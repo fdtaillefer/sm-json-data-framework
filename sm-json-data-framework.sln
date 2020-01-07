@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sm-json-data-framework", "sm-json-data-framework\sm-json-data-framework.csproj", "{5EE636F3-B1CD-4713-8866-2EC08F998CB7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C75E8103-2C0A-4995-AB6E-383AA716815C}
+	EndGlobalSection
+EndGlobal
