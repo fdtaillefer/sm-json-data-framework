@@ -1,10 +1,12 @@
 ﻿using sm_json_data_framework.Converters;
 using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
+using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using System;
@@ -19,6 +21,13 @@ namespace sm_json_data_framework.Reading
 {
     public static class ModelReader
     {
+        /// <summary>
+        /// Reads all sm-json-data json files, from the provided base directory, and builds a SuperMetroidModel.
+        /// </summary>
+        /// <param name="baseDirectory"></param>
+        /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
+        /// If false, the objects in the returned model will contain mostly just raw data.</param>
+        /// <returns>The generated SuperMetroidModel</returns>
         public static SuperMetroidModel ReadModel(string baseDirectory, bool initialize = true)
         {
             SuperMetroidModel model = new SuperMetroidModel();
@@ -32,6 +41,8 @@ namespace sm_json_data_framework.Reading
             string weaponPath = baseDirectory + "\\weapons\\main.json";
             string enemyPath = baseDirectory + "\\enemies\\main.json";
             string bossPath = baseDirectory + "\\enemies\\bosses\\main.json";
+            string connectionBaseDirectory = baseDirectory + "\\connection";
+            string roomBaseDirectory = baseDirectory + "\\region";
 
             // Read items and put them in the model
             ItemContainer itemContainer = JsonSerializer.Deserialize<ItemContainer>(File.ReadAllText(itemsPath), options);
@@ -62,7 +73,6 @@ namespace sm_json_data_framework.Reading
             foreach(Helper helper in model.Helpers.Values)
             {
                 unresolvedStrings.AddRange(helper.Requires.ReplaceRawStringRequirements(stringLogicalElementConverter));
-                
             }
 
             foreach (Tech tech in model.Techs.Values)
@@ -77,15 +87,19 @@ namespace sm_json_data_framework.Reading
                     $"to 'never', an item, a helper, a tech, or a game flag: {string.Join(", ", unresolvedStrings.Distinct())}");
             }
 
-            // STITCHME Starting now, I'd like to fail fast if any string requirement fails to resolve.
+            // Starting now, fail-fast if any string requirement fails to resolve
+            stringLogicalElementConverter.AllowRawStrings = false;
 
             // Read weapons
             WeaponContainer weaponContainer = JsonSerializer.Deserialize<WeaponContainer>(File.ReadAllText(weaponPath), options);
             model.Weapons = weaponContainer.Weapons.ToDictionary(w => w.Name);
 
-            // Read regular enemies
+            // STITCHME Do we want to go through logical elements that reference weapons or categories and do something about them?
+
+            // Read regular enemies and bosses
             EnemyContainer enemyContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(enemyPath), options);
-            model.Enemies = enemyContainer.Enemies.ToDictionary(e => e.Name);
+            EnemyContainer bossContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(bossPath), options);
+            model.Enemies = enemyContainer.Enemies.Concat(bossContainer.Enemies).ToDictionary(e => e.Name);
             // Initialize calculated data in enemies if requested
             if(initialize)
             {
@@ -95,19 +109,36 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
-            // Read bosses
-            EnemyContainer bossContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(bossPath), options);
-            foreach(Enemy boss in bossContainer.Enemies)
+            // Find and read all connection files
+            string[] allConnectionFiles = Directory.GetFiles(connectionBaseDirectory, "*.json", SearchOption.AllDirectories);
+            foreach(string connectionFile in allConnectionFiles)
             {
-                // Initialize calculated data in boss if requested
-                if (initialize)
+                ConnectionContainer connectionContainer = JsonSerializer.Deserialize<ConnectionContainer>(File.ReadAllText(connectionFile), options);
+                foreach(Connection connection in connectionContainer.Connections)
                 {
-                    boss.Initialize(model);
+                    ConnectionNode node1 = connection.Nodes.ElementAt(0);
+                    model.Connections.Add($"{node1.RoomName}_{node1.Nodeid}", connection);
+
+                    ConnectionNode node2 = connection.Nodes.ElementAt(1);
+                    model.Connections.Add($"{node2.RoomName}_{node2.Nodeid}", connection);
                 }
-                model.Enemies.Add(boss.Name, boss);
             }
 
-            // STITCHME rooms, connections
+            // Find and read all room files
+            string[] allRoomFiles = Directory.GetFiles(roomBaseDirectory, "*.json", SearchOption.AllDirectories);
+            foreach (string roomFile in allRoomFiles)
+            {
+                RoomContainer roomContainer = JsonSerializer.Deserialize<RoomContainer>(File.ReadAllText(roomFile), options);
+                foreach(Room room in roomContainer.Rooms)
+                {
+                    model.Rooms.Add(room.Name, room);
+
+                    if (initialize)
+                    {
+                        room.Initialize(model);
+                    }
+                }
+            }
 
             return model;
         }

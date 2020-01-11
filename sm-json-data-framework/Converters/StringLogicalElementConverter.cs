@@ -16,6 +16,11 @@ namespace sm_json_data_framework.Converters
     {
         private SuperMetroidModel SuperMetroidModel { get; set; }
 
+        /// <summary>
+        /// Indicates whether raw strings that don't match something in the superMetroidModel should be allowed. Defaults to true.
+        /// </summary>
+        public bool AllowRawStrings { get; set; } = true;
+
         public StringLogicalElementConverter(SuperMetroidModel superMetroidModel)
         {
             SuperMetroidModel = superMetroidModel;
@@ -84,9 +89,13 @@ namespace sm_json_data_framework.Converters
             // If the string matched nothing that's in the model maybe it's referencing something that's
             // not been read and put in the model yet.
             // Return a raw string logical element. This will need to be replaced before initialization is done.
-            else
+            else if (AllowRawStrings)
             {
                 return new RawStringLogicalElement(stringValue);
+            }
+            else
+            {
+                throw new JsonException($"Logical element string {stringValue} could not be matched to anything.");
             }
         }
     }

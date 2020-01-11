@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Items
 
         public IEnumerable<ExpansionItem> ExpansionItems { get; set; } = Enumerable.Empty<ExpansionItem>();
 
-        [JsonPropertyName("gameFlag")]
+        [JsonPropertyName("gameFlags")]
         public IEnumerable<string> GameFlagNames { get; set; } = Enumerable.Empty<string>();
     }
 }

@@ -39,28 +39,36 @@ namespace sm_json_data_framework.Models.Enemies
         public IEnumerable<string> InvulnerabilityStrings { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
-        /// Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.
-        /// The sequence of all weapons this enemy is invulnerable to.
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>The sequence of all weapons this enemy is invulnerable to.</para>
         /// </summary>
+        [JsonIgnore]
         public IEnumerable<Weapon> InvulnerableWeapons { get; private set; }
 
         [JsonPropertyName("damageMultipliers")]
         public IEnumerable<RawEnemyDamageMultiplier> RawDamageMultipliers { get; set; } = Enumerable.Empty<RawEnemyDamageMultiplier>();
 
         /// <summary>
-        /// Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.
-        /// Contains damage multipliers for all weapons this enemy takes damage from, mapped by weapon name.
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Contains damage multipliers for all weapons this enemy takes damage from, mapped by weapon name.</para>
         /// </summary>
+        [JsonIgnore]
         public Dictionary<string, WeaponMultiplier> WeaponMultipliers { get; private set; }
 
         public IEnumerable<string> Areas { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
-        /// Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.
-        /// A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it</para>
         /// </summary>
+        [JsonIgnore]
         public IDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; set; }
 
+        /// <summary>
+        /// Initializes additional properties in this Enemy, which wouldn't be initialized by simply parsing an enemies json file.
+        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
+        /// </summary>
+        /// <param name="model">The model to use to initialize the additional properties</param>
         public void Initialize(SuperMetroidModel model)
         {
             // convert InvulnerabilityStrings to Weapons

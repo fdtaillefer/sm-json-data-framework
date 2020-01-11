@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,21 @@ namespace sm_json_data_framework.Models.Rooms.Node.NodeSparking
         public int ShinesparkFrames { get; set; }
 
         [JsonPropertyName("initiateAt")]
-        public int? InitiateAtNodeId { get; set; }
+        public int? OverrideInitiateAtNodeId { get; set; }
+
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>The node referenced by the <see cref="OverrideInitiateAtNodeId"/> property, if any.</para>
+        /// </summary>
+        [JsonIgnore]
+        public RoomNode OverrideInitiateAtNode { get; set; }
+
+        /// <summary>
+        /// <para>Not reliable before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.</para>
+        /// </summary>
+        [JsonIgnore]
+        public RoomNode InitiateAtNode { get { return OverrideInitiateAtNode ?? Node; } }
 
         public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
 
@@ -32,5 +47,29 @@ namespace sm_json_data_framework.Models.Rooms.Node.NodeSparking
         public int StartingDownTiles { get; set; } = 0;
 
         // STITCHME Note?
+
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>The node in which this CanLeaveCharged is.</para>
+        /// </summary>
+        [JsonIgnore]
+        public RoomNode Node { get; set; }
+
+        /// <summary>
+        /// Initializes additional properties in this CanLeaveCharged, which wouldn't be initialized by simply parsing a rooms json file.
+        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
+        /// </summary>
+        /// <param name="model">The model to use to initialize the additional properties</param>
+        /// <param name="node">The node in which this CanLeaveCharged is</param>
+        public void Initialize(SuperMetroidModel model, RoomNode node)
+        {
+            Node = node;
+
+            // Initialize OverrideInitiateAtNode
+            if (OverrideInitiateAtNodeId != null)
+            {
+                OverrideInitiateAtNode = node.Room.Nodes[(int)OverrideInitiateAtNodeId];
+            }
+        }
     }
 }

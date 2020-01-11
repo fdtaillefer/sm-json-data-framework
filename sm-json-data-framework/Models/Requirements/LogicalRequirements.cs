@@ -39,30 +39,35 @@ namespace sm_json_data_framework.Models.Requirements
                 unresolvedRawStrings.AddRange(unresolvedSubRawStrings);
             }
 
+            // Build a new list of resolved logical elements to replace the current one
+            List<AbstractLogicalElement> newElements = new List<AbstractLogicalElement>();
+
             // For any raw string logical element we contain directly, attempt to resolve it and substitute the new logical element
-            LogicalElements = LogicalElements.Select(le =>
+            // Anything else just stays the same
+            foreach(AbstractLogicalElement logicalElement in LogicalElements)
             {
                 // If this is a raw string, get the converter to convert it to hopefully something better
-                if(le is RawStringLogicalElement rawStringElement)
+                if (logicalElement is RawStringLogicalElement rawStringElement)
                 {
                     AbstractLogicalElement newLogicalElement = stringElementConverter.CreateLogicalElement(rawStringElement.StringValue);
                     // if we still have a raw string, add the string to the list of unresolved strings we'll return
                     if (newLogicalElement is RawStringLogicalElement)
                     {
                         unresolvedRawStrings.Add(rawStringElement.StringValue);
-                        return le;
+                        newElements.Add(logicalElement);
                     }
                     // If we successfully resolved the string, substitute the new element
                     else
                     {
-                        return newLogicalElement;
+                        newElements.Add(newLogicalElement);
                     }
                 }
                 else
                 {
-                    return le;
+                    newElements.Add(logicalElement);
                 }
-            });
+            }
+            LogicalElements = newElements;
 
             return unresolvedRawStrings.Distinct();
         }

@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Utils
         /// <returns>A sequence of Weapons</returns>
         public static IEnumerable<Weapon> NamesToWeapons(this IEnumerable<string> names, SuperMetroidModel model)
         {
-            return names.SelectMany(n => n.NameToWeapons(model)).Distinct();
+            return names.SelectMany(n => n.NameToWeapons(model)).Distinct(ObjectReferenceEqualityComparer<Weapon>.Default);
         }
 
         /// <summary>

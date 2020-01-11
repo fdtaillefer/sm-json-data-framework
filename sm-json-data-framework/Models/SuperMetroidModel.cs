@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Enemies;
+﻿using sm_json_data_framework.Models.Connections;
+using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.Items;
@@ -50,6 +51,12 @@ namespace sm_json_data_framework.Models
         /// The rooms in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
+
+        /// <summary>
+        /// A dictionary that maps a string (that describes a node, in the form {roomName}_{nodeId}) to a connection.
+        /// Be aware that this means each connection will likely be present twice.
+        /// </summary>
+        public IDictionary<string, Connection> Connections { get; set; } = new Dictionary<string, Connection>();
 
         // STITCHME I think Connections can just be tacked onto nodes?
         private IDictionary<string, Weapon> _weapons;
