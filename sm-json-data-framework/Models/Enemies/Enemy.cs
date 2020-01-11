@@ -1,10 +1,12 @@
-﻿using System;
+﻿using sm_json_data_framework.Utils;
+using sm_json_data_framework.Models.Weapons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Models.Enemies
+namespace sm_json_data_framework.Models.Enemies
 {
     public class Enemy
     {
@@ -36,17 +38,49 @@ namespace sm_json_data_parser.Models.Enemies
         [JsonPropertyName("invul")]
         public IEnumerable<string> InvulnerabilityStrings { get; set; } = Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.
+        /// The sequence of all weapons this enemy is invulnerable to.
+        /// </summary>
+        public IEnumerable<Weapon> InvulnerableWeapons { get; private set; }
+
         [JsonPropertyName("damageMultipliers")]
         public IEnumerable<RawEnemyDamageMultiplier> RawDamageMultipliers { get; set; } = Enumerable.Empty<RawEnemyDamageMultiplier>();
 
+        /// <summary>
+        /// Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.
+        /// Contains damage multipliers for all weapons this enemy takes damage from, mapped by weapon name.
+        /// </summary>
+        public Dictionary<string, WeaponMultiplier> WeaponMultipliers { get; private set; }
+
         public IEnumerable<string> Areas { get; set; } = Enumerable.Empty<string>();
 
-        // STITCHME Something about putting down all weapons this is vulnerable to and the number of shots?
+        /// <summary>
+        /// Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.
+        /// A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it
+        /// </summary>
         public IDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; set; }
 
         public void Initialize(SuperMetroidModel model)
         {
-            // STITCHME Model should provide weapons by category. Now it does, see what I can do with that.
+            // convert InvulnerabilityStrings to Weapons
+            InvulnerableWeapons = InvulnerabilityStrings.NamesToWeapons(model);
+
+            // Get a WeaponMultiplier for all non-immune weapons
+            WeaponMultipliers = RawDamageMultipliers
+                .SelectMany(rdm => rdm.Weapon.NameToWeapons(model).Select(w => new WeaponMultiplier(w, rdm.Value)))
+                .ToDictionary(m => m.Weapon.Name);
+            foreach(Weapon neutralWeapon in model.Weapons.Values
+                .Except(WeaponMultipliers.Values.Select(wm => wm.Weapon), ObjectReferenceEqualityComparer<Weapon>.Default)
+                .Except(InvulnerableWeapons, ObjectReferenceEqualityComparer<Weapon>.Default))
+            {
+                WeaponMultipliers.Add(neutralWeapon.Name, new WeaponMultiplier(neutralWeapon, 1m));
+            }
+
+            // Create a WeaponSusceptibility for each non-immune weapon
+            WeaponSusceptibilities = WeaponMultipliers.Values
+                .Select(wm => new WeaponSusceptibility(wm.Weapon, wm.NumberOfHits(Hp)))
+                .ToDictionary(ws => ws.Weapon.Name);
         }
 
     }

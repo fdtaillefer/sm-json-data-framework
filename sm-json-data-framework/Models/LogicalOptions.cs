@@ -1,12 +1,12 @@
-﻿using sm_json_data_parser.Models.GameFlags;
-using sm_json_data_parser.Models.Rooms;
-using sm_json_data_parser.Models.Techs;
+﻿using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Models.Techs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_parser.Models
+namespace sm_json_data_framework.Models
 {
     public class LogicalOptions
     {

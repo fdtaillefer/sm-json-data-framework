@@ -1,12 +1,12 @@
-﻿using sm_json_data_parser.Converters;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements.SubRequirements;
-using sm_json_data_parser.Models.Requirements.StringRequirements;
+﻿using sm_json_data_framework.Converters;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Requirements
+namespace sm_json_data_framework.Models.Requirements
 {
     public class LogicalRequirements
     {

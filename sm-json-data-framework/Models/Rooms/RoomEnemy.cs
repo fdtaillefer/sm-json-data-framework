@@ -1,11 +1,11 @@
-﻿using sm_json_data_parser.Models.Requirements;
+﻿using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Models.Rooms
+namespace sm_json_data_framework.Models.Rooms
 {
     public class RoomEnemy
     {

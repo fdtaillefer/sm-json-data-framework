@@ -1,11 +1,12 @@
-﻿using sm_json_data_parser.Converters;
-using sm_json_data_parser.Models;
-using sm_json_data_parser.Models.GameFlags;
-using sm_json_data_parser.Models.Helpers;
-using sm_json_data_parser.Models.Items;
-using sm_json_data_parser.Models.Requirements.StringRequirements;
-using sm_json_data_parser.Models.Techs;
-using sm_json_data_parser.Models.Weapons;
+﻿using sm_json_data_framework.Converters;
+using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
+using sm_json_data_framework.Models.Techs;
+using sm_json_data_framework.Models.Weapons;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,11 +15,11 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Reading
+namespace sm_json_data_framework.Reading
 {
     public static class ModelReader
     {
-        public static SuperMetroidModel ReadModel(string baseDirectory)
+        public static SuperMetroidModel ReadModel(string baseDirectory, bool initialize = true)
         {
             SuperMetroidModel model = new SuperMetroidModel();
 
@@ -29,6 +30,8 @@ namespace sm_json_data_parser.Reading
             string helpersPath = baseDirectory + "\\helpers.json";
             string techPath = baseDirectory + "\\tech.json";
             string weaponPath = baseDirectory + "\\weapons\\main.json";
+            string enemyPath = baseDirectory + "\\enemies\\main.json";
+            string bossPath = baseDirectory + "\\enemies\\bosses\\main.json";
 
             // Read items and put them in the model
             ItemContainer itemContainer = JsonSerializer.Deserialize<ItemContainer>(File.ReadAllText(itemsPath), options);
@@ -76,10 +79,35 @@ namespace sm_json_data_parser.Reading
 
             // STITCHME Starting now, I'd like to fail fast if any string requirement fails to resolve.
 
+            // Read weapons
             WeaponContainer weaponContainer = JsonSerializer.Deserialize<WeaponContainer>(File.ReadAllText(weaponPath), options);
             model.Weapons = weaponContainer.Weapons.ToDictionary(w => w.Name);
-            // STITCHME enemies, rooms, connections
 
+            // Read regular enemies
+            EnemyContainer enemyContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(enemyPath), options);
+            model.Enemies = enemyContainer.Enemies.ToDictionary(e => e.Name);
+            // Initialize calculated data in enemies if requested
+            if(initialize)
+            {
+                foreach(Enemy enemy in model.Enemies.Values)
+                {
+                    enemy.Initialize(model);
+                }
+            }
+
+            // Read bosses
+            EnemyContainer bossContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(bossPath), options);
+            foreach(Enemy boss in bossContainer.Enemies)
+            {
+                // Initialize calculated data in boss if requested
+                if (initialize)
+                {
+                    boss.Initialize(model);
+                }
+                model.Enemies.Add(boss.Name, boss);
+            }
+
+            // STITCHME rooms, connections
 
             return model;
         }

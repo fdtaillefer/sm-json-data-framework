@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Items
+namespace sm_json_data_framework.Models.Items
 {
     /// <summary>
     /// Represents an item that is explicitly identified as such in the game.

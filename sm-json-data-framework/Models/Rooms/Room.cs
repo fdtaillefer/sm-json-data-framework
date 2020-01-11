@@ -1,11 +1,11 @@
-﻿using sm_json_data_parser.Models.Rooms.Nodes;
+﻿using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Models.Rooms
+namespace sm_json_data_framework.Models.Rooms
 {
     public class Room
     {
@@ -25,6 +25,9 @@ namespace sm_json_data_parser.Models.Rooms
         public IEnumerable<RoomNode> NodesSequence { get; set; }
 
         private IDictionary<int, RoomNode> _nodesDictionary;
+        /// <summary>
+        /// The nodes in this room, mapped by id
+        /// </summary>
         [JsonIgnore]
         public IDictionary<int, RoomNode> Nodes { get 
             {

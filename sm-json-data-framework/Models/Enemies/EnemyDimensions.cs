@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Models.Enemies
+namespace sm_json_data_framework.Models.Enemies
 {
     public class EnemyDimensions
     {

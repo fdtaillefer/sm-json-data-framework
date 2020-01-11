@@ -1,9 +1,9 @@
-﻿using sm_json_data_parser.Models.Requirements;
+﻿using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Helpers
+namespace sm_json_data_framework.Models.Helpers
 {
     public class Helper
     {

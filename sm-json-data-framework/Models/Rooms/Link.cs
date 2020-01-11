@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Models.Rooms
+namespace sm_json_data_framework.Models.Rooms
 {
     public class Link
     {

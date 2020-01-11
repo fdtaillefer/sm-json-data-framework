@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Enemies
+namespace sm_json_data_framework.Models.Enemies
 {
     public class EnemyDrops
     {
-        public double NoDrop { get; set; }
+        public decimal NoDrop { get; set; }
 
-        public double SmallEnergy { get; set; }
+        public decimal SmallEnergy { get; set; }
 
-        public double BigEnergy { get; set; }
+        public decimal BigEnergy { get; set; }
 
-        public double Missile { get; set; }
+        public decimal Missile { get; set; }
 
-        public double Super { get; set; }
+        public decimal Super { get; set; }
 
-        public double PowerBomb { get; set; }
+        public decimal PowerBomb { get; set; }
     }
 }

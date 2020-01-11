@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Models.Items
+namespace sm_json_data_framework.Models.Items
 {
     public class ItemContainer
     {

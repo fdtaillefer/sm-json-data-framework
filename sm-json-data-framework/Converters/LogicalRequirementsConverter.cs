@@ -1,14 +1,14 @@
-﻿using sm_json_data_parser.Models.Requirements;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements;
-using sm_json_data_parser.Models.Requirements.StringRequirements;
-using sm_json_data_parser.Models.Rooms;
+﻿using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
+using sm_json_data_framework.Models.Rooms;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Converters
+namespace sm_json_data_framework.Converters
 {
     public class LogicalRequirementsConverter : JsonConverter<LogicalRequirements>
     {

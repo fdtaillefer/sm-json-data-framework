@@ -1,16 +1,16 @@
-﻿using sm_json_data_parser.Models;
-using sm_json_data_parser.Models.GameFlags;
-using sm_json_data_parser.Models.Helpers;
-using sm_json_data_parser.Models.Items;
-using sm_json_data_parser.Models.Requirements.StringRequirements;
-using sm_json_data_parser.Models.Techs;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
+using sm_json_data_framework.Models.Techs;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Converters
+namespace sm_json_data_framework.Converters
 {
     public class StringLogicalElementConverter : JsonConverter<AbstractStringLogicalElement>
     {

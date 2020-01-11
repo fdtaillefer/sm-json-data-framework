@@ -1,10 +1,10 @@
-﻿using sm_json_data_parser.Models.Requirements;
+﻿using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Rooms.Nodes
+namespace sm_json_data_framework.Models.Rooms.Nodes
 {
     public class NodeLock
     {

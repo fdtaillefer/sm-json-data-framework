@@ -1,9 +1,9 @@
-﻿using sm_json_data_parser.Models.Requirements;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements.Integers;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements.Strings;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements.SubObjects;
-using sm_json_data_parser.Models.Requirements.ObjectRequirements.SubRequirements;
+﻿using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_parser.Converters
+namespace sm_json_data_framework.Converters
 {
     public class ObjectLogicalElementConverter : JsonConverter<AbstractObjectLogicalElement>
     {

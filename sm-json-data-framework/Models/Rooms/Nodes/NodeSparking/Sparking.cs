@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Rooms.Node.NodeSparking
+namespace sm_json_data_framework.Models.Rooms.Node.NodeSparking
 {
     public class Sparking
     {

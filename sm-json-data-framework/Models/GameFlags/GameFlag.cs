@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_parser.Models.GameFlags
+namespace sm_json_data_framework.Models.GameFlags
 {
     public class GameFlag
     {

@@ -1,9 +1,9 @@
-﻿using sm_json_data_parser.Models.Helpers;
+﻿using sm_json_data_framework.Models.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_parser.Models.Requirements.StringRequirements
+namespace sm_json_data_framework.Models.Requirements.StringRequirements
 {
     public class HelperLogicalElement : AbstractStringLogicalElement
     {
