@@ -27,7 +27,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public LogicalRequirements InteractionRequires { get; set; }
 
-        public Sparking Sparking { get; set; }
+        public IEnumerable<Runway> Runways { get; set; } = Enumerable.Empty<Runway>();
+
+        public IEnumerable<CanLeaveCharged> CanLeaveCharged { get; set; } = Enumerable.Empty<CanLeaveCharged>();
 
         // Decide who should handle null here
         [JsonPropertyName("spawnAt")]
@@ -121,12 +123,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Initialize CanLeaveCharged objects
-            if (Sparking != null)
+            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
             {
-                foreach (CanLeaveCharged canLeaveCharged in Sparking.CanLeaveCharged)
-                {
-                    canLeaveCharged.Initialize(model, this);
-                }
+                canLeaveCharged.Initialize(model, this);
             }
 
             // Initialize Yielded game flags
