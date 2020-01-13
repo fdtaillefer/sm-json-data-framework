@@ -1,5 +1,7 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Rooms;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
@@ -21,5 +23,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public int OpenEnd { get; set; }
 
         public int ShinesparkFrames { get; set; }
+
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        {
+            // No properties need to be handled here
+            return Enumerable.Empty<string>();
+        }
     }
 }

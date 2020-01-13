@@ -72,29 +72,27 @@ namespace sm_json_data_framework.Reading
             List<string> unresolvedStrings = new List<string>();
             foreach(Helper helper in model.Helpers.Values)
             {
-                unresolvedStrings.AddRange(helper.Requires.ReplaceRawStringRequirements(stringLogicalElementConverter));
+                unresolvedStrings.AddRange(helper.Requires.ReplaceRawStringElements(stringLogicalElementConverter));
             }
 
             foreach (Tech tech in model.Techs.Values)
             {
-                unresolvedStrings.AddRange(tech.Requires.ReplaceRawStringRequirements(stringLogicalElementConverter));
+                unresolvedStrings.AddRange(tech.Requires.ReplaceRawStringElements(stringLogicalElementConverter));
             }
 
             // If there was any raw string we failed to resolve, consider that an error
             if(unresolvedStrings.Any())
             {
                 throw new JsonException($"The following string requirements, found in helpers and techs, could not be resolved " +
-                    $"to 'never', an item, a helper, a tech, or a game flag: {string.Join(", ", unresolvedStrings.Distinct())}");
+                    $"to 'never', an item, a helper, a tech, or a game flag: {string.Join(", ", unresolvedStrings.Distinct().Select(s => $"'{s}'"))}");
             }
 
-            // Starting now, fail-fast if any string requirement fails to resolve
-            stringLogicalElementConverter.AllowRawStrings = false;
+            // Starting now, fail-fast if any string requirement that fails to resolve
+            stringLogicalElementConverter.AllowRawStringElements = false;
 
             // Read weapons
             WeaponContainer weaponContainer = JsonSerializer.Deserialize<WeaponContainer>(File.ReadAllText(weaponPath), options);
             model.Weapons = weaponContainer.Weapons.ToDictionary(w => w.Name);
-
-            // STITCHME Do we want to go through logical elements that reference weapons or categories and do something about them?
 
             // Read regular enemies and bosses
             EnemyContainer enemyContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(enemyPath), options);
@@ -138,6 +136,47 @@ namespace sm_json_data_framework.Reading
                         room.Initialize(model);
                     }
                 }
+            }
+
+            // STITCHME Do we want to go through logical elements that reference anything as a string and do something about them?
+            // I think so. 
+            // -So what logical elements do we have so far?
+            //    - helpers
+            //    - techs
+            //    - weapon has some
+            //    - rooms has a hierarchy with a bunch of stuff
+
+            // STITCHME Then we can configure readers to find a match or fail on weapons/categories/enemies, too.
+
+            // I guess I could call that InitializeRawStringProperties() or something?
+
+            List<string> unhandledLogicalElementProperties = new List<string>();
+
+            foreach (Helper helper in model.Helpers.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            foreach(Tech tech in model.Techs.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            foreach(Weapon weapon in model.Weapons.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            foreach(Room room in model.Rooms.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            // If there was any logical element property we failed to resolve, consider that an error
+            if (unhandledLogicalElementProperties.Any())
+            {
+                throw new JsonException($"The following logical element property values could not be resolved " +
+                    $"to to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
             }
 
             return model;

@@ -6,34 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
+namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
-    public class CanComeInCharged : AbstractObjectLogicalElement
+    public abstract class AbstractObjectLogicalElementWithNodeId : AbstractObjectLogicalElementWithInteger
     {
-        [JsonPropertyName("fromNode")]
-        public int FromNodeId { get; set; }
-
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
-        /// <para>The node that this element's FromNodeId references. </para>
+        /// <para>The node that this element's value references. </para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode FromNodeNode { get; set; }
-
-        public int FramesRemaining { get; set; }
-
-        public int ShinesparkFrames { get; set; }
+        public RoomNode Node {get;set;}
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
-            if (room.Nodes.TryGetValue(FromNodeId, out RoomNode node))
+            if (room.Nodes.TryGetValue(Value, out RoomNode node))
             {
-                FromNodeNode = node;
+                Node = node;
                 return Enumerable.Empty<string>();
             }
             else
             {
-                return new[] { $"Node {FromNodeId} in room {room.Name}" };
+                return new[] { $"Node {Value} in room {room.Name}" };
             }
         }
     }

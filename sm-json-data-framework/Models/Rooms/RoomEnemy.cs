@@ -49,8 +49,6 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
 
-        // STITCHME Note?
-
         /// <summary>
         /// Initializes additional properties in this RoomEnemy, which wouldn't be initialized by simply parsing a rooms json file.
         /// All such properties are identified in their own documentation and should not be read if this method isn't called.
@@ -64,6 +62,26 @@ namespace sm_json_data_framework.Models.Rooms
             HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
             BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
+        }
+
+        /// <summary>
+        /// Goes through all logical elements within this RoomEnemy (and all LogicalRequirements within any of them),
+        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <param name="room">The room in which this RoomEnemy is</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        {
+            List<string> unhandled = new List<string>();
+
+            unhandled.AddRange(Spawn.InitializeReferencedLogicalElementProperties(model, room));
+
+            unhandled.AddRange(StopSpawn.InitializeReferencedLogicalElementProperties(model, room));
+
+            unhandled.AddRange(DropRequires.InitializeReferencedLogicalElementProperties(model, room));
+
+            return unhandled.Distinct();
         }
     }
 }

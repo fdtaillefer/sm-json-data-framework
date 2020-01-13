@@ -25,7 +25,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public string NodeAddress { get; set; }
 
-        public LogicalRequirements InteractionRequires { get; set; }
+        public LogicalRequirements InteractionRequires { get; set; } = new LogicalRequirements();
 
         public IEnumerable<Runway> Runways { get; set; } = Enumerable.Empty<Runway>();
 
@@ -36,7 +36,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int? OverrideSpawnAtNodeId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>The node referenced by the <see cref="OverrideSpawnAtNodeId"/> property, if any.</para>
         /// </summary>
         [JsonIgnore]
@@ -65,31 +65,32 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public IEnumerable<GameFlag> Yields { get; set; }
 
-        // STITCHME Note?
+        [JsonIgnore]
+        public IEnumerable<string> Note { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>The room in which this node is.</para>
         /// </summary>
         [JsonIgnore]
         public Room Room { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the connection that connects this node to its destination.</para>
         /// </summary>
         [JsonIgnore]
         public Connection OutConnection { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the node that leaving the room via this node leads to.</para>
         /// </summary>
         [JsonIgnore]
         public RoomNode OutNode { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>Contains all in-room links from this node to another, mapped by the destination node ID</para>
         /// </summary>
         [JsonIgnore]
@@ -138,6 +139,59 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 Links = linksFromHere.Single().To.ToDictionary(l => l.TargetNodeId);
             }
+
+            // Initialize ViewableNodes
+            foreach(ViewableNode viewableNode in ViewableNodes)
+            {
+                viewableNode.Initialize(model, room);
+            }
+
+            // Initialize Locks
+            foreach(NodeLock nodeLock in Locks)
+            {
+                nodeLock.Initialize(model, room);
+            }
+
+            // Initialize Runways
+            foreach(Runway runway in Runways)
+            {
+                runway.Initialize(model, room);
+            }
+        }
+
+        /// <summary>
+        /// Goes through all logical elements within this Node (and all LogicalRequirements within any of them),
+        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        {
+            List<string> unhandled = new List<string>();
+
+            unhandled.AddRange(InteractionRequires.InitializeReferencedLogicalElementProperties(model, Room));
+
+            foreach(Runway runway in Runways)
+            {
+                unhandled.AddRange(runway.InitializeReferencedLogicalElementProperties(model, Room));
+            }
+
+            foreach(CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+            {
+                unhandled.AddRange(canLeaveCharged.InitializeReferencedLogicalElementProperties(model, Room));
+            }
+
+            foreach(NodeLock nodeLock in Locks)
+            {
+                unhandled.AddRange(nodeLock.InitializeReferencedLogicalElementProperties(model, Room));
+            }
+
+            foreach(ViewableNode viewableNode in ViewableNodes)
+            {
+                unhandled.AddRange(viewableNode.InitializeReferencedLogicalElementProperties(model, Room));
+            }
+
+            return unhandled.Distinct();
         }
     }
 }

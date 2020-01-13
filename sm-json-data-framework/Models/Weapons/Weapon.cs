@@ -11,7 +11,7 @@ namespace sm_json_data_framework.Models.Weapons
         public int Id { get; set; }
 
         public string Name { get; set; }
-        
+
         public int Damage { get; set; }
 
         public int CooldownFrames { get; set; }
@@ -26,6 +26,21 @@ namespace sm_json_data_framework.Models.Weapons
 
         public IEnumerable<WeaponCategoryEnum> Categories { get; set; } = Enumerable.Empty<WeaponCategoryEnum>();
 
-        // STITCHME Note?
+        /// <summary>
+        /// Goes through all logical elements within this Weapon,
+        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        {
+            List<string> unhandled = new List<string>();
+
+            unhandled.AddRange(UseRequires.InitializeReferencedLogicalElementProperties(model, null));
+
+            unhandled.AddRange(ShotRequires.InitializeReferencedLogicalElementProperties(model, null));
+
+            return unhandled.Distinct();
+        }
     }
 }

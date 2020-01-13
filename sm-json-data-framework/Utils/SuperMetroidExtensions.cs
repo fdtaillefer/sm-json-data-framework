@@ -27,11 +27,25 @@ namespace sm_json_data_framework.Utils
         /// </summary>
         /// <param name="name">The name to convert</param>
         /// <param name="model">A SuperMetroidModel that contains existing weapons</param>
-        /// <returns>A sequence of Weapons</returns>
+        /// <returns>A sequence of Weapons, or null if the string matches no weapon or category</returns>
         public static IEnumerable<Weapon> NameToWeapons(this string name, SuperMetroidModel model)
         {
-            return model.Weapons.ContainsKey(name) ?
-                    new[] { model.Weapons[name] } : model.WeaponsByCategory[(WeaponCategoryEnum)Enum.Parse(typeof(WeaponCategoryEnum), name)];
+            if(model.Weapons.TryGetValue(name, out Weapon weapon))
+            {
+                return new[] { weapon };
+            }
+            else
+            {
+                try
+                {
+                    WeaponCategoryEnum category = (WeaponCategoryEnum)Enum.Parse(typeof(WeaponCategoryEnum), name);
+                    return model.WeaponsByCategory[category];
+                }
+                catch (ArgumentException)
+                {
+                    return null;
+                }
+            }
         }
     }
 }

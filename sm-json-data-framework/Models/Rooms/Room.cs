@@ -17,8 +17,6 @@ namespace sm_json_data_framework.Models.Rooms
 
         public string Subarea { get; set; }
 
-        // STITCHME Note is string or array - how would we want to handle this? It's not important for now anyway
-
         public string RoomAddress { get; set; }
 
         /// <summary>
@@ -103,6 +101,39 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 enemy.Initialize(model, this);
             }
+        }
+
+        /// <summary>
+        /// Goes through all logical elements within this Room and any element of it,
+        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        {
+            List<string> unhandled = new List<string>();
+            
+            foreach(RoomNode node in Nodes.Values)
+            {
+                unhandled.AddRange(node.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            foreach(Link link in Links)
+            {
+                unhandled.AddRange(link.InitializeReferencedLogicalElementProperties(model, this));
+            }
+
+            foreach (RoomEnemy enemy in Enemies)
+            {
+                unhandled.AddRange(enemy.InitializeReferencedLogicalElementProperties(model, this));
+            }
+
+            foreach(RoomObstacle obstacle in Obstacles.Values)
+            {
+                unhandled.AddRange(obstacle.InitializeReferencedLogicalElementProperties(model, this));
+            }
+
+            return unhandled.Distinct();
         }
     }
 }

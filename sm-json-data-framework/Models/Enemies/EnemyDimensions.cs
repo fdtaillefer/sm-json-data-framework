@@ -12,7 +12,5 @@ namespace sm_json_data_framework.Models.Enemies
 
         [JsonPropertyName("w")]
         public int Width { get; set; }
-
-        // STITCHME Note?
     }
 }

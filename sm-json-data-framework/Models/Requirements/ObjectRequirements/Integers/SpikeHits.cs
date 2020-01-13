@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
-    public class SpikeHits : AbstractObjectLogicalElementWithInteger
+    public class SpikeHits : AbstractObjectLogicalElementWithNumericalIntegerValue
     {
     }
 }

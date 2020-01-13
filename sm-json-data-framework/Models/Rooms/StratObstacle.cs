@@ -12,6 +12,13 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonPropertyName("id")]
         public string ObstacleId { get; set; }
 
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>The RoomObstacle that this StratObstacle indicates must be passed through</para>
+        /// </summary>
+        [JsonIgnore]
+        public RoomObstacle Obstacle { get; set; }
+
         public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
 
         public LogicalRequirements Bypass { get; set; } = new LogicalRequirements();
@@ -19,6 +26,44 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonPropertyName("additionalObstacles")]
         public IEnumerable<string> AdditionalObstacleIds { get; set; } = Enumerable.Empty<string>();
 
-        // STITCHME Note?
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>The additional RoomObstacles that are destroyed alongside this StratObstacle</para>
+        /// </summary>
+        [JsonIgnore]
+        public IEnumerable<RoomObstacle> AdditionalObstacles { get; set; }
+
+        /// <summary>
+        /// Initializes additional properties in this StratObstacle, which wouldn't be initialized by simply parsing a rooms json file.
+        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
+        /// </summary>
+        /// <param name="model">The model to use to initialize the additional properties</param>
+        /// <param name="room">The room in which this StratObstacle is</param>
+        public void Initialize(SuperMetroidModel model, Room room)
+        {
+            // Initialize Obstacle
+            Obstacle = room.Obstacles[ObstacleId];
+
+            // Initialize AdditionalObstacles
+            AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]);
+        }
+
+        /// <summary>
+        /// Goes through all logical elements within this StratObstacle (and all LogicalRequirements within any of them),
+        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <param name="room">The room in which this StratObstacle is</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        {
+            List<string> unhandled = new List<string>();
+
+            unhandled.AddRange(Requires.InitializeReferencedLogicalElementProperties(model, room));
+
+            unhandled.AddRange(Bypass.InitializeReferencedLogicalElementProperties(model, room));
+
+            return unhandled.Distinct();
+        }
     }
 }

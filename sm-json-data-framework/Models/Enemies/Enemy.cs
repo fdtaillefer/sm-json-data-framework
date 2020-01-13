@@ -14,13 +14,29 @@ namespace sm_json_data_framework.Models.Enemies
 
         public string Name { get; set; }
 
-        public IEnumerable<EnemyAttack> Attacks { get; set; } = Enumerable.Empty<EnemyAttack>();
+        [JsonPropertyName("attacks")]
+        public IEnumerable<EnemyAttack> AttacksSequence { get; set; } = Enumerable.Empty<EnemyAttack>();
+
+        private IDictionary<string, EnemyAttack> _attacksDictionary;
+        /// <summary>
+        /// The attacks of this enemy, mapped by name
+        /// </summary>
+        [JsonIgnore]
+        public IDictionary<string, EnemyAttack> Attacks
+        {
+            get
+            {
+                if (_attacksDictionary == null)
+                {
+                    _attacksDictionary = AttacksSequence.ToDictionary(a => a.Name);
+                }
+                return _attacksDictionary;
+            }
+        }
 
         public int Hp { get; set; }
 
         public int AmountOfDrops { get; set; }
-
-        // STITCHME Note?
 
         public EnemyDrops Drops { get; set; }
 
@@ -90,6 +106,5 @@ namespace sm_json_data_framework.Models.Enemies
                 .Select(wm => new WeaponSusceptibility(wm.Weapon, wm.NumberOfHits(Hp)))
                 .ToDictionary(ws => ws.Weapon.Name);
         }
-
     }
 }

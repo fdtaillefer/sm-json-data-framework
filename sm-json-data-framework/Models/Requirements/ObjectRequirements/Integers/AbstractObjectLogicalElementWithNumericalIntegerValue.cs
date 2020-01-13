@@ -4,17 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
+namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
-    public class Ammo : AbstractObjectLogicalElement
+    public abstract class AbstractObjectLogicalElementWithNumericalIntegerValue : AbstractObjectLogicalElementWithInteger
     {
-        public AmmoEnum Type { get; set; }
-        
-        public int Count { get; set; }
-
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
-            // No properties need to be handled here
+            // If the value is just a numerical value, it doesn't need to match up to anything
             return Enumerable.Empty<string>();
         }
     }

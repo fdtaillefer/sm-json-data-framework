@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Converters;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
+using sm_json_data_framework.Models.Rooms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,14 +29,14 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="stringElementConverter">A StringLogicalElementConverter that can attempt to convert a raw string into a more specific logical element</param>
         /// <returns>All strings that couldn't be resolved to a more specific logical element</returns>
-        public IEnumerable<string> ReplaceRawStringRequirements(StringLogicalElementConverter stringElementConverter)
+        public IEnumerable<string> ReplaceRawStringElements(StringLogicalElementConverter stringElementConverter)
         {
             List<string> unresolvedRawStrings = new List<string>();
 
             // For any logical element in this LogicalRequirements that has sub-LogicalRequirements, do a recursive call
             foreach(AbstractObjectLogicalElementWithSubRequirements logicalElement in LogicalElements.OfType<AbstractObjectLogicalElementWithSubRequirements>())
             {
-                IEnumerable<string> unresolvedSubRawStrings = logicalElement.LogicalRequirements.ReplaceRawStringRequirements(stringElementConverter);
+                IEnumerable<string> unresolvedSubRawStrings = logicalElement.LogicalRequirements.ReplaceRawStringElements(stringElementConverter);
                 unresolvedRawStrings.AddRange(unresolvedSubRawStrings);
             }
 
@@ -70,6 +71,25 @@ namespace sm_json_data_framework.Models.Requirements
             LogicalElements = newElements;
 
             return unresolvedRawStrings.Distinct();
+        }
+
+        /// <summary>
+        /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),
+        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <param name="room">The room in which this LogicalRequirements is, or null if it's not in a room</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        {
+            List<string> unhandled = new List<string>();
+
+            foreach(AbstractLogicalElement logicalElement in LogicalElements)
+            {
+                unhandled.AddRange(logicalElement.InitializeReferencedLogicalElementProperties(model, room));
+            }
+
+            return unhandled;
         }
 
         // When evaluating this, we should have an `and` parameter that defaults to true

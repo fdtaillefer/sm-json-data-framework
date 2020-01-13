@@ -12,6 +12,9 @@ namespace sm_json_data_framework.Models.Items
         [JsonPropertyName("baseItems")]
         public IEnumerable<string> BaseItemNames { get; set; } = Enumerable.Empty<string>();
 
+        [JsonPropertyName("baseFlags")]
+        public IEnumerable<string> BaseGameFlagNames { get; set; } = Enumerable.Empty<string>();
+
         public IEnumerable<BaseResource> BaseResources { get; set; } = Enumerable.Empty<BaseResource>();
 
         public IEnumerable<InGameItem> UpgradeItems { get; set; } = Enumerable.Empty<InGameItem>();

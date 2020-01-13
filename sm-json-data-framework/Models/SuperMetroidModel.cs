@@ -58,7 +58,6 @@ namespace sm_json_data_framework.Models
         /// </summary>
         public IDictionary<string, Connection> Connections { get; set; } = new Dictionary<string, Connection>();
 
-        // STITCHME I think Connections can just be tacked onto nodes?
         private IDictionary<string, Weapon> _weapons;
         /// <summary>
         /// The weapons in this model, mapped by name.

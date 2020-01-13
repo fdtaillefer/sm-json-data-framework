@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
 {
-    public class AbstractObjectLogicalElement : AbstractLogicalElement
+    public abstract class AbstractObjectLogicalElement : AbstractLogicalElement
     {
     }
 }
