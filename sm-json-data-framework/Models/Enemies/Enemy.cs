@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Enemies
 {
-    public class Enemy
+    public class Enemy : InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -80,11 +80,6 @@ namespace sm_json_data_framework.Models.Enemies
         [JsonIgnore]
         public IDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; set; }
 
-        /// <summary>
-        /// Initializes additional properties in this Enemy, which wouldn't be initialized by simply parsing an enemies json file.
-        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the additional properties</param>
         public void Initialize(SuperMetroidModel model)
         {
             // convert InvulnerabilityStrings to Weapons
@@ -105,6 +100,12 @@ namespace sm_json_data_framework.Models.Enemies
             WeaponSusceptibilities = WeaponMultipliers.Values
                 .Select(wm => new WeaponSusceptibility(wm.Weapon, wm.NumberOfHits(Hp)))
                 .ToDictionary(ws => ws.Weapon.Name);
+        }
+
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        {
+            // No logical elements in here
+            return Enumerable.Empty<string>();
         }
     }
 }

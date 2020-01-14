@@ -6,7 +6,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class NodeLock
+    public class NodeLock : InitializablePostDeserializeInNode
     {
         public LockTypeEnum LockType { get; set; }
 
@@ -16,13 +16,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public IEnumerable<Strat> BypassStrats { get; set; } = Enumerable.Empty<Strat>();
 
-        /// <summary>
-        /// Initializes additional properties in this Strat, which wouldn't be initialized by simply parsing a rooms json file.
-        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the additional properties</param>
-        /// <param name="room">The room in which this StratFailure is</param>
-        public void Initialize(SuperMetroidModel model, Room room)
+        public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
         {
             foreach (Strat strat in UnlockStrats)
             {
@@ -35,14 +29,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        /// <summary>
-        /// Goes through all logical elements within this Lock (and all LogicalRequirements within any of them),
-        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel that contains global data</param>
-        /// <param name="room">The room in which this Lock is</param>
-        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             List<string> unhandled = new List<string>();
 

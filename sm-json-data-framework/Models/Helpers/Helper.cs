@@ -5,18 +5,17 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Helpers
 {
-    public class Helper
+    public class Helper : InitializablePostDeserializeOutOfRoom
     {
         public string Name { get; set; }
 
         public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
 
-        /// <summary>
-        /// Goes through all logical elements within this Helper,
-        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel that contains global data</param>
-        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public void Initialize(SuperMetroidModel model)
+        {
+            // Nothing relevant to initialize
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, null);

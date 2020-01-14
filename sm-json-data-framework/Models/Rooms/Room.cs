@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class Room
+    public class Room : InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -73,11 +73,6 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public SuperMetroidModel SuperMetroidModel { get; set; }
 
-        /// <summary>
-        /// Initializes additional properties in this Room, which wouldn't be initialized by simply parsing a rooms json file.
-        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the additional properties</param>
         public void Initialize(SuperMetroidModel model)
         {
             SuperMetroidModel = model;
@@ -92,9 +87,9 @@ namespace sm_json_data_framework.Models.Rooms
                 obstacle.Initialize(model, this);
             }
 
-            foreach (LinkTo linkTo in Links.SelectMany(l => l.To))
+            foreach (Link link in Links)
             {
-                linkTo.Initialize(model, this);
+                link.Initialize(model, this);
             }
 
             foreach(RoomEnemy enemy in Enemies)
@@ -103,12 +98,6 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        /// <summary>
-        /// Goes through all logical elements within this Room and any element of it,
-        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel that contains global data</param>
-        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             List<string> unhandled = new List<string>();

@@ -1,7 +1,7 @@
 ﻿using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Requirements;
-using sm_json_data_framework.Models.Rooms.Node.NodeSparking;
+using sm_json_data_framework.Models.Rooms.Node;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class RoomNode
+    public class RoomNode : InitializablePostDeserializeInRoom
     {
         public int Id { get; set; }
 
@@ -75,6 +75,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public Room Room { get; set; }
 
+        internal IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the connection that connects this node to its destination.</para>
@@ -96,12 +101,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public Dictionary<int, LinkTo> Links { get; set; }
 
-        /// <summary>
-        /// Initializes additional properties in this RoomNode, which wouldn't be initialized by simply parsing a rooms json file.
-        /// All such properties are identified in their own documentation and should not be read if this method isn't called.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the additional properties</param>
-        /// <param name="room">The room in which this node is</param>
         public void Initialize(SuperMetroidModel model, Room room)
         {
             Room = room;
@@ -123,12 +122,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 OverrideSpawnAtNode = Room.Nodes[(int)OverrideSpawnAtNodeId];
             }
 
-            // Initialize CanLeaveCharged objects
-            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
-            {
-                canLeaveCharged.Initialize(model, this);
-            }
-
             // Initialize Yielded game flags
             Yields = YieldsStrings.Select(s => model.GameFlags[s]);
 
@@ -140,55 +133,55 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 Links = linksFromHere.Single().To.ToDictionary(l => l.TargetNodeId);
             }
 
+            // Initialize CanLeaveCharged objects
+            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+            {
+                canLeaveCharged.Initialize(model, room, this);
+            }
+
             // Initialize ViewableNodes
             foreach(ViewableNode viewableNode in ViewableNodes)
             {
-                viewableNode.Initialize(model, room);
+                viewableNode.Initialize(model, room, this);
             }
 
             // Initialize Locks
             foreach(NodeLock nodeLock in Locks)
             {
-                nodeLock.Initialize(model, room);
+                nodeLock.Initialize(model, room, this);
             }
 
             // Initialize Runways
             foreach(Runway runway in Runways)
             {
-                runway.Initialize(model, room);
+                runway.Initialize(model, room, this);
             }
         }
 
-        /// <summary>
-        /// Goes through all logical elements within this Node (and all LogicalRequirements within any of them),
-        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel that contains global data</param>
-        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();
 
-            unhandled.AddRange(InteractionRequires.InitializeReferencedLogicalElementProperties(model, Room));
+            unhandled.AddRange(InteractionRequires.InitializeReferencedLogicalElementProperties(model, room));
 
             foreach(Runway runway in Runways)
             {
-                unhandled.AddRange(runway.InitializeReferencedLogicalElementProperties(model, Room));
+                unhandled.AddRange(runway.InitializeReferencedLogicalElementProperties(model, room, this));
             }
 
             foreach(CanLeaveCharged canLeaveCharged in CanLeaveCharged)
             {
-                unhandled.AddRange(canLeaveCharged.InitializeReferencedLogicalElementProperties(model, Room));
+                unhandled.AddRange(canLeaveCharged.InitializeReferencedLogicalElementProperties(model, room, this));
             }
 
             foreach(NodeLock nodeLock in Locks)
             {
-                unhandled.AddRange(nodeLock.InitializeReferencedLogicalElementProperties(model, Room));
+                unhandled.AddRange(nodeLock.InitializeReferencedLogicalElementProperties(model, room, this));
             }
 
             foreach(ViewableNode viewableNode in ViewableNodes)
             {
-                unhandled.AddRange(viewableNode.InitializeReferencedLogicalElementProperties(model, Room));
+                unhandled.AddRange(viewableNode.InitializeReferencedLogicalElementProperties(model, room, this));
             }
 
             return unhandled.Distinct();

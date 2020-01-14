@@ -6,7 +6,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Weapons
 {
-    public class Weapon
+    public class Weapon : InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -26,12 +26,11 @@ namespace sm_json_data_framework.Models.Weapons
 
         public IEnumerable<WeaponCategoryEnum> Categories { get; set; } = Enumerable.Empty<WeaponCategoryEnum>();
 
-        /// <summary>
-        /// Goes through all logical elements within this Weapon,
-        /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel that contains global data</param>
-        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public void Initialize(SuperMetroidModel model)
+        {
+            // Nothing relevant to initialize
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             List<string> unhandled = new List<string>();
