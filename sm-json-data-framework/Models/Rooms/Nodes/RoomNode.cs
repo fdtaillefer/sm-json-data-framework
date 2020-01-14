@@ -75,11 +75,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public Room Room { get; set; }
 
-        internal IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the connection that connects this node to its destination.</para>

@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +19,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
         {
+            // Eliminate disabled unlock strats
+            UnlockStrats = UnlockStrats.WhereEnabled(model);
+
             foreach (Strat strat in UnlockStrats)
             {
                 strat.Initialize(model, room);
             }
 
+            // Eliminate disabled bypass strats
+            BypassStrats = BypassStrats.WhereEnabled(model);
             foreach (Strat strat in BypassStrats)
             {
                 strat.Initialize(model, room);

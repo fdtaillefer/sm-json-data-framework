@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,9 @@ namespace sm_json_data_framework.Models.Rooms
         {
             // Initialize TargetNode
             TargetNode = room.Nodes[TargetNodeId];
+
+            // Eliminate disabled strats
+            Strats = Strats.WhereEnabled(model);
 
             // Initialize Strats
             foreach(Strat strat in Strats)

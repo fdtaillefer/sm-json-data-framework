@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace sm_json_data_framework.Models.Rooms.Node
 
         public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
         {
+            // Eliminate disabled strats
+            Strats = Strats.WhereEnabled(model);
+
             foreach (Strat strat in Strats)
             {
                 strat.Initialize(model, room);

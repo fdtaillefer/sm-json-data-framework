@@ -104,7 +104,7 @@ namespace sm_json_data_framework.Models.Rooms
             
             foreach(RoomNode node in Nodes.Values)
             {
-                unhandled.AddRange(node.InitializeReferencedLogicalElementProperties(model));
+                unhandled.AddRange(node.InitializeReferencedLogicalElementProperties(model, this));
             }
 
             foreach(Link link in Links)

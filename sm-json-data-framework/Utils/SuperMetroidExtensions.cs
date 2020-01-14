@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Weapons;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,17 @@ namespace sm_json_data_framework.Utils
                     return null;
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a sequence containing the strats in this enumerable that are enabled.
+        /// </summary>
+        /// <param name="strats">A sequence of strats</param>
+        /// <param name="model">A model which can be used to figure out whether a strat is enabled</param>
+        /// <returns></returns>
+        public static IEnumerable<Strat> WhereEnabled(this IEnumerable<Strat> strats, SuperMetroidModel model)
+        {
+            return strats.Where(s => model.LogicalOptions.IsStratEnabled(s));
         }
     }
 }

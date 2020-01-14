@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +64,10 @@ namespace sm_json_data_framework.Models.Rooms.Node
                 OverrideInitiateAtNode = node.Room.Nodes[(int)OverrideInitiateAtNodeId];
             }
 
-            foreach(Strat strat in Strats)
+            // Eliminate disabled strats
+            Strats = Strats.WhereEnabled(model);
+
+            foreach (Strat strat in Strats)
             {
                 strat.Initialize(model, node.Room);
             }
