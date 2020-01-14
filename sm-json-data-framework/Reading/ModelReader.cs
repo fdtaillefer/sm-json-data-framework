@@ -138,18 +138,7 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
-            // STITCHME Do we want to go through logical elements that reference anything as a string and do something about them?
-            // I think so. 
-            // -So what logical elements do we have so far?
-            //    - helpers
-            //    - techs
-            //    - weapon has some
-            //    - rooms has a hierarchy with a bunch of stuff
-
-            // STITCHME Then we can configure readers to find a match or fail on weapons/categories/enemies, too.
-
-            // I guess I could call that InitializeRawStringProperties() or something?
-
+            // Initialize all references within logical elements
             List<string> unhandledLogicalElementProperties = new List<string>();
 
             foreach (Helper helper in model.Helpers.Values)
