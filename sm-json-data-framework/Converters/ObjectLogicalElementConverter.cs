@@ -15,12 +15,56 @@ namespace sm_json_data_framework.Converters
 {
     public class ObjectLogicalElementConverter : JsonConverter<AbstractObjectLogicalElement>
     {
-        public static readonly IEnumerable<string> LOGICAL_REQUIREMENT_OBJECTS = new[] { "and", "or" };
-        public static readonly IEnumerable<string> INTEGER_OBJECTS = new[] { "acidFrames", "draygonElectricityFrames",
-            "energyAtMost", "heatFrames", "hibashiHits", "lavaFrames", "previousNode", "spikeHits", "thornHits"};
-        public static readonly IEnumerable<string> STRING_OBJECTS = new[] { "previousStratProperty" };
-        public static readonly IEnumerable<string> SUBOBJECT_OBJECTS = new[] { "adjacentRunway", "ammo", "ammoDrain",
-            "canComeInCharged", "canShineCharge", "enemyDamage", "enemyKill", "resetRoom"};
+        private IDictionary<ObjectLogicalElementTypeEnum, Type> defaultLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>();
+        private IDictionary<ObjectLogicalElementTypeEnum, Type> overrideLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>();
+
+        public ObjectLogicalElementConverter()
+        {
+            // Initialize default logical element types
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.And, typeof(And));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.Or, typeof(Or));
+            
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.AcidFrames, typeof(AcidFrames));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.DraygonElectricityFrames, typeof(DraygonElectricityFrames));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnergyAtMost, typeof(EnergyAtMost));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.HeatFrames, typeof(HeatFrames));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.HibashiHits, typeof(HibashiHits));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.LavaFrames, typeof(HeatFrames));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.PreviousNode, typeof(PreviousNode));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.SpikeHits, typeof(SpikeHits));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.ThornHits, typeof(ThornHits));
+
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.PreviousStratProperty, typeof(PreviousStratProperty));
+
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.AdjacentRunway, typeof(AdjacentRunway));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.Ammo, typeof(Ammo));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.AmmoDrain, typeof(AmmoDrain));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.CanComeInCharged, typeof(CanComeInCharged));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.CanShineCharge, typeof(CanShineCharge));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnemyDamage, typeof(EnemyDamage));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnemyKill, typeof(EnemyKill));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.ResetRoom, typeof(ResetRoom));
+
+            // STITCHME Receive, validate and initialize override types
+        }
+
+        /// <summary>
+        /// Returns the logical element type to instantiate for the provided elementTypeEnum.
+        /// </summary>
+        /// <param name="elementTypeEnum"></param>
+        /// <returns></returns>
+        private Type GetLogicalElementType(ObjectLogicalElementTypeEnum elementTypeEnum)
+        {
+            if (overrideLogicalElementTypes.TryGetValue(elementTypeEnum, out Type overriddenType))
+            {
+                return overriddenType;
+            }
+            else
+            {
+                return defaultLogicalElementTypes[elementTypeEnum];
+            }
+
+        }
 
         public override AbstractObjectLogicalElement Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -40,28 +84,28 @@ namespace sm_json_data_framework.Converters
             // Read the next element, to put the reader in position to deserialize the logical element
             reader.Read();
 
-            // 
+            // Convert property name to logicalElementEnum
+            ObjectLogicalElementTypeEnum elementTypeEnum 
+                = (ObjectLogicalElementTypeEnum)Enum.Parse(typeof(ObjectLogicalElementTypeEnum), propertyName, true);
+
             AbstractObjectLogicalElement logicalElement = null;
             // This should be placing us either at a StartObject or StartArray, depending on the property name.
-            if (LOGICAL_REQUIREMENT_OBJECTS.Contains(propertyName))
+            switch (elementTypeEnum.GetSubType())
             {
-                logicalElement = CreateLogicalElementWithRequirements(ref reader, options, propertyName);
-            }
-            else if(INTEGER_OBJECTS.Contains(propertyName))
-            {
-                logicalElement = CreateLogicalElementWithInteger(ref reader, options, propertyName);
-            }
-            else if(STRING_OBJECTS.Contains(propertyName))
-            {
-                logicalElement = CreateLogicalElementWithString(ref reader, options, propertyName);
-            }
-            else if (SUBOBJECT_OBJECTS.Contains(propertyName))
-            {
-                logicalElement = CreateLogicalElementWithSubObject(ref reader, options, propertyName);
-            }
-            else
-            {
-                throw new JsonException($"Object logical element '{propertyName}' is not recognized");
+                case ObjectLogicalElementSubTypeEnum.SubRequirement:
+                    logicalElement = CreateLogicalElementWithRequirements(ref reader, options, elementTypeEnum);
+                    break;
+                case ObjectLogicalElementSubTypeEnum.Integer:
+                    logicalElement = CreateLogicalElementWithInteger(ref reader, options, elementTypeEnum);
+                    break;
+                case ObjectLogicalElementSubTypeEnum.String:
+                    logicalElement = CreateLogicalElementWithString(ref reader, options, elementTypeEnum);
+                    break;
+                case ObjectLogicalElementSubTypeEnum.SubObject:
+                    logicalElement = CreateLogicalElementWithSubObject(ref reader, options, elementTypeEnum);
+                    break;
+                default:
+                    throw new Exception($"Logical element subtype enum {elementTypeEnum.GetSubType()} not recognized.");
             }
 
             // Read the end of the object that contained the name of the object
@@ -78,86 +122,67 @@ namespace sm_json_data_framework.Converters
             throw new NotImplementedException();
         }
 
-        private AbstractObjectLogicalElement CreateLogicalElementWithRequirements(ref Utf8JsonReader reader, JsonSerializerOptions options, string propertyName)
+        private AbstractObjectLogicalElement CreateLogicalElementWithRequirements(ref Utf8JsonReader reader, JsonSerializerOptions options,
+            ObjectLogicalElementTypeEnum elementTypeEnum)
         {
             if (reader.TokenType != JsonTokenType.StartArray)
             {
-                throw new JsonException($"Logical element object '{propertyName}' should be an array");
+                throw new JsonException($"Logical element object '{elementTypeEnum}' should be an array");
             }
             LogicalRequirements logicalRequirements = JsonSerializer.Deserialize<LogicalRequirements>(ref reader, options);
 
-            AbstractObjectLogicalElementWithSubRequirements logicalElement = propertyName switch
-            {
-                "and" => new And(),
-                "or" => new Or()
-            };
+            Type typeToInstanciate = GetLogicalElementType(elementTypeEnum);
+            AbstractObjectLogicalElementWithSubRequirements logicalElement 
+                = (AbstractObjectLogicalElementWithSubRequirements)Activator.CreateInstance(typeToInstanciate);
             logicalElement.LogicalRequirements = logicalRequirements;
 
             return logicalElement;
         }
 
-        // STITCHME How can the behavior be overridden? One way would be to delegate to something that can be configured.
-        // Possibly some metadata in the options? Possibly another set of options?
-        private AbstractObjectLogicalElement CreateLogicalElementWithInteger(ref Utf8JsonReader reader, JsonSerializerOptions options, string propertyName)
+        private AbstractObjectLogicalElement CreateLogicalElementWithInteger(ref Utf8JsonReader reader, JsonSerializerOptions options,
+            ObjectLogicalElementTypeEnum elementTypeEnum)
         {
             if (reader.TokenType != JsonTokenType.Number)
             {
-                throw new JsonException($"Logical element object '{propertyName}' should be a number");
+                throw new JsonException($"Logical element object '{elementTypeEnum}' should be a number");
             }
             int value = reader.GetInt32();
 
-            AbstractObjectLogicalElementWithInteger logicalElement = propertyName switch
-            {
-                "acidFrames" => new AcidFrames(),
-                "draygonElectricityFrames" => new DraygonElectricityFrames(),
-                "heatFrames" => new HeatFrames(),
-                "hibashiHits" => new HibashiHits(),
-                "lavaFrames" => new LavaFrames(),
-                "energyAtMost" => new EnergyAtMost(),
-                "spikeHits" => new SpikeHits(),
-                "thornHits" => new ThornHits(),
-                "previousNode" => new PreviousNode()
-            };
+            Type typeToInstanciate = GetLogicalElementType(elementTypeEnum);
+            AbstractObjectLogicalElementWithInteger logicalElement
+                = (AbstractObjectLogicalElementWithInteger)Activator.CreateInstance(typeToInstanciate);
             logicalElement.Value = value;
 
             return logicalElement;
         }
 
-        private AbstractObjectLogicalElement CreateLogicalElementWithString(ref Utf8JsonReader reader, JsonSerializerOptions options, string propertyName)
+        private AbstractObjectLogicalElement CreateLogicalElementWithString(ref Utf8JsonReader reader, JsonSerializerOptions options,
+            ObjectLogicalElementTypeEnum elementTypeEnum)
         {
             if (reader.TokenType != JsonTokenType.String)
             {
-                throw new JsonException($"Logical element object '{propertyName}' should be a string");
+                throw new JsonException($"Logical element object '{elementTypeEnum}' should be a string");
             }
             string value = reader.GetString();
 
-            AbstractObjectLogicalElementWithString logicalElement = propertyName switch
-            {
-                "previousStratProperty" => new PreviousStratProperty()
-            };
+            Type typeToInstanciate = GetLogicalElementType(elementTypeEnum);
+            AbstractObjectLogicalElementWithString logicalElement
+                = (AbstractObjectLogicalElementWithString)Activator.CreateInstance(typeToInstanciate);
             logicalElement.Value = value;
 
             return logicalElement;
         }
 
-        private AbstractObjectLogicalElement CreateLogicalElementWithSubObject(ref Utf8JsonReader reader, JsonSerializerOptions options, string propertyName)
+        private AbstractObjectLogicalElement CreateLogicalElementWithSubObject(ref Utf8JsonReader reader, JsonSerializerOptions options,
+            ObjectLogicalElementTypeEnum elementTypeEnum)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
             {
-                throw new JsonException($"Logical element object '{propertyName}' should be an object");
+                throw new JsonException($"Logical element object '{elementTypeEnum}' should be an object");
             }
 
-            AbstractObjectLogicalElement logicalElement = propertyName switch
-            {
-                "ammo" => JsonSerializer.Deserialize<Ammo>(ref reader, options),
-                "ammoDrain" => JsonSerializer.Deserialize<AmmoDrain>(ref reader, options),
-                "enemyKill" => JsonSerializer.Deserialize<EnemyKill>(ref reader, options),
-                "enemyDamage" => JsonSerializer.Deserialize<EnemyDamage>(ref reader, options),
-                "adjacentRunway" => JsonSerializer.Deserialize<AdjacentRunway>(ref reader, options),
-                "canComeInCharged" => JsonSerializer.Deserialize<CanComeInCharged>(ref reader, options),
-                "canShineCharge" => JsonSerializer.Deserialize<CanShineCharge>(ref reader, options),
-                "resetRoom" => JsonSerializer.Deserialize<ResetRoom>(ref reader, options)
-            };
+            Type typeToInstanciate = GetLogicalElementType(elementTypeEnum);
+            AbstractObjectLogicalElement logicalElement = (AbstractObjectLogicalElement)JsonSerializer.Deserialize(ref reader, typeToInstanciate, options);
 
             return logicalElement;
         }

@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
 {
     public class AmmoDrain : AbstractObjectLogicalElement
     {
-        public AmmoEnum Type { get; set; }
+        [JsonPropertyName("type")]
+        public AmmoEnum AmmoType { get; set; }
 
         public int Count { get; set; }
 
