@@ -27,12 +27,16 @@ namespace sm_json_data_framework.Reading
         /// <param name="baseDirectory"></param>
         /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
         /// If false, the objects in the returned model will contain mostly just raw data.</param>
+        /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
+        /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
+        /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(string baseDirectory, bool initialize = true)
+        public static SuperMetroidModel ReadModel(string baseDirectory, bool initialize = true,
+            IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             SuperMetroidModel model = new SuperMetroidModel();
 
-            JsonSerializerOptions options = CreateJsonSerializerOptions(model);
+            JsonSerializerOptions options = CreateJsonSerializerOptions(model, overrideTypes);
             StringLogicalElementConverter stringLogicalElementConverter = options.GetConverter(typeof(AbstractStringLogicalElement)) as StringLogicalElementConverter;
 
             string itemsPath = baseDirectory + "\\items.json";
@@ -171,7 +175,8 @@ namespace sm_json_data_framework.Reading
             return model;
         }
 
-        public static JsonSerializerOptions CreateJsonSerializerOptions(SuperMetroidModel superMetroidModel)
+        public static JsonSerializerOptions CreateJsonSerializerOptions(SuperMetroidModel superMetroidModel,
+            IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             JsonSerializerOptions options = new JsonSerializerOptions
             {
@@ -185,7 +190,7 @@ namespace sm_json_data_framework.Reading
             // Add custom converters for logical requirements and logical elements
             options.Converters.Add(new LogicalRequirementsConverter());
             options.Converters.Add(new StringLogicalElementConverter(superMetroidModel));
-            options.Converters.Add(new ObjectLogicalElementConverter());
+            options.Converters.Add(new ObjectLogicalElementConverter(overrideTypes));
 
             return options;
         }

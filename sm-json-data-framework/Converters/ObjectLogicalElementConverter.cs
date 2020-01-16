@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Converters
         private IDictionary<ObjectLogicalElementTypeEnum, Type> defaultLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>();
         private IDictionary<ObjectLogicalElementTypeEnum, Type> overrideLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>();
 
-        public ObjectLogicalElementConverter()
+        public ObjectLogicalElementConverter(IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             // Initialize default logical element types
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.And, typeof(And));
@@ -45,7 +45,18 @@ namespace sm_json_data_framework.Converters
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnemyKill, typeof(EnemyKill));
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.ResetRoom, typeof(ResetRoom));
 
-            // STITCHME Receive, validate and initialize override types
+            // Validate and initialize override types
+            overrideTypes = overrideTypes ?? new (ObjectLogicalElementTypeEnum typeEnum, Type type)[] { };
+            foreach(var overrideTuple in overrideTypes)
+            {
+                Type defaultType = defaultLogicalElementTypes[overrideTuple.typeEnum];
+                if (!defaultType.IsAssignableFrom(overrideTuple.type))
+                {
+                    throw new ArgumentException($"The C# type {overrideTuple.type.Name} cannot be used to represent logical element '{overrideTuple.typeEnum}' " +
+                        $"Because type {defaultType} is not assignable from it");
+                }
+                overrideLogicalElementTypes.Add(overrideTuple.typeEnum, overrideTuple.type);
+            }
         }
 
         /// <summary>
