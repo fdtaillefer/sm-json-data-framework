@@ -9,7 +9,7 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class ExpansionItem : InGameItem
     {
-        public ConsumableResourceEnum Resource { get; set; }
+        public RechargeableResourceEnum Resource { get; set; }
 
         public int ResourceAmount { get; set; }
     }

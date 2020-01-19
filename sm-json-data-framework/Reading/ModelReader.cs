@@ -4,6 +4,7 @@ using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
@@ -50,7 +51,7 @@ namespace sm_json_data_framework.Reading
 
             // Read items and put them in the model
             ItemContainer itemContainer = JsonSerializer.Deserialize<ItemContainer>(File.ReadAllText(itemsPath), options);
-            model.Items = itemContainer.BaseItemNames
+            model.Items = itemContainer.ImplicitItemNames
                 .Select(n => new Item(n))
                 .Concat(itemContainer.UpgradeItems)
                 .Concat(itemContainer.ExpansionItems)
@@ -60,9 +61,6 @@ namespace sm_json_data_framework.Reading
             model.GameFlags = itemContainer.GameFlagNames
                 .Select(n => new GameFlag(n))
                 .ToDictionary(f => f.Name);
-
-            // STITCHME Something missing about starting game state
-            // Can't do this until I have a concept of game state
 
             // Read helpers and techs
             HelperContainer helperContainer = JsonSerializer.Deserialize<HelperContainer>(File.ReadAllText(helpersPath), options);
@@ -119,10 +117,10 @@ namespace sm_json_data_framework.Reading
                 foreach(Connection connection in connectionContainer.Connections)
                 {
                     ConnectionNode node1 = connection.Nodes.ElementAt(0);
-                    model.Connections.Add($"{node1.RoomName}_{node1.Nodeid}", connection);
+                    model.Connections.Add(node1.IdentifyingString, connection);
 
                     ConnectionNode node2 = connection.Nodes.ElementAt(1);
-                    model.Connections.Add($"{node2.RoomName}_{node2.Nodeid}", connection);
+                    model.Connections.Add(node2.IdentifyingString, connection);
                 }
             }
 
@@ -141,6 +139,9 @@ namespace sm_json_data_framework.Reading
                     }
                 }
             }
+
+            // Create and assign initial game state
+            model.InitialGameState = new InGameState(model, itemContainer);
 
             // Initialize all references within logical elements
             List<string> unhandledLogicalElementProperties = new List<string>();

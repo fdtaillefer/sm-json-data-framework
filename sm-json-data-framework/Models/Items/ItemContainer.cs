@@ -8,14 +8,22 @@ namespace sm_json_data_framework.Models.Items
 {
     public class ItemContainer
     {
+        [JsonPropertyName("startingRoom")]
+        public string StartingRoomName { get; set; }
 
-        [JsonPropertyName("baseItems")]
-        public IEnumerable<string> BaseItemNames { get; set; } = Enumerable.Empty<string>();
+        [JsonPropertyName("startingNode")]
+        public int StartingNodeId { get; set; }
 
-        [JsonPropertyName("baseFlags")]
-        public IEnumerable<string> BaseGameFlagNames { get; set; } = Enumerable.Empty<string>();
+        [JsonPropertyName("startingItems")]
+        public IEnumerable<string> StartingItemNames { get; set; } = Enumerable.Empty<string>();
 
-        public IEnumerable<BaseResource> BaseResources { get; set; } = Enumerable.Empty<BaseResource>();
+        [JsonPropertyName("startingFlags")]
+        public IEnumerable<string> StartingGameFlagNames { get; set; } = Enumerable.Empty<string>();
+
+        public IEnumerable<ResourceCapacity> StartingResources { get; set; } = Enumerable.Empty<ResourceCapacity>();
+
+        [JsonPropertyName("implicitItems")]
+        public IEnumerable<string> ImplicitItemNames { get; set; } = Enumerable.Empty<string>();
 
         public IEnumerable<InGameItem> UpgradeItems { get; set; } = Enumerable.Empty<InGameItem>();
 

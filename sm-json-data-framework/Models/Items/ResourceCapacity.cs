@@ -4,9 +4,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Items
 {
-    public class BaseResource
+    public class ResourceCapacity
     {
-        public ConsumableResourceEnum Resource { get; set; }
+        public RechargeableResourceEnum Resource { get; set; }
 
         public int MaxAmount { get; set; }
     }

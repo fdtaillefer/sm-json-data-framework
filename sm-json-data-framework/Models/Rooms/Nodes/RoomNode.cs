@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Node;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,13 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     public class RoomNode : InitializablePostDeserializeInRoom
     {
         public int Id { get; set; }
+
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>A string that identifies this node, often used as a key in Dictionaries.</para>
+        /// </summary>
+        [JsonIgnore]
+        public string IdentifyingString { get => SuperMetroidUtils.BuildNodeIdentifyingString(Room.Name, Id); }
 
         public string Name { get; set; }
 
@@ -103,7 +111,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Initialize OutConnection and OutNode
             if(NodeType == NodeTypeEnum.Exit || NodeType == NodeTypeEnum.Door)
             {
-                if (model.Connections.TryGetValue($"{Room.Name}_{Id}", out Connection connection))
+                if (model.Connections.TryGetValue(IdentifyingString, out Connection connection))
                 {
                     OutConnection = connection;
                     ConnectionNode otherNode = connection.Nodes.Where(n => n.RoomName == Room.Name && n.Nodeid == Id).Single();

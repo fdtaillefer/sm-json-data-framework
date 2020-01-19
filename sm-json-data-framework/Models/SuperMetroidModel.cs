@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
@@ -53,7 +54,7 @@ namespace sm_json_data_framework.Models
         public IDictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
 
         /// <summary>
-        /// A dictionary that maps a string (that describes a node, in the form {roomName}_{nodeId}) to a connection.
+        /// A dictionary that maps a node's IdentifyingString to a connection.
         /// Be aware that this means each connection will likely be present twice.
         /// </summary>
         public IDictionary<string, Connection> Connections { get; set; } = new Dictionary<string, Connection>();
@@ -88,5 +89,16 @@ namespace sm_json_data_framework.Models
         /// The boss enemies in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Enemy> Bosses { get; set; } = new Dictionary<string, Enemy>();
+
+        public InGameState InitialGameState { private get; set; }
+
+        /// <summary>
+        /// Creates and returns a copy of the initial game state.
+        /// </summary>
+        /// <returns></returns>
+        public InGameState CreateInitialGameStateCopy()
+        {
+            return new InGameState(InitialGameState);
+        }
     }
 }
