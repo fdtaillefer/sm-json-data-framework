@@ -20,8 +20,8 @@ namespace sm_json_data_framework.Models.InGameStates
         public InRoomState(InRoomState other)
         {
             CurrentNode = other.CurrentNode;
-            VisitedNodeIds = new List<int>(other.VisitedNodeIds);
-            DestroyedObstacleIds = new HashSet<string>(other.DestroyedObstacleIds);
+            VisitedNodeIdsList = new List<int>(other.VisitedNodeIdsList);
+            DestroyedObstacleIdsSet = new HashSet<string>(other.DestroyedObstacleIdsSet);
         }
 
         /// <summary>
@@ -35,14 +35,29 @@ namespace sm_json_data_framework.Models.InGameStates
         public Room CurrentRoom { get => CurrentNode?.Room; }
 
         /// <summary>
-        ///  The ID of nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
+        /// Inner list containing the ID of nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
         /// </summary>
-        protected List<int> VisitedNodeIds { get; set; } = new List<int>();
+        protected List<int> VisitedNodeIdsList { get; set; } = new List<int>();
 
         /// <summary>
-        /// The ID of obstacles that have been destroyed in this room since entering.
+        /// A sequence of IDs of nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
         /// </summary>
-        protected HashSet<string> DestroyedObstacleIds { get; set; } = new HashSet<string>();
+        public IEnumerable<int> VisitedNodeIds { get; }
+
+        /// <summary>
+        /// The inner HashSet containing the ID of obstacles that have been destroyed in this room since entering.
+        /// </summary>
+        protected HashSet<string> DestroyedObstacleIdsSet { get; set; } = new HashSet<string>();
+
+        /// <summary>
+        /// A sequence of IDs of obstacles that have been destroyed in this room since entering.
+        /// </summary>
+        public IEnumerable<string> DestroyedObstacleIds { get; }
+
+        /// <summary>
+        /// The strat that was used to reach the current node, if any. Otherwise, is null.
+        /// </summary>
+        public Strat LastStrat { get; protected set; }
 
         /// <summary>
         /// Sets this InRoomState's state to that of immediate entry of a room via the provided entry node.
@@ -51,19 +66,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="entryNode">The node by which the room is being entered.</param>
         public void EnterRoom(RoomNode entryNode)
         {
-            DestroyedObstacleIds.Clear();
-            VisitedNodeIds.Clear();
+            ClearRoomState();
 
-            if(entryNode == null)
+            if(entryNode != null)
             {
-                CurrentNode = null;
-            }
-            else
-            {
-                VisitNode(entryNode);
+                VisitNode(entryNode, null);
                 if(entryNode.SpawnAtNode != null)
                 {
-                    VisitNode(entryNode.SpawnAtNode);
+                    VisitNode(entryNode.SpawnAtNode, null);
                 }
             }
         }
@@ -72,10 +82,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Updates the in-room state by moving the player to the provided node. Should not be called for a node that is not in the current room.
         /// </summary>
         /// <param name="node">Node to visit.</param>
-        public void VisitNode(RoomNode node)
+        /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
+        /// it's on a link that connects previous node to new node.</param>
+        public void VisitNode(RoomNode node, Strat strat)
         {
             CurrentNode = node;
-            VisitedNodeIds.Add(node.Id);
+            VisitedNodeIdsList.Add(node.Id);
+            LastStrat = strat;
         }
 
         /// <summary>
@@ -85,7 +98,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="obstacle">The obstacle to destroy.</param>
         public void DestroyObstacle(RoomObstacle obstacle)
         {
-            DestroyedObstacleIds.Add(obstacle.Id);
+            DestroyedObstacleIdsSet.Add(obstacle.Id);
         }
 
         /// <summary>
@@ -93,7 +106,10 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         public void ClearRoomState()
         {
-            EnterRoom(null);
+            DestroyedObstacleIdsSet.Clear();
+            VisitedNodeIdsList.Clear();
+            LastStrat = null;
+            CurrentNode = null;
         }
     }
 }

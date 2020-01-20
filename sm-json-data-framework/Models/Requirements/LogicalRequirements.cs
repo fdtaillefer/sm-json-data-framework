@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Converters;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
@@ -92,6 +93,25 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
-        // When evaluating this, we should have an `and` parameter that defaults to true
+        /// <summary>
+        /// Returns whether this logical requirements is fulfilled by the provided in-game state.
+        /// </summary>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="and">If true, checks that all logical elements in this requirements are fulfilled. 
+        /// If false, checks that at least one logical element is fulfilled.</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <returns></returns>
+        public bool IsFulfilled(InGameState inGameState, bool and = true, bool usePreviousRoom = false)
+        {
+            if (and)
+            {
+                return LogicalElements.All(le => le.IsFulfilled(inGameState, usePreviousRoom));
+            }
+            else
+            {
+                return LogicalElements.Any(le => le.IsFulfilled(inGameState, usePreviousRoom));
+            }
+        }
     }
 }

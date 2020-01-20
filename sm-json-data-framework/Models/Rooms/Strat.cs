@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Requirements;
+﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,20 @@ namespace sm_json_data_framework.Models.Rooms
         public IEnumerable<StratFailure> Failures { get; set; } = Enumerable.Empty<StratFailure>();
 
         public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
+
+        /// <summary>
+        /// Evaluates whether the requirements of this strat are met by the provided in-game state.
+        /// </summary>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <returns></returns>
+        public bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        {
+            // STITCHME This needs to worry about obstacles too...
+
+            return Requires.IsFulfilled(inGameState, usePreviousRoom: usePreviousRoom);
+        }
 
         public void Initialize(SuperMetroidModel model, Room room)
         {

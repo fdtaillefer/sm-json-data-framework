@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms;
+﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Rooms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             // No properties need to be handled here
             return Enumerable.Empty<string>();
+        }
+
+        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        {
+            return inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), Count);
         }
     }
 }

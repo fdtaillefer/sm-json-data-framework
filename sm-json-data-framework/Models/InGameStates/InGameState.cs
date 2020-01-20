@@ -86,6 +86,10 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
         {
+            if(quantity == 0)
+            {
+                return true;
+            }
             return resource switch
             {
                 // The other resources can be fully spent, but for energy we don't want to go below 1
@@ -140,7 +144,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected IDictionary<string, GameFlag> GameFlags { get; set; } = new Dictionary<string, GameFlag>();
 
-        public bool HasGameflag(GameFlag flag)
+        public bool HasGameFlag(GameFlag flag)
         {
             return GameFlags.ContainsKey(flag.Name);
         }
@@ -152,7 +156,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public void AddGameFlag(GameFlag flag)
         {
-            if(!HasGameflag(flag))
+            if(!HasGameFlag(flag))
             {
                 GameFlags.Add(flag.Name, flag);
             }
@@ -169,6 +173,33 @@ namespace sm_json_data_framework.Models.InGameStates
         public bool HasItem(string itemName)
         {
             return NonConsumableItems.ContainsKey(itemName) || ExpansionItems.ContainsKey(itemName);
+        }
+
+        /// <summary>
+        /// Returns specifically whether the Varia Suit is available in this in-game state.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasVariaSuit()
+        {
+            return HasItem("Varia");
+        }
+
+        /// <summary>
+        /// Returns specifically whether the Gravity Suit is available in this in-game state.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasGravitySuit()
+        {
+            return HasItem("Gravity");
+        }
+
+        /// <summary>
+        /// Returns specifically whether the Speed Booster is available in this in-game state.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasSpeedBooster()
+        {
+            return HasItem("SpeedBooster");
         }
 
         public void AddItem(Item item)
@@ -205,17 +236,74 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
+        /// <summary>
+        /// In-room state of the current room.
+        /// </summary>
         protected InRoomState InRoomState { get; set; }
 
         /// <summary>
-        /// The node the player is currently at. This can be null if in-room state isn't being tracked.
+        /// In-room state of the last room when it was left.
         /// </summary>
-        public RoomNode CurrentNode { get => InRoomState.CurrentNode; }
+        protected InRoomState PreviousRoomState { get; set; }
 
         /// <summary>
-        /// The room the player is currently in. This can be null if in-room state isn't being tracked.
+        /// Returns the node the player is currently at. This can be null if in-room state isn't being tracked.
         /// </summary>
-        public Room CurrentRoom { get => InRoomState.CurrentRoom; }
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public RoomNode GetCurrentNode(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            return roomState?.CurrentNode;
+        }
+
+        /// <summary>
+        /// Returns the room the player is currently in. This can be null if in-room state isn't being tracked.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public Room GetCurrentroom(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            return roomState?.CurrentRoom;
+        }
+
+        /// <summary>
+        /// Returns the strat that was used to reach the current node, if any. Otherwise, returns null.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public Strat GetLastStrat(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            return roomState?.LastStrat;
+        }
+
+        /// <summary>
+        /// Returns a sequence of IDs of nodes that have been visited in the current room since entering, in order, 
+        /// starting with the node through which the room was entered. May be empty if the in-room state is not being tracked.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public IEnumerable<int> GetVisitedNodeIds(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            IEnumerable<int> returnValue = roomState?.VisitedNodeIds;
+            return returnValue == null? Enumerable.Empty<int>() : returnValue;
+        }
+
+        /// <summary>
+        /// Returns a sequence of IDs of obstacles that have been destroyed in the current room since entering.
+        /// May be empty if the in-room state is not being tracked.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public IEnumerable<string> GetDestroyedObstacleIds(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            IEnumerable<string> returnValue = roomState?.DestroyedObstacleIds;
+            return returnValue == null ? Enumerable.Empty<string>() : returnValue;
+        }
 
         /// <summary>
         /// Positions the in-game state as it would be after entering a room via the provided node. This may place the player at a different node immediately
@@ -224,6 +312,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="entryNode"></param>
         public void EnterRoom(RoomNode entryNode)
         {
+            // Copy current room state and remember it as previous
+            PreviousRoomState = new InRoomState(InRoomState);
             InRoomState.EnterRoom(entryNode);
         }
 
@@ -231,9 +321,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Positions the in-game state at the provided node. This node should be inside the current room.
         /// </summary>
         /// <param name="nodeToVisit">The node to go to</param>
-        public void VisitNode(RoomNode nodeToVisit)
+        /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
+        /// it's on a link that connects previous node to new node.</param>
+        public void VisitNode(RoomNode nodeToVisit, Strat strat)
         {
-            InRoomState.VisitNode(nodeToVisit);
+            InRoomState.VisitNode(nodeToVisit, strat);
         }
 
         /// <summary>
@@ -252,6 +344,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public void ClearRoomState()
         {
             InRoomState.ClearRoomState();
+            PreviousRoomState?.ClearRoomState();
         }
     }
 }

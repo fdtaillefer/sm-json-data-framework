@@ -44,6 +44,7 @@ namespace sm_json_data_framework.Converters
 
         public AbstractStringLogicalElement CreateLogicalElement(string stringValue)
         {
+            // STITCHME This creates logical elements without allowing the use of an override type. Fix this?
             if (Equals(stringValue, "never"))
             {
                 return new NeverLogicalElement();

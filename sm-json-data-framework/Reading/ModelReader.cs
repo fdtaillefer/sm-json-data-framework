@@ -140,37 +140,40 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
-            // Create and assign initial game state
-            model.InitialGameState = new InGameState(model, itemContainer);
-
-            // Initialize all references within logical elements
-            List<string> unhandledLogicalElementProperties = new List<string>();
-
-            foreach (Helper helper in model.Helpers.Values)
+            if (initialize)
             {
-                unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(model));
-            }
+                // Create and assign initial game state
+                model.InitialGameState = new InGameState(model, itemContainer);
 
-            foreach(Tech tech in model.Techs.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(model));
-            }
+                // Initialize all references within logical elements
+                List<string> unhandledLogicalElementProperties = new List<string>();
 
-            foreach(Weapon weapon in model.Weapons.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(model));
-            }
+                foreach (Helper helper in model.Helpers.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(model));
+                }
 
-            foreach(Room room in model.Rooms.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(model));
-            }
+                foreach(Tech tech in model.Techs.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(model));
+                }
 
-            // If there was any logical element property we failed to resolve, consider that an error
-            if (unhandledLogicalElementProperties.Any())
-            {
-                throw new JsonException($"The following logical element property values could not be resolved " +
-                    $"to to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
+                foreach(Weapon weapon in model.Weapons.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(model));
+                }
+
+                foreach(Room room in model.Rooms.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(model));
+                }
+
+                // If there was any logical element property we failed to resolve, consider that an error
+                if (unhandledLogicalElementProperties.Any())
+                {
+                    throw new JsonException($"The following logical element property values could not be resolved " +
+                        $"to to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
+                }
             }
 
             return model;

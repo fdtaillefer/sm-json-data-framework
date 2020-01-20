@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Items;
+﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +14,11 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         public ItemLogicalElement(Item item)
         {
             Item = item;
+        }
+
+        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        {
+            return inGameState.HasItem(Item);
         }
     }
 }

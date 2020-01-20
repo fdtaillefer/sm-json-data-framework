@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Utils;
@@ -101,6 +102,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             ExcludedWeapons = excludedWeapons.Distinct();
 
             return unhandled.Distinct();
+        }
+
+        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        {
+            // STITCHME Do something
+            throw new NotImplementedException();
         }
     }
 }

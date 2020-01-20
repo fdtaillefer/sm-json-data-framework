@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms;
+﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
@@ -89,6 +90,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             ObstaclesToAvoid = obstaclesToAvoid;
 
             return unhandled.Distinct();
+        }
+
+        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        {
+            // STITCHME Do something
+            throw new NotImplementedException();
         }
     }
 }
