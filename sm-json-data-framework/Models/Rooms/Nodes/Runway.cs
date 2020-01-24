@@ -1,13 +1,15 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Node
 {
-    public class Runway : InitializablePostDeserializeInNode
+    public class Runway : InitializablePostDeserializeInNode, IRunway
     {
         public int Length { get; set; }
 
@@ -27,7 +29,8 @@ namespace sm_json_data_framework.Models.Rooms.Node
 
         public bool UsableComingIn = true;
 
-        public int OpenEnd { get; set; }
+        [JsonPropertyName("openEnd")]
+        public int OpenEnds { get; set; } = 0;
 
         public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
         {

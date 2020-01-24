@@ -48,6 +48,15 @@ namespace sm_json_data_framework.Models
         public IDictionary<string, Tech> Techs { get; set; } = new Dictionary<string, Tech>();
 
         /// <summary>
+        /// Returns whether the shinespark tech is enabled.
+        /// </summary>
+        /// <returns></returns>
+        public bool CanShinespark()
+        {
+            return LogicalOptions.IsTechEnabled(Techs["canShinespark"]);
+        }
+
+        /// <summary>
         /// The items in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Item> Items { get; set; } = new Dictionary<string, Item>();

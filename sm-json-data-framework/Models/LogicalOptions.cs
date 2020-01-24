@@ -39,7 +39,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// The number of tiles needed for the charging of a shinespark to be expected.
         /// </summary>
-        public int TilesToShineCharge { get; set; } = 31;
+        public decimal TilesToShineCharge { get; set; } = 31M;
 
         public bool IsTechEnabled(Tech tech)
         {

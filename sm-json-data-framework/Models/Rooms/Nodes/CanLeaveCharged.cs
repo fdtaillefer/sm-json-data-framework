@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -8,8 +9,14 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Node
 {
-    public class CanLeaveCharged : InitializablePostDeserializeInNode
+    public class CanLeaveCharged : InitializablePostDeserializeInNode, IRunway
     {
+        [JsonIgnore]
+        public int Length { get => UsedTiles; }
+
+        [JsonIgnore]
+        public int EndingUpTiles { get => 0; }
+
         public int UsedTiles { get; set; }
 
         public int FramesRemaining { get; set; }
@@ -35,7 +42,8 @@ namespace sm_json_data_framework.Models.Rooms.Node
 
         public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
 
-        public int OpenEnd { get; set; } = 0;
+        [JsonPropertyName("openEnd")]
+        public int OpenEnds { get; set; } = 0;
 
         public int GentleUpTiles { get; set; } = 0;
 

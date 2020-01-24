@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Rooms.Node;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,11 @@ namespace sm_json_data_framework.Rules
         public virtual int SpikeDamage { get => 60; }
 
         public virtual int HibashiDamage { get => 30; }
+
+        /// <summary>
+        /// The energy at which a shinespark is interrupted
+        /// </summary>
+        public virtual int ShinesparkEnergyLimit { get => 29; }
 
         /// <summary>
         /// Calculates and returns the environmental damage Samus would take for the provided in-game state and base environmental damage. This method is intended
@@ -146,6 +152,19 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
+        /// <para>Returns the energy Samus must have when initiating a shinespark, for that shinespark to complete to the end.
+        /// By default, that is the energy cost of the shinespark + the energy at which a shinespark is interrupted.</para>
+        /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
+        /// </summary>
+        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark. 0 means no shinespark is being executed.</param>
+        /// <returns></returns>
+        public virtual int CalculateEnergyNeededForShinespark(InGameState inGameState, int shinesparkFrames)
+        {
+            return shinesparkFrames == 0 ? 0 : shinesparkFrames + ShinesparkEnergyLimit;
+        }
+
+        /// <summary>
         /// Calculates and returns how much damage the provided enemy attack would do to Samus, given the provided in-game state.
         /// </summary>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
@@ -168,6 +187,47 @@ namespace sm_json_data_framework.Rules
             {
                 return attack.BaseDamage;
             }
+        }
+
+        /// <summary>
+        /// Calculates the effective length of the provided runway, in flat tiles.
+        /// </summary>
+        /// <param name="runway">The runway to calculate</param>
+        /// <returns></returns>
+        public virtual decimal CalculateEffectiveRunwayLength(IRunway runway)
+        {
+            // I don't know how diagonal tiles work, so ignore them for now
+            // Up and down tiles are both worth a bit more than 1 tile, but seem to be worth a different amount each.
+            return runway.OpenEnds * 0.75M + runway.Length;
+        }
+
+        /// <summary>
+        /// Calculates the effective length of the provided runway, used in the opposite direction, in flat tiles.
+        /// </summary>
+        /// <param name="runway">The runway to calculate in reverse</param>
+        /// <returns></returns>
+        public decimal CalculateEffectiveReversedRunwayLength(IRunway runway)
+        {
+            return CalculateEffectiveRunwayLength(ReverseRunway(runway));
+        }
+
+        /// <summary>
+        /// Creates and returns the equivalent of the provided runway, but used in the opposite direction.
+        /// </summary>
+        /// <param name="runway">The runway to reverse</param>
+        /// <returns></returns>
+        public virtual IRunway ReverseRunway(IRunway runway)
+        {
+            return new Runway {
+                Length = runway.Length,
+                EndingUpTiles = runway.StartingDownTiles,
+                GentleDownTiles = runway.GentleUpTiles,
+                GentleUpTiles = runway.GentleDownTiles,
+                OpenEnds = runway.OpenEnds,
+                StartingDownTiles = runway.EndingUpTiles,
+                SteepDownTiles = runway.SteepUpTiles,
+                SteepUpTiles = runway.SteepDownTiles
+            };
         }
     }
 }
