@@ -5,29 +5,12 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
-    public class SpikeHits : AbstractObjectLogicalElementWithNumericalIntegerValue, IDamageRequirement
+    public class SpikeHits : AbstractObjectLogicalElementWithNumericalIntegerValue
     {
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
-            int damage = CalculateDamage(inGameState.HasVariaSuit(), inGameState.HasGravitySuit());
+            int damage = model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.SpikeDamage);
             return inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage);
-        }
-
-        public virtual int CalculateDamage(bool hasVaria, bool hasGravity)
-        {
-            int baseDamage = 60;
-            if (hasGravity)
-            {
-                return baseDamage / 4;
-            }
-            else if (hasVaria)
-            {
-                return baseDamage / 2;
-            }
-            else
-            {
-                return baseDamage;
-            }
         }
     }
 }

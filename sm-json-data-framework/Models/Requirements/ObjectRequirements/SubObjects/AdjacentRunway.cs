@@ -36,7 +36,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
             // We already have to look at the room prior to the one we're asked to evaluate
             // If we're being asked to evaluate the previous room, we have no way to obtain the state of the room before that so just return false
@@ -60,7 +60,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             // At this point we know we just exited the previous room through a node that led to FromNode, and that we haven't moved since
             // We can use the adjacent runway so long as we can execute at least one strat of a long enough runway
-            return lastRoomExitNode.Runways.Any(r => r.Length >= UsedTiles && r.Strats.Any(s => s.IsFulfilled(inGameState, true)));
+            return lastRoomExitNode.Runways.Any(r => r.Length >= UsedTiles && r.Strats.Any(s => s.IsFulfilled(model, inGameState, true)));
         }
     }
 }

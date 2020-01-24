@@ -8,7 +8,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     public class PreviousNode : AbstractObjectLogicalElementWithNodeId
     {
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
             // Look at second-to-last visited node. Last node is the current node.
             IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(usePreviousRoom);

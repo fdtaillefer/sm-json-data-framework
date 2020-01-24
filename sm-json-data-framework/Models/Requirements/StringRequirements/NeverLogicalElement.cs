@@ -7,7 +7,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 {
     public class NeverLogicalElement : AbstractStringLogicalElement
     {
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
             return false;
         }

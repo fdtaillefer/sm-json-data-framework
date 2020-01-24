@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
 {
-    public class EnemyDamage : AbstractObjectLogicalElement, IDamageRequirement
+    public class EnemyDamage : AbstractObjectLogicalElement
     {
         [JsonPropertyName("enemy")]
         public string EnemyName { get; set; }
@@ -56,28 +56,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
-            int damage = CalculateDamage(inGameState.HasVariaSuit(), inGameState.HasGravitySuit());
+            int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits;
             return inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage);
-        }
-
-        public virtual int CalculateDamage(bool hasVaria, bool hasGravity)
-        {
-            int baseDamage = Attack.BaseDamage * Hits;
-
-            if (hasGravity && Attack.AffectedByGravity)
-            {
-                return baseDamage / 4;
-            }
-            else if (hasVaria && Attack.AffectedByVaria)
-            {
-                return baseDamage / 2;
-            }
-            else
-            {
-                return baseDamage;
-            }
         }
     }
 }

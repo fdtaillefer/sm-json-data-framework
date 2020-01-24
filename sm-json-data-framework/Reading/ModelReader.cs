@@ -10,6 +10,7 @@ using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,17 +26,20 @@ namespace sm_json_data_framework.Reading
         /// <summary>
         /// Reads all sm-json-data json files, from the provided base directory, and builds a SuperMetroidModel.
         /// </summary>
-        /// <param name="baseDirectory"></param>
+        /// <param name="baseDirectory">A path to the base directory of the data model to read</param>
+        /// <param name="rules">A repository of game rules to operate by.</param>
         /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
         /// If false, the objects in the returned model will contain mostly just raw data.</param>
         /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(string baseDirectory, bool initialize = true,
+        public static SuperMetroidModel ReadModel(string baseDirectory, SuperMetroidRules rules, bool initialize = true,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             SuperMetroidModel model = new SuperMetroidModel();
+
+            model.Rules = rules;
 
             JsonSerializerOptions options = CreateJsonSerializerOptions(model, overrideTypes);
             StringLogicalElementConverter stringLogicalElementConverter = options.GetConverter(typeof(AbstractStringLogicalElement)) as StringLogicalElementConverter;

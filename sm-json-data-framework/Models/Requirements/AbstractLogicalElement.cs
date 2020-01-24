@@ -20,11 +20,12 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Evaluates whether the requirements of this logical element are met by the provided in-game state.
         /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
         /// <returns></returns>
-        public abstract bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false);
+        public abstract bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false);
 
         // STITCHME could be nice to ask for always and never?
     }

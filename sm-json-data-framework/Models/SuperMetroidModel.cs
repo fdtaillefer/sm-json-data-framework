@@ -7,6 +7,7 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,8 +26,16 @@ namespace sm_json_data_framework.Models
             // Weapons can't have an initializer directly on itself because of the custom setter
             Weapons = new Dictionary<string, Weapon>();
         }
-
+        
+        /// <summary>
+        /// Options that describe what the player is expected to be able or unable to do.
+        /// </summary>
         public LogicalOptions LogicalOptions { get; set; } = new LogicalOptions();
+
+        /// <summary>
+        /// A repository of game rules we are operating by.
+        /// </summary>
+        public SuperMetroidRules Rules { get; set; }
 
         /// <summary>
         /// The helpers in this model, mapped by name.

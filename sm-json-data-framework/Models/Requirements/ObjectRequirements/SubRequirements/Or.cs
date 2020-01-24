@@ -8,9 +8,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
 {
     public class Or : AbstractObjectLogicalElementWithSubRequirements
     {
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
-            return LogicalRequirements.IsFulfilled(inGameState, and: false, usePreviousRoom: usePreviousRoom);
+            return LogicalRequirements.IsFulfilled(model, inGameState, and: false, usePreviousRoom: usePreviousRoom);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return Enumerable.Empty<string>();
         }
 
-        public override bool IsFulfilled(InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
             return inGameState.GetLastStrat(usePreviousRoom)?.StratProperties?.Contains(Value) == true;
         }

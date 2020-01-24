@@ -8,6 +8,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models
 {
+    /// <summary>
+    /// Options that describe what the player is expected to be able or unable to do.
+    /// </summary>
     public class LogicalOptions
     {
         /// <summary>
