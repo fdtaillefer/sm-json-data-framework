@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Models.Rooms.Node;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace sm_json_data_framework.Models.InGameStates
     /// </summary>
     public class InGameState
     {
+        // STITCHME We oughta find a way to put unlocked locks in there. I imagine they would work quite exactly like game flags
+
         /// <summary>
         /// Creates a new InGameState
         /// </summary>
@@ -262,7 +265,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
         /// <returns></returns>
-        public Room GetCurrentroom(bool usePreviousRoom = false)
+        public Room GetCurrentRoom(bool usePreviousRoom = false)
         {
             InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
             return roomState?.CurrentRoom;
@@ -345,6 +348,55 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             InRoomState.ClearRoomState();
             PreviousRoomState?.ClearRoomState();
+        }
+
+        /// <summary>
+        /// <para>Returns all runways that the player would be in a state to retroactively use, according to this in-game state.
+        /// Does not check whether the player is able to use any strats on those runways.</para>
+        /// <para>"Retroactive use" is meant to be done right after entering a room, and aims to retroactively decide how the last room was exited.</para>
+        /// <para>A runway would typically be used retroactively to satisfy and adjacentRunway or canComeInCharged
+        /// that is being executed at the first node of the new room.</para>
+        /// </summary>
+        /// <param name="inRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
+        /// to use retroactive runways in the current context. The first node in this path also dictates the node to which the retroactive runways must lead.</param>
+        /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGamestate.</param>
+        /// <returns></returns>
+        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> inRoomPath, bool usePreviousRoom = false)
+        {
+            // Since this is a retroactive check, we already have to look at the room prior to the one we're asked to evaluate
+            // If we were already evaluating the previous room, we have no way to obtain the state of the room before that so just return
+            if (usePreviousRoom)
+            {
+                return Enumerable.Empty<Runway>();
+            }
+
+            RoomNode currentNode = GetCurrentNode(usePreviousRoom);
+
+            // The only runways that are usable are the ones on the node through which we left the previous room,
+            // and they are only usable if that node led to the node through which we entered the current room.
+            IEnumerable<int> visitedNodeIds = GetVisitedNodeIds(usePreviousRoom);
+            // If we don't know at what node we entered, we can't identify any usable runways
+            if (!visitedNodeIds.Any())
+            {
+                return Enumerable.Empty<Runway>();
+            }
+
+            // If the current in-room state doesn't respect the in-room path necessary to use retroactive runways, we can't use any
+            if(!visitedNodeIds.SequenceEqual(inRoomPath))
+            {
+                return Enumerable.Empty<Runway>();
+            }
+
+            // If we didn't leave the previous room via a node that led to the node by which we entered current room, no runways are usable
+            RoomNode entryNode = GetCurrentRoom(usePreviousRoom).Nodes[visitedNodeIds.First()];
+            RoomNode previousRoomExitNode = GetCurrentNode(true);
+            if (previousRoomExitNode?.OutNode != entryNode)
+            {
+                return Enumerable.Empty<Runway>();
+            }
+
+            // We've confirmed we can use retroactive runways. Return all runways of the previous room's exit node
+            return previousRoomExitNode?.Runways;
         }
     }
 }

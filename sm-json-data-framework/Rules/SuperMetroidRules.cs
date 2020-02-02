@@ -24,6 +24,42 @@ namespace sm_json_data_framework.Rules
         public virtual int ShinesparkEnergyLimit { get => 29; }
 
         /// <summary>
+        /// The number of tiles that are lost when combining two runways via a room transition
+        /// </summary>
+        public virtual decimal RoomTransitionTilesLost { get => 1M; }
+
+        // Apparently the gain varies between 8.5 and 9 pixels, which is just over half a tile.
+        /// <summary>
+        /// The number of tiles gained from having one open end in a runway.
+        /// </summary>
+        public virtual decimal TilesGainedPerOpenEnd { get => 0.5M; }
+
+        // According to zqxk, charging on gentle up tiles multiplies required distance by 27/32. So each tile is worth 32/27 of a tile
+        /// <summary>
+        /// A multiplier that can be applied to a number of gentle up tiles to obtain the equivalent run length in flat tiles.
+        /// </summary>
+        public virtual decimal GentleUpTileMultiplier { get => 32M / 27M; }
+
+        // According to zqxk, charging on steep up tiles multiplies required distance by 3/4. So each tile is worth 4/3 of a tile
+        /// <summary>
+        /// A multiplier that can be applied to a number of steep up tiles to obtain the equivalent run length in flat tiles.
+        /// </summary>
+        public virtual decimal SteepUpTileMultiplier { get => 4M / 3M; }
+
+        // STITCHME Don't know about downward slopes yet
+        /// <summary>
+        /// A multiplier that can be applied to a number of gentle down tiles to obtain the equivalent run length in flat tiles.
+        /// </summary>
+        public virtual decimal GentleDownTileMultiplier { get => 1M; }
+
+        // STITCHME Don't know about downward slopes yet
+        /// <summary>
+        /// A multiplier that can be applied to a number of steep down tiles to obtain the equivalent run length in flat tiles.
+        /// </summary>
+        public virtual decimal SteepDownTileMultiplier { get => 1; }
+
+
+        /// <summary>
         /// Calculates and returns the environmental damage Samus would take for the provided in-game state and base environmental damage. This method is intended
         /// for environment-based punctual hits, not damage over time.
         /// </summary>
@@ -193,22 +229,36 @@ namespace sm_json_data_framework.Rules
         /// Calculates the effective length of the provided runway, in flat tiles.
         /// </summary>
         /// <param name="runway">The runway to calculate</param>
+        /// <param name="tilesSavedWithStutter">The number of tiles the player is expected to be saving using a stutter-step.
+        /// If a portion of the runway to use begins downhill, it will be deemed unusable for a stutter-step and the effective runway length
+        /// will be reduced accordingly.</param>
         /// <returns></returns>
-        public virtual decimal CalculateEffectiveRunwayLength(IRunway runway)
+        public virtual decimal CalculateEffectiveRunwayLength(IRunway runway, decimal tilesSavedWithStutter)
         {
-            // I don't know how diagonal tiles work, so ignore them for now
-            // Up and down tiles are both worth a bit more than 1 tile, but seem to be worth a different amount each.
-            return runway.OpenEnds * 0.75M + runway.Length;
+            decimal runwayLength = runway.Length
+                + runway.OpenEnds * TilesGainedPerOpenEnd
+                + (GentleUpTileMultiplier - 1) * runway.GentleUpTiles
+                + (SteepUpTileMultiplier - 1) * runway.SteepUpTiles
+                + (GentleDownTileMultiplier - 1) * runway.GentleDownTiles
+                + (SteepDownTileMultiplier - 1) * runway.SteepDownTiles;
+
+            // We are going to consider downward slopes as unusable for stutter, and adjust the effective length accordingly.
+            // It's apparently possible to stutter for reduced effectiveness on downard slopes, but we'll ignore it for now.
+            runwayLength -= Math.Min(tilesSavedWithStutter, runway.StartingDownTiles);
+            
+            return runwayLength;
         }
 
         /// <summary>
         /// Calculates the effective length of the provided runway, used in the opposite direction, in flat tiles.
         /// </summary>
         /// <param name="runway">The runway to calculate in reverse</param>
+        /// <param name="tilesSavedWithStutter">The number of tiles the player is expected to be saving using a stutter-step.
+        /// If a portion of the runway to use begins downhill, it will be deemed unusable for a stutter-step and the effective runway length
         /// <returns></returns>
-        public decimal CalculateEffectiveReversedRunwayLength(IRunway runway)
+        public decimal CalculateEffectiveReversedRunwayLength(IRunway runway, decimal tilesSavedWithStutter)
         {
-            return CalculateEffectiveRunwayLength(ReverseRunway(runway));
+            return CalculateEffectiveRunwayLength(ReverseRunway(runway), tilesSavedWithStutter);
         }
 
         /// <summary>

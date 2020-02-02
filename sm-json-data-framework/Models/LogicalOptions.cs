@@ -39,7 +39,18 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// The number of tiles needed for the charging of a shinespark to be expected.
         /// </summary>
-        public decimal TilesToShineCharge { get; set; } = 31M;
+        public decimal TilesToShineCharge { get; set; } = 32.5M;
+
+        /// <summary>
+        /// The number of tiles that are saved by doing a stutter-step to reach the value of <see cref="TilesToShineCharge"/>
+        /// </summary>
+        public decimal TilesSavedWithStutter { get; set; } = 0M;
+
+        /// <summary>
+        /// Indicates whether the value in <see cref="TilesToShineCharge"/> assumes that a stutter-step is being performed.
+        /// This is relevant when trying to shine charge on a runway where you can't stutter.
+        /// </summary>
+        public bool ShineChargesWithStutter { get; set; } = false;
 
         public bool IsTechEnabled(Tech tech)
         {

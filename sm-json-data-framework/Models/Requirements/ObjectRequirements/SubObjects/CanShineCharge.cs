@@ -46,7 +46,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Must have SpeedBooster and must be able to charge in the current runway
             // If a shinespark is involved, the shinespark tech must be enabled and must have the energy for the Shinespark (spent energy + 29)
             return inGameState.HasSpeedBooster()
-                && model.LogicalOptions.TilesToShineCharge >= model.Rules.CalculateEffectiveRunwayLength(this)
+                && model.LogicalOptions.TilesToShineCharge >= model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter)
                 && (!mustShinespark || 
                     (model.CanShinespark() && inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(inGameState, ShinesparkFrames))));
         }

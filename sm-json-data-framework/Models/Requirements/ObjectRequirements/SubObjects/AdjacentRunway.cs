@@ -21,6 +21,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         [JsonIgnore]
         public RoomNode FromNode {get;set;}
 
+        public IEnumerable<int> InRoomPath { get; set; } = Enumerable.Empty<int>();
+
         public int UsedTiles { get; set; }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
@@ -38,29 +40,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
-            // We already have to look at the room prior to the one we're asked to evaluate
-            // If we're being asked to evaluate the previous room, we have no way to obtain the state of the room before that so just return false
-            if (usePreviousRoom)
-            {
-                return false;
-            }
+            // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
+            IEnumerable<int> inRoomPath = (InRoomPath == null || !InRoomPath.Any()) ?  new[] { FromNodeId } : InRoomPath;
 
-            // If we didn't exit the previous room through a node that leads to this one, we cannot use an adjacent runway
-            RoomNode lastRoomExitNode = inGameState.GetCurrentNode(true);
-            if (lastRoomExitNode?.OutNode != FromNode)
-            {
-                return false;
-            }
-
-            // If we aren't just entering the room at this node, we cannot use an adjacent runway
-            if(inGameState.GetCurrentNode() != FromNode || inGameState.GetVisitedNodeIds().Count() > 1)
-            {
-                return false;
-            }
-
-            // At this point we know we just exited the previous room through a node that led to FromNode, and that we haven't moved since
-            // We can use the adjacent runway so long as we can execute at least one strat of a long enough runway
-            return lastRoomExitNode.Runways.Any(r => r.Length >= UsedTiles && r.Strats.Any(s => s.IsFulfilled(model, inGameState, true)));
+            // This is fulfilled if there is a retroactive runway that the player is in a state to retroactively use, and which has a strat
+            // the player can execute
+            return inGameState.GetRetroactiveRunways(inRoomPath, usePreviousRoom).Any(r => r.Length >= UsedTiles && r.IsUsable(model, inGameState, false, true));
         }
     }
 }
