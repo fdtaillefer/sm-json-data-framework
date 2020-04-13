@@ -46,6 +46,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // This is fulfilled if there is a retroactive runway that the player is in a state to retroactively use, and which has a strat
             // the player can execute
             return inGameState.GetRetroactiveRunways(inRoomPath, usePreviousRoom).Any(r => r.Length >= UsedTiles && r.IsUsable(model, inGameState, false, true));
+
+            // Note that there are no concerns here about unlocking the previous door, because unlocking a door to use it cannot be done retroactively.
+            // It has to have already been done in order to use the door in the first place.
         }
     }
 }

@@ -17,6 +17,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
         public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room);
 
+        // STITCHME This probably needs to instead attempt to fulfill, and return a in-game state (if successful) or null (if not).
+        // Reason being that if you have 5 missiles and two separate requirements to spend 5, they'll both pass if you don't
+        // actually keep a record of what you'd spend.
         /// <summary>
         /// Evaluates whether the requirements of this logical element are met by the provided in-game state.
         /// </summary>

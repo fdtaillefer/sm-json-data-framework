@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return inGameState.HasSpeedBooster()
                 && model.LogicalOptions.TilesToShineCharge >= model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter)
                 && (!mustShinespark || 
-                    (model.CanShinespark() && inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(inGameState, ShinesparkFrames))));
+                    (model.CanShinespark() && inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames))));
         }
     }
 }

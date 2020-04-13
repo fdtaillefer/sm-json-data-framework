@@ -30,6 +30,20 @@ namespace sm_json_data_framework.Models.InGameStates
         public RoomNode CurrentNode { get; protected set; }
 
         /// <summary>
+        /// <para>The node by which this player is leaving this room, without actually being at that node. 
+        /// This is used to represent exiting through a node by doing something that must be initiated at a different node (such as a CanLeaveCharged).</para>
+        /// <para>Be aware that remotely exiting a room should only allow the player to proceed in the next room if the effects of the remote exit are used,
+        /// because the actual remove exit action will only be resolved and applied retroactively in the next room.</para>
+        /// <para>In normal situations where the player just leaves a room through the node they're at (or haven't left the room yet), this will be null</para>
+        /// </summary>
+        public RoomNode RemoteExitNode { get; protected set; }
+
+        /// <summary>
+        /// Indicates whether the room described by this state was exited by bypassing the exit door's lock.
+        /// </summary>
+        public bool BypassedExitLock { get; protected set; } = false;
+
+        /// <summary>
         /// The room the player is currently in. This can be null if in-room state isn't being tracked.
         /// </summary>
         public Room CurrentRoom { get => CurrentNode?.Room; }
@@ -92,6 +106,19 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Finalizes this in-room state to represent how the player exits the room.
+        /// </summary>
+        /// <param name="bypassExitLock">Indicates whether the player exited by bypassing a lock on the exit node. Defaults to false.</param>
+        /// <param name="remoteExitNode">If the player exits remotely, exiting via a node they're not at by perforeming a remote action initiated where they are 
+        /// (for example, a canLeaveCharged), this node indicates the node through which the player is exiting. If this is null, the player is assumed to leave via the
+        /// node they are currently at. Defaults to null.</param>
+        public void ExitRoom(bool bypassExitLock = false, RoomNode remoteExitNode = null)
+        {
+            BypassedExitLock = bypassExitLock;
+            RemoteExitNode = remoteExitNode;
+        }
+
+        /// <summary>
         /// Updates the in-room state to contain a mention of the destruction of the provided obstacle.
         /// Should not be called for an obstacle that is not in the current room.
         /// </summary>
@@ -110,6 +137,8 @@ namespace sm_json_data_framework.Models.InGameStates
             VisitedNodeIdsList.Clear();
             LastStrat = null;
             CurrentNode = null;
+            RemoteExitNode = null;
+            BypassedExitLock = false;
         }
     }
 }

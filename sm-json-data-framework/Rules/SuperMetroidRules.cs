@@ -192,10 +192,9 @@ namespace sm_json_data_framework.Rules
         /// By default, that is the energy cost of the shinespark + the energy at which a shinespark is interrupted.</para>
         /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
         /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark. 0 means no shinespark is being executed.</param>
         /// <returns></returns>
-        public virtual int CalculateEnergyNeededForShinespark(InGameState inGameState, int shinesparkFrames)
+        public virtual int CalculateEnergyNeededForShinespark(int shinesparkFrames)
         {
             return shinesparkFrames == 0 ? 0 : shinesparkFrames + ShinesparkEnergyLimit;
         }

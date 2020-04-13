@@ -56,6 +56,7 @@ namespace sm_json_data_framework.Models.Rooms.Node
             return unhandled.Distinct();
         }
 
+        // STITCHME This probably ought to return a new InGameState after using the runway (or null if not possible)
         /// <summary>
         /// Returns whether this runway is usable according to the provided parameters
         /// </summary>

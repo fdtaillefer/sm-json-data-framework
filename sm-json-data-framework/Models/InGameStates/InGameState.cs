@@ -12,11 +12,13 @@ using System.Text;
 namespace sm_json_data_framework.Models.InGameStates
 {
     /// <summary>
-    /// contains the logically-relevant attributes of a given in-game state.
+    /// Contains the logically-relevant attributes of a given in-game state.
     /// </summary>
     public class InGameState
     {
         // STITCHME We oughta find a way to put unlocked locks in there. I imagine they would work quite exactly like game flags
+
+        // STITCHME It might be valuable to eventually have InGameState be able to say which nodes are reachable?
 
         /// <summary>
         /// Creates a new InGameState
@@ -261,6 +263,29 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns the node the player is remotely exiting the room from. This should be null in all situations except if looking at the previous room,
+        /// and if the player also exited that room remotely.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public RoomNode GetRemoteExitNode(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            return roomState?.RemoteExitNode;
+        }
+
+        /// <summary>
+        /// Returns whether the player is exiting the room by bypassing a lock on the node they are exiting by.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
+        /// <returns></returns>
+        public bool BypassingExitLock(bool usePreviousRoom = false)
+        {
+            InRoomState roomState = usePreviousRoom ? PreviousRoomState : InRoomState;
+            return roomState?.BypassedExitLock ?? false;
+        }
+
+        /// <summary>
         /// Returns the room the player is currently in. This can be null if in-room state isn't being tracked.
         /// </summary>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
@@ -309,14 +334,25 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Positions the in-game state as it would be after entering a room via the provided node. This may place the player at a different node immediately
-        /// if the node calls for it.
+        /// <para>Positions the in-game state as it would be after entering a room via the provided node. This may place the player at a different node immediately
+        /// if the node calls for it.</para>
+        /// <para>This method allows for leaving "remotely": leaving through a node the player is not at, by performing an action that must be initiated where the player is.
+        /// A known example is using a CanLeaveCharged that initiates at a different node than the door it's on.</para>
+        /// <para>Be aware that when leaving remotely, the exact action used is only determined retroactively once in the next room, and that leaving remotely is
+        /// not considered valid if it's not made use of by a strat in the next room.
+        /// </para>
         /// </summary>
-        /// <param name="entryNode"></param>
-        public void EnterRoom(RoomNode entryNode)
+        /// <param name="entryNode">The node (in the next room) through which the next room will be enteted.</param>
+        /// <param name="remoteExitNode">If the player is leaving remotely, this indicates the node through which the player remotely leaves.</param>
+        public void EnterRoom(RoomNode entryNode, bool bypassExitLock = false, RoomNode remoteExitNode = null)
         {
+            // Finalize current room state with exit state
+            InRoomState.ExitRoom(bypassExitLock, remoteExitNode);
+
             // Copy current room state and remember it as previous
             PreviousRoomState = new InRoomState(InRoomState);
+
+            // Enter next room
             InRoomState.EnterRoom(entryNode);
         }
 
@@ -351,11 +387,11 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// <para>Returns all runways that the player would be in a state to retroactively use, according to this in-game state.
-        /// Does not check whether the player is able to use any strats on those runways.</para>
+        /// <para>Returns all runways that the player could possibly be able to retroactively use, according to the pathing in this in-game state.
+        /// Does not check whether the player is also able to use any strats on those runways.</para>
         /// <para>"Retroactive use" is meant to be done right after entering a room, and aims to retroactively decide how the last room was exited.</para>
-        /// <para>A runway would typically be used retroactively to satisfy and adjacentRunway or canComeInCharged
-        /// that is being executed at the first node of the new room.</para>
+        /// <para>A runway would typically be used retroactively to satisfy an adjacentRunway or canComeInCharged
+        /// that is being executed soon after entry of the new room.</para>
         /// </summary>
         /// <param name="inRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
         /// to use retroactive runways in the current context. The first node in this path also dictates the node to which the retroactive runways must lead.</param>
@@ -370,10 +406,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return Enumerable.Empty<Runway>();
             }
 
-            RoomNode currentNode = GetCurrentNode(usePreviousRoom);
-
-            // The only runways that are usable are the ones on the node through which we left the previous room,
-            // and they are only usable if that node led to the node through which we entered the current room.
+            // We will need to know what nodes were visited in the current room. If this info is missing, we can't do anything retroactively.
             IEnumerable<int> visitedNodeIds = GetVisitedNodeIds(usePreviousRoom);
             // If we don't know at what node we entered, we can't identify any usable runways
             if (!visitedNodeIds.Any())
@@ -387,16 +420,111 @@ namespace sm_json_data_framework.Models.InGameStates
                 return Enumerable.Empty<Runway>();
             }
 
+            // At this point we know our behavior in the current room respects the provided requirements for retroactively using a runway.
+            // We must now figure out if the previous room also qualifies.
+
+            // Figure out through what node we left the previous room...
+            RoomNode previousRoomExitNode = GetCurrentNode(true);
+
+            // If we can't figure out how we left previous room, we can't return any runways
+            if (previousRoomExitNode == null)
+            {
+                return Enumerable.Empty<Runway>();
+            }
+
+            // If the last room was exited by bypassing a lock, runways can't be used
+            if (BypassingExitLock(true))
+            {
+                return Enumerable.Empty<Runway>();
+            }
+
             // If we didn't leave the previous room via a node that led to the node by which we entered current room, no runways are usable
             RoomNode entryNode = GetCurrentRoom(usePreviousRoom).Nodes[visitedNodeIds.First()];
-            RoomNode previousRoomExitNode = GetCurrentNode(true);
-            if (previousRoomExitNode?.OutNode != entryNode)
+            if (previousRoomExitNode.OutNode != entryNode)
             {
                 return Enumerable.Empty<Runway>();
             }
 
             // We've confirmed we can use retroactive runways. Return all runways of the previous room's exit node
-            return previousRoomExitNode?.Runways;
+            return previousRoomExitNode.Runways;
+        }
+
+        /// <summary>
+        /// <para>Returns all canLeaveChargeds that the player could possibly be able to retroactively use, according to the pathing in this in-game state.
+        /// Does not check whether the player is able to use any strats on those canLeaveChargeds, or whether charging or sparking is currently doable.
+        /// To check all of that, see <see cref="CanLeaveCharged.IsUsable(SuperMetroidModel, InGameState, bool)"/>.</para>
+        /// <para>"Retroactive use" is meant to be done right after entering a room, and aims to retroactively decide how the last room was exited.</para>
+        /// <para>A canLeaveCharged would typically be used retroactively to satisfy a canComeInCharged
+        /// that is being executed soon after entry of the new room.</para>
+        /// </summary>
+        /// <param name="inRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able to use 
+        /// retroactive canLeavechargeds in the current context. The first node in this path also dictates the node to which 
+        /// the retroactive charged exit must lead.</param>
+        /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGamestate.</param>
+        /// <returns></returns>
+        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(IEnumerable<int> inRoomPath, bool usePreviousRoom = false)
+        {
+            // Since this is a retroactive check, we already have to look at the room prior to the one we're asked to evaluate
+            // If we were already evaluating the previous room, we have no way to obtain the state of the room before that so just return
+            if (usePreviousRoom)
+            {
+                return Enumerable.Empty<CanLeaveCharged>();
+            }
+
+            // We will need to know what nodes were visited in the current room. If this info is missing, we can't do anything retroactively.
+            IEnumerable<int> visitedNodeIds = GetVisitedNodeIds(usePreviousRoom);
+            // If we don't know at what node we entered, we can't identify any usable runways
+            if (!visitedNodeIds.Any())
+            {
+                return Enumerable.Empty<CanLeaveCharged>();
+            }
+
+            // If the current in-room state doesn't respect the in-room path necessary to use retroactive runways, we can't use any
+            if (!visitedNodeIds.SequenceEqual(inRoomPath))
+            {
+                return Enumerable.Empty<CanLeaveCharged>();
+            }
+
+            RoomNode entryNode = GetCurrentRoom(usePreviousRoom).Nodes[visitedNodeIds.First()];
+
+            // At this point we know our behavior in the current room respects the provided requirements for retroactively using a CanLeaveCharged.
+
+            // Figure out through what node we left the previous room...
+            RoomNode previousRoomNode = GetCurrentNode(true);
+            RoomNode previousRoomRemoteExitNode = GetRemoteExitNode(true);
+            bool remoteExit = previousRoomRemoteExitNode != null;
+            RoomNode previousRoomExitNode = remoteExit?  previousRoomRemoteExitNode : previousRoomNode;
+
+            // If we can't figure out how we left previous room, we can't return any canLeaveChargeds
+            if (previousRoomExitNode == null)
+            {
+                return Enumerable.Empty<CanLeaveCharged>();
+            }
+
+            // If the last room was exited by bypassing a lock, canLeaveChargeds can't be used
+            if (BypassingExitLock(true))
+            {
+                return Enumerable.Empty<CanLeaveCharged>();
+            }
+
+            // If we didn't leave the previous room via a node that led to the node by which we entered current room, no canLeavechargeds are usable
+            if (previousRoomExitNode.OutNode != entryNode)
+            {
+                return Enumerable.Empty<CanLeaveCharged>();
+            }
+
+            // If last room was exited remotely, return all CanLeaveChargeds of that remote exited node which are initiated at the last node
+            if (remoteExit)
+            {
+                return previousRoomExitNode.CanLeaveCharged.Where(clc => clc.InitiateAtNode == previousRoomNode)
+                    // If a remote CanLeaveCharged requires opening the door first, make sure the door's node was visited prior to remotely exiting
+                    .Where(clc => !clc.MustOpenDoorFirst || GetVisitedNodeIds(true).Contains(previousRoomExitNode.Id));
+            }
+            // If last room was not exited remotely, return all CanLeaveChargeds that are performed directly at exit node
+            else
+            {
+                return previousRoomExitNode.CanLeaveCharged.Where(clc => clc.InitiateAtNode == null);
+            }
         }
     }
 }
