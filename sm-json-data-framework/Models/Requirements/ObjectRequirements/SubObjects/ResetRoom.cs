@@ -94,8 +94,33 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
         {
-            // STITCHME Do something
-            throw new NotImplementedException();
+            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(usePreviousRoom);
+            // If the node at which we entered is not allowed, this is not fulfilled.
+            if (!NodeIds.Contains(visitedNodeIds.First()))
+            {
+                return false;
+            }
+
+            // If we have visited a node to avoid, this is not fulfilled.
+            if(NodeIdsToAvoid.Intersect(visitedNodeIds).Any())
+            {
+                return false;
+            }
+
+            // If we were supposed to stay put but have visited more than the starting node, this is not fulfilled
+            if(MustStayPut && visitedNodeIds.Count() > 1)
+            {
+                return false;
+            }
+
+            // If we have destroyed an obstacle that needed to be preserved, this is not fulfilled
+            if (ObstaclesIdsToAvoid.Intersect(inGameState.GetDestroyedObstacleIds(usePreviousRoom)).Any())
+            {
+                return false;
+            }
+
+            // We've avoided all pitfalls. This ResetRoom is fulfilled
+            return true;
         }
     }
 }
