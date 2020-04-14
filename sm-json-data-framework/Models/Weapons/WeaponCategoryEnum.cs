@@ -14,6 +14,7 @@ namespace sm_json_data_framework.Models.Weapons
         UnchargedIceBeam,
         BeamNoPlasma,
         UnchargedBeamNoPlasma,
-        PowerBombBlast
+        PowerBombBlast,
+        SpecialBeamAttack
     }
 }
