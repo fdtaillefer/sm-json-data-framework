@@ -38,14 +38,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
             IEnumerable<int> inRoomPath = (InRoomPath == null || !InRoomPath.Any()) ?  new[] { FromNodeId } : InRoomPath;
 
             // This is fulfilled if there is a retroactive runway that the player is in a state to retroactively use, and which has a strat
             // the player can execute
-            return inGameState.GetRetroactiveRunways(inRoomPath, usePreviousRoom).Any(r => r.Length >= UsedTiles && r.IsUsable(model, inGameState, false, true));
+            return inGameState.GetRetroactiveRunways(inRoomPath, usePreviousRoom).Any(r => r.Length >= UsedTiles && r.IsUsable(model, inGameState, false, times: times, usePreviousRoom: true));
 
             // Note that there are no concerns here about unlocking the previous door, because unlocking a door to use it cannot be done retroactively.
             // It has to have already been done in order to use the door in the first place.

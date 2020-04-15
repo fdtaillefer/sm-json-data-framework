@@ -113,10 +113,11 @@ namespace sm_json_data_framework.Models.Rooms.Node
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="times">The number of consecutive times that this should be checked for usability. Only really impacts resource cost, since most items are non-consumable.</param>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
         /// <returns></returns>
-        public bool IsUsable(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
+        public bool IsUsable(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // There are many things to check...
 
@@ -140,13 +141,13 @@ namespace sm_json_data_framework.Models.Rooms.Node
             }
 
             // If there are no strats we are able to execute, this is not usable
-            if (!Strats.Any(s => s.IsFulfilled(model, inGameState, usePreviousRoom)))
+            if (!Strats.Any(s => s.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom)))
             {
                 return false;
             }
 
             // If we don't have enough energy to actually execute the shinespark after all that, this is not usable
-            if(!inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames)))
+            if(!inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times))
             {
                 return false;
             }

@@ -125,10 +125,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.IsFulfilled(model, inGameState, usePreviousRoom: usePreviousRoom));
+            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
 
             // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapon whose ammo is farmable in this EnemyKill
             IEnumerable<Weapon> freeWeapons = usableWeapons.Where(w => !w.ShotRequires.LogicalElements.Where(le => le is Ammo ammo && !FarmableAmmo.Contains(ammo.AmmoType)).Any());
@@ -152,8 +152,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 // Will probably leave this here until we are able (and required) to decide which ammo we'd rather use, in situations where many types are effective.
                     .Where(e => !e.WeaponSusceptibilities.Values
                         .Where(ws => nonFreeWeapons.Contains(ws.Weapon, ObjectReferenceEqualityComparer<Weapon>.Default)
-                            // STITCHME This ammo check only checks for one shot. We need a feature to evaluate a LogicalRequirements N times (by multiplying all resource costs).
-                            && ws.Weapon.ShotRequires.IsFulfilled(model, inGameState, usePreviousRoom :usePreviousRoom))
+                            // We need as many shots as this WeaponSusceptibility requires to kill the enemy
+                            && ws.Weapon.ShotRequires.IsFulfilled(model, inGameState, times: ws.Shots * times, usePreviousRoom :usePreviousRoom))
                         .Any()
                     )
                 )

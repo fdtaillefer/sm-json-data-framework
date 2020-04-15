@@ -7,9 +7,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     public class LavaFrames : AbstractObjectLogicalElementWithNumericalIntegerValue
     {
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            int damage = model.Rules.CalculateLavaDamage(inGameState, Value);
+            int damage = model.Rules.CalculateLavaDamage(inGameState, Value) * times;
             return inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage);
         }
     }

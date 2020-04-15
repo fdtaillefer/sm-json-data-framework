@@ -41,10 +41,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             bool mustShinespark = ShinesparkFrames > 0;
-            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames);
+            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times;
 
             // Check simple preconditions before looking at runways
             if (!inGameState.HasSpeedBooster() || (mustShinespark && !model.CanShinespark()))
@@ -55,7 +55,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Figure out if we can get charged in-room before looking at the adjacent room.
             // We can use the runway in either direction in that case.
             IEnumerable<(Runway runway, decimal length)> usableInRoomRunways = FromNode.Runways
-                .Where(r => r.IsUsable(model, inGameState, false, usePreviousRoom))
+                .Where(r => r.IsUsable(model, inGameState, false, times: times, usePreviousRoom: usePreviousRoom))
                 .Select(r => (runway: r, length: Math.Max(model.Rules.CalculateEffectiveRunwayLength(r, model.LogicalOptions.TilesSavedWithStutter),
                                                          model.Rules.CalculateEffectiveReversedRunwayLength(r, model.LogicalOptions.TilesSavedWithStutter))));
 
@@ -83,7 +83,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // We can do this if we can find an adjacent runway we are able to use and that is long enough
             IEnumerable<Runway> adequateRunways = inGameState.GetRetroactiveRunways(inRoomPath, true)
                             .Where(r => model.Rules.CalculateEffectiveRunwayLength(r, model.LogicalOptions.TilesSavedWithStutter) >= requiredAdjacentRunwayLength)
-                            .Where(r => r.IsUsable(model, inGameState, false, true));
+                            .Where(r => r.IsUsable(model, inGameState, false, times: times, usePreviousRoom: true));
             if (adequateRunways.Any())
             {
                 // Check energy for shinespark
@@ -96,7 +96,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // We can also do this if we can find a CanLeaveCharged we are able to use and that has enough FramesRemaining
             IEnumerable<CanLeaveCharged> adequateCanLeaveChargeds = inGameState.GetRetroactiveCanLeaveChargeds(inRoomPath, true)
                             .Where(clc => clc.FramesRemaining >= FramesRemaining)
-                            .Where(clc => clc.IsUsable(model, inGameState, true));
+                            .Where(clc => clc.IsUsable(model, inGameState, times: times, usePreviousRoom: true));
             if(adequateCanLeaveChargeds.Any())
             {
                 // Check energy for shinespark

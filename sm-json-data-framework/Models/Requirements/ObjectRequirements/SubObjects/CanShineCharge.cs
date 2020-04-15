@@ -40,7 +40,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, bool usePreviousRoom = false)
+        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             bool mustShinespark = ShinesparkFrames > 0;
             // Must have SpeedBooster and must be able to charge in the current runway
@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return inGameState.HasSpeedBooster()
                 && model.LogicalOptions.TilesToShineCharge >= model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter)
                 && (!mustShinespark || 
-                    (model.CanShinespark() && inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames))));
+                    (model.CanShinespark() && inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times)));
         }
     }
 }
