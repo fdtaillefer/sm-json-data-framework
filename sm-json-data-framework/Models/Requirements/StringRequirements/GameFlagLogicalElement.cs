@@ -18,11 +18,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             GameFlag = gameFlag;
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
-        {
-            return inGameState.HasGameFlag(GameFlag);
-        }
-
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             if(inGameState.HasGameFlag(GameFlag))

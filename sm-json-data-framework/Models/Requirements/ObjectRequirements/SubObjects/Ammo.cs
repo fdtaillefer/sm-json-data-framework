@@ -24,11 +24,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
-        {
-            return inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), Count * times);
-        }
-
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             int ammoCost = Count * times;

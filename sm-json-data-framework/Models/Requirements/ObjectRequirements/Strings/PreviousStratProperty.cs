@@ -18,15 +18,20 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return Enumerable.Empty<string>();
         }
 
-        // STITCHME Keep this when removing them
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        /// <summary>
+        /// Returns whether the provided InGameState fulfills this PreviousStratProperty element.
+        /// </summary>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// <returns></returns>
+        public bool IsFulfilled(InGameState inGameState, bool usePreviousRoom)
         {
             return inGameState.GetLastStrat(usePreviousRoom)?.StratProperties?.Contains(Value) == true;
         }
 
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            if (IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom))
+            if (IsFulfilled(inGameState, usePreviousRoom))
             {
                 // Clone the InGameState to fulfill method contract
                 return inGameState.Clone();

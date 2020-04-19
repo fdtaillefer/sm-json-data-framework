@@ -96,30 +96,6 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
-        // STITCHME Remove
-        /// <summary>
-        /// Returns whether this logical requirements is fulfilled by the provided in-game state.
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that this should be checked for fulfillment. Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="and">If true, checks that all logical elements in this requirements are fulfilled. 
-        /// If false, checks that at least one logical element is fulfilled.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
-        /// <returns></returns>
-        public bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool and = true, bool usePreviousRoom = false)
-        {
-            if (and)
-            {
-                return LogicalElements.All(le => le.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
-            }
-            else
-            {
-                return LogicalElements.Any(le => le.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
-            }
-        }
-
         /// <summary>
         /// Attempts to fulfill the requirements of this LogicalRequirements by the provided in-game state. If successful, returns a new InGameState instance to
         /// represent the in-game state after performing the LogicalRequirements. If unsuccessful, return nulls.

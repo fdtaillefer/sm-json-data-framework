@@ -56,23 +56,6 @@ namespace sm_json_data_framework.Models.Rooms.Node
             return unhandled.Distinct();
         }
 
-        // STITCHME Remove
-        // STITCHME This probably ought to return a new InGameState after using the runway (or null if not possible)
-        /// <summary>
-        /// Returns whether this runway is usable according to the provided parameters
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="comingIn">If true, evaluates usability while coming into the room. If false, evaluates usability when already in the room.</param>
-        /// <param name="times">The number of consecutive times that this should be checked for usability. Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
-        /// <returns></returns>
-        public bool IsUsable(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, bool usePreviousRoom = false)
-        {
-            return (UsableComingIn || !comingIn) && Strats.Any(s => s.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
-        }
-
         /// <summary>
         /// Attempts to fulfill the requirements for using this Runway by the provided in-game state. If successful, returns a new InGameState instance to
         /// represent the in-game state after using the runway. If unsuccessful, returns null.

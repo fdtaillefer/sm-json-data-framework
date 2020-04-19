@@ -17,11 +17,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         public string StringValue { get; set; }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
-        {
-            throw new NotImplementedException("Raw string logical elements should be replaced before being evaluated");
-        }
-
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             throw new NotImplementedException("Raw string logical elements should be replaced before being evaluated");

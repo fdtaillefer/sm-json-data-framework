@@ -18,11 +18,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Item = item;
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
-        {
-            return inGameState.HasItem(Item);
-        }
-
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             if (inGameState.HasItem(Item))

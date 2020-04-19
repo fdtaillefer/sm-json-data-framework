@@ -11,8 +11,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class PreviousNode : AbstractObjectLogicalElementWithNodeId
     {
-        // STITCHME When removing IsFulfilled, keep it here. It will have value. But remove times and model, they're not used. And remove uPR default.
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        /// <summary>
+        /// Returns whether the provided InGameState fulfills this PreviousNode element.
+        /// </summary>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// <returns></returns>
+        public bool IsFulfilled(InGameState inGameState, bool usePreviousRoom)
         {
             // Look at second-to-last visited node (last node is the current node)
             IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(usePreviousRoom);
@@ -21,7 +26,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            if (IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom))
+            if (IsFulfilled(inGameState, usePreviousRoom))
             {
                 // Clone the InGameState to fulfill method contract
                 return inGameState.Clone();

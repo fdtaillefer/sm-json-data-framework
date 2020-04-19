@@ -128,44 +128,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
-        {
-            // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
-
-            // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapon whose ammo is farmable in this EnemyKill
-            IEnumerable<Weapon> freeWeapons = usableWeapons.Where(w => !w.ShotRequires.LogicalElements.Where(le => le is Ammo ammo && !FarmableAmmo.Contains(ammo.AmmoType)).Any());
-
-            // Remove all enemies that can be killed by free weapons
-            IEnumerable<IEnumerable<Enemy>> nonFreeGroups = GroupedEnemies
-                .RemoveEnemies(e => e.WeaponSusceptibilities.Values
-                    .Where(ws => freeWeapons.Contains(ws.Weapon, ObjectReferenceEqualityComparer<Weapon>.Default))
-                    .Any());
-
-            // Eliminate from remaining enemies all enemies that can be killed with available ammo
-            IEnumerable<Weapon> nonFreeWeapons = usableWeapons.Except(freeWeapons, ObjectReferenceEqualityComparer<Weapon>.Default);
-            IEnumerable<IEnumerable<Enemy>> remainingGroups = nonFreeGroups
-                .Select(g => g
-                // STITCHME Checking this one enemy at a time prevents us from calculating the ammo cost of splash weapons correctly.
-                // Will probably leave this here until we are able (and required) to decide which ammo we'd rather use, in situations where many types are effective.
-                    .Where(e => !e.WeaponSusceptibilities.Values
-                        .Where(ws => nonFreeWeapons.Contains(ws.Weapon, ObjectReferenceEqualityComparer<Weapon>.Default)
-                            // We need as many shots as this WeaponSusceptibility requires to kill the enemy
-                            && ws.Weapon.ShotRequires.IsFulfilled(model, inGameState, times: ws.Shots * times, usePreviousRoom: usePreviousRoom))
-                        .Any()
-                    )
-                )
-                // Eliminate groups with no enemy left
-                .Where(g => g.Any());
-
-            // EnemyKill is fulfilled if we were able to kill all enemies
-            return !remainingGroups.Any();
-        }
-
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
+            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom) != null);
 
             // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
             // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),
