@@ -10,6 +10,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements
 {
+    /// <summary>
+    /// A container class for a series of logical elements.
+    /// </summary>
     public class LogicalRequirements
     {
         public LogicalRequirements()
@@ -93,6 +96,7 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
+        // STITCHME Remove
         /// <summary>
         /// Returns whether this logical requirements is fulfilled by the provided in-game state.
         /// </summary>
@@ -113,6 +117,30 @@ namespace sm_json_data_framework.Models.Requirements
             else
             {
                 return LogicalElements.Any(le => le.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom));
+            }
+        }
+
+        /// <summary>
+        /// Attempts to fulfill the requirements of this LogicalRequirements by the provided in-game state. If successful, returns a new InGameState instance to
+        /// represent the in-game state after performing the LogicalRequirements. If unsuccessful, return nulls.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="and">If true, attempts to fulfill all logical elements in this requirements. 
+        /// If false, attempst to fulfill at least one logical element.</param>
+        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <returns>A new InGameState representing the state after fulfillment if successful, or null otherwise</returns>
+        public InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool and = true, bool usePreviousRoom = false)
+        {
+            if (and)
+            {
+                return model.ApplyAnd(inGameState, LogicalElements, (le, igs) => le.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
+            }
+            else
+            {
+                return model.ApplyOr(inGameState, LogicalElements, (le, igs) => le.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
             }
         }
     }

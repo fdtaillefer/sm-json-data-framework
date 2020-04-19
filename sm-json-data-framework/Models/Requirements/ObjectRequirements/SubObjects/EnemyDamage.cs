@@ -10,6 +10,9 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
 {
+    /// <summary>
+    /// A logical element which requires Samus to take damage from an enemy.
+    /// </summary>
     public class EnemyDamage : AbstractObjectLogicalElement
     {
         [JsonPropertyName("enemy")]
@@ -60,6 +63,21 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
             return inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage);
+        }
+
+        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
+            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage))
+            {
+                inGameState = inGameState.Clone();
+                inGameState.ConsumeResource(ConsumableResourceEnum.ENERGY, damage);
+                return inGameState;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

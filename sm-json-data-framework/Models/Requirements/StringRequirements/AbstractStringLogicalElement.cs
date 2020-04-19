@@ -6,6 +6,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.StringRequirements
 {
+    /// <summary>
+    /// And abstract superclass for logical elements that have an inner string value.
+    /// </summary>
     public abstract class AbstractStringLogicalElement : AbstractLogicalElement
     {
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

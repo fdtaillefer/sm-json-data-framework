@@ -6,7 +6,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.StringRequirements
 {
-
+    /// <summary>
+    /// A logical element that is fulfilled by previously obtaining an item.
+    /// </summary>
     public class ItemLogicalElement : AbstractStringLogicalElement
     {
         private Item Item { get; set; }
@@ -19,6 +21,19 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             return inGameState.HasItem(Item);
+        }
+
+        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            if (inGameState.HasItem(Item))
+            {
+                // Clone the In-game state to fulfill method contract
+                return inGameState.Clone();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

@@ -13,10 +13,11 @@ namespace sm_json_data_framework.Models.Enemies
     {
         public WeaponSusceptibility() { }
 
-        public WeaponSusceptibility(Weapon weapon, int shots)
+        public WeaponSusceptibility(Weapon weapon, int shots, int damagePerShot)
         {
             Weapon = weapon;
             Shots = shots;
+            DamagePerShot = damagePerShot;
         }
 
         /// <summary>
@@ -28,5 +29,10 @@ namespace sm_json_data_framework.Models.Enemies
         /// The number of perfectly-aimed shots of the weapon it would take to kill the implicit enemy
         /// </summary>
         public int Shots { get; set; }
+
+        /// <summary>
+        /// The amount of damage done to the implicit enemy per successful shot of the weapon
+        /// </summary>
+        public int DamagePerShot { get; set; }
     }
 }

@@ -9,6 +9,9 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
 {
+    /// <summary>
+    /// A logical element which requires Samus to charge a blue suit and possibly use it to shinespark (if it has any shinespark frames).
+    /// </summary>
     public class CanShineCharge : AbstractObjectLogicalElement, IRunway
     {
         [JsonIgnore]
@@ -49,6 +52,43 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 && model.LogicalOptions.TilesToShineCharge >= model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter)
                 && (!mustShinespark || 
                     (model.CanShinespark() && inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times)));
+        }
+
+        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            bool mustShinespark = ShinesparkFrames > 0;
+
+            // Always need the SpeedBooster to charge a bluesuit
+            if(!inGameState.HasSpeedBooster())
+            {
+                return null;
+            }
+
+            // If a shinespark is needed, the tech must be allowed
+            if(mustShinespark && !model.CanShinespark())
+            {
+                return null;
+            }
+
+            // The runway must be long enough to charge
+            if(model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter) < model.LogicalOptions.TilesToShineCharge)
+            {
+                return null;
+            }
+
+            // If we have enough energy for the shinespark, consume it and return the result
+            int energyCost = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames);
+            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, energyCost))
+            {
+                inGameState = inGameState.Clone();
+                inGameState.ConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
+                return inGameState;
+            }
+            // If we don't have enough for the shinespark, we cannot do this
+            else
+            {
+                return null;
+            }
         }
     }
 }

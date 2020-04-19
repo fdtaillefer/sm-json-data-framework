@@ -61,6 +61,12 @@ namespace sm_json_data_framework.Models.InGameStates
             InRoomState = new InRoomState(startingNode);
         }
 
+        /// <summary>
+        /// A copy constructor that creates a new InGameState based on the provided one one.
+        /// This is a somewhat shallow copy; referenced objects whose inner state does not change with a game state (such as Room, GameFlag, etc.) will not be copied.
+        /// The inner InRoomState does get copied.
+        /// </summary>
+        /// <param name="other">The InGameState to copy</param>
         public InGameState(InGameState other)
         {
             GameFlags = new Dictionary<string, GameFlag>(other.GameFlags);
@@ -73,6 +79,17 @@ namespace sm_json_data_framework.Models.InGameStates
             Resources = new Dictionary<RechargeableResourceEnum, int>(other.Resources);
 
             InRoomState = new InRoomState(other.InRoomState);
+
+            PreviousRoomState = new InRoomState(other.PreviousRoomState);
+        }
+
+        /// <summary>
+        /// Delegates to the copy constructor to return a new InGameState based on this one.
+        /// </summary>
+        /// <returns></returns>
+        public InGameState Clone()
+        {
+            return new InGameState(this);
         }
 
         protected IDictionary<RechargeableResourceEnum, int> ResourceMaximums { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
@@ -84,9 +101,32 @@ namespace sm_json_data_framework.Models.InGameStates
             return ResourceMaximums[resource];
         }
 
+        /// <summary>
+        /// Returns the current amount of the provided rechargeable resource.
+        /// </summary>
+        /// <param name="resource">Resource to get the amount of.</param>
+        /// <returns></returns>
         public int GetCurrentAmount(RechargeableResourceEnum resource)
         {
             return Resources[resource];
+        }
+
+        /// <summary>
+        /// Returns the current amount of the provided consumable resource. This is almost the same as getting the current amount of a rechargeable resource,
+        /// except both types of energy are grouped together.
+        /// </summary>
+        /// <param name="resource">Resource to get the amount of.</param>
+        /// <returns></returns>
+        public int GetCurrentAmount(ConsumableResourceEnum resource)
+        {
+            return resource switch
+            {
+                // The other resources can be fully spent, but for energy we don't want to go below 1
+                ConsumableResourceEnum.ENERGY => GetCurrentAmount(RechargeableResourceEnum.RegularEnergy) + GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy),
+                ConsumableResourceEnum.MISSILE => GetCurrentAmount(RechargeableResourceEnum.Missile),
+                ConsumableResourceEnum.SUPER => GetCurrentAmount(RechargeableResourceEnum.Super),
+                ConsumableResourceEnum.POWER_BOMB => GetCurrentAmount(RechargeableResourceEnum.PowerBomb)
+            };
         }
 
         public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
@@ -393,11 +433,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <para>A runway would typically be used retroactively to satisfy an adjacentRunway or canComeInCharged
         /// that is being executed soon after entry of the new room.</para>
         /// </summary>
-        /// <param name="inRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
+        /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
         /// to use retroactive runways in the current context. The first node in this path also dictates the node to which the retroactive runways must lead.</param>
-        /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGamestate.</param>
+        /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGameState.</param>
         /// <returns></returns>
-        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> inRoomPath, bool usePreviousRoom = false)
+        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, bool usePreviousRoom = false)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the one we're asked to evaluate
             // If we were already evaluating the previous room, we have no way to obtain the state of the room before that so just return
@@ -415,7 +455,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // If the current in-room state doesn't respect the in-room path necessary to use retroactive runways, we can't use any
-            if(!visitedNodeIds.SequenceEqual(inRoomPath))
+            if(!visitedNodeIds.SequenceEqual(requiredInRoomPath))
             {
                 return Enumerable.Empty<Runway>();
             }
@@ -457,12 +497,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <para>A canLeaveCharged would typically be used retroactively to satisfy a canComeInCharged
         /// that is being executed soon after entry of the new room.</para>
         /// </summary>
-        /// <param name="inRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able to use 
+        /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able to use 
         /// retroactive canLeavechargeds in the current context. The first node in this path also dictates the node to which 
         /// the retroactive charged exit must lead.</param>
-        /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGamestate.</param>
+        /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGameState.</param>
         /// <returns></returns>
-        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(IEnumerable<int> inRoomPath, bool usePreviousRoom = false)
+        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(IEnumerable<int> requiredInRoomPath, bool usePreviousRoom = false)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the one we're asked to evaluate
             // If we were already evaluating the previous room, we have no way to obtain the state of the room before that so just return
@@ -480,7 +520,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // If the current in-room state doesn't respect the in-room path necessary to use retroactive runways, we can't use any
-            if (!visitedNodeIds.SequenceEqual(inRoomPath))
+            if (!visitedNodeIds.SequenceEqual(requiredInRoomPath))
             {
                 return Enumerable.Empty<CanLeaveCharged>();
             }
@@ -525,6 +565,50 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 return previousRoomExitNode.CanLeaveCharged.Where(clc => clc.InitiateAtNode == null);
             }
+        }
+    }
+    // End of InGameState class
+
+    /// <summary>
+    /// A Comparer that can compare two in-game states by their consumable resource count, based on an internal dictionary of relative resource values.
+    /// The "greater" in-game state is the one whose resource total is deemed more valuable according to these values.
+    /// </summary>
+    public class InGameStateComparer : IComparer<InGameState>
+    {
+        private IDictionary<ConsumableResourceEnum, int> RelativeResourceValues {get; set;}
+
+        public InGameStateComparer(IDictionary<ConsumableResourceEnum, int> relativeResourceValues)
+        {
+            RelativeResourceValues = relativeResourceValues;
+        }
+
+        public int Compare(InGameState x, InGameState y)
+        {
+            return CalculateValue(x).CompareTo(CalculateValue(y));
+        }
+
+        /// <summary>
+        /// Calculates a value to attribute to the provided InGameState when using this Comparer to compare InGameStates.
+        /// </summary>
+        /// <param name="inGameState">The InGameState to assign a value to</param>
+        /// <returns></returns>
+        private int CalculateValue(InGameState inGameState)
+        {
+            // Give a negative value to null. It's decidedly less valuable than any existing state.
+            if (inGameState == null)
+            {
+                return -1;
+            }
+
+            // We are assuming that dead states (0 energy) won't show up. If we wanted to support that, we'd have to check specifically for it and give it a negative value too.
+            // (but greater than the value for null)
+            int value = 0;
+            foreach (ConsumableResourceEnum currentResource in Enum.GetValues(typeof(ConsumableResourceEnum)))
+            {
+                value += inGameState.GetCurrentAmount(currentResource) * RelativeResourceValues[currentResource];
+            }
+
+            return value;
         }
     }
 }

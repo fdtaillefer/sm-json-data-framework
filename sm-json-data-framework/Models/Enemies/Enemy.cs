@@ -98,7 +98,7 @@ namespace sm_json_data_framework.Models.Enemies
 
             // Create a WeaponSusceptibility for each non-immune weapon
             WeaponSusceptibilities = WeaponMultipliers.Values
-                .Select(wm => new WeaponSusceptibility(wm.Weapon, wm.NumberOfHits(Hp)))
+                .Select(wm => new WeaponSusceptibility(wm.Weapon, wm.NumberOfHits(Hp), wm.DamagePerShot))
                 .ToDictionary(ws => ws.Weapon.Name);
         }
 

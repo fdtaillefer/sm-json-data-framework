@@ -6,6 +6,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.StringRequirements
 {
+    /// <summary>
+    /// A logical element that is fulfilled by fulfilling the requirements of an inner Tech.
+    /// </summary>
     public class TechLogicalElement : AbstractStringLogicalElement
     {
         private Tech Tech { get; set; }
@@ -18,6 +21,11 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             return Tech.Requires.IsFulfilled(model, inGameState, times: times);
+        }
+
+        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            return Tech.Requires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
         }
     }
 }

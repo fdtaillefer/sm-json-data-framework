@@ -22,6 +22,9 @@ namespace sm_json_data_framework.Models.InGameStates
             CurrentNode = other.CurrentNode;
             VisitedNodeIdsList = new List<int>(other.VisitedNodeIdsList);
             DestroyedObstacleIdsSet = new HashSet<string>(other.DestroyedObstacleIdsSet);
+            RemoteExitNode = other.RemoteExitNode;
+            BypassedExitLock = other.BypassedExitLock;
+            LastStrat = other.LastStrat;
         }
 
         /// <summary>

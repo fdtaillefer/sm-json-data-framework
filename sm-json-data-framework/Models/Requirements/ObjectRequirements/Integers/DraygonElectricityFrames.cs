@@ -5,12 +5,14 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
-    public class DraygonElectricityFrames : AbstractObjectLogicalElementWithNumericalIntegerValue
+    /// <summary>
+    /// A logical element which requires Samus to spend some frames grappled to one of Draygon's turrets.
+    /// </summary>
+    public class DraygonElectricityFrames : AbstractDamageNumericalValueLogicalElement
     {
-        public override bool IsFulfilled(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            int damage = model.Rules.CalculateElectricityGrappleDamage(inGameState, Value) * times;
-            return inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage);
+            return model.Rules.CalculateElectricityGrappleDamage(inGameState, Value) * times;
         }
     }
 }

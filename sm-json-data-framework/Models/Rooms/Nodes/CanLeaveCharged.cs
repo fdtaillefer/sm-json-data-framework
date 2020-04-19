@@ -107,6 +107,7 @@ namespace sm_json_data_framework.Models.Rooms.Node
             return unhandled.Distinct();
         }
 
+        // STITCHME Remove
         // STITCHME This probably ought to return a new InGameState after using the runway (or null if not possible)
         /// <summary>
         /// Returns whether this canLeaveCharged is usable according to the provided parameters
@@ -154,6 +155,57 @@ namespace sm_json_data_framework.Models.Rooms.Node
 
             // Made it!
             return true;
+        }
+
+        /// <summary>
+        /// Attempts to fulfill the requirements of this CanLeaveCharged by the provided in-game state. If successful, returns a new InGameState instance to
+        /// represent the in-game state after performing the CanLeaveCharged. If unsuccessful, returns null.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <returns>A new InGameState representing the state after fulfillment if successful, or null otherwise</returns>
+        public InGameState AttemptUse(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            // There are many things to check...
+
+            // If we don't have SpeedBooster, this is not usable
+            if (!inGameState.HasSpeedBooster())
+            {
+                return null;
+            }
+
+            // If we need a shinespark and the tech is turned off, this is not usable
+            bool mustShinespark = ShinesparkFrames > 0;
+            if (mustShinespark && !model.CanShinespark())
+            {
+                return null;
+            }
+
+            // If the player is unable to charge a shinespark with the available runway, this is not usable
+            if (EffectiveRunwayLength < model.LogicalOptions.TilesToShineCharge)
+            {
+                return null;
+            }
+
+            // Figure out how much energy we will need to have for the shinespark
+            int shinesparkEnergyToSpend = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times;
+
+            // Try to execute all strats, obtaining the resulting state of whichever spends the lowest amount of resources while retaining enough for the shinespark
+            InGameState bestResultingState = model.ApplyOr(inGameState, Strats, (s, igs) => s.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom),
+                acceptationCondition: igs => igs.IsResourceAvailable(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend));
+
+            // If we couldn't find a successful strat, give up
+            if (bestResultingState == null)
+            {
+                return null;
+            }
+
+            // Finally, spend the energy for executing a shinespark if needed (we already asked to check that the state has enough)
+            bestResultingState.ConsumeResource(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
+            return bestResultingState;
         }
     }
 }

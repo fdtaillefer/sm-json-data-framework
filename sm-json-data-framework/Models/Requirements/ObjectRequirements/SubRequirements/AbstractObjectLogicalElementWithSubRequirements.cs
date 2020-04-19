@@ -5,6 +5,9 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements
 {
+    /// <summary>
+    /// An abstract logical element that is composed of inner logical elements.
+    /// </summary>
     public abstract class AbstractObjectLogicalElementWithSubRequirements : AbstractObjectLogicalElement
     {
         public LogicalRequirements LogicalRequirements { get; set; }

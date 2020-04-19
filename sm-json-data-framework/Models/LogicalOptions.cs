@@ -1,4 +1,6 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
 using System;
@@ -13,6 +15,18 @@ namespace sm_json_data_framework.Models
     /// </summary>
     public class LogicalOptions
     {
+        public LogicalOptions()
+        {
+            // Default resource values
+            RelativeResourceValues = new Dictionary<ConsumableResourceEnum, int> {
+                {ConsumableResourceEnum.ENERGY,  1},
+                // Missile drops are super plentiful, AND each drop gives twice as much as Supers.
+                {ConsumableResourceEnum.MISSILE,  3},
+                {ConsumableResourceEnum.SUPER,  30},
+                {ConsumableResourceEnum.POWER_BOMB,  60}
+            };
+        }
+
         /// <summary>
         /// <para>If true, all techs are enabled unless their name is found in <see cref="DisabledTechs"/>.</para>
         /// <para>If false, all techs are disabled unless their name is found in <see cref="EnabledTechs"/>.</para>
@@ -45,6 +59,30 @@ namespace sm_json_data_framework.Models
         /// The number of tiles that are saved by doing a stutter-step to reach the value of <see cref="TilesToShineCharge"/>
         /// </summary>
         public decimal TilesSavedWithStutter { get; set; } = 0M;
+
+        private IDictionary<ConsumableResourceEnum, int> _relativeResourceValues;
+        /// <summary>
+        /// A map that maps a consumable resource type to a relative value vs other resource types.
+        /// It can be used by algorithms if they need to make a decision between several possible options to consume resources.
+        /// </summary>
+        public IDictionary<ConsumableResourceEnum, int> RelativeResourceValues { get
+            {
+                return _relativeResourceValues;
+            }
+            set
+            {
+                _relativeResourceValues = value;
+                // Update the inner InGameStateComparer to use the new resource values
+                InGameStateComparer = new InGameStateComparer(_relativeResourceValues);
+            }
+        }
+
+        /// <summary>
+        /// An instance of <see cref="InGameStateComparer"/>, initialized with the current relative resource values.
+        /// </summary>
+        public InGameStateComparer InGameStateComparer { get; private set; }
+
+        public int RelativeEnergyValue { get; set; } = 0;
 
         /// <summary>
         /// Indicates whether the value in <see cref="TilesToShineCharge"/> assumes that a stutter-step is being performed.

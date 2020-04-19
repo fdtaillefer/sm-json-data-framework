@@ -133,6 +133,98 @@ namespace sm_json_data_framework.Models
         public InGameState InitialGameState { private get; set; }
 
         /// <summary>
+        /// Compares the two provided game states, using the comparer returned by <see cref="GetInGameStateComparer"/>.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public int CompareInGameStates(InGameState x, InGameState y)
+        {
+            return GetInGameStateComparer().Compare(x, y);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="InGameStateComparer"/>, initialized with the internal relative resource values.
+        /// </summary>
+        /// <returns></returns>
+        public InGameStateComparer GetInGameStateComparer()
+        {
+            return LogicalOptions.InGameStateComparer;
+        }
+
+        /// <summary>
+        /// Given an enumeration of executables that return an InGameState, and an execution function that applies the executables on an InGameState,
+        /// attempts to find the least costly successful executable for a provided initial InGameState. If a no-cost executable is found,
+        /// its result is returned immediately.
+        /// </summary>
+        /// <typeparam name="T">The type of the executables to try out.</typeparam>
+        /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
+        /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
+        /// <param name="executionFunction">A function that executes an executable.</param>
+        /// <param name="acceptationCondition">An optional Predicate that must be true for a resulting InGameState to be considered successful (on top of not being null).
+        /// If this Predicate is null, no additional conditions are checked.</param>
+        /// <returns>The InGameState returned by the best executable, or null if all executions failed.</returns>
+        public InGameState ApplyOr<T>(InGameState initialInGameState, IEnumerable<T> executables, Func<T, InGameState, InGameState> executionFunction,
+            Predicate<InGameState> acceptationCondition = null)
+        {
+            InGameStateComparer comparer = GetInGameStateComparer();
+
+            // Try to execute all executions, returning whichever spends the lowest amount of resources
+            InGameState bestResultingState = null;
+            foreach (T currentExecutable in executables)
+            {
+                InGameState resultingState = executionFunction(currentExecutable, initialInGameState);
+
+                // If the fulfillment was successful
+                if(resultingState != null && (acceptationCondition == null || acceptationCondition.Invoke(resultingState)) )
+                {
+
+                    // If the fulfillment did not reduce the amount of resources, return immediately
+                    if (comparer.Compare(resultingState, initialInGameState) == 0)
+                    {
+                        return resultingState;
+                    }
+
+                    // If the resulting state is the best we've found yet, retain it
+                    if (comparer.Compare(resultingState, bestResultingState) > 0)
+                    {
+                        bestResultingState = resultingState;
+                    }
+                }
+
+            }
+
+            // If no strat succeeded, this will return null
+            return bestResultingState;
+        }
+
+        /// <summary>
+        /// <para>Given an enumeration of executables that return an InGameState, and an execution function that applies the executables on an InGameState,
+        /// attempts to execute all executables successively, starting from a provided initial InGameState.</para>
+        /// <para>This method will give up at the first failed execution and return null.</para>
+        /// </summary>
+        /// <typeparam name="T">The type of the executables to execute.</typeparam>
+        /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
+        /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
+        /// <param name="executionFunction">A function that executes an executable.</param>
+        /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.</returns>
+        public InGameState ApplyAnd<T>(InGameState initialInGameState, IEnumerable<T> executables, Func<T, InGameState, InGameState> executionFunction)
+        {
+            // Iterate over all logical elements, attempting to fulfill them
+            InGameState currentState = initialInGameState;
+            foreach (T currentExecutable in executables)
+            {
+                currentState = executionFunction(currentExecutable, initialInGameState);
+                // If we failed to fulfill, give up immediately
+                if (currentState == null)
+                {
+                    return null;
+                }
+            }
+            return currentState;
+        }
+
+        /// <summary>
         /// Creates and returns a copy of the initial game state.
         /// </summary>
         /// <returns></returns>

@@ -21,6 +21,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
 
+        // STITCHME Remove
         /// <summary>
         /// Evaluates whether the requirements of this strat are met by the provided in-game state.
         /// </summary>
@@ -35,6 +36,23 @@ namespace sm_json_data_framework.Models.Rooms
             // STITCHME This needs to worry about obstacles too...
 
             return Requires.IsFulfilled(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+        }
+
+        /// <summary>
+        /// Attempts to fulfill the requirements of this strat by the provided in-game state. If successful, returns a new InGameState instance to
+        /// represent the in-game state after performing the strat. If unsuccessful, return nulls.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <returns>A new InGameState representing the state after fulfillment if successful, or null otherwise</returns>
+        public InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            // STITCHME This needs to worry about obstacles too...
+
+            return Requires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
         }
 
         public void Initialize(SuperMetroidModel model, Room room)
