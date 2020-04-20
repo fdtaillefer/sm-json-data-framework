@@ -29,13 +29,46 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// <paramref name="tryBypassFirst"/>If true, will try to bypass an obstacle first if a bypass exists. If false, will try to destroy an obstacle first.
         /// (whenever in-room state is relevant).</param>
         /// <returns>A new InGameState representing the state after fulfillment if successful, or null otherwise</returns>
-        public InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false, bool tryBypassFirst = false)
         {
-            // STITCHME This needs to worry about obstacles too...
+            InGameState resultingState = Requires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
 
-            return Requires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            foreach (StratObstacle obstacle in Obstacles.Where(o => !inGameState.GetDestroyedObstacleIds(usePreviousRoom).Contains(o.ObstacleId)))
+            {
+                if (tryBypassFirst)
+                {
+                    // Try bypassing the obstacle first
+                    InGameState bypassResultingState = obstacle.AttemptBypass(model, resultingState, times: times, usePreviousRoom: usePreviousRoom);
+                    if (bypassResultingState != null)
+                    {
+                        return bypassResultingState;
+                    }
+                    // If bypassing failed, try to destroy it
+                    else
+                    {
+                        return obstacle.AttemptDestroy(model, resultingState, times: times, usePreviousRoom: usePreviousRoom);
+                    }
+                }
+                else
+                {
+                    // Try destroying the obstacle first
+                    InGameState destroyResultingState = obstacle.AttemptDestroy(model, resultingState, times: times, usePreviousRoom: usePreviousRoom);
+                    if(destroyResultingState != null)
+                    {
+                        return destroyResultingState;
+                    }
+                    // If destroying failed, try bypassing it
+                    else
+                    {
+                        return obstacle.AttemptBypass(model, resultingState, times: times, usePreviousRoom: usePreviousRoom);
+                    }
+                }
+            }
+
+            return resultingState;
         }
 
         public void Initialize(SuperMetroidModel model, Room room)
