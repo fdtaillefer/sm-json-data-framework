@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Rules;
@@ -92,6 +93,11 @@ namespace sm_json_data_framework.Models
         /// The rooms in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
+
+        /// <summary>
+        /// The node locks in this model, mapped by name.
+        /// </summary>
+        public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
 
         /// <summary>
         /// A dictionary that maps a node's IdentifyingString to a connection.
