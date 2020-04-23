@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     {
         public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            return LogicalRequirements.AttemptFulfill(model, inGameState, times: times, and: false, usePreviousRoom: usePreviousRoom);
+            return LogicalRequirements.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom, and: false);
         }
     }
 }
