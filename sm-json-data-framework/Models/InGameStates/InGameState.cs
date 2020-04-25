@@ -245,7 +245,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Adds the provided node lock to the opened node locks in this InGameState.
         /// </summary>
         /// <param name="nodeLock">Lock to add</param>
-        public void ApplyAddOpenedLock(NodeLock nodeLock)
+        public void ApplyOpenLock(NodeLock nodeLock)
         {
             if (!IsLockOpen(nodeLock))
             {

@@ -132,7 +132,13 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Try to find the cheapest doable unlock strat and return the result of that
-            return model.ApplyOr(inGameState, UnlockStrats, (s, igs) => s.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
+            InGameState resultingState = model.ApplyOr(inGameState, UnlockStrats, (s, igs) => s.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
+            // If lock was successfully opened, alter the resulting state
+            if(resultingState != null)
+            {
+                resultingState.ApplyOpenLock(this);
+            }
+            return resultingState;
         }
     }
 }
