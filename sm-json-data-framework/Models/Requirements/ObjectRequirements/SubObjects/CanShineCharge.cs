@@ -70,7 +70,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, energyCost))
             {
                 inGameState = inGameState.Clone();
-                inGameState.ConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
+                inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
                 return inGameState;
             }
             // If we don't have enough for the shinespark, we cannot do this

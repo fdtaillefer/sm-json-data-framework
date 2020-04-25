@@ -27,7 +27,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage))
             {
                 inGameState = inGameState.Clone();
-                inGameState.ConsumeResource(ConsumableResourceEnum.ENERGY, damage);
+                inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
                 return inGameState;
             }
             else

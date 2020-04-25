@@ -32,7 +32,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
             {
                 inGameState = inGameState.Clone();
-                inGameState.ConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
+                inGameState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
                 return inGameState;
             }
             else

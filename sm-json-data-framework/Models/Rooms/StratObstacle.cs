@@ -109,10 +109,10 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             // We have succeeded, but we must update the InGameState to reflect any destroyed obstacles
-            resultingState.DestroyObstacle(Obstacle);
+            resultingState.ApplyDestroyedObstacle(Obstacle);
             foreach(RoomObstacle obstacle in AdditionalObstacles)
             {
-                resultingState.DestroyObstacle(obstacle);
+                resultingState.ApplyDestroyedObstacle(obstacle);
             }
 
             return resultingState;

@@ -14,7 +14,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public InRoomState(RoomNode initialNode)
         {
-            EnterRoom(initialNode);
+            ApplyEnterRoom(initialNode);
         }
         
         public InRoomState(InRoomState other)
@@ -81,16 +81,16 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This may actually place the player at a different node if the node calls for it.
         /// </summary>
         /// <param name="entryNode">The node by which the room is being entered.</param>
-        public void EnterRoom(RoomNode entryNode)
+        public void ApplyEnterRoom(RoomNode entryNode)
         {
             ClearRoomState();
 
             if(entryNode != null)
             {
-                VisitNode(entryNode, null);
+                ApplyVisitNode(entryNode, null);
                 if(entryNode.SpawnAtNode != null)
                 {
-                    VisitNode(entryNode.SpawnAtNode, null);
+                    ApplyVisitNode(entryNode.SpawnAtNode, null);
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="node">Node to visit.</param>
         /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
         /// it's on a link that connects previous node to new node.</param>
-        public void VisitNode(RoomNode node, Strat strat)
+        public void ApplyVisitNode(RoomNode node, Strat strat)
         {
             CurrentNode = node;
             VisitedNodeIdsList.Add(node.Id);
@@ -115,7 +115,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="remoteExitNode">If the player exits remotely, exiting via a node they're not at by perforeming a remote action initiated where they are 
         /// (for example, a canLeaveCharged), this node indicates the node through which the player is exiting. If this is null, the player is assumed to leave via the
         /// node they are currently at. Defaults to null.</param>
-        public void ExitRoom(bool bypassExitLock = false, RoomNode remoteExitNode = null)
+        public void ApplyExitRoom(bool bypassExitLock = false, RoomNode remoteExitNode = null)
         {
             BypassedExitLock = bypassExitLock;
             RemoteExitNode = remoteExitNode;
@@ -126,7 +126,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Should not be called for an obstacle that is not in the current room.
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
-        public void DestroyObstacle(RoomObstacle obstacle)
+        public void ApplyDestroyedObstacle(RoomObstacle obstacle)
         {
             DestroyedObstacleIdsSet.Add(obstacle.Id);
         }

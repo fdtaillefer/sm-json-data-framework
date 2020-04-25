@@ -16,8 +16,6 @@ namespace sm_json_data_framework.Models.InGameStates
     /// </summary>
     public class InGameState
     {
-        // STITCHME We oughta find a way to put unlocked locks in there. I imagine they would work quite exactly like game flags
-
         // STITCHME It might be valuable to eventually have InGameState be able to say which nodes are reachable?
 
         /// <summary>
@@ -48,13 +46,13 @@ namespace sm_json_data_framework.Models.InGameStates
             // Initialize starting game flags
             foreach(string gameFlagName in itemContainer.StartingGameFlagNames)
             {
-                AddGameFlag(model.GameFlags[gameFlagName]);
+                ApplyAddGameFlag(model.GameFlags[gameFlagName]);
             }
 
             // Initialize starting items
             foreach (string itemName in itemContainer.StartingItemNames)
             {
-                AddItem(model.Items[itemName]);
+                ApplyAddItem(model.Items[itemName]);
             }
 
             RoomNode startingNode = model.Rooms[itemContainer.StartingRoomName].Nodes[itemContainer.StartingNodeId];
@@ -64,7 +62,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// A copy constructor that creates a new InGameState based on the provided one one.
         /// This is a somewhat shallow copy; referenced objects whose inner state does not change with a game state (such as Room, GameFlag, etc.) will not be copied.
-        /// The inner InRoomState does get copied.
+        /// The inner InRoomState and anything else that fully belongs to the InGameState does get copied.
         /// </summary>
         /// <param name="other">The InGameState to copy</param>
         public InGameState(InGameState other)
@@ -151,7 +149,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to consume</param>
         /// <param name="quantity">The amount to consume</param>
-        public void ConsumeResource(ConsumableResourceEnum resource, int quantity)
+        public void ApplyConsumeResource(ConsumableResourceEnum resource, int quantity)
         {
             switch (resource)
             {
@@ -182,7 +180,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Sets current value for the provided resource to the current maximum
         /// </summary>
         /// <param name="resource">The resource to refill</param>
-        public void RefillResource(RechargeableResourceEnum resource)
+        public void ApplyRefillResource(RechargeableResourceEnum resource)
         {
             Resources[resource] = ResourceMaximums[resource];
         }
@@ -213,7 +211,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Adds the provided game flag to the activated game flags in this InGameState.
         /// </summary>
         /// <param name="flag">Flag to add</param>
-        public void AddGameFlag(GameFlag flag)
+        public void ApplyAddGameFlag(GameFlag flag)
         {
             if(!HasGameFlag(flag))
             {
@@ -247,7 +245,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Adds the provided node lock to the opened node locks in this InGameState.
         /// </summary>
         /// <param name="nodeLock">Lock to add</param>
-        public void AddOpenedLock(NodeLock nodeLock)
+        public void ApplyAddOpenedLock(NodeLock nodeLock)
         {
             if (!IsLockOpen(nodeLock))
             {
@@ -295,7 +293,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return HasItem("SpeedBooster");
         }
 
-        public void AddItem(Item item)
+        public void ApplyAddItem(Item item)
         {
             // Expansion items have a count
             if(item is ExpansionItem expansionItem)
@@ -432,16 +430,16 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be enteted.</param>
         /// <param name="remoteExitNode">If the player is leaving remotely, this indicates the node through which the player remotely leaves.</param>
-        public void EnterRoom(RoomNode entryNode, bool bypassExitLock = false, RoomNode remoteExitNode = null)
+        public void ApplyEnterRoom(RoomNode entryNode, bool bypassExitLock = false, RoomNode remoteExitNode = null)
         {
             // Finalize current room state with exit state
-            InRoomState.ExitRoom(bypassExitLock, remoteExitNode);
+            InRoomState.ApplyExitRoom(bypassExitLock, remoteExitNode);
 
             // Copy current room state and remember it as previous
             PreviousRoomState = new InRoomState(InRoomState);
 
             // Enter next room
-            InRoomState.EnterRoom(entryNode);
+            InRoomState.ApplyEnterRoom(entryNode);
         }
 
         /// <summary>
@@ -450,9 +448,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeToVisit">The node to go to</param>
         /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
         /// it's on a link that connects previous node to new node.</param>
-        public void VisitNode(RoomNode nodeToVisit, Strat strat)
+        public void ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
         {
-            InRoomState.VisitNode(nodeToVisit, strat);
+            InRoomState.ApplyVisitNode(nodeToVisit, strat);
         }
 
         /// <summary>
@@ -460,15 +458,15 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This obstacle should be in the current room.
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
-        public void DestroyObstacle(RoomObstacle obstacle)
+        public void ApplyDestroyedObstacle(RoomObstacle obstacle)
         {
-            InRoomState.DestroyObstacle(obstacle);
+            InRoomState.ApplyDestroyedObstacle(obstacle);
         }
 
         /// <summary>
         /// Removes all in-room data from this InGameState. Useful if this has been initialized at a starting node but in-room state is not going to be maintained.
         /// </summary>
-        public void ClearRoomState()
+        public void ApplyClearRoomState()
         {
             InRoomState.ClearRoomState();
             PreviousRoomState?.ClearRoomState();

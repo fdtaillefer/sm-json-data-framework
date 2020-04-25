@@ -154,7 +154,7 @@ namespace sm_json_data_framework.Models.Rooms.Node
             }
 
             // Finally, spend the energy for executing a shinespark if needed (we already asked to check that the state has enough)
-            bestResultingState.ConsumeResource(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
+            bestResultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
             return bestResultingState;
         }
     }
