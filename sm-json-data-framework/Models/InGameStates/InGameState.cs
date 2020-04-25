@@ -189,21 +189,69 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected IDictionary<string, GameFlag> GameFlags { get; set; } = new Dictionary<string, GameFlag>();
 
+        /// <summary>
+        /// Returns whether the provided game flag is activated in this InGameState.
+        /// </summary>
+        /// <param name="flag">The game flag to check</param>
+        /// <returns></returns>
         public bool HasGameFlag(GameFlag flag)
         {
             return GameFlags.ContainsKey(flag.Name);
         }
 
+        /// <summary>
+        /// Returns whether the game flag with the provided name is activated in this InGameState.
+        /// </summary>
+        /// <param name="flagName">The game flag name to check</param>
+        /// <returns></returns>
         public bool HasGameFlag(string flagName)
         {
             return GameFlags.ContainsKey(flagName);
         }
 
+        /// <summary>
+        /// Adds the provided game flag to the activated game flags in this InGameState.
+        /// </summary>
+        /// <param name="flag">Flag to add</param>
         public void AddGameFlag(GameFlag flag)
         {
             if(!HasGameFlag(flag))
             {
                 GameFlags.Add(flag.Name, flag);
+            }
+        }
+
+        protected IDictionary<string, NodeLock> OpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
+
+        /// <summary>
+        /// Returns whether the provided node lock is open in this InGameState.
+        /// </summary>
+        /// <param name="nodeLock">The node lock to check</param>
+        /// <returns></returns>
+        public bool IsLockOpen(NodeLock nodeLock)
+        {
+            return OpenedLocks.ContainsKey(nodeLock.Name);
+        }
+
+        /// <summary>
+        /// Returns whether the node lock with the provided name is open in this InGameState.
+        /// </summary>
+        /// <param name="lockName">The node lock name to check</param>
+        /// <returns></returns>
+        public bool IsLockOpen(string lockName)
+        {
+            return OpenedLocks.ContainsKey(lockName);
+        }
+
+        /// <summary>
+        /// Adds the provided node lock to the opened node locks in this InGameState.
+        /// </summary>
+        /// <param name="nodeLock">Lock to add</param>
+        public void AddOpenedLock(NodeLock nodeLock)
+        {
+            if (!IsLockOpen(nodeLock))
+            {
+                OpenedLocks.Add(nodeLock.Name, nodeLock);
             }
         }
 
