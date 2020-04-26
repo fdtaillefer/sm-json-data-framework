@@ -6,6 +6,7 @@ using sm_json_data_framework.Models.Rooms.Node;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -17,6 +18,11 @@ namespace sm_json_data_framework.Models.InGameStates
     public class InGameState
     {
         // STITCHME It might be valuable to eventually have InGameState be able to say which nodes are reachable?
+
+        // STITCHME It could be nice to keep track of all canResets in the room and evaluate them as you move around?
+        // Another option would be to have something in an initialization phase that converts canResets into just names,
+        // and adds information on nodes and strats that they invalidate the canReset.
+        // We'll see when we get to the step of reducing logical elements *shrug*
 
         /// <summary>
         /// Creates a new InGameState
@@ -67,7 +73,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="other">The InGameState to copy</param>
         public InGameState(InGameState other)
         {
-            GameFlags = new Dictionary<string, GameFlag>(other.GameFlags);
+            ActiveGameFlags = new Dictionary<string, GameFlag>(other.ActiveGameFlags);
 
             NonConsumableItems = new Dictionary<string, Item>(other.NonConsumableItems);
             ExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.ExpansionItems);
@@ -185,7 +191,21 @@ namespace sm_json_data_framework.Models.InGameStates
             Resources[resource] = ResourceMaximums[resource];
         }
 
-        protected IDictionary<string, GameFlag> GameFlags { get; set; } = new Dictionary<string, GameFlag>();
+        protected IDictionary<string, GameFlag> ActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
+
+        private IReadOnlyDictionary<string, GameFlag> _activeGameFlags;
+        /// <summary>
+        /// Returns a read-only view of the active game flags, mapped by name.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyDictionary<string, GameFlag> GetActiveGameFlagsDictionary()
+        {
+            if (_activeGameFlags == null)
+            {
+                _activeGameFlags = new ReadOnlyDictionary<string, GameFlag>(ActiveGameFlags);
+            }
+            return _activeGameFlags;
+        }
 
         /// <summary>
         /// Returns whether the provided game flag is activated in this InGameState.
@@ -194,7 +214,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public bool HasGameFlag(GameFlag flag)
         {
-            return GameFlags.ContainsKey(flag.Name);
+            return ActiveGameFlags.ContainsKey(flag.Name);
         }
 
         /// <summary>
@@ -204,7 +224,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public bool HasGameFlag(string flagName)
         {
-            return GameFlags.ContainsKey(flagName);
+            return ActiveGameFlags.ContainsKey(flagName);
         }
 
         /// <summary>
@@ -215,11 +235,25 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             if(!HasGameFlag(flag))
             {
-                GameFlags.Add(flag.Name, flag);
+                ActiveGameFlags.Add(flag.Name, flag);
             }
         }
 
         protected IDictionary<string, NodeLock> OpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
+
+        private IReadOnlyDictionary<string, NodeLock> _readOnlyOpenedLocks;
+        /// <summary>
+        /// Returns a read-only view of the opened locks dictionary, mapped by name.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyDictionary<string, NodeLock> GetOpenedLocksDictionary()
+        {
+            if (_readOnlyOpenedLocks == null)
+            {
+                _readOnlyOpenedLocks = new ReadOnlyDictionary<string, NodeLock>(OpenedLocks);
+            }
+            return _readOnlyOpenedLocks;
+        }
 
         /// <summary>
         /// Returns whether the provided node lock is open in this InGameState.
@@ -255,6 +289,20 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected IDictionary<string, Item> NonConsumableItems { get; set; } = new Dictionary<string, Item>();
         protected IDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get; set; } = new Dictionary<string, (ExpansionItem item, int count)>();
+
+        private IReadOnlyDictionary<string, Item> _readOnlyNonConsumableItems;
+        /// <summary>
+        /// Returns a read-only view of the inner non-consumable items dictionary, mapped by name.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyDictionary<string, Item> GetNonConsumableItemsDictionary()
+        {
+            if (_readOnlyNonConsumableItems == null)
+            {
+                _readOnlyNonConsumableItems = new ReadOnlyDictionary<string, Item>(NonConsumableItems);
+            }
+            return _readOnlyNonConsumableItems;
+        }
 
         public bool HasItem(Item item)
         {
