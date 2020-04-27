@@ -1,10 +1,12 @@
-﻿using sm_json_data_framework.Models.GameFlags;
+﻿using Nito.Collections;
+using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Navigation
@@ -28,8 +30,6 @@ namespace sm_json_data_framework.Models.Navigation
         // Anything else?
         // - There could be some more complex operations like "go to THIS node", but then that can lead to evaluating a lot of things to find the cheapest option.
         //   Still, I'm sure it could be worth.
-        //
-        // This would maintain the new current InGameState, while possibly leaving previous ones in memory to allow some undo/redo shenanigans.
         // 
         // Failure to do an action would leave the state unchanged and return something to indicate failure.
         //
@@ -43,25 +43,100 @@ namespace sm_json_data_framework.Models.Navigation
 
 
 
-
-
-
-
-
-
-
-
         /// <summary>
         /// Constructor that initializes a GameNavigator with the provided initial state.
         /// </summary>
         /// <param name="initialState">The starting inGameState for this navigator.</param>
-        public GameNavigator(InGameState initialState)
+        /// <param name="maxPreviousStatesSize">The maximum number of previous states that this navigator should keep in memory.</param>
+        public GameNavigator(InGameState initialState, int maxPreviousStatesSize)
         {
-            InGameState = initialState;
+            CurrentInGameState = initialState;
+            MaxPreviousStatesSize = maxPreviousStatesSize;
         }
 
-        private InGameState InGameState {get; set;}
+        /// <summary>
+        /// The InGameState describing the current in-game situation of this GameNavigator.
+        /// </summary>
+        public InGameState CurrentInGameState {get; private set;}
 
+        private int MaxPreviousStatesSize { get; set; }
+
+        /// <summary>
+        /// Contains previous in-game states, paired with the action that was performed on them to obtain the next state.
+        /// More recent actions are at the front of the Deque.
+        /// </summary>
+        private Deque<(INavigationAction action, InGameState initialState)> PreviousStates { get; } = new Deque<(INavigationAction action, InGameState inGameState)>();
+
+        /// <summary>
+        /// Contains actions that have been undone, paired with the in-game state that resulted from the action.
+        /// </summary>
+        private Stack<(INavigationAction action, InGameState resultingState)> UndoneActions { get; } = new Stack<(INavigationAction action, InGameState inGameState)>();
+
+        /// <summary>
+        /// Given a performed action and its resulting state, moves this navigator forward,
+        /// remembering its current state as a previous one and adopting the resulting state as its current one.
+        /// </summary>
+        /// <param name="action">The action that was performed</param>
+        /// <param name="resultingState">The InGameState that resulted from performing the action</param>
+        private void DoAction(INavigationAction action, InGameState resultingState)
+        {
+            // Can't move forward on a failure
+            if(!action.Succeeded)
+            {
+                return;
+            }
+
+            UndoneActions.Clear();
+            PreviousStates.AddToFront((action, CurrentInGameState));
+            CurrentInGameState = resultingState;
+
+            // If we exceeded the allowed number of previous states, remove the oldest one
+            if(PreviousStates.Count > MaxPreviousStatesSize)
+            {
+                PreviousStates.RemoveFromBack();
+            }
+        }
+
+        /// <summary>
+        /// Undoes the most recent previous action, rolling back to the state before that action.
+        /// </summary>
+        /// <returns>An action representing the effects of undoing the previous action.
+        /// If there are no actions to undo, returns a failure action.</returns>
+        public INavigationAction Undo()
+        {
+            if (PreviousStates.Any())
+            {
+                (var action, var initialState) = PreviousStates.RemoveFromFront();
+                UndoneActions.Push((action, CurrentInGameState));
+                CurrentInGameState = initialState;
+                return action.Reverse();
+            }
+            // No actions to undo
+            else
+            {
+                return Failure.Instance;
+            }
+        }
+
+        /// <summary>
+        /// Redoes the last action that was undone, moving forward to the state after that action.
+        /// </summary>
+        /// <returns>The action that was redone, or a failure if there are no actions to redo.</returns>
+        public INavigationAction Redo()
+        {
+            if(UndoneActions.Count > 0)
+            {
+                (var action, var resultingState)  = UndoneActions.Pop();
+                PreviousStates.AddToFront((action, CurrentInGameState));
+                CurrentInGameState = resultingState;
+                return action;
+            }
+            // No actions to redo
+            else
+            {
+                return Failure.Instance;
+            }
+        }
 
         #region Action methods
 
@@ -75,7 +150,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public RoomNode GetCurrentPosition()
         {
-            return InGameState.GetCurrentNode();
+            return CurrentInGameState.GetCurrentNode();
         }
 
         /// <summary>
@@ -85,7 +160,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IEnumerable<int> GetVisitedNodeIds()
         {
-            return InGameState.GetVisitedNodeIds();
+            return CurrentInGameState.GetVisitedNodeIds();
         }
 
         /// <summary>
@@ -94,7 +169,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IEnumerable<string> GetDestroyedObstacleIds()
         {
-            return InGameState.GetDestroyedObstacleIds();
+            return CurrentInGameState.GetDestroyedObstacleIds();
         }
 
         /// <summary>
@@ -103,7 +178,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentNonReserveEnergy()
         {
-            return InGameState.GetCurrentAmount(RechargeableResourceEnum.RegularEnergy);
+            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.RegularEnergy);
         }
 
         /// <summary>
@@ -112,7 +187,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentReserveEnergy()
         {
-            return InGameState.GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy);
+            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy);
         }
 
         /// <summary>
@@ -121,7 +196,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentTotalEnergy()
         {
-            return InGameState.GetCurrentAmount(ConsumableResourceEnum.ENERGY);
+            return CurrentInGameState.GetCurrentAmount(ConsumableResourceEnum.ENERGY);
         }
 
         /// <summary>
@@ -130,7 +205,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentMissiles()
         {
-            return InGameState.GetCurrentAmount(RechargeableResourceEnum.Missile);
+            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.Missile);
         }
 
         /// <summary>
@@ -139,7 +214,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentSuperMissiles()
         {
-            return InGameState.GetCurrentAmount(RechargeableResourceEnum.Super);
+            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.Super);
         }
 
         /// <summary>
@@ -148,7 +223,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentPowerBombs()
         {
-            return InGameState.GetCurrentAmount(RechargeableResourceEnum.PowerBomb);
+            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.PowerBomb);
         }
 
         /// <summary>
@@ -158,7 +233,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentAmount(RechargeableResourceEnum resource)
         {
-            return InGameState.GetCurrentAmount(resource);
+            return CurrentInGameState.GetCurrentAmount(resource);
         }
 
         /// <summary>
@@ -169,7 +244,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentAmount(ConsumableResourceEnum resource)
         {
-            return InGameState.GetCurrentAmount(resource);
+            return CurrentInGameState.GetCurrentAmount(resource);
         }
 
         /// <summary>
@@ -178,7 +253,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxNonReserveEnergy()
         {
-            return InGameState.GetMaxAmount(RechargeableResourceEnum.RegularEnergy);
+            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.RegularEnergy);
         }
 
         /// <summary>
@@ -187,7 +262,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxReserveEnergy()
         {
-            return InGameState.GetMaxAmount(RechargeableResourceEnum.ReserveEnergy);
+            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.ReserveEnergy);
         }
 
         /// <summary>
@@ -196,7 +271,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxMissiles()
         {
-            return InGameState.GetMaxAmount(RechargeableResourceEnum.Missile);
+            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.Missile);
         }
 
         /// <summary>
@@ -205,7 +280,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxSuperMissiles()
         {
-            return InGameState.GetMaxAmount(RechargeableResourceEnum.Super);
+            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.Super);
         }
 
         /// <summary>
@@ -214,7 +289,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxPowerBombs()
         {
-            return InGameState.GetMaxAmount(RechargeableResourceEnum.PowerBomb);
+            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.PowerBomb);
         }
 
         /// <summary>
@@ -224,7 +299,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxAmount(RechargeableResourceEnum resource)
         {
-            return InGameState.GetMaxAmount(resource);
+            return CurrentInGameState.GetMaxAmount(resource);
         }
 
         /// <summary>
@@ -233,7 +308,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IReadOnlyDictionary<string, Item> GetItemsDictionary()
         {
-            return InGameState.GetNonConsumableItemsDictionary();
+            return CurrentInGameState.GetNonConsumableItemsDictionary();
         }
 
         /// <summary>
@@ -242,7 +317,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IReadOnlyDictionary<string, NodeLock> GetOpenedLocksDictionary()
         {
-            return InGameState.GetOpenedLocksDictionary();
+            return CurrentInGameState.GetOpenedLocksDictionary();
         }
 
         /// <summary>
@@ -251,7 +326,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IReadOnlyDictionary<string, GameFlag> GetActiveGameFlagsDictionary()
         {
-            return InGameState.GetActiveGameFlagsDictionary();
+            return CurrentInGameState.GetActiveGameFlagsDictionary();
         }
 
         #endregion
