@@ -34,19 +34,14 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             IEnumerable<ResourceCapacity> startingResources = itemContainer.StartingResources;
 
-            // Initialize max and current resource counts using starting resources
+            Inventory = new ItemInventory(startingResources);
+
+            Resources = new ResourceCount();
+
+            // Start the player at full
             foreach (ResourceCapacity capacity in startingResources)
             {
-                ResourceMaximums.Add(capacity.Resource, capacity.MaxAmount);
-                Resources.Add(capacity.Resource, capacity.MaxAmount);
-            }
-
-            // Initialize missing resources at current and max of 0
-            foreach (RechargeableResourceEnum resource in ((RechargeableResourceEnum[])Enum.GetValues(typeof(RechargeableResourceEnum)))
-                .Where(r => !ResourceMaximums.ContainsKey(r)))
-            {
-                ResourceMaximums.Add(resource, 0);
-                Resources.Add(resource, 0);
+                Resources.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
             }
 
             // Initialize starting game flags
@@ -66,7 +61,7 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// A copy constructor that creates a new InGameState based on the provided one one.
+        /// A copy constructor that creates a new InGameState based on the provided one.
         /// This is a somewhat shallow copy; referenced objects whose inner state does not change with a game state (such as Room, GameFlag, etc.) will not be copied.
         /// The inner InRoomState and anything else that fully belongs to the InGameState does get copied.
         /// </summary>
@@ -75,12 +70,9 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             ActiveGameFlags = new Dictionary<string, GameFlag>(other.ActiveGameFlags);
 
-            NonConsumableItems = new Dictionary<string, Item>(other.NonConsumableItems);
-            ExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.ExpansionItems);
+            Inventory = other.Inventory.Clone();
 
-            ResourceMaximums = new Dictionary<RechargeableResourceEnum, int>(other.ResourceMaximums);
-
-            Resources = new Dictionary<RechargeableResourceEnum, int>(other.Resources);
+            Resources = other.Resources.Clone();
 
             InRoomState = new InRoomState(other.InRoomState);
 
@@ -96,13 +88,16 @@ namespace sm_json_data_framework.Models.InGameStates
             return new InGameState(this);
         }
 
-        protected IDictionary<RechargeableResourceEnum, int> ResourceMaximums { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
+        protected ResourceCount Resources { get; set; }
 
-        protected IDictionary<RechargeableResourceEnum, int> Resources { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
-
+        /// <summary>
+        /// Returns the maximum possible amount of the provided resource in this InGameState.
+        /// </summary>
+        /// <param name="resource">The resource to get the max amount of.19</param>
+        /// <returns></returns>
         public int GetMaxAmount(RechargeableResourceEnum resource)
         {
-            return ResourceMaximums[resource];
+            return Inventory.GetMaxAmount(resource);
         }
 
         /// <summary>
@@ -112,7 +107,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public int GetCurrentAmount(RechargeableResourceEnum resource)
         {
-            return Resources[resource];
+            return Resources.GetAmount(resource);
         }
 
         /// <summary>
@@ -157,29 +152,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="quantity">The amount to consume</param>
         public void ApplyConsumeResource(ConsumableResourceEnum resource, int quantity)
         {
-            switch (resource)
-            {
-                case ConsumableResourceEnum.ENERGY:
-                    // Consume regular energy first, down to 1
-                    int regularEnergy = GetCurrentAmount(RechargeableResourceEnum.RegularEnergy);
-                    int regularEnergyToConsume = regularEnergy > quantity ? quantity : regularEnergy - 1;
-                    Resources[RechargeableResourceEnum.RegularEnergy] -= regularEnergyToConsume;
-                    quantity -= regularEnergyToConsume;
-                    if(regularEnergyToConsume > 0)
-                    {
-                        Resources[RechargeableResourceEnum.ReserveEnergy] -= quantity;
-                    }
-                    break;
-                case ConsumableResourceEnum.MISSILE:
-                    Resources[RechargeableResourceEnum.Missile] -= quantity;
-                    break;
-                case ConsumableResourceEnum.SUPER:
-                    Resources[RechargeableResourceEnum.Super] -= quantity;
-                    break;
-                case ConsumableResourceEnum.POWER_BOMB:
-                    Resources[RechargeableResourceEnum.PowerBomb] -= quantity;
-                    break;
-            }
+            Resources.ApplyAmountReduction(resource, quantity);
         }
 
         /// <summary>
@@ -188,7 +161,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="resource">The resource to refill</param>
         public void ApplyRefillResource(RechargeableResourceEnum resource)
         {
-            Resources[resource] = ResourceMaximums[resource];
+            Resources.ApplyAmount(resource, Inventory.GetMaxAmount(resource));
         }
 
         protected IDictionary<string, GameFlag> ActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
@@ -287,92 +260,80 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
-        protected IDictionary<string, Item> NonConsumableItems { get; set; } = new Dictionary<string, Item>();
-        protected IDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get; set; } = new Dictionary<string, (ExpansionItem item, int count)>();
+        protected ItemInventory Inventory { get; set; }
 
-        private IReadOnlyDictionary<string, Item> _readOnlyNonConsumableItems;
         /// <summary>
         /// Returns a read-only view of the inner non-consumable items dictionary, mapped by name.
         /// </summary>
         /// <returns></returns>
         public IReadOnlyDictionary<string, Item> GetNonConsumableItemsDictionary()
         {
-            if (_readOnlyNonConsumableItems == null)
-            {
-                _readOnlyNonConsumableItems = new ReadOnlyDictionary<string, Item>(NonConsumableItems);
-            }
-            return _readOnlyNonConsumableItems;
-        }
-
-        public bool HasItem(Item item)
-        {
-            return HasItem(item.Name);
-        }
-
-        public bool HasItem(string itemName)
-        {
-            return NonConsumableItems.ContainsKey(itemName) || ExpansionItems.ContainsKey(itemName);
+            return Inventory.GetNonConsumableItemsDictionary();
         }
 
         /// <summary>
-        /// Returns specifically whether the Varia Suit is available in this in-game state.
+        /// Returns a read-only view of the inner dictionary of expansion items (along with how many of each is present), mapped by name.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyDictionary<string, (ExpansionItem item, int count)> GetExpansionItemsDictionary()
+        {
+            return Inventory.GetExpansionItemsDictionary();
+        }
+
+        /// <summary>
+        /// Returns whether the player has the provided item in this InGameState.
+        /// </summary>
+        /// <param name="item">The item to check for</param>
+        /// <returns></returns>
+        public bool HasItem(Item item)
+        {
+            return Inventory.HasItem(item);
+        }
+
+        /// <summary>
+        /// Returns whether the player has the item with the provided name in this InGameState.
+        /// </summary>
+        /// <param name="item">The item to check for</param>
+        /// <returns></returns>
+        public bool HasItem(string itemName)
+        {
+            return Inventory.HasItem(itemName);
+        }
+
+        /// <summary>
+        /// Returns specifically whether the player has the Varia Suit in this in-game state.
         /// </summary>
         /// <returns></returns>
         public bool HasVariaSuit()
         {
-            return HasItem("Varia");
+            return Inventory.HasVariaSuit();
         }
 
         /// <summary>
-        /// Returns specifically whether the Gravity Suit is available in this in-game state.
+        /// Returns specifically whether the player has the Gravity Suit in this in-game state.
         /// </summary>
         /// <returns></returns>
         public bool HasGravitySuit()
         {
-            return HasItem("Gravity");
+            return Inventory.HasGravitySuit();
         }
 
         /// <summary>
-        /// Returns specifically whether the Speed Booster is available in this in-game state.
+        /// Returns specifically whether the player has the Speed Booster in this in-game state.
         /// </summary>
         /// <returns></returns>
         public bool HasSpeedBooster()
         {
-            return HasItem("SpeedBooster");
+            return Inventory.HasSpeedBooster();
         }
 
+        /// <summary>
+        /// Adds the provided item to the player's inventory for this InGameState.
+        /// </summary>
+        /// <param name="item"></param>
         public void ApplyAddItem(Item item)
         {
-            // Expansion items have a count
-            if(item is ExpansionItem expansionItem)
-            {
-                if (!ExpansionItems.ContainsKey(expansionItem.Name))
-                {
-                    // Add item with an initial quantity of 1
-                    ExpansionItems.Add(expansionItem.Name, (expansionItem, 1));
-                }
-                else
-                {
-                    // Increment count
-                    var itemWithCount = ExpansionItems[expansionItem.Name];
-                    itemWithCount.count++;
-                    ExpansionItems[expansionItem.Name] = itemWithCount;
-                }
-                // In either case, the inner maximum of the proper resource should increase
-                ResourceMaximums[expansionItem.Resource] =
-                    ResourceMaximums[expansionItem.Resource] + expansionItem.ResourceAmount;
-
-                // Capacity pickups may add current resources as well, but they are not repeatable so by default we don't want logic to rely on them.
-                // So we will not alter current resources.
-            }
-            // Regular items don't have a count
-            else
-            {
-                if (!NonConsumableItems.ContainsKey(item.Name))
-                {
-                    NonConsumableItems.Add(item.Name, item);
-                }
-            }
+            Inventory.ApplyAddItem(item);
         }
 
         /// <summary>
@@ -499,6 +460,29 @@ namespace sm_json_data_framework.Models.InGameStates
         public void ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
         {
             InRoomState.ApplyVisitNode(nodeToVisit, strat);
+        }
+
+        /// <summary>
+        /// Identifies and returns a LinkTo that allows navigation from the current node to the provided node.
+        /// </summary>
+        /// <param name="targetNodeId">The node to which the LinkTo should lead</param>
+        /// <returns>The identified LinkTo, or null if a single LinkTo couldn't be found</returns>
+        public LinkTo GetCurrentLinkTo(int targetNodeId)
+        {
+            Link linkFromCurrent = GetCurrentRoom().Links
+                .Where(link => link.FromNodeId == GetCurrentNode().Id)
+                .SingleOrDefault();
+            // If we don't find exactly one link from current node, can't do anything
+            if (linkFromCurrent == null)
+            {
+                return null;
+            }
+            else
+            {
+                return linkFromCurrent.To
+                    .Where(to => to.TargetNodeId == targetNodeId)
+                    .SingleOrDefault();
+            }
         }
 
         /// <summary>
