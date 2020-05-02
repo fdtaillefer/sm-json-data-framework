@@ -29,12 +29,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return inGameState.GetLastStrat(usePreviousRoom)?.StratProperties?.Contains(Value) == true;
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             if (IsFulfilled(inGameState, usePreviousRoom))
             {
                 // Clone the InGameState to fulfill method contract
-                return inGameState.Clone();
+                return new ExecutionResult(inGameState.Clone());
             }
             else
             {

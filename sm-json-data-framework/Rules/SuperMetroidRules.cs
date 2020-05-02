@@ -254,10 +254,24 @@ namespace sm_json_data_framework.Rules
         /// <param name="runway">The runway to calculate in reverse</param>
         /// <param name="tilesSavedWithStutter">The number of tiles the player is expected to be saving using a stutter-step.
         /// If a portion of the runway to use begins downhill, it will be deemed unusable for a stutter-step and the effective runway length
+        /// will be reduced accordingly.</param>
         /// <returns></returns>
         public decimal CalculateEffectiveReversedRunwayLength(IRunway runway, decimal tilesSavedWithStutter)
         {
             return CalculateEffectiveRunwayLength(ReverseRunway(runway), tilesSavedWithStutter);
+        }
+
+        /// <summary>
+        /// Calculates the effective length of the provided runway, in flat tiles. Tries the runway in both directions and returns the longest result.
+        /// </summary>
+        /// <param name="runway">The runway to calculate, checking both directions</param>
+        /// <param name="tilesSavedWithStutter">The number of tiles the player is expected to be saving using a stutter-step.
+        /// If a portion of the runway to use begins downhill, it will be deemed unusable for a stutter-step and the effective runway length
+        /// will be reduced accordingly.</param>
+        /// <returns></returns>
+        public decimal CalculateEffectiveReversibleRunwayLength(IRunway runway, decimal tilesSavedWithStutter)
+        {
+            return Math.Max(CalculateEffectiveRunwayLength(runway, tilesSavedWithStutter), CalculateEffectiveReversedRunwayLength(runway, tilesSavedWithStutter));
         }
 
         /// <summary>

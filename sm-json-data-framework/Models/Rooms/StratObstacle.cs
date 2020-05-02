@@ -60,62 +60,98 @@ namespace sm_json_data_framework.Models.Rooms
             return unhandled.Distinct();
         }
 
+        IExecutable _destroyExecution = null;
         /// <summary>
-        /// Attemps to execute the bypass of this obstacle without destroying it, and returns a new InGameState describing the state after success (or null).
+        /// An IExecutable that corresponds to destroying this obstacle.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// <returns>A new InGameState describing the state after succeeding, or null in case of failure</returns>
-        public InGameState AttemptBypass(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public IExecutable DestroyExecution
+        {
+            get
+            {
+                if(_destroyExecution == null)
+                {
+                    _destroyExecution = new DestroyExecution(this);
+                }
+                return _destroyExecution;
+            }
+        }
+
+        IExecutable _bypassExecution = null;
+        /// <summary>
+        /// An IExecutable that corresponds to bypassing this obstacle.
+        /// </summary>
+        public IExecutable BypassExecution {
+            get
+            {
+                if(_bypassExecution == null)
+                {
+                    _bypassExecution = new BypassExecution(this);
+                }
+                return _bypassExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the destruction of a StratObstacle in an IExecutable interface.
+    /// </summary>
+    internal class DestroyExecution : IExecutable
+    {
+        private StratObstacle StratObstacle { get; set; }
+
+        public DestroyExecution(StratObstacle stratObstacle)
+        {
+            StratObstacle = stratObstacle;
+        }
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
+
+            // Start with the RoomObstacle's requirements
+            ExecutionResult result = StratObstacle.Obstacle.Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            // If we couldn't execute the RoomObstacle's requirements, give up
+            if (result == null)
+            {
+                return null;
+            }
+
+            // Add this specific StratObstacle's requirements
+            result = result.AndThen(StratObstacle.Requires, model, times: times, usePreviousRoom: usePreviousRoom);
+            // If that failed, give up
+            if (result == null)
+            {
+                return null;
+            }
+
+            // We have succeeded, but we must update the ExecutionResult and its InGameState to reflect any destroyed obstacles
+            result.ApplyDestroyedObstacles(new[] { StratObstacle.Obstacle }.Concat(StratObstacle.AdditionalObstacles), usePreviousRoom);
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the bypassing of a StratObstacle in an IExecutable interface.
+    /// </summary>
+    internal class BypassExecution: IExecutable
+    {
+        private StratObstacle StratObstacle { get; set; }
+
+        public BypassExecution(StratObstacle stratObstacle)
+        {
+            StratObstacle = stratObstacle;
+        }
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // The bypass attempt fails if there's no way to bypass
-            if (Bypass == null)
+            if (StratObstacle.Bypass == null)
             {
                 return null;
             }
             else
             {
-                return Bypass.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+                return StratObstacle.Bypass.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
             }
-        }
-
-        /// <summary>
-        /// Attemps to execute the destruction of this obstacle, and returns a new InGameState describing the state after success (or null).
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// <returns>A new InGameState describing the state after succeeding, or null in case of failure</returns>
-        public InGameState AttemptDestroy(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
-        {
-            // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
-
-            // Start with the RoomObstacle's requirements
-            InGameState resultingState = Obstacle.Requires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
-            // If we couldn't fulfill the RoomObstacle's requirements, give up
-            if (resultingState == null)
-            {
-                return null;
-            }
-
-            resultingState = Requires.AttemptFulfill(model, resultingState, times: times, usePreviousRoom: usePreviousRoom);
-            // If we couldn't fulfill this StratObstatcle's requirements, give up
-            if(resultingState == null)
-            {
-                return null;
-            }
-
-            // We have succeeded, but we must update the InGameState to reflect any destroyed obstacles
-            resultingState.ApplyDestroyedObstacle(Obstacle);
-            foreach(RoomObstacle obstacle in AdditionalObstacles)
-            {
-                resultingState.ApplyDestroyedObstacle(obstacle);
-            }
-
-            return resultingState;
         }
     }
 }

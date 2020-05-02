@@ -24,14 +24,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             int ammoCost = Count * times;
             if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
             {
-                inGameState = inGameState.Clone();
-                inGameState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
-                return inGameState;
+                var resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
+                return new ExecutionResult(resultingState);
             }
             else
             {

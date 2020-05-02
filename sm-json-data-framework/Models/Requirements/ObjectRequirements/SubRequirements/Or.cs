@@ -11,9 +11,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     /// </summary>
     public class Or : AbstractObjectLogicalElementWithSubRequirements
     {
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            return LogicalRequirements.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom, and: false);
+            return LogicalRequirements.ExecuteOne(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
         }
     }
 }

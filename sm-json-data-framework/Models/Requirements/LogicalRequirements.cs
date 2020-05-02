@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// A container class for a series of logical elements.
     /// </summary>
-    public class LogicalRequirements
+    public class LogicalRequirements: IExecutable
     {
         public LogicalRequirements()
         {
@@ -96,28 +96,26 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            return model.ExecuteAll(LogicalElements, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+        }
+
         /// <summary>
-        /// Attempts to fulfill the requirements of this LogicalRequirements by the provided in-game state. If successful, returns a new InGameState instance to
-        /// represent the in-game state after performing the LogicalRequirements. If unsuccessful, return nulls.
+        /// Attempts to execute one logicalement element inside this LogicalRequirements (the cheapest one) 
+        /// based on the provided in-game state (which will not be altered), by fulfilling its execution requirements.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
+        /// <param name="times">The number of consecutive times that this should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
-        /// <param name="and">If true, attempts to fulfill all logical elements in this requirements. 
-        /// If false, attempst to fulfill at least one logical element.</param>
-        /// <returns>A new InGameState representing the state after fulfillment if successful, or null otherwise</returns>
-        public InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false, bool and = true)
+        /// <returns></returns>
+        public ExecutionResult ExecuteOne(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            if (and)
-            {
-                return model.ApplyAnd(inGameState, LogicalElements, (element, state) => element.AttemptFulfill(model, state, times, usePreviousRoom));
-            }
-            else
-            {
-                return model.ApplyOr(inGameState, LogicalElements, (element, state) => element.AttemptFulfill(model, state, times, usePreviousRoom));
-            }
+            (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            return result;
         }
     }
 }

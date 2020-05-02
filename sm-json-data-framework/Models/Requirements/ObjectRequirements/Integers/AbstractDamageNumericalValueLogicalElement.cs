@@ -21,14 +21,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <returns>The calculated amount of damage</returns>
         public abstract int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false);
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             int damage = CalculateDamage(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage))
             {
-                inGameState = inGameState.Clone();
-                inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
-                return inGameState;
+                var resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
+                return new ExecutionResult(resultingState);
             }
             else
             {

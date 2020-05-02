@@ -43,24 +43,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             bool mustShinespark = ShinesparkFrames > 0;
 
             // Always need the SpeedBooster to charge a bluesuit
-            if(!inGameState.HasSpeedBooster())
+            if (!inGameState.HasSpeedBooster())
             {
                 return null;
             }
 
             // If a shinespark is needed, the tech must be allowed
-            if(mustShinespark && !model.CanShinespark())
+            if (mustShinespark && !model.CanShinespark())
             {
                 return null;
             }
 
             // The runway must be long enough to charge
-            if(model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter) < model.LogicalOptions.TilesToShineCharge)
+            if (model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter) < model.LogicalOptions.TilesToShineCharge)
             {
                 return null;
             }
@@ -69,9 +69,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             int energyCost = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames);
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, energyCost))
             {
-                inGameState = inGameState.Clone();
-                inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
-                return inGameState;
+                InGameState resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
+                return new ExecutionResult(resultingState);
             }
             // If we don't have enough for the shinespark, we cannot do this
             else

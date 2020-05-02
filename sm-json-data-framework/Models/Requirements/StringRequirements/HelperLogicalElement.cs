@@ -18,9 +18,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Helper = helper;
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            return Helper.Requires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            return Helper.Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
@@ -57,26 +58,69 @@ namespace sm_json_data_framework.Models.Rooms.Node
         }
 
         /// <summary>
-        /// Attempts to fulfill the requirements for using this Runway by the provided in-game state. If successful, returns a new InGameState instance to
-        /// represent the in-game state after using the runway. If unsuccessful, returns null.
+        /// Attempts to use this runway based on the provided in-game state (which will not be altered), 
+        /// by fulfilling its execution requirements.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
         /// <param name="comingIn">If true, tries to use the runway while coming into the room. If false, tries to use it when already in the room.</param>
-        /// <param name="times">The number of consecutive times that this runway should be used. Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="times">The number of consecutive times that this runway should be used.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
-        /// <returns>A new InGameState representing the state after fulfillment if successful, or null otherwise</returns>
-        public InGameState AttemptUse(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, bool usePreviousRoom = false)
+        /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
+        /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, bool usePreviousRoom = false)
         {
             // If we're coming in, this must be usable coming in
-            if(!UsableComingIn && comingIn)
+            if (!UsableComingIn && comingIn)
             {
                 return null;
             }
 
-            // Try to execute all strats, returning the resulting state of whichever spends the lowest amount of resources
-            return model.ApplyOr(inGameState, Strats, (s, igs) => s.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
+            // Return the result of the best strat execution
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            if (result == null)
+            {
+                return null;
+            }
+            else
+            {
+                // Add a record of the runway being used
+                result.AddUsedRunway(this, bestStrat);
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates and returns an executable version of this runway.
+        /// </summary>
+        /// <param name="comingIn">Indicates whether the executable should consider that the player is coming in the room or not.</param>
+        /// <returns></returns>
+        public ExecutableRunway AsExecutable(bool comingIn)
+        {
+            return new ExecutableRunway(this, comingIn);
+        }
+    }
+
+    /// <summary>
+    /// An IExecutable wrapper around Runway, with handling for whether the execution is done coming in the room or not.
+    /// </summary>
+    public class ExecutableRunway : IExecutable
+    {
+        public ExecutableRunway(Runway runway, bool comingIn)
+        {
+            Runway = runway;
+            ComingIn = comingIn;
+        }
+
+        public Runway Runway { get; private set; }
+
+        public bool ComingIn { get; private set; }
+
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            return Runway.Execute(model, inGameState, ComingIn, times: times, usePreviousRoom: usePreviousRoom);
         }
     }
 }

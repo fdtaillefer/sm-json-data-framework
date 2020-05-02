@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
             IEnumerable<int> inRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
@@ -51,8 +51,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             IEnumerable<Runway> retroactiveRunways = inGameState.GetRetroactiveRunways(inRoomPath, usePreviousRoom)
                 .Where(r => r.Length >= UsedTiles);
 
-            // Return the best state from using any of the runways
-            return model.ApplyOr(inGameState, retroactiveRunways, (r, igs) => r.AttemptUse(model, igs, comingIn: false, times: times, usePreviousRoom: usePreviousRoom));
+            (_, var executionResult) = model.ExecuteBest(retroactiveRunways.Select(runway => runway.AsExecutable(comingIn: false)),
+                inGameState, times: times, usePreviousRoom: usePreviousRoom);
+
+            return executionResult;
 
             // Note that there are no concerns here about unlocking the previous door, because unlocking a door to use it cannot be done retroactively.
             // It has to have already been done in order to use the door in the first place.

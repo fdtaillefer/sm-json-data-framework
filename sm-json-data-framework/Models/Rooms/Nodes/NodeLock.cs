@@ -96,49 +96,93 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // The lock isn't open, but it's only active if its activation conditions are met.
             // The resulting game state has no value because locks are activated passively.
-            return Lock.AttemptFulfill(model, inGameState) != null;
+            return Lock.Execute(model, inGameState) != null;
         }
 
+        IExecutable _openExecution = null;
         /// <summary>
-        /// Attemps to execute a bypass of this lock without opening it, and returns a new InGameState describing the state after success (or null).
-        /// Does not actually check whether the lock is active, strictly attempts to execute a bypass strat.
+        /// An IExecutable that corresponds to opening this lock.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// <returns>A new InGameState describing the state after succeeding, or null in case of failure</returns>
-        public InGameState AttemptBypass(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public IExecutable OpenExecution
         {
-            // Try to find the cheapest doable bypass strat and return the result of that
-            return model.ApplyOr(inGameState, BypassStrats, (s, igs) => s.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
+            get
+            {
+                if (_openExecution == null)
+                {
+                    _openExecution = new OpenExecution(this);
+                }
+                return _openExecution;
+            }
         }
 
+        IExecutable _bypassExecution = null;
         /// <summary>
-        /// Attempts to execute the opening of this lock, and returns a new InGameState describing the state after success (or null).
-        /// If the lock is not currently active, this will be considered a failure.
+        /// An IExecutable that corresponds to bypassing this lock.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that this should be fulfilled. Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// <returns>A new InGameState describing the state after succeeding, or null in case of failure</returns>
-        public InGameState AttemptOpen(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public IExecutable BypassExecution
+        {
+            get
+            {
+                if (_bypassExecution == null)
+                {
+                    _bypassExecution = new BypassExecution(this);
+                }
+                return _bypassExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the opening of a NodeLock in an IExecutable interface.
+    /// </summary>
+    internal class OpenExecution : IExecutable
+    {
+        private NodeLock NodeLock { get; set; }
+
+        public OpenExecution(NodeLock nodeLock)
+        {
+            NodeLock = nodeLock;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             // Can't open a lock that isn't active
-            if (!IsActive(model, inGameState))
+            if (!NodeLock.IsActive(model, inGameState))
             {
                 return null;
             }
 
-            // Try to find the cheapest doable unlock strat and return the result of that
-            InGameState resultingState = model.ApplyOr(inGameState, UnlockStrats, (s, igs) => s.AttemptFulfill(model, igs, times: times, usePreviousRoom: usePreviousRoom));
-            // If lock was successfully opened, alter the resulting state
-            if(resultingState != null)
+            // Look for the best unlock strat
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            if (result != null)
             {
-                resultingState.ApplyOpenLock(this);
+                result.ApplyOpenedLock(NodeLock, bestStrat);
             }
-            return resultingState;
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the bypassing of a NodeLock in an IExecutable interface.
+    /// </summary>
+    internal class BypassExecution : IExecutable
+    {
+        private NodeLock NodeLock { get; set; }
+
+        public BypassExecution(NodeLock nodeLock)
+        {
+            NodeLock = nodeLock;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            // Look for the best bypass strat
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            if(result != null)
+            {
+                result.AddBypassedLock(NodeLock, bestStrat);
+            }
+            return result;
         }
     }
 }

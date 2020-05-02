@@ -128,10 +128,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
+            // Create an ExecutionResult immediately so we can record free kills in it
+            ExecutionResult result = new ExecutionResult(inGameState.Clone());
+
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.AttemptFulfill(model, inGameState, times: times, usePreviousRoom: usePreviousRoom) != null);
+            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom) != null);
 
             // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
             // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),
@@ -140,15 +143,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             // Remove all enemies that can be killed by free weapons
             IEnumerable<IEnumerable<Enemy>> nonFreeGroups = GroupedEnemies
-                .RemoveEnemies(e => e.WeaponSusceptibilities.Values
-                    .Where(ws => freeWeapons.Contains(ws.Weapon, ObjectReferenceEqualityComparer<Weapon>.Default))
-                    .Any());
+                .RemoveEnemies(e =>
+                {
+                    // Look for a free usable weapon this enemy is susceptible to.
+                    var firstWeaponSusceptibility = e.WeaponSusceptibilities.Values
+                        .Where(ws => freeWeapons.Contains(ws.Weapon, ObjectReferenceEqualityComparer<Weapon>.Default))
+                        .FirstOrDefault();
+
+                    // If we found a weapon, record a kill and return true (to remove the enemy)
+                    if (firstWeaponSusceptibility != null)
+                    {
+                        result.ApplyKilledEnemy(e, firstWeaponSusceptibility.Weapon, firstWeaponSusceptibility.Shots);
+                        return true;
+                    }
+                    // If we didn't find a weapon, return false (to retain the enemy)
+                    else
+                    {
+                        return false;
+                    }
+                });
 
             // If there are no enemies left, we are done!
-            if(!nonFreeGroups.Any())
+            if (!nonFreeGroups.Any())
             {
-                // Even though the state hasn't changed, clone it to fulfill the method's contract
-                return inGameState.Clone();
+                return result;
             }
 
             // The remaining enemies require ammo
@@ -159,11 +177,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Iterate over each group, killing it and updating the resulting state.
             // We'll test many scenarios, each with 0 to 1 splash weapon and a fixed number of splash weapon shots (after which enemies are killed with single-target weapons).
             // We will not test multiple combinations of splash weapons.
-            InGameState resultingState = inGameState;
-            foreach(IEnumerable<Enemy> currentEnemyGroup in nonFreeGroups)
+            foreach (IEnumerable<Enemy> currentEnemyGroup in nonFreeGroups)
             {
                 // Build a list of combinations of splash weapons and splash shots (including one entry for no splash weapon at all)
-                IEnumerable<(Weapon splashWeapon, int splashShots)> combinations = nonFreeSplashWeapons.SelectMany(w =>
+                IEnumerable<(Weapon splashWeapon, int splashShots)> splashCombinations = nonFreeSplashWeapons.SelectMany(w =>
                     // Figure out what different shot counts for this weapon will lead to different numbers of casualties
                     currentEnemyGroup
                         .Select(e => e.WeaponSusceptibilities.TryGetValue(w.Name, out WeaponSusceptibility susceptibility) ? susceptibility.Shots : 0)
@@ -175,112 +192,20 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 .Append((splashWeapon: null, splashShots: 0));
 
                 // Evaluate all combinations and apply the cheapest to our current resulting state
-                resultingState = model.ApplyOr(resultingState, combinations,
-                    (c, igs) => KillEnemyGroup(model, igs, times, usePreviousRoom, currentEnemyGroup, c.splashWeapon, c.splashShots, nonFreeIndividualWeapons)
-                );
+                (_, ExecutionResult killResult) = model.ExecuteBest(splashCombinations.Select(combination => new EnemyGroupAmmoExecutable(currentEnemyGroup, nonFreeIndividualWeapons, combination.splashWeapon, combination.splashShots)),
+                    result.ResultingState, times: times, usePreviousRoom: usePreviousRoom);
 
                 // If we failed to kill an enemy group, we can't kill all enemies
-                if (resultingState == null)
-                {
-                    return null;
-                }
-            }
-
-            return resultingState;
-        }
-
-        /// <summary>
-        /// <para>Kills the provided enemy group, first by applying the provided number of splash shots with the provided splash weapon, then
-        /// finishing off survivors with the cheapest of the provided individual weapons.</para>
-        /// <para>If no splash weapon is provided, skips immediately to killing enemies with individual weapons.</para>
-        /// <para>Returns a new InGameState describing the resulting state after the cheapest identified solution, or null if no solution works.</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that the enemies should be killed. Impacts resource cost.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
-        /// <param name="enemyGroup">The enemy group to kill</param>
-        /// <param name="splashWeapon">An optional splash weapon to initially use against the group. If null, the splash attack is skipped.</param>
-        /// <param name="splashShots">The number of shots to use for the splash weapon</param>
-        /// <param name="individualWeapons">An enumeration of weapons to try to use to finish off the enemies after the splash attack.</param>
-        /// <returns></returns>
-        private InGameState KillEnemyGroup(SuperMetroidModel model, InGameState inGameState, int times, bool usePreviousRoom, IEnumerable<Enemy> enemyGroup,
-            Weapon splashWeapon, int splashShots, IEnumerable<Weapon> individualWeapons)
-        {
-            InGameState resultingState = null;
-            // We'll need to track the health of individual enemies, so create an EnemyWithHealth for each
-            IEnumerable<EnemyWithHealth> enemiesWithHealth = enemyGroup.Select(e => new EnemyWithHealth(e));
-
-            // If no splashWeapon is provided (or it's somehow not a splash weapon), skip that step and only do the individual kill
-            if(splashWeapon == null || !splashWeapon.HitsGroup)
-            {
-                resultingState = inGameState;
-            }
-            // If using a splash weapon, spend the ammo then apply the damage
-            else
-            {
-                resultingState = splashWeapon.ShotRequires.AttemptFulfill(model, inGameState, times: times * splashShots, usePreviousRoom: usePreviousRoom);
-
-                // If we can't spend the ammo, fail immediately
-                if (resultingState == null)
+                if (killResult == null)
                 {
                     return null;
                 }
 
-                // Apply the splash attack to each enemy
-                enemiesWithHealth = enemiesWithHealth
-                    .Select(e => {
-                        e.Enemy.WeaponSusceptibilities.TryGetValue(splashWeapon.Name, out WeaponSusceptibility susceptibility);
-                        // If the splash weapon hurts the enemy, apply damage
-                        if(susceptibility != null)
-                        {
-                            int damage = susceptibility.DamagePerShot * splashShots;
-                            e.Health -= damage;
-                        }
-
-                        // Return null if enemy is dead
-                        return e.IsAlive() ? e : null;
-                    })
-                    // Remove dead enemies
-                    .Where(e => e != null);
+                // Update the sequential ExecutionResult
+                result = result.ApplySubsequentResult(killResult);
             }
 
-            // Iterate over each remaining enemy, killing it with the cheapest individual weapon
-            foreach(EnemyWithHealth currentEnemy in enemiesWithHealth)
-            {
-                resultingState = model.ApplyOr(resultingState, individualWeapons, (w, igs) => KillEnemy(model, igs, times, usePreviousRoom, currentEnemy, w));
-
-                // If we can't kill one of the enemies, give up
-                if (resultingState == null)
-                {
-                    return null;
-                }
-            }
-
-            return resultingState;
-        }
-
-        /// <summary>
-        /// Kills the provided enemy using the provided weapon, returning the resulting InGameState.
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="times">The number of consecutive times that the enemy should be killed. Impacts resource cost.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
-        /// <param name="enemyWithHealth">The enemy to kill, with is current remaining health</param>
-        /// <param name="weapon">The weapon to use to kill the enemy</param>
-        /// <returns>The resulting InGameState after killing the enemy, or null if killing the enemy failed.</returns>
-        private InGameState KillEnemy(SuperMetroidModel model, InGameState inGameState, int times, bool usePreviousRoom, EnemyWithHealth enemyWithHealth, Weapon weapon)
-        {
-            enemyWithHealth.Enemy.WeaponSusceptibilities.TryGetValue(weapon.Name, out WeaponSusceptibility susceptibility);
-            if (susceptibility == null)
-            {
-                return null;
-            }
-            int numberOfShots = enemyWithHealth.Health / susceptibility.DamagePerShot;
-            return weapon.ShotRequires.AttemptFulfill(model, inGameState, times: times * numberOfShots, usePreviousRoom: usePreviousRoom);
+            return result;
         }
     }
 
@@ -309,6 +234,164 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public bool IsAlive()
         {
             return Health > 0;
+        }
+
+        /// <summary>
+        /// Creates and returns an executable that kills this enemy (with its remaining health) with the provided weapon.
+        /// </summary>
+        /// <param name="weapon">The weapon to use to finish off the enemy</param>
+        /// <param name="priorSplashWeapon">An optional splash weapon, that was previously used to attack this enemy</param>
+        /// <param name="priorSplashShots">The number of shots of priorSplashWeapons that this enemy was previously hit with</param>
+        /// <returns></returns>
+        public EnemyWithHealthExecutable ToExecutable(Weapon weapon, Weapon priorSplashWeapon, int priorSplashShots)
+        {
+            return new EnemyWithHealthExecutable(this, weapon, priorSplashWeapon, priorSplashShots);
+        }
+    }
+
+    /// <summary>
+    /// <para>An executable that corresponds to an ammo kill of an enemy group, with a specific splash weapon scenario
+    /// (involving an optional splash weapon and an accompanying number of shots for that weapon).</para>
+    /// <para>The execution involves firing the prescribed number of splash weapon shots, then finishing off the remaining enemies
+    /// with the cheapest non-splash weapon. </para>
+    /// </summary>
+    public class EnemyGroupAmmoExecutable : IExecutable
+    {
+        public EnemyGroupAmmoExecutable(IEnumerable<Enemy> enemyGroup, IEnumerable<Weapon> nonSplashWeapons,
+            Weapon splashWeapon, int splashShots)
+        {
+            EnemyGroup = enemyGroup;
+            SplashWeapon = splashWeapon;
+            NonSplashWeapons = nonSplashWeapons;
+            SplashShots = splashShots;
+        }
+
+        private IEnumerable<Enemy> EnemyGroup { get; set; }
+        
+        private IEnumerable<Weapon> NonSplashWeapons { get; set; }
+
+        private Weapon SplashWeapon { get; set; }
+
+        private int SplashShots { get; set; }
+
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            ExecutionResult result = null;
+            // We'll need to track the health of individual enemies, so create an EnemyWithHealth for each
+            IEnumerable<EnemyWithHealth> enemiesWithHealth = EnemyGroup.Select(e => new EnemyWithHealth(e));
+
+            // If using a splash weapon, spend the ammo then apply the damage
+            if (SplashWeapon != null && SplashWeapon.HitsGroup)
+            {
+                result = SplashWeapon.ShotRequires.Execute(model, inGameState, times: times * SplashShots, usePreviousRoom: usePreviousRoom);
+
+                // If we can't spend the ammo, fail immediately
+                if (result == null)
+                {
+                    return null;
+                }
+
+                // Apply the splash attack to each enemy
+                enemiesWithHealth = enemiesWithHealth
+                    .Select(e =>
+                    {
+                        e.Enemy.WeaponSusceptibilities.TryGetValue(SplashWeapon.Name, out WeaponSusceptibility susceptibility);
+                        // If the splash weapon hurts the enemy, apply damage
+                        if (susceptibility != null)
+                        {
+                            int damage = susceptibility.DamagePerShot * SplashShots;
+                            e.Health -= damage;
+                        }
+
+                        // Return the new state of the enemy.
+                        if (e.IsAlive())
+                        {
+                            return e;
+                        }
+                        // If the enemy is dead, record the kill and return null
+                        else
+                        {
+                            // No matter how many shots we dealt to the group, record how many shots it took to actually kill this enemy.
+                            result.ApplyKilledEnemy(e.Enemy, SplashWeapon, susceptibility.Shots);
+                            return null;
+                        }
+                    })
+                    // Remove dead enemies
+                    .Where(e => e != null);
+            }
+            // No else: If no splashWeapon is provided (or it's somehow not a splash weapon), skip that step and only do the individual kill
+
+
+            // Iterate over each remaining enemy, killing it with the cheapest non-splash weapon
+            foreach (EnemyWithHealth currentEnemy in enemiesWithHealth)
+            {
+                var (_, killResult) = model.ExecuteBest(NonSplashWeapons.Select(weapon => currentEnemy.ToExecutable(weapon, SplashWeapon, SplashShots)),
+                    result?.ResultingState ?? inGameState, times: times, usePreviousRoom: usePreviousRoom);
+
+                // If we can't kill one of the enemies, give up
+                if (killResult == null)
+                {
+                    return null;
+                }
+
+                // Update the sequential ExecutionResult
+                result = result == null ? killResult : result.ApplySubsequentResult(killResult);
+            }
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// Represents the killing of an enemy with a current health count, possibly after it was attacked with a splash weapon first.
+    /// </summary>
+    public class EnemyWithHealthExecutable : IExecutable
+    {
+        public EnemyWithHealthExecutable(EnemyWithHealth enemyWithHealth, Weapon weapon, Weapon priorSplashWeapon, int priorSplashShots)
+        {
+            EnemyWithHealth = enemyWithHealth;
+            Weapon = weapon;
+            PriorSplashWeapon = priorSplashWeapon;
+            PriorSplashShots = priorSplashShots;
+        }
+
+        private EnemyWithHealth EnemyWithHealth { get; set; }
+
+        private Weapon Weapon { get; set; }
+
+        private Weapon PriorSplashWeapon { get; set; }
+
+        private int PriorSplashShots { get; set; }
+
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            bool enemyInitiallyFull = EnemyWithHealth.Health == EnemyWithHealth.Enemy.Hp;
+
+            EnemyWithHealth.Enemy.WeaponSusceptibilities.TryGetValue(Weapon.Name, out WeaponSusceptibility susceptibility);
+            if (susceptibility == null)
+            {
+                return null;
+            }
+            int numberOfShots = EnemyWithHealth.Health / susceptibility.DamagePerShot;
+
+            ExecutionResult result = Weapon.ShotRequires.Execute(model, inGameState, times: times * numberOfShots, usePreviousRoom: usePreviousRoom);
+
+            if(result != null)
+            {
+                // Record the kill
+
+                // If the enemy was full, then the prior splash attack (if any) didn't affect it. Ignore it.
+                if(enemyInitiallyFull)
+                {
+                    result.ApplyKilledEnemy(EnemyWithHealth.Enemy, Weapon, numberOfShots);
+                }
+                // If the enemy was not full, the splash attack contributed to its death
+                else
+                {
+                    result.ApplyKilledEnemy(EnemyWithHealth.Enemy, new [] { (PriorSplashWeapon, PriorSplashShots), (Weapon, numberOfShots) });
+                }
+            }
+            return result;
         }
     }
 

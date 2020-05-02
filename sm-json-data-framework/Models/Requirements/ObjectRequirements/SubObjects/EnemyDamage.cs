@@ -59,14 +59,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
+
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage))
             {
-                inGameState = inGameState.Clone();
-                inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
-                return inGameState;
+                InGameState resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
+                return new ExecutionResult(resultingState);
             }
             else
             {

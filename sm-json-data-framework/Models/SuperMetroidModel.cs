@@ -4,6 +4,7 @@ using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Techs;
@@ -159,54 +160,53 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Given an enumeration of executables that return an InGameState, and an execution function that applies the executables on an InGameState,
-        /// attempts to find the least costly successful executable for a provided initial InGameState. If a no-cost executable is found,
-        /// its result is returned immediately.
+        /// Given an enumeration of executables, attempts to find the least costly one that can be successfully executed.
+        /// Returns the associated execution result.
+        /// If a no-cost executable is found, its result is returned immediately.
         /// </summary>
-        /// <typeparam name="T">The type of the executables to try out.</typeparam>
         /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
-        /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
-        /// <param name="executionFunction">A function that executes an executable.</param>
-        /// <param name="acceptationCondition">An optional Predicate that must be true for a resulting InGameState to be considered successful (on top of not being null).
-        /// If this Predicate is null, no additional conditions are checked.</param>
-        /// <returns>The InGameState returned by the best executable, or null if all executions failed.</returns>
-        public InGameState ApplyOr<T>(InGameState initialInGameState, IEnumerable<T> executables, Func<T, InGameState, InGameState> executionFunction,
-            Predicate<InGameState> acceptationCondition = null)
+        /// <param name="executables">An enumeration of executables to attempt executing.</param>
+        /// <param name="times">The number of consecutive times the executables should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <param name="acceptationCondition">An optional Predicate that is checked against the resulting in-game state of executions.
+        /// Executions whose resulting state does not respect the predicate are rejected.</param>
+        /// <returns>The best executable, alongside its ExecutionResult, or default values if none succeeded</returns>
+        public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, InGameState initialInGameState, int times = 1,
+            bool usePreviousRoom = false, Predicate<InGameState> acceptationCondition = null) where T:IExecutable
         {
             InGameStateComparer comparer = GetInGameStateComparer();
 
-            // Try to execute all executions, returning whichever spends the lowest amount of resources
-            InGameState bestResultingState = null;
+            // Try to execute all executables, returning whichever spends the lowest amount of resources
+            (T bestExecutable, ExecutionResult result) bestResult = (default(T), null);
             foreach (T currentExecutable in executables)
             {
-                InGameState resultingState = executionFunction(currentExecutable, initialInGameState);
+                ExecutionResult currentResult = currentExecutable.Execute(this, initialInGameState, times: times, usePreviousRoom: usePreviousRoom);
 
                 // If the fulfillment was successful
-                if(resultingState != null && (acceptationCondition == null || acceptationCondition.Invoke(resultingState)) )
+                if (currentResult != null && (acceptationCondition == null || acceptationCondition.Invoke(currentResult.ResultingState)))
                 {
 
                     // If the fulfillment did not reduce the amount of resources, return immediately
-                    if (comparer.Compare(resultingState, initialInGameState) == 0)
+                    if (comparer.Compare(currentResult.ResultingState, initialInGameState) == 0)
                     {
-                        return resultingState;
+                        return (currentExecutable, currentResult);
                     }
 
                     // If the resulting state is the best we've found yet, retain it
-                    if (comparer.Compare(resultingState, bestResultingState) > 0)
+                    if (comparer.Compare(currentResult.ResultingState, bestResult.result.ResultingState) > 0)
                     {
-                        bestResultingState = resultingState;
+                        bestResult = (currentExecutable, currentResult);
                     }
                 }
-
             }
 
-            // If no strat succeeded, this will return null
-            return bestResultingState;
+            return bestResult;
         }
 
         /// <summary>
-        /// <para>Given an enumeration of executables that return an InGameState, and an execution function that applies the executables on an InGameState,
-        /// attempts to execute all executables successively, starting from a provided initial InGameState.</para>
+        /// <para>Given an enumeration of executables, executes them all successively, starting from the provided initialGameState.</para>
         /// <para>This method will give up at the first failed execution and return null.</para>
         /// </summary>
         /// <typeparam name="T">The type of the executables to execute.</typeparam>
@@ -214,20 +214,30 @@ namespace sm_json_data_framework.Models
         /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
         /// <param name="executionFunction">A function that executes an executable.</param>
         /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.</returns>
-        public InGameState ApplyAnd<T>(InGameState initialInGameState, IEnumerable<T> executables, Func<T, InGameState, InGameState> executionFunction)
+        public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, InGameState initialInGameState, int times = 1, bool usePreviousRoom = false)
         {
-            // Iterate over all logical elements, attempting to fulfill them
-            InGameState currentState = initialInGameState;
-            foreach (T currentExecutable in executables)
+            // Iterate over all executables, attempting to fulfill them
+            ExecutionResult result = null;
+            foreach (IExecutable currentExecutable in executables)
             {
-                currentState = executionFunction(currentExecutable, initialInGameState);
-                // If we failed to fulfill, give up immediately
-                if (currentState == null)
+                // If this is the first execution, generate an initial result
+                if(result == null)
+                {
+                    result = currentExecutable.Execute(this, initialInGameState, times: times, usePreviousRoom: usePreviousRoom);
+                }
+                // If this is not the first execution, apply this execution on top of previous result
+                else
+                {
+                    result = result.AndThen(currentExecutable, this, times: times, usePreviousRoom: usePreviousRoom);
+                }
+
+                // If we failed to execute, give up immediately
+                if (result == null)
                 {
                     return null;
                 }
             }
-            return currentState;
+            return result;
         }
 
         /// <summary>

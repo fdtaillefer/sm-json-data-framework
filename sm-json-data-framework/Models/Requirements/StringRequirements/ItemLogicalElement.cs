@@ -18,12 +18,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Item = item;
         }
 
-        public override InGameState AttemptFulfill(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             if (inGameState.HasItem(Item))
             {
                 // Clone the In-game state to fulfill method contract
-                return inGameState.Clone();
+                return new ExecutionResult(inGameState.Clone());
             }
             else
             {
