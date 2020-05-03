@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace sm_json_data_framework.Models
 {
@@ -60,6 +61,76 @@ namespace sm_json_data_framework.Models
         /// A repository of game rules we are operating by.
         /// </summary>
         public SuperMetroidRules Rules { get; set; }
+
+        /// <summary>
+        /// Describes the start condition for the game.
+        /// </summary>
+        public StartConditions StartConditions { get; set; }
+
+        /// <summary>
+        /// Creates and assigns to this model internal start conditions, based on the provided ItemContainer.
+        /// This should not be called unless rooms, items, and game flags have already been assigned to this model.
+        /// </summary>
+        /// <param name="itemContainer"></param>
+        public void AssignStartingConditions(ItemContainer itemContainer)
+        {
+            if (!Rooms.TryGetValue(itemContainer.StartingRoomName, out Room startingRoom))
+            {
+                throw new Exception($"Starting room '{itemContainer.StartingRoomName}' not found.");
+            }
+
+            if (!startingRoom.Nodes.TryGetValue(itemContainer.StartingNodeId, out RoomNode startingNode))
+            {
+                throw new Exception($"Starting node ID {itemContainer.StartingNodeId} not found in room '{startingRoom.Name}'.");
+            }
+
+            List<GameFlag> startingFlags = new List<GameFlag>();
+            foreach(string flagName in itemContainer.StartingGameFlagNames)
+            {
+                if (!GameFlags.TryGetValue(flagName, out GameFlag flag))
+                {
+                    throw new Exception($"Starting game flag {flagName} not found.");
+                }
+                startingFlags.Add(flag);
+            }
+
+            List<NodeLock> startingLocks = new List<NodeLock>();
+            foreach(string lockName in itemContainer.StartingNodeLockNames)
+            {
+                if(!Locks.TryGetValue(lockName, out NodeLock nodeLock))
+                {
+                    throw new Exception($"Starting node lock {lockName} not found.");
+                }
+                startingLocks.Add(nodeLock);
+            }
+
+            ResourceCount startingResources = new ResourceCount();
+            foreach(ResourceCapacity capacity in itemContainer.StartingResources)
+            {
+                startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
+            }
+
+            ItemInventory startingInventory = new ItemInventory(startingResources);
+            foreach(string itemName in itemContainer.StartingItemNames)
+            {
+                if (!Items.TryGetValue(itemName, out Item item))
+                {
+                    throw new Exception($"Starting item {itemName} not found.");
+                }
+                startingInventory.ApplyAddItem(item);
+            }
+
+            StartConditions = new StartConditions
+            {
+                StartingNode = startingNode,
+                StartingGameFlags = startingFlags,
+                StartingOpenLocks = startingLocks,
+                BaseResourceMaximums = startingResources,
+                // Default starting resource counts to the starting maximum
+                StartingResources = startingResources.Clone(),
+                StartingInventory = startingInventory
+            };
+        }
 
         /// <summary>
         /// The helpers in this model, mapped by name.

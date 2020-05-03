@@ -20,6 +20,9 @@ namespace sm_json_data_framework.Models.Items
         [JsonPropertyName("startingFlags")]
         public IEnumerable<string> StartingGameFlagNames { get; set; } = Enumerable.Empty<string>();
 
+        [JsonPropertyName("startingLocks")]
+        public IEnumerable<string> StartingNodeLockNames { get; set; } = Enumerable.Empty<string>();
+
         public IEnumerable<ResourceCapacity> StartingResources { get; set; } = Enumerable.Empty<ResourceCapacity>();
 
         [JsonPropertyName("implicitItems")]

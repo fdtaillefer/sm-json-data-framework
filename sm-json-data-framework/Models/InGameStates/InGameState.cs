@@ -181,6 +181,28 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Creates and returns a new dictionary containing all active game flags from this in-game state
+        /// that aren't active in the provided other in-game state.
+        /// </summary>
+        /// <param name="other">The other in-game state</param>
+        /// <returns></returns>
+        public IDictionary<string, GameFlag> GetActiveGameFlagsExceptWith(InGameState other)
+        {
+            IDictionary<string, GameFlag> returnFlags = new Dictionary<string, GameFlag>();
+
+            // For each flag, just check for absence in other
+            foreach (KeyValuePair<string, GameFlag> kvp in ActiveGameFlags)
+            {
+                if (!other.ActiveGameFlags.ContainsKey(kvp.Key))
+                {
+                    returnFlags.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return returnFlags;
+        }
+
+        /// <summary>
         /// Returns whether the provided game flag is activated in this InGameState.
         /// </summary>
         /// <param name="flag">The game flag to check</param>
@@ -229,6 +251,29 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Creates and returns a new dictionary containing all OPENED NODE LOCKS from this in-game state
+        /// that aren't OPENED in the provided other in-game state.
+        /// </summary>
+        /// <param name="other">The other in-game state</param>
+        /// <returns></returns>
+        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptWith(InGameState other)
+        {
+
+            IDictionary<string, NodeLock> returnLocks = new Dictionary<string, NodeLock>();
+
+            // For each lock, just check for absence in other
+            foreach (KeyValuePair<string, NodeLock> kvp in OpenedLocks)
+            {
+                if (!other.OpenedLocks.ContainsKey(kvp.Key))
+                {
+                    returnLocks.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return returnLocks;
+        }
+
+        /// <summary>
         /// Returns whether the provided node lock is open in this InGameState.
         /// </summary>
         /// <param name="nodeLock">The node lock to check</param>
@@ -261,6 +306,17 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         protected ItemInventory Inventory { get; set; }
+
+        /// <summary>
+        /// Creates and returns a new ItemInventory containing all items from this in-game state
+        /// that aren't found in the provided other in-game state.
+        /// </summary>
+        /// <param name="other">The other in-game state</param>
+        /// <returns></returns>
+        public ItemInventory GetInventoryExceptWith(InGameState other)
+        {
+            return Inventory.ExceptWith(other.Inventory);
+        }
 
         /// <summary>
         /// Returns a read-only view of the inner non-consumable items dictionary, mapped by name.

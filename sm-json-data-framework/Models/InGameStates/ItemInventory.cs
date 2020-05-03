@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace sm_json_data_framework.Models.InGameStates
@@ -14,16 +17,30 @@ namespace sm_json_data_framework.Models.InGameStates
     /// </summary>
     public class ItemInventory
     {
-        public ItemInventory(IEnumerable<ResourceCapacity> startingResources)
+        /// <summary>
+        /// A constructor that receives an enumeration of ResourceCapacity to express the base resource maximums.
+        /// </summary>
+        /// <param name="baseResourceMaximums">The base maximum for all resources</param>
+        public ItemInventory(IEnumerable<ResourceCapacity> baseResourceMaximums)
         {
             ResourceCapacityChanges = new ResourceCount();
 
             // Apply startingResources to base maximums
             BaseResourceMaximums = new ResourceCount();
-            foreach (ResourceCapacity capacity in startingResources)
+            foreach (ResourceCapacity capacity in baseResourceMaximums)
             {
                 BaseResourceMaximums.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
             }
+        }
+
+        /// <summary>
+        /// A constructor that receives a ResourceCount to express the base resource maximums.
+        /// </summary>
+        /// <param name="baseResourceMaximums">A ResourceCount containing the base maximums.
+        /// This instance will be cloned and will never be modified as a result of being passed here.</param>
+        public ItemInventory(ResourceCount baseResourceMaximums)
+        {
+            BaseResourceMaximums = baseResourceMaximums.Clone();
         }
 
         public ItemInventory(ItemInventory other)
@@ -134,6 +151,16 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns whether there is any explicit in-game item in this inventory.
+        /// </summary>
+        /// <returns></returns>
+        public bool ContainsAnyInGameItem()
+        {
+            return NonConsumableItems.Values.Where(i => i is InGameItem).Any()
+                || ExpansionItems.Values.Where(i => i.item is InGameItem).Any();
+        }
+
+        /// <summary>
         /// Adds the provided item to this inventory.
         /// </summary>
         /// <param name="item"></param>
@@ -170,5 +197,51 @@ namespace sm_json_data_framework.Models.InGameStates
                 }
             }
         }
+
+        /// <summary>
+        /// Creates and returns a new ItemInventory containing all items from this Inventory
+        /// that aren't found in the provided other inventory.
+        /// </summary>
+        /// <param name="other">The other inventory</param>
+        /// <returns></returns>
+        public ItemInventory ExceptWith(ItemInventory other)
+        {
+            // Create a new empty inventory
+            ItemInventory returnInventory = new ItemInventory(BaseResourceMaximums);
+
+            // For non-consumable items, just check for absence in other
+            foreach (KeyValuePair<string, Item> kvp in NonConsumableItems)
+            {
+                if (!other.NonConsumableItems.ContainsKey(kvp.Key))
+                {
+                    returnInventory.ApplyAddItem(kvp.Value);
+                }
+            }
+
+            // For expansion items, we need a count difference
+            foreach(var kvp in ExpansionItems)
+            {
+                // Find how many of this item are present in this and not in other
+                int timesMissing = 0;
+                if (other.ExpansionItems.TryGetValue(kvp.Key, out var otherExpansionItem))
+                {
+                    // This can turn out negative, the for loop will properly do nothing
+                    timesMissing = kvp.Value.count - otherExpansionItem.count;
+                }
+                else
+                {
+                    timesMissing = kvp.Value.count;
+                }
+
+                // Add this item as many times as the count difference
+                for(int i = 0; i < timesMissing; i++)
+                {
+                    returnInventory.ApplyAddItem(kvp.Value.item);
+                }
+            }
+
+            return returnInventory;
+        }
     }
+
 }

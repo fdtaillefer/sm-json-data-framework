@@ -144,6 +144,8 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
+            model.AssignStartingConditions(itemContainer);
+
             if (initialize)
             {
                 // Create and assign initial game state
