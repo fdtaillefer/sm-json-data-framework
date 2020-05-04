@@ -319,6 +319,23 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Creates and returns a ResourceCount that expresses how many resources this in-game state has,
+        /// relative to the provided in-game state. Negative values mean this state has less.
+        /// </summary>
+        /// <param name="other">The other in-game state to compare with.</param>
+        /// <returns></returns>
+        public ResourceCount GetResourceVariationWith(InGameState other)
+        {
+            ResourceCount returnValue = new ResourceCount();
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                returnValue.ApplyAmount(currentResource, GetCurrentAmount(currentResource) - other.GetCurrentAmount(currentResource));
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
         /// Returns a read-only view of the inner non-consumable items dictionary, mapped by name.
         /// </summary>
         /// <returns></returns>

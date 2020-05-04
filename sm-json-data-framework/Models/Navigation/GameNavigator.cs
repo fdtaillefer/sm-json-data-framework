@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
@@ -33,9 +34,8 @@ namespace sm_json_data_framework.Models.Navigation
         // 
         // Failure to do an action would leave the state unchanged and return something to indicate failure.
         //
-        // We could possibly also have a log of previous actions in here, maintained alongside the previous states.
-        //
         // Some kind of system to customize/override the items at in-game locations could be good, to navigate an actual randomized seed and grab items.
+        // Though this one might be out of scope for GameNavigator. It should probably happen upstream.
 
 
 
@@ -46,10 +46,12 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// Constructor that initializes a GameNavigator with the provided initial state.
         /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="initialState">The starting inGameState for this navigator.</param>
         /// <param name="maxPreviousStatesSize">The maximum number of previous states that this navigator should keep in memory.</param>
-        public GameNavigator(InGameState initialState, int maxPreviousStatesSize)
+        public GameNavigator(SuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize)
         {
+            GameModel = model;
             CurrentInGameState = initialState;
             MaxPreviousStatesSize = maxPreviousStatesSize;
         }
@@ -59,18 +61,25 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         public InGameState CurrentInGameState {get; private set;}
 
+        /// <summary>
+        /// A model that can be used to obtain data about the current game configuration.
+        /// </summary>
+        private SuperMetroidModel GameModel { get; set; }
+
         private int MaxPreviousStatesSize { get; set; }
 
         /// <summary>
         /// Contains previous in-game states, paired with the action that was performed on them to obtain the next state.
         /// More recent actions are at the front of the Deque.
         /// </summary>
-        private Deque<(INavigationAction action, InGameState initialState)> PreviousStates { get; } = new Deque<(INavigationAction action, InGameState inGameState)>();
+        private Deque<(AbstractNavigationAction action, InGameState initialState)> PreviousStates { get; } = new Deque<(AbstractNavigationAction action, InGameState inGameState)>();
 
         /// <summary>
         /// Contains actions that have been undone, paired with the in-game state that resulted from the action.
         /// </summary>
-        private Stack<(INavigationAction action, InGameState resultingState)> UndoneActions { get; } = new Stack<(INavigationAction action, InGameState inGameState)>();
+        private Stack<(AbstractNavigationAction action, InGameState resultingState)> UndoneActions { get; } = new Stack<(AbstractNavigationAction action, InGameState inGameState)>();
+
+        #region Action methods
 
         /// <summary>
         /// Given a performed action and its resulting state, moves this navigator forward,
@@ -78,7 +87,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         /// <param name="action">The action that was performed</param>
         /// <param name="resultingState">The InGameState that resulted from performing the action</param>
-        private void DoAction(INavigationAction action, InGameState resultingState)
+        private void DoAction(AbstractNavigationAction action, InGameState resultingState)
         {
             // Can't move forward on a failure
             if(!action.Succeeded)
@@ -102,14 +111,14 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         /// <returns>An action representing the effects of undoing the previous action.
         /// If there are no actions to undo, returns a failure action.</returns>
-        public INavigationAction Undo()
+        public AbstractNavigationAction Undo()
         {
             if (PreviousStates.Any())
             {
                 (var action, var initialState) = PreviousStates.RemoveFromFront();
                 UndoneActions.Push((action, CurrentInGameState));
                 CurrentInGameState = initialState;
-                return action.Reverse();
+                return action.Reverse(GameModel);
             }
             // No actions to undo
             else
@@ -122,7 +131,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// Redoes the last action that was undone, moving forward to the state after that action.
         /// </summary>
         /// <returns>The action that was redone, or a failure if there are no actions to redo.</returns>
-        public INavigationAction Redo()
+        public AbstractNavigationAction Redo()
         {
             if(UndoneActions.Count > 0)
             {
@@ -138,7 +147,37 @@ namespace sm_json_data_framework.Models.Navigation
             }
         }
 
-        #region Action methods
+        /// <summary>
+        /// Attempts to move from current node to the node with the provided ID in the current room.
+        /// This requires a direct link.
+        /// </summary>
+        /// <param name="nodeId">The ID of the node to move to</param>
+        /// <returns>The resulting action. If moving fails, returns a failure action.</returns>
+        public AbstractNavigationAction MoveToNode(int nodeId)
+        {
+            // Find a link from current node to  that node
+            LinkTo linkTo = CurrentInGameState.GetCurrentLinkTo(nodeId);
+            if (linkTo == null)
+            {
+                return Failure.Instance;
+            }
+
+            // We found a link, try to follow it
+            var(strat, result) = GameModel.ExecuteBest(linkTo.Strats, CurrentInGameState);
+            
+            // If no strat of the link was successful, this is a failure
+            if (strat == null)
+            {
+                return Failure.Instance;
+            }
+
+            // If a strat succeeded, create a corresponding action
+            var action = new MoveToNodeAction(GameModel, CurrentInGameState, strat, result);
+
+            // Register the action as done and return it
+            DoAction(action, result.ResultingState);
+            return action;
+        }
 
         #endregion
 

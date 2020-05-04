@@ -24,9 +24,28 @@ namespace sm_json_data_framework.Models.InGameStates
             ApplyAmounts(other);
         }
 
+        /// <summary>
+        /// Creates and returns a copy of this ResourceCount.
+        /// </summary>
+        /// <returns></returns>
         public ResourceCount Clone()
         {
             return new ResourceCount(this);
+        }
+
+        /// <summary>
+        /// Creates and returns a copy of this ResourceCount, with positive and negative values flipped.
+        /// </summary>
+        /// <returns></returns>
+        public ResourceCount CloneNegative()
+        {
+            ResourceCount clone = Clone();
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                clone.ApplyAmount(currentResource, clone.GetAmount(currentResource) * -1);
+            }
+
+            return clone;
         }
 
         private IDictionary<RechargeableResourceEnum, int> Amounts { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
