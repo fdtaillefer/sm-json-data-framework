@@ -167,6 +167,11 @@ namespace sm_json_data_framework.Models
         public IDictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
 
         /// <summary>
+        /// The nodes in this model, mapped by name.
+        /// </summary>
+        public IDictionary<string, RoomNode> Nodes { get; set; } = new Dictionary<string, RoomNode>();
+
+        /// <summary>
         /// The node locks in this model, mapped by name.
         /// </summary>
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();

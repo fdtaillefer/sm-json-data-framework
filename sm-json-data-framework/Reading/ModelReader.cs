@@ -8,6 +8,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Rules;
@@ -136,6 +137,11 @@ namespace sm_json_data_framework.Reading
                 foreach(Room room in roomContainer.Rooms)
                 {
                     model.Rooms.Add(room.Name, room);
+
+                    foreach(RoomNode node in room.Nodes.Values)
+                    {
+                        model.Nodes.Add(node.Name, node);
+                    }
 
                     if (initialize)
                     {
