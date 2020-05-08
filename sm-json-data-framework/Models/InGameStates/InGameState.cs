@@ -70,6 +70,8 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             ActiveGameFlags = new Dictionary<string, GameFlag>(other.ActiveGameFlags);
 
+            TakenItemLocations = new Dictionary<string, RoomNode>(other.TakenItemLocations);
+
             Inventory = other.Inventory.Clone();
 
             Resources = other.Resources.Clone();
@@ -302,6 +304,77 @@ namespace sm_json_data_framework.Models.InGameStates
             if (!IsLockOpen(nodeLock))
             {
                 OpenedLocks.Add(nodeLock.Name, nodeLock);
+            }
+        }
+
+        protected IDictionary<string, RoomNode> TakenItemLocations { get; set; } = new Dictionary<string, RoomNode>();
+
+        private IReadOnlyDictionary<string, RoomNode> _takenItemLocations;
+        /// <summary>
+        /// Returns a read-only view of the taken item locations, mapped by name.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyDictionary<string, RoomNode> GetTakenItemLocationsDictionary()
+        {
+            if (_takenItemLocations == null)
+            {
+                _takenItemLocations = new ReadOnlyDictionary<string, RoomNode>(TakenItemLocations);
+            }
+            return _takenItemLocations;
+        }
+
+        /// <summary>
+        /// Creates and returns a new dictionary containing all taken item locations from this in-game state
+        /// that aren't taken in the provided other in-game state.
+        /// </summary>
+        /// <param name="other">The other in-game state</param>
+        /// <returns></returns>
+        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptWith(InGameState other)
+        {
+            IDictionary<string, RoomNode> returnLocations = new Dictionary<string, RoomNode>();
+
+            // For each location, just check for absence in other
+            foreach (KeyValuePair<string, RoomNode> kvp in TakenItemLocations)
+            {
+                if (!other.TakenItemLocations.ContainsKey(kvp.Key))
+                {
+                    returnLocations.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return returnLocations;
+        }
+
+        /// <summary>
+        /// Returns whether the provided item location is taken in this InGameState.
+        /// </summary>
+        /// <param name="roomNode">The node of the location to check</param>
+        /// <returns></returns>
+        public bool IsItemLocationTaken(RoomNode location)
+        {
+            return TakenItemLocations.ContainsKey(location.Name);
+        }
+
+        /// <summary>
+        /// Returns whether the location with the provided name is taken in this InGameState.
+        /// </summary>
+        /// <param name="locationName">The location name to check</param>
+        /// <returns></returns>
+        public bool IsItemLocationTaken(string locationName)
+        {
+            return TakenItemLocations.ContainsKey(locationName);
+        }
+
+        /// <summary>
+        /// Adds the provided location to the taken locations in this InGameState.
+        /// Does not modify the inventory.
+        /// </summary>
+        /// <param name="location">Node of the location to add</param>
+        public void ApplyTakeLocation(RoomNode location)
+        {
+            if (!IsItemLocationTaken(location))
+            {
+                TakenItemLocations.Add(location.Name, location);
             }
         }
 
