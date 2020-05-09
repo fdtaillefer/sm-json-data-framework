@@ -688,7 +688,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // We must now figure out if the previous room also qualifies.
 
             // Figure out through what node we left the previous room...
-            RoomNode previousRoomExitNode = GetCurrentNode(true);
+            RoomNode previousRoomExitNode = GetCurrentNode(usePreviousRoom: true);
 
             // If we can't figure out how we left previous room, we can't return any runways
             if (previousRoomExitNode == null)
@@ -697,7 +697,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // If the last room was exited by bypassing a lock, runways can't be used
-            if (BypassingExitLock(true))
+            if (BypassingExitLock(usePreviousRoom: true))
             {
                 return Enumerable.Empty<Runway>();
             }
@@ -754,8 +754,8 @@ namespace sm_json_data_framework.Models.InGameStates
             // At this point we know our behavior in the current room respects the provided requirements for retroactively using a CanLeaveCharged.
 
             // Figure out through what node we left the previous room...
-            RoomNode previousRoomNode = GetCurrentNode(true);
-            RoomNode previousRoomRemoteExitNode = GetRemoteExitNode(true);
+            RoomNode previousRoomNode = GetCurrentNode(usePreviousRoom: true);
+            RoomNode previousRoomRemoteExitNode = GetRemoteExitNode(usePreviousRoom: true);
             bool remoteExit = previousRoomRemoteExitNode != null;
             RoomNode previousRoomExitNode = remoteExit?  previousRoomRemoteExitNode : previousRoomNode;
 
@@ -766,7 +766,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // If the last room was exited by bypassing a lock, canLeaveChargeds can't be used
-            if (BypassingExitLock(true))
+            if (BypassingExitLock(usePreviousRoom: true))
             {
                 return Enumerable.Empty<CanLeaveCharged>();
             }

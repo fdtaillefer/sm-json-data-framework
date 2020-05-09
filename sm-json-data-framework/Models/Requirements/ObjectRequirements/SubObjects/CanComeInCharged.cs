@@ -88,11 +88,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Next Step: all adjacent runways with their resulting state.
 
             // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
-            var inRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
+            var requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
             // For all adjacent runways that can be used retroactively while still doing the shinespark after,
             // figure out the resulting state, effective length, and the overall best resulting state
             var (usableAdjacentRunwayEvaluations, bestAdjacentRunwayResult) =
-                EvaluateRunways(model, inGameState, inGameState.GetRetroactiveRunways(inRoomPath, usePreviousRoom: true), times, usePreviousRoom,
+                EvaluateRunways(model, inGameState, inGameState.GetRetroactiveRunways(requiredInRoomPath, usePreviousRoom: true), times, usePreviousRoom,
                     hasEnergyForShinespark, runwaysReversible: false);
 
             // If using this adjacent runway cost nothing, spend the shinespark and return
@@ -110,7 +110,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             // Next step: Find the best retroactive CanLeaveCharged that has enough frames
             // remaining and leaves Samus with enough energy for the shinespark
-            var usableCanLeaveChargeds = inGameState.GetRetroactiveCanLeaveChargeds(inRoomPath, usePreviousRoom: true)
+            var usableCanLeaveChargeds = inGameState.GetRetroactiveCanLeaveChargeds(requiredInRoomPath, usePreviousRoom: usePreviousRoom)
                 .Where(clc => clc.FramesRemaining >= FramesRemaining);
             (_, ExecutionResult bestLeaveChargedResult) = model.ExecuteBest(usableCanLeaveChargeds, inGameState, times: times,
                 usePreviousRoom: usePreviousRoom, hasEnergyForShinespark);
