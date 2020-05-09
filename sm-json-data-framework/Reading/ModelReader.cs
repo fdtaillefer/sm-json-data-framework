@@ -14,6 +14,7 @@ using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -119,13 +120,38 @@ namespace sm_json_data_framework.Reading
             foreach(string connectionFile in allConnectionFiles)
             {
                 ConnectionContainer connectionContainer = JsonSerializer.Deserialize<ConnectionContainer>(File.ReadAllText(connectionFile), options);
-                foreach(Connection connection in connectionContainer.Connections)
+                foreach(JsonConnection connection in connectionContainer.Connections)
                 {
                     ConnectionNode node1 = connection.Nodes.ElementAt(0);
-                    model.Connections.Add(node1.IdentifyingString, connection);
-
                     ConnectionNode node2 = connection.Nodes.ElementAt(1);
-                    model.Connections.Add(node2.IdentifyingString, connection);
+
+                    // If the forward direction is applicable for this json connection, create and add a corresponding forward one-way connection
+                    if(connection.Direction == ConnectionDirectionEnum.Forward 
+                        || connection.Direction == ConnectionDirectionEnum.Bidirectional)
+                    {
+                        Connection forwardConnection = new Connection
+                        {
+                            ConnectionType = connection.ConnectionType,
+                            FromNode = connection.Nodes.First(),
+                            ToNode = connection.Nodes.ElementAt(1)
+                        };
+
+                        model.Connections.Add(forwardConnection.FromNode.IdentifyingString, forwardConnection);
+                    }
+
+                    // If the backward direction is applicable for this json connection, create and add a corresponding backward one-way connection
+                    if (connection.Direction == ConnectionDirectionEnum.Backward
+                        || connection.Direction == ConnectionDirectionEnum.Bidirectional)
+                    {
+                        Connection backwardConnection = new Connection
+                        {
+                            ConnectionType = connection.ConnectionType,
+                            FromNode = connection.Nodes.ElementAt(1),
+                            ToNode = connection.Nodes.First()
+                        };
+
+                        model.Connections.Add(backwardConnection.FromNode.IdentifyingString, backwardConnection);
+                    }
                 }
             }
 
@@ -142,11 +168,16 @@ namespace sm_json_data_framework.Reading
                     {
                         model.Nodes.Add(node.Name, node);
                     }
-
-                    if (initialize)
-                    {
-                        room.Initialize(model);
-                    }
+                }
+            }
+            // The initialization of rooms initializes the nodes' connection destination node.
+            // That requires this node (and, logically, its room beforehand) to have been created already.
+            // This means we can't initialize a room safely until we've created all rooms, so iterate a second on rooms to initialize.
+            if (initialize)
+            {
+                foreach (Room room in model.Rooms.Values)
+                {
+                    room.Initialize(model);
                 }
             }
 

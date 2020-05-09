@@ -177,8 +177,7 @@ namespace sm_json_data_framework.Models
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
 
         /// <summary>
-        /// A dictionary that maps a node's IdentifyingString to a connection.
-        /// Be aware that this means each connection will likely be present twice.
+        /// A dictionary that maps a node's IdentifyingString to a one-way connection with that node as the origin.
         /// </summary>
         public IDictionary<string, Connection> Connections { get; set; } = new Dictionary<string, Connection>();
 

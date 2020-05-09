@@ -85,7 +85,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
-        /// <para>If this node is a way out of the room, this is the connection that connects this node to its destination.</para>
+        /// <para>If this node is a way out of the room, this is the one-way connection that connects this node to its destination.</para>
         /// </summary>
         [JsonIgnore]
         public Connection OutConnection { get; set; }
@@ -114,7 +114,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 if (model.Connections.TryGetValue(IdentifyingString, out Connection connection))
                 {
                     OutConnection = connection;
-                    ConnectionNode otherNode = connection.Nodes.Where(n => n.RoomName == Room.Name && n.Nodeid == Id).Single();
+                    ConnectionNode otherNode = connection.ToNode;
                     OutNode = model.Rooms[otherNode.RoomName].Nodes[otherNode.Nodeid];
                 }
             }

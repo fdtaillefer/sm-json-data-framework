@@ -4,8 +4,10 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Connections
 {
-    public class ConnectionContainer
+    public enum ConnectionDirectionEnum
     {
-        public IEnumerable<JsonConnection> Connections { get; set; }
+        Forward,
+        Backward,
+        Bidirectional
     }
 }
