@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,6 +22,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <returns>The calculated amount of damage</returns>
         public abstract int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false);
 
+        /// <summary>
+        /// Returns the enumeration of items that are responsible for reducing incurred damage, 
+        /// given the execution described by the provided parameters.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state that execution would start with.</param>
+        /// <returns></returns>
+        public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, InGameState inGameState);
+
         public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             int damage = CalculateDamage(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
@@ -28,7 +38,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             {
                 var resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
-                return new ExecutionResult(resultingState);
+                ExecutionResult result = new ExecutionResult(resultingState);
+                result.ApplyDamageReducingItemsInvolved(GetDamageReducingItems(model, inGameState));
+                return result;
             }
             else
             {

@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +16,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             int currentRegularEnergy = inGameState.GetCurrentAmount(Items.RechargeableResourceEnum.RegularEnergy);
             // Don't take damage if we've already reached the threshold
             return Math.Max(0, currentRegularEnergy - Value);
+        }
+
+        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, InGameState inGameState)
+        {
+            // This brings energy down to a specific level, and has no cares for damage reduction items
+            return new Item[] { };
         }
     }
 }

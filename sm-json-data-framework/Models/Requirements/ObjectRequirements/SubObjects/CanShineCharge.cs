@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Rules;
 using System;
@@ -71,7 +72,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             {
                 InGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
-                return new ExecutionResult(resultingState);
+                ExecutionResult result = new ExecutionResult(resultingState);
+                result.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                return result;
             }
             // If we don't have enough for the shinespark, we cannot do this
             else

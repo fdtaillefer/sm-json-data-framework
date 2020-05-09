@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Node;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,6 +65,10 @@ namespace sm_json_data_framework.Models.Navigation
             OpenedLocks = executionResult.OpenedLocks;
             BypassedLocks = executionResult.BypassedLocks;
             KilledEnemies = executionResult.KilledEnemies;
+
+            // Since the set of items is mutable, do not transfer the instance
+            ItemsInvolved.UnionWith(executionResult.ItemsInvolved);
+            DamageReducingItemsInvolved.UnionWith(executionResult.DamageReducingItemsInvolved);
         }
 
         #region Information about the action's effects
@@ -163,6 +168,17 @@ namespace sm_json_data_framework.Models.Navigation
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
         /// </summary>
         public IEnumerable<IndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<IndividualEnemyKillResult>();
+
+        /// <summary>
+        /// A sequence of items that were involved in some way, excluding damage reduction
+        /// and operation of weapons already present in <see cref="KilledEnemies"/>.
+        /// </summary>
+        public ISet<Item> ItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+
+        /// <summary>
+        /// A sequence of items that were involved in reducing incoming damage.
+        /// </summary>
+        public ISet<Item> DamageReducingItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
         #endregion
 
         /// <summary>

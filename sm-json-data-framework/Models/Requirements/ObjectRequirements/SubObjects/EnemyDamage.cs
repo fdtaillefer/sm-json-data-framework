@@ -67,7 +67,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             {
                 InGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
-                return new ExecutionResult(resultingState);
+                ExecutionResult result = new ExecutionResult(resultingState);
+                result.ApplyDamageReducingItemsInvolved(model.Rules.GetEnemyDamageReducingItems(model, inGameState, Attack));
+                return result;
             }
             else
             {

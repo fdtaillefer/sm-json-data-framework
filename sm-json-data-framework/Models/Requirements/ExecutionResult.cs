@@ -1,9 +1,11 @@
 ﻿using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Node;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Weapons;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,6 +73,18 @@ namespace sm_json_data_framework.Models.Requirements
         public IEnumerable<IndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<IndividualEnemyKillResult>();
 
         /// <summary>
+        /// A sequence of items that were involved in some way. 
+        /// This excludes items needed to operate weapons described in <see cref="KilledEnemies"/>.
+        /// This also excludes items whose only contribution was reducing damage (they are in <see cref="DamageReducingItemsInvolved"/>).
+        /// </summary>
+        public ISet<Item> ItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+
+        /// <summary>
+        /// A sequence of items that were involved in reducing incoming damage.
+        /// </summary>
+        public ISet<Item> DamageReducingItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+
+        /// <summary>
         /// Given the result of an execution done on this result's resulting state, updates this result to represent
         /// the result of both executions done back-to-back. Then, returns itself.
         /// </summary>
@@ -85,6 +99,8 @@ namespace sm_json_data_framework.Models.Requirements
             OpenedLocks = OpenedLocks.Concat(subsequentResult.OpenedLocks);
             BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks);
             KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies);
+            ItemsInvolved.UnionWith(subsequentResult.ItemsInvolved);
+            DamageReducingItemsInvolved.UnionWith(subsequentResult.DamageReducingItemsInvolved);
 
             return this;
         }
@@ -170,6 +186,25 @@ namespace sm_json_data_framework.Models.Requirements
         public void ApplyKilledEnemy(Enemy enemy, IEnumerable<(Weapon weapon, int shots)> killMethod)
         {
             KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, killMethod));
+        }
+
+        /// <summary>
+        /// Adds to this ExecutionResult a record of getting execution some benefit out of having the provided items.
+        /// This should exclude damage reduction and the operation of weapons recorded in <see cref="KilledEnemies"/>.
+        /// </summary>
+        /// <param name="items">The items</param>
+        public void ApplyItemsInvolved(IEnumerable<Item> items)
+        {
+            ItemsInvolved.UnionWith(items);
+        }
+
+        /// <summary>
+        /// Adds to this ExecutionResult a record of taking less damage due to having the provided items.
+        /// </summary>
+        /// <param name="items">The items</param>
+        public void ApplyDamageReducingItemsInvolved(IEnumerable<Item> items)
+        {
+            DamageReducingItemsInvolved.UnionWith(items);
         }
 
         /// <summary>

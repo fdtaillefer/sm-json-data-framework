@@ -4,6 +4,7 @@ using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
@@ -46,11 +47,22 @@ namespace sm_json_data_framework.Models
     /// </summary>
     public class SuperMetroidModel
     {
+        public const string GRAVITY_SUIT_NAME = "Gravity";
+        public const string VARIA_SUIT_NAME = "Varia";
+        public const string SPEED_BOOSTER_NAME = "SpeedBooster";
+
         public SuperMetroidModel()
         {
             // Weapons can't have an initializer directly on itself because of the custom setter
             Weapons = new Dictionary<string, Weapon>();
         }
+
+        /// <summary>
+        /// Indicates whether this model's contents has been "initialized".
+        /// If true, a lot of pre-processing was done to initialize additional properties in many objects within the returned model.
+        /// If false, the objects in the returned model contain mostly just raw data.
+        /// </summary>
+        public bool Initialized { get; set; }
         
         /// <summary>
         /// Options that describe what the player is expected to be able or unable to do.
@@ -316,12 +328,32 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Creates and returns a copy of the initial game state.
+        /// Creates and returns a copy of the initial game state. Requires this model to have been initialized.
         /// </summary>
         /// <returns></returns>
         public InGameState CreateInitialGameStateCopy()
         {
+            if (!Initialized)
+            {
+                throw new Exception("InGameState is not available for a model that's not initialized.");
+            }
             return new InGameState(InitialGameState);
+        }
+
+        /// <summary>
+        /// Creates and returns a game navigator at the starting location and with starting resources.
+        /// Requires this model to have been initialized.
+        /// </summary>
+        /// <param name="maxPreviousStatesSize">The maximum number of previous states that the created navigator
+        /// should keep in memory.</param>
+        /// <returns></returns>
+        public GameNavigator CreateInitialGameNavigator(int maxPreviousStatesSize)
+        {
+            if (!Initialized)
+            {
+                throw new Exception("GameNavigator is not available for a model that's not initialized.");
+            }
+            return new GameNavigator(this, CreateInitialGameStateCopy(), maxPreviousStatesSize);
         }
     }
 }

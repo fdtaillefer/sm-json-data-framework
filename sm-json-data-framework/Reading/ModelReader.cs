@@ -219,6 +219,7 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
+            model.Initialized = initialize;
             return model;
         }
 

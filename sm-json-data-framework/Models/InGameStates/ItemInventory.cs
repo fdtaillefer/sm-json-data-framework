@@ -119,7 +119,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public bool HasVariaSuit()
         {
-            return HasItem("Varia");
+            return HasItem(SuperMetroidModel.VARIA_SUIT_NAME);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public bool HasGravitySuit()
         {
-            return HasItem("Gravity");
+            return HasItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public bool HasSpeedBooster()
         {
-            return HasItem("SpeedBooster");
+            return HasItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }
 
         /// <summary>
