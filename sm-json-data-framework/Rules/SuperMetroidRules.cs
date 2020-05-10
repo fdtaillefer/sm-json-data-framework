@@ -440,5 +440,22 @@ namespace sm_json_data_framework.Rules
                 SteepUpTiles = runway.SteepDownTiles
             };
         }
+
+        /// <summary>
+        /// Returns how the game adjusts a resource when picking up an associated expansion item.
+        /// </summary>
+        /// <param name="resource">The resource to get the behavior for.</param>
+        /// <returns></returns>
+        public virtual ExpansionPickupRestoreBehaviorEnum GetExpansionPickupRestoreBehavior(RechargeableResourceEnum resource)
+        {
+            return resource switch
+            {
+                RechargeableResourceEnum.Missile => ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP,
+                RechargeableResourceEnum.Super => ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP,
+                RechargeableResourceEnum.PowerBomb => ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP,
+                RechargeableResourceEnum.RegularEnergy => ExpansionPickupRestoreBehaviorEnum.REFILL,
+                RechargeableResourceEnum.ReserveEnergy => ExpansionPickupRestoreBehaviorEnum.NOTHING
+            };
+        }
     }
 }

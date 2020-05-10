@@ -72,6 +72,8 @@ namespace sm_json_data_framework.Models.InGameStates
 
             TakenItemLocations = new Dictionary<string, RoomNode>(other.TakenItemLocations);
 
+            OpenedLocks = new Dictionary<String, NodeLock>(other.OpenedLocks);
+
             Inventory = other.Inventory.Clone();
 
             Resources = other.Resources.Clone();
@@ -156,6 +158,26 @@ namespace sm_json_data_framework.Models.InGameStates
                 ConsumableResourceEnum.SUPER => GetCurrentAmount(RechargeableResourceEnum.Super) >= quantity,
                 ConsumableResourceEnum.POWER_BOMB => GetCurrentAmount(RechargeableResourceEnum.PowerBomb) >= quantity
             };
+        }
+
+        /// <summary>
+        /// Adds the provided quantity of the provided consumable resource. Will not go beyond the maximum
+        /// </summary>
+        /// <param name="resource">The resource to increase</param>
+        /// <param name="quantity">The amount to increase by</param>
+        public void ApplyAddResource(RechargeableResourceEnum resource, int quantity)
+        {
+            int max = GetMaxAmount(resource);
+            int currentAmount = Resources.GetAmount(resource);
+
+            // We're already at max (or greater, somehow). Don't add anything
+            if (currentAmount >= max)
+            {
+                return;
+            }
+            int newAmount = currentAmount + quantity;
+
+            Resources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
         }
 
         /// <summary>

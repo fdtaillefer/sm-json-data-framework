@@ -41,6 +41,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public ItemInventory(ResourceCount baseResourceMaximums)
         {
             BaseResourceMaximums = baseResourceMaximums.Clone();
+            ResourceCapacityChanges = new ResourceCount();
         }
 
         public ItemInventory(ItemInventory other)

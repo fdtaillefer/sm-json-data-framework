@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,12 +50,20 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="initialState">The starting inGameState for this navigator.</param>
         /// <param name="maxPreviousStatesSize">The maximum number of previous states that this navigator should keep in memory.</param>
-        public GameNavigator(SuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize)
+        /// <param name="options">Optional game navigation options. If left null, default options will be used.</param>
+        public GameNavigator(SuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
         {
             GameModel = model;
             CurrentInGameState = initialState;
             MaxPreviousStatesSize = maxPreviousStatesSize;
+            if (options == null)
+            {
+                options = new GameNavigatorOptions();
+            }
+            Options = options;
         }
+
+        private GameNavigatorOptions Options { get; set; }
 
         /// <summary>
         /// The InGameState describing the current in-game situation of this GameNavigator.
@@ -157,10 +166,18 @@ namespace sm_json_data_framework.Models.Navigation
         {
             string intent = $"Move to node {nodeId}";
 
-            // Find a link from current node to  that node
+            // Does that node exist?
+            if (!CurrentInGameState.GetCurrentRoom().Nodes.TryGetValue(nodeId, out RoomNode destinationNode))
+            {
+                intent = intent + $", but that node doesn't exist in {CurrentInGameState.GetCurrentRoom().Name}";
+                return new Failure(intent);
+            }
+
+            // Find a link from current node to that node
             LinkTo linkTo = CurrentInGameState.GetCurrentLinkTo(nodeId);
             if (linkTo == null)
             {
+                intent = intent + $", but no links found to that node from node {CurrentInGameState.GetCurrentNode().Id}";
                 return new Failure(intent);
             }
 
@@ -170,6 +187,7 @@ namespace sm_json_data_framework.Models.Navigation
             // If no strat of the link was successful, this is a failure
             if (strat == null)
             {
+                intent = intent + $", but could not execute any strats";
                 return new Failure(intent);
             }
 
@@ -275,6 +293,24 @@ namespace sm_json_data_framework.Models.Navigation
             {
                 result.ResultingState.ApplyTakeLocation(node);
                 result.ResultingState.ApplyAddItem(node.NodeItem);
+
+                // If we need to adjust resources according to normal game behavior...
+                if (Options.AddResourcesOnExpansionPickup && node.NodeItem is ExpansionItem expansionItem)
+                {
+                    switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
+                    {
+                        case ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP:
+                            result.ResultingState.ApplyAddResource(expansionItem.Resource, expansionItem.ResourceAmount);
+                            break;
+                        case ExpansionPickupRestoreBehaviorEnum.REFILL:
+                            result.ResultingState.ApplyRefillResource(expansionItem.Resource);
+                            break;
+                        // If we don't know or if the pickup has no effect, do nothing
+                        case ExpansionPickupRestoreBehaviorEnum.NOTHING:
+                        default:
+                            break;
+                    }
+                }
             }
 
             // Use any refill utility
