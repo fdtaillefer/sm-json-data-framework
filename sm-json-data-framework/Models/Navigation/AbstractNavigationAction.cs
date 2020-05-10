@@ -49,11 +49,12 @@ namespace sm_json_data_framework.Models.Navigation
             // Initialize item locations taken
             ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptWith(initialInGameState).Values);
 
-            // Initialize resource variation
-            ResourceVariation = executionResult.ResultingState.GetResourceVariationWith(initialInGameState);
+            // Initialize resources before and after
+            ResourcesBefore = initialInGameState.GetCurrentResources();
+            ResourcesAfter = executionResult.ResultingState.GetCurrentResources();
 
             // Initialize destroyed obstacles, but that's only relevant if we didn't change rooms
-            if(executionResult.ResultingState.GetCurrentRoom() == initialInGameState.GetCurrentRoom())
+            if (executionResult.ResultingState.GetCurrentRoom() == initialInGameState.GetCurrentRoom())
             {
                 ObstaclesDestroyed = ObstaclesDestroyed.Concat(
                     executionResult.ResultingState.GetDestroyedObstacleIds()
@@ -152,9 +153,14 @@ namespace sm_json_data_framework.Models.Navigation
         public IEnumerable<RoomObstacle> ObstaclesRestored { get; protected set; } = Enumerable.Empty<RoomObstacle>();
 
         /// <summary>
-        /// A ResourceCount representing the variation of each resource type that happened as a result of this action.
+        /// A ResourceCount representing the player's resources before this action.
         /// </summary>
-        public ResourceCount ResourceVariation { get; set; }
+        ResourceCount ResourcesBefore { get; set; }
+
+        /// <summary>
+        /// A ResourceCount representing the player's resources after this action.
+        /// </summary>
+        ResourceCount ResourcesAfter { get; set; }
         #endregion
 
         #region Information about how the action was performed
@@ -234,8 +240,9 @@ namespace sm_json_data_framework.Models.Navigation
             reverseAction.ItemLocationsTaken = ItemLocationsPutBack;
             reverseAction.ItemLocationsPutBack = ItemLocationsTaken;
 
-            // Initialize reversed resource variation
-            reverseAction.ResourceVariation = ResourceVariation.CloneNegative();
+            // Initialize reversed resource counts
+            reverseAction.ResourcesBefore = ResourcesAfter.Clone();
+            reverseAction.ResourcesAfter = ResourcesBefore.Clone();
 
             // Initialize reversed obstacles change
             // Don't clone, expect that IEnumerables won't get mutated.
@@ -300,14 +307,16 @@ namespace sm_json_data_framework.Models.Navigation
                 // Resource variation
                 foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
                 {
-                    int variation = ResourceVariation.GetAmount(currentResource);
+                    int countAfter = ResourcesAfter.GetAmount(currentResource);
+
+                    int variation = countAfter - ResourcesBefore.GetAmount(currentResource);
                     if(variation < 0)
                     {
-                        Console.WriteLine($"Used up {variation * -1} of resource {currentResource}");
+                        Console.WriteLine($"Used up {variation * -1} of resource {currentResource}, current amount now {countAfter}");
                     }
                     else if (variation > 0)
                     {
-                        Console.WriteLine($"Gained up {variation} of resource {currentResource}");
+                        Console.WriteLine($"Gained {variation} of resource {currentResource}, current amount now {countAfter}");
                     }
                 }
 

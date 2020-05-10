@@ -106,6 +106,15 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns a copy of the current resource count in this in-game state.
+        /// </summary>
+        /// <returns></returns>
+        public ResourceCount GetCurrentResources()
+        {
+            return Resources.Clone();
+        }
+
+        /// <summary>
         /// Returns the current amount of the provided rechargeable resource.
         /// </summary>
         /// <param name="resource">Resource to get the amount of.</param>
