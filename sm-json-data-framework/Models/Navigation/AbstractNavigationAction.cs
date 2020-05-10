@@ -46,6 +46,9 @@ namespace sm_json_data_framework.Models.Navigation
             // Initialize locks opened
             LocksOpened = LocksOpened.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptWith(initialInGameState).Values);
 
+            // Initialize item locations taken
+            ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptWith(initialInGameState).Values);
+
             // Initialize resource variation
             ResourceVariation = executionResult.ResultingState.GetResourceVariationWith(initialInGameState);
 
@@ -115,7 +118,7 @@ namespace sm_json_data_framework.Models.Navigation
         public IEnumerable<GameFlag> GameFlagsLost { get; protected set; } = Enumerable.Empty<GameFlag>();
 
         /// <summary>
-        /// The enumeration of node  locks that have been opened as a result of this action.
+        /// The enumeration of node locks that have been opened as a result of this action.
         /// </summary>
         public IEnumerable<NodeLock> LocksOpened { get; protected set; } = Enumerable.Empty<NodeLock>();
 
@@ -124,6 +127,16 @@ namespace sm_json_data_framework.Models.Navigation
         /// This can only really happen by reversing an action.
         /// </summary>
         public IEnumerable<NodeLock> LocksClosed { get; protected set; } = Enumerable.Empty<NodeLock>();
+
+        /// <summary>
+        /// The enumeration of item locations whose item has been taken by the player as a result of this action.
+        /// </summary>
+        public IEnumerable<RoomNode> ItemLocationsTaken { get; protected set; } = Enumerable.Empty<RoomNode>();
+
+        /// <summary>
+        /// The enumeration of item locations whose item has been put back where it was as a result of this action.
+        /// </summary>
+        public IEnumerable<RoomNode> ItemLocationsPutBack { get; protected set; } = Enumerable.Empty<RoomNode>();
 
         /// <summary>
         /// <para>The enumeration of in-room obstacles that have been destroyed as a result of this action.</para>
@@ -215,6 +228,11 @@ namespace sm_json_data_framework.Models.Navigation
             // Don't clone, expect that IEnumerables won't get mutated.
             reverseAction.LocksOpened = LocksClosed;
             reverseAction.LocksClosed = LocksOpened;
+
+            // Initialize reversed item location taken change
+            // Don't clone, expect that IEnumerables won't get mutated.
+            reverseAction.ItemLocationsTaken = ItemLocationsPutBack;
+            reverseAction.ItemLocationsPutBack = ItemLocationsTaken;
 
             // Initialize reversed resource variation
             reverseAction.ResourceVariation = ResourceVariation.CloneNegative();
@@ -313,6 +331,17 @@ namespace sm_json_data_framework.Models.Navigation
                 foreach (NodeLock nodeLock in LocksClosed)
                 {
                     Console.WriteLine($"Closed lock '{nodeLock.Name}'");
+                }
+
+                // Item locations taken and put back
+                foreach(RoomNode itemLocation in ItemLocationsTaken)
+                {
+                    Console.WriteLine($"Item at location '{itemLocation.Name}' has been taken");
+                }
+
+                foreach (RoomNode itemLocation in ItemLocationsPutBack)
+                {
+                    Console.WriteLine($"Item at location '{itemLocation.Name}' has been put back");
                 }
 
                 //Obstacles destroyed and restored
