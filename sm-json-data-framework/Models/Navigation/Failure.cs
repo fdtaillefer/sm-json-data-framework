@@ -15,9 +15,7 @@ namespace sm_json_data_framework.Models.Navigation
     /// </summary>
     public class Failure : AbstractNavigationAction
     {
-        public static readonly Failure Instance = new Failure();
-
-        private Failure()
+        public Failure(string intent): base(intent)
         {
             Succeeded = false;
         }

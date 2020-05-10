@@ -300,9 +300,16 @@ namespace sm_json_data_framework.Models
         /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
         /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
         /// <param name="executionFunction">A function that executes an executable.</param>
-        /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.</returns>
+        /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.
+        /// This will never return the initialInGameState instance.</returns>
         public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, InGameState initialInGameState, int times = 1, bool usePreviousRoom = false)
         {
+            // If there are no executables, this is an instant success. Clone the inGameState to respect the contract.
+            if(!executables.Any())
+            {
+                return new ExecutionResult(initialInGameState.Clone());
+            }
+
             // Iterate over all executables, attempting to fulfill them
             ExecutionResult result = null;
             foreach (IExecutable currentExecutable in executables)

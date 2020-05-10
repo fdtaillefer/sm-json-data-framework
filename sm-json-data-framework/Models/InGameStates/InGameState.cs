@@ -78,7 +78,10 @@ namespace sm_json_data_framework.Models.InGameStates
 
             InRoomState = new InRoomState(other.InRoomState);
 
-            PreviousRoomState = new InRoomState(other.PreviousRoomState);
+            if(other.PreviousRoomState != null)
+            {
+                PreviousRoomState = new InRoomState(other.PreviousRoomState);
+            }
         }
 
         /// <summary>

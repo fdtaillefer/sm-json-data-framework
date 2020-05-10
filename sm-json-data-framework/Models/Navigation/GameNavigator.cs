@@ -123,7 +123,7 @@ namespace sm_json_data_framework.Models.Navigation
             // No actions to undo
             else
             {
-                return Failure.Instance;
+                return new Failure("Undo an action, but there are no actions to undo in the queue");
             }
         }
 
@@ -143,7 +143,7 @@ namespace sm_json_data_framework.Models.Navigation
             // No actions to redo
             else
             {
-                return Failure.Instance;
+                return new Failure("Redo an action, but there are no actions to redo in the queue");
             }
         }
 
@@ -155,11 +155,13 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The resulting action. If moving fails, returns a failure action.</returns>
         public AbstractNavigationAction MoveToNode(int nodeId)
         {
+            string intent = $"Move to node {nodeId}";
+
             // Find a link from current node to  that node
             LinkTo linkTo = CurrentInGameState.GetCurrentLinkTo(nodeId);
             if (linkTo == null)
             {
-                return Failure.Instance;
+                return new Failure(intent);
             }
 
             // We found a link, try to follow it
@@ -168,11 +170,14 @@ namespace sm_json_data_framework.Models.Navigation
             // If no strat of the link was successful, this is a failure
             if (strat == null)
             {
-                return Failure.Instance;
+                return new Failure(intent);
             }
 
+            // A strat succeeded, update the in-game position
+            result.ResultingState.ApplyVisitNode(linkTo.TargetNode, strat);
+
             // If a strat succeeded, create a corresponding action
-            var action = new MoveToNodeAction(GameModel, CurrentInGameState, strat, result);
+            var action = new MoveToNodeAction(intent, GameModel, CurrentInGameState, strat, result);
 
             // Register the action as done and return it
             DoAction(action, result.ResultingState);

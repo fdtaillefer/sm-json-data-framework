@@ -18,20 +18,20 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         public Strat StratUsed { get; set; }
 
-        protected MoveToNodeAction()
+        protected MoveToNodeAction(string intent) : base(intent)
         {
 
         }
 
-        public MoveToNodeAction(SuperMetroidModel model, InGameState initialInGameState, Strat stratUsed, ExecutionResult executionResult) :
-            base(model, initialInGameState, executionResult)
+        public MoveToNodeAction(string intent, SuperMetroidModel model, InGameState initialInGameState, Strat stratUsed, ExecutionResult executionResult) :
+            base(intent, model, initialInGameState, executionResult)
         {
             StratUsed = stratUsed;
         }
 
         public override AbstractNavigationAction Reverse(SuperMetroidModel model)
         {
-            MoveToNodeAction reverseAction = new MoveToNodeAction();
+            MoveToNodeAction reverseAction = new MoveToNodeAction($"Undo action '{this.IntentDescription}'");
             TransferDataToReverseAbstractAction(reverseAction);
             reverseAction.StratUsed = StratUsed;
 

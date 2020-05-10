@@ -53,11 +53,6 @@ namespace sm_json_data_framework.Models.Requirements
         public IEnumerable<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(CanLeaveCharged, Strat)>();
 
         /// <summary>
-        /// A sequence of room obstacles that were destroyed.
-        /// </summary>
-        public IEnumerable<RoomObstacle> DestroyedObstacles { get; set; } = Enumerable.Empty<RoomObstacle>();
-
-        /// <summary>
         /// A sequence of node locks that were opened along with the open strat used to opem them.
         /// </summary>
         public IEnumerable<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(NodeLock openedLock, Strat stratUsed)>();
@@ -95,7 +90,6 @@ namespace sm_json_data_framework.Models.Requirements
             ResultingState = subsequentResult.ResultingState;
             RunwaysUsed = RunwaysUsed.Concat(subsequentResult.RunwaysUsed);
             CanLeaveChargedExecuted = CanLeaveChargedExecuted.Concat(subsequentResult.CanLeaveChargedExecuted);
-            DestroyedObstacles = DestroyedObstacles.Concat(subsequentResult.DestroyedObstacles);
             OpenedLocks = OpenedLocks.Concat(subsequentResult.OpenedLocks);
             BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks);
             KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies);
@@ -106,14 +100,12 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// Applies the destruction of the provided obstacles both in this ExecutionResult and in its resulting InGameState.
+        /// Applies the destruction of the provided obstacles both in this ExecutionResult's resulting InGameState.
         /// </summary>
         /// <param name="obstacles">The obstacles to mark as destroyed.</param>
         /// <param name="usePreviousRoom">Indicates whether the obstacles were destroyed in the context of the previous room.</param>
         public void ApplyDestroyedObstacles(IEnumerable<RoomObstacle> obstacles, bool usePreviousRoom)
         {
-            DestroyedObstacles = DestroyedObstacles.Concat(obstacles);
-
             // While we can retroactively do some things in previous rooms, we will not retroactively alter the room state.
             if (!usePreviousRoom)
             {

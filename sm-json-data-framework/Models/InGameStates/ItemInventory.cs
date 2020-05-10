@@ -46,8 +46,10 @@ namespace sm_json_data_framework.Models.InGameStates
         public ItemInventory(ItemInventory other)
         {
             NonConsumableItems = new Dictionary<string, Item>(other.NonConsumableItems);
-
             ExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.ExpansionItems);
+
+            BaseResourceMaximums = other.BaseResourceMaximums.Clone();
+            ResourceCapacityChanges = other.ResourceCapacityChanges.Clone();
         }
 
         public ItemInventory Clone()

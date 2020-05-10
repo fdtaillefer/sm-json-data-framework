@@ -19,13 +19,15 @@ namespace sm_json_data_framework.Models.Navigation
     /// </summary>
     public abstract class AbstractNavigationAction
     {
-        protected AbstractNavigationAction()
+        protected AbstractNavigationAction(string intent)
         {
-
+            IntentDescription = intent;
         }
 
-        public AbstractNavigationAction(SuperMetroidModel model, InGameState initialInGameState, ExecutionResult executionResult)
+        public AbstractNavigationAction(string intent, SuperMetroidModel model, InGameState initialInGameState, ExecutionResult executionResult): this(intent)
         {
+            Succeeded = true;
+
             // Initialize position change
             if(initialInGameState.GetCurrentNode() != executionResult.ResultingState.GetCurrentNode())
             {
@@ -50,7 +52,7 @@ namespace sm_json_data_framework.Models.Navigation
             // Initialize destroyed obstacles, but that's only relevant if we didn't change rooms
             if(executionResult.ResultingState.GetCurrentRoom() == initialInGameState.GetCurrentRoom())
             {
-                DestroyedObstacles = DestroyedObstacles.Concat(
+                ObstaclesDestroyed = ObstaclesDestroyed.Concat(
                     executionResult.ResultingState.GetDestroyedObstacleIds()
                         .Except(initialInGameState.GetDestroyedObstacleIds())
                         .Select(obstacleId => executionResult.ResultingState.GetCurrentRoom().Obstacles[obstacleId])
@@ -61,7 +63,6 @@ namespace sm_json_data_framework.Models.Navigation
             // No need to copy since they are IEnumerable and not supposed to be mutated.
             RunwaysUsed = executionResult.RunwaysUsed;
             CanLeaveChargedExecuted = executionResult.CanLeaveChargedExecuted;
-            DestroyedObstacles = executionResult.DestroyedObstacles;
             OpenedLocks = executionResult.OpenedLocks;
             BypassedLocks = executionResult.BypassedLocks;
             KilledEnemies = executionResult.KilledEnemies;
@@ -70,6 +71,11 @@ namespace sm_json_data_framework.Models.Navigation
             ItemsInvolved.UnionWith(executionResult.ItemsInvolved);
             DamageReducingItemsInvolved.UnionWith(executionResult.DamageReducingItemsInvolved);
         }
+
+        /// <summary>
+        /// A description of what was being attempted which resulted in this action.
+        /// </summary>
+        public string IntentDescription { get; set; } = "";
 
         #region Information about the action's effects
         /// <summary>
@@ -150,11 +156,6 @@ namespace sm_json_data_framework.Models.Navigation
         public IEnumerable<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(CanLeaveCharged, Strat)>();
 
         /// <summary>
-        /// A sequence of room obstacles that were destroyed.
-        /// </summary>
-        public IEnumerable<RoomObstacle> DestroyedObstacles { get; set; } = Enumerable.Empty<RoomObstacle>();
-
-        /// <summary>
         /// A sequence of node locks that were opened along with the open strat used to opem them.
         /// </summary>
         public IEnumerable<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(NodeLock openedLock, Strat stratUsed)>();
@@ -224,6 +225,146 @@ namespace sm_json_data_framework.Models.Navigation
             reverseAction.ObstaclesRestored = ObstaclesDestroyed;
 
             // Don't transfer information data. It makes little sense for a reverse action
+        }
+
+        /// <summary>
+        /// Outputs to console a summary of this action. Always outputs succedd/failure,
+        /// and optionally outputs more depending on provided paramters.
+        /// </summary>
+        /// <param name="outputEffects">If true, will output how the action impacted the game state.</param>
+        /// <param name="outputDetails">If true, will output details about how the action was performed.</param>
+        public void OutputToConsole(bool outputEffects, bool outputDetails)
+        {
+            Console.WriteLine("");
+            Console.WriteLine($"Action attempted: {IntentDescription}");
+            if (!Succeeded)
+            {
+                Console.WriteLine("Action failed!");
+                return;
+            }
+
+            if(IsReverseAction)
+            {
+                Console.WriteLine("Action reversal executed");
+            }
+            else
+            {
+                Console.WriteLine("Action succeeded!");
+            }
+
+            if(outputEffects)
+            {
+                // Position change
+                if (PositionChange.fromNode != PositionChange.toNode)
+                {
+                    Console.WriteLine($"Current node changed from '{PositionChange.fromNode.Name}' to '{PositionChange.toNode.Name}'");
+                }
+
+                // Items gained and lost
+                foreach (Item item in ItemsGained.GetNonConsumableItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Gained item '{item.Name}'");
+                }
+                foreach ( var(item, count) in ItemsGained.GetExpansionItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Gained item '{item.Name}' X {count}");
+                }
+
+                foreach (Item item in ItemsLost.GetNonConsumableItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Lost item '{item.Name}'");
+                }
+                foreach (var (item, count) in ItemsLost.GetExpansionItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Lost item '{item.Name}' X {count}");
+                }
+
+                // Resource variation
+                foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                {
+                    int variation = ResourceVariation.GetAmount(currentResource);
+                    if(variation < 0)
+                    {
+                        Console.WriteLine($"Used up {variation * -1} of resource {currentResource}");
+                    }
+                    else if (variation > 0)
+                    {
+                        Console.WriteLine($"Gained up {variation} of resource {currentResource}");
+                    }
+                }
+
+                // Game flags gained and lost
+                foreach (GameFlag flag in GameFlagsGained)
+                {
+                    Console.WriteLine($"Gained game flag '{flag.Name}'");
+                }
+
+                foreach (GameFlag flag in GameFlagsLost)
+                {
+                    Console.WriteLine($"Lost game flag '{flag.Name}'");
+                }
+
+                // Locks opened and closed
+                foreach(NodeLock nodeLock in LocksOpened)
+                {
+                    Console.WriteLine($"Opened lock '{nodeLock.Name}'");
+                }
+
+                foreach (NodeLock nodeLock in LocksClosed)
+                {
+                    Console.WriteLine($"Closed lock '{nodeLock.Name}'");
+                }
+
+                //Obstacles destroyed and restored
+                foreach (RoomObstacle obstacle in ObstaclesDestroyed)
+                {
+                    Console.WriteLine($"Destroyed obstacle '{obstacle.Name}'");
+                }
+
+                foreach (RoomObstacle obstacle in ObstaclesRestored)
+                {
+                    Console.WriteLine($"Restored obstacle '{obstacle.Name}'");
+                }
+            }
+
+            if (outputDetails)
+            {
+                foreach(var (runway, strat) in RunwaysUsed)
+                {
+                    Console.WriteLine($"A runway on node '{runway.Node.Name}' was used, by executing strat '{strat.Name}'");
+                }
+
+                foreach(var (canLeaveCharged, strat) in CanLeaveChargedExecuted)
+                {
+                    Console.WriteLine($"A canLeaveCharged on node '{canLeaveCharged.Node.Name}' was used, by executing strat '{strat.Name}'");
+                }
+
+                foreach(var (nodeLock, strat) in OpenedLocks)
+                {
+                    Console.WriteLine($"Lock '{nodeLock.Name}' was opened, by executing strat '{strat.Name}'");
+                }
+
+                foreach(var (nodeLock, strat) in BypassedLocks)
+                {
+                    Console.WriteLine($"Lock '{nodeLock.Name}' was bypassed, by executing strat '{strat.Name}'");
+                }
+
+                foreach(var killResult in KilledEnemies)
+                {
+                    string killMethodString = String.Join(" and ", killResult.KillMethod.Select(method => $"{method.shots} shots of weapon {method.weapon.Name}"));
+                    Console.WriteLine($"Enemy '{killResult.Enemy.Name}' was killed, using {killMethodString}.");
+                }
+
+                foreach(var item in ItemsInvolved)
+                {
+                    Console.WriteLine($"Item '{item.Name}' was used during execution.");
+                }
+
+                foreach(var item in DamageReducingItemsInvolved)
+                {
+                    Console.WriteLine($"Item '{item.Name}' helped reduce incoming damage.");
+                }
+            }
         }
     }
 }

@@ -31,6 +31,13 @@ namespace sm_json_data_framework.Models.Rooms.Node
 
         public bool UsableComingIn = true;
 
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>The node to which this runway is tied.</para>
+        /// </summary>
+        [JsonIgnore]
+        public RoomNode Node { get; set; }
+
         [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
 
@@ -43,6 +50,8 @@ namespace sm_json_data_framework.Models.Rooms.Node
             {
                 strat.Initialize(model, room);
             }
+
+            Node = node;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
