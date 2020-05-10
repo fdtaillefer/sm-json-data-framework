@@ -49,7 +49,7 @@ namespace sm_json_data_framework.Models.Enemies
 
         public bool Grapplable { get; set; }
 
-        public bool Farmable { get; set; }
+        public int? RespawnFrames { get; set; }
 
         [JsonPropertyName("invul")]
         public IEnumerable<string> InvulnerabilityStrings { get; set; } = Enumerable.Empty<string>();
