@@ -73,7 +73,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 InGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
                 ExecutionResult result = new ExecutionResult(resultingState);
-                result.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                result.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return result;
             }
             // If we don't have enough for the shinespark, we cannot do this

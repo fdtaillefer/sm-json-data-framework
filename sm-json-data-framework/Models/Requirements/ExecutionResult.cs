@@ -164,7 +164,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="enemy">The killed enemy</param>
         /// <param name="weapon">The weapon that was used to kill</param>
         /// <param name="shots">The number of shots the kill took</param>
-        public void ApplyKilledEnemy(Enemy enemy, Weapon weapon, int shots)
+        public void AddKilledEnemy(Enemy enemy, Weapon weapon, int shots)
         {
             KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, new[] { (weapon, shots) }));
         }
@@ -175,7 +175,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="enemy">The killed enemy</param>
         /// <param name="killMethod">An enumeration of weapons alongside their number of shots fired</param>
-        public void ApplyKilledEnemy(Enemy enemy, IEnumerable<(Weapon weapon, int shots)> killMethod)
+        public void AddKilledEnemy(Enemy enemy, IEnumerable<(Weapon weapon, int shots)> killMethod)
         {
             KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, killMethod));
         }
@@ -185,7 +185,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// This should exclude damage reduction and the operation of weapons recorded in <see cref="KilledEnemies"/>.
         /// </summary>
         /// <param name="items">The items</param>
-        public void ApplyItemsInvolved(IEnumerable<Item> items)
+        public void AddItemsInvolved(IEnumerable<Item> items)
         {
             ItemsInvolved.UnionWith(items);
         }
@@ -194,7 +194,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// Adds to this ExecutionResult a record of taking less damage due to having the provided items.
         /// </summary>
         /// <param name="items">The items</param>
-        public void ApplyDamageReducingItemsInvolved(IEnumerable<Item> items)
+        public void AddDamageReducingItemsInvolved(IEnumerable<Item> items)
         {
             DamageReducingItemsInvolved.UnionWith(items);
         }

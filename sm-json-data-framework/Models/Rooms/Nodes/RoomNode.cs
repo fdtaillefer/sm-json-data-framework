@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Node;
 using sm_json_data_framework.Utils;
@@ -29,7 +30,15 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public NodeSubTypeEnum NodeSubType { get; set; }
 
-        public string NodeItem { get; set; }
+        [JsonPropertyName("nodeItem")]
+        public string NodeItemName { get; set; }
+
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>The item that can be obtained by interacting with this node (if any).</para>
+        /// </summary>
+        [JsonIgnore]
+        public Item NodeItem { get; set; }
 
         public string NodeAddress { get; set; }
 
@@ -127,6 +136,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Initialize Yielded game flags
             Yields = YieldsStrings.Select(s => model.GameFlags[s]);
+
+            // Initialize item
+            if (NodeItemName != null)
+            {
+                NodeItem = model.Items[NodeItemName];
+            }
 
             // Initialize Links
             IEnumerable<Link> linksFromHere = room.Links.Where(l => l.FromNodeId == Id);

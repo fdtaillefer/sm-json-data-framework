@@ -77,7 +77,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (model.CompareInGameStates(inGameState, bestInRoomResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestInRoomResult);
-                bestInRoomResult.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestInRoomResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestInRoomResult;
             }
 
@@ -101,7 +101,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (model.CompareInGameStates(inGameState, bestAdjacentRunwayResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestAdjacentRunwayResult);
-                bestAdjacentRunwayResult.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestAdjacentRunwayResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestAdjacentRunwayResult;
             }
 
@@ -122,7 +122,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (model.CompareInGameStates(inGameState, bestLeaveChargedResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestLeaveChargedResult);
-                bestLeaveChargedResult.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestLeaveChargedResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestLeaveChargedResult;
             }
 
@@ -160,7 +160,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 if (model.CompareInGameStates(inGameState, bestCombinationResult?.ResultingState) == 0)
                 {
                     consumeShinesparkEnergy(bestCombinationResult);
-                    bestCombinationResult.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                    bestCombinationResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                     return currentAdjacentRunwayResult.Clone().ApplySubsequentResult(bestCombinationResult);
                 }
 
@@ -183,7 +183,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             else
             {
                 consumeShinesparkEnergy(bestOverallResult);
-                bestOverallResult.ApplyItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestOverallResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestOverallResult;
             }
         }

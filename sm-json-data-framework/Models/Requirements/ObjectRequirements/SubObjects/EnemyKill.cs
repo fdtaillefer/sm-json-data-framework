@@ -153,7 +153,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                     // If we found a weapon, record a kill and return true (to remove the enemy)
                     if (firstWeaponSusceptibility != null)
                     {
-                        result.ApplyKilledEnemy(e, firstWeaponSusceptibility.Weapon, firstWeaponSusceptibility.Shots);
+                        result.AddKilledEnemy(e, firstWeaponSusceptibility.Weapon, firstWeaponSusceptibility.Shots);
                         return true;
                     }
                     // If we didn't find a weapon, return false (to retain the enemy)
@@ -312,7 +312,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                         else
                         {
                             // No matter how many shots we dealt to the group, record how many shots it took to actually kill this enemy.
-                            result.ApplyKilledEnemy(e.Enemy, SplashWeapon, susceptibility.Shots);
+                            result.AddKilledEnemy(e.Enemy, SplashWeapon, susceptibility.Shots);
                             return null;
                         }
                     })
@@ -383,12 +383,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 // If the enemy was full, then the prior splash attack (if any) didn't affect it. Ignore it.
                 if(enemyInitiallyFull)
                 {
-                    result.ApplyKilledEnemy(EnemyWithHealth.Enemy, Weapon, numberOfShots);
+                    result.AddKilledEnemy(EnemyWithHealth.Enemy, Weapon, numberOfShots);
                 }
                 // If the enemy was not full, the splash attack contributed to its death
                 else
                 {
-                    result.ApplyKilledEnemy(EnemyWithHealth.Enemy, new [] { (PriorSplashWeapon, PriorSplashShots), (Weapon, numberOfShots) });
+                    result.AddKilledEnemy(EnemyWithHealth.Enemy, new [] { (PriorSplashWeapon, PriorSplashShots), (Weapon, numberOfShots) });
                 }
             }
             return result;

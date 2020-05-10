@@ -37,5 +37,10 @@ namespace sm_json_data_framework.Models.Navigation
 
             return reverseAction;
         }
+
+        public override string GetSuccessOutputString()
+        {
+            return $"Action succeeded using strat '{StratUsed.Name}'";
+        }
     }
 }

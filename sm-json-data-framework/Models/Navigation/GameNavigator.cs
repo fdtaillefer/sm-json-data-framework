@@ -184,6 +184,139 @@ namespace sm_json_data_framework.Models.Navigation
             return action;
         }
 
+        /// <summary>
+        /// Attempts to interact with the current node. If the node is locked, attempts to open or bypass the lock beforehand.
+        /// </summary>
+        /// <returns>The resulting action. If interaction fails, returns a failure action.</returns>
+        public AbstractNavigationAction InteractWithNode()
+        {
+            RoomNode node = CurrentInGameState.GetCurrentNode();
+
+            string intent = node.NodeType switch
+            {
+                NodeTypeEnum.Door => $"Exit through node {node.Name}",
+                NodeTypeEnum.Exit => $"Exit through node {node.Name}",
+                NodeTypeEnum.Event => $"Activate event {node.Name}",
+                NodeTypeEnum.Item => $"Pick up item at {node.Name}",
+                NodeTypeEnum.Entrance => $"Interact with {node.Name}",
+                NodeTypeEnum.Junction => $"Interact with {node.Name}"
+            };
+
+            ExecutionResult result = null;
+
+            bool nodeAccessible = true;
+            bool bypassedLock = false;
+            foreach(NodeLock currentLock in node.Locks.Where(l => l.IsActive(GameModel, CurrentInGameState)))
+            {
+                // Try to open lock
+                var currentResult = currentLock.OpenExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
+
+                // If opening failed, try to bypass
+                if (currentResult == null)
+                {
+                    currentResult = currentLock.BypassExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
+
+                    // If bypass also failed, we can't interact with the node because of this lock
+                    if (currentResult == null)
+                    {
+                        nodeAccessible = false;
+                    }
+                    else
+                    {
+                        bypassedLock = true;
+                    }
+                }
+
+                if (result == null)
+                {
+                    result = currentResult;
+                }
+                else
+                {
+                    result.ApplySubsequentResult(currentResult);
+                }
+            }
+
+            // We couldn't get through a lock, return a failure
+            if (!nodeAccessible)
+            {
+                intent = intent + ", but a lock is preventing access";
+                return new Failure(intent);
+            }
+
+            // Locks are taken care of, but maybe interaction with the node has straight requirements as well
+            var interactionResult = node.InteractionRequires.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
+            if(result == null)
+            {
+                result = interactionResult;
+            }
+            else
+            {
+                result.ApplySubsequentResult(interactionResult);
+            }
+            // Interaction failed. Drop the lock phase altogether.
+            // If the goal is to unlock the node regardless of interaction, there is a method for that.
+            if (result == null)
+            {
+                intent = intent + ", but couldn't fulfill interaction requirements";
+                return new Failure(intent);
+            }
+
+            // At this point, the interaction can happen. Process everything on the node regardless of type.
+
+            // Activate game flags
+            foreach(GameFlag flag in node.Yields)
+            {
+                result.ResultingState.ApplyAddGameFlag(flag);
+            }
+
+            // Take item at location
+            if(node.NodeItem != null && !CurrentInGameState.IsItemLocationTaken(node.Name))
+            {
+                result.ResultingState.ApplyTakeLocation(node);
+                result.ResultingState.ApplyAddItem(node.NodeItem);
+            }
+
+            // Use any refill utility
+            foreach(UtilityEnum utility in node.Utility)
+            {
+                switch(utility)
+                {
+                    case UtilityEnum.Energy:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.RegularEnergy);
+                        break;
+                    case UtilityEnum.Reserve:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.ReserveEnergy);
+                        break;
+                    case UtilityEnum.Missile:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Missile);
+                        break;
+                    case UtilityEnum.Super:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Super);
+                        break;
+                    case UtilityEnum.PowerBomb:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.PowerBomb);
+                        break;
+                    // Other utilities don't do anything for us
+                    default:
+                        break;
+                }
+            }
+
+            // Use node to exit the room
+            if (node.OutNode != null)
+            {
+                result.ResultingState.ApplyEnterRoom(node.OutNode, bypassedLock);
+            }
+
+            // Create an action to return
+            InteractWithNodeAction action = new InteractWithNodeAction(intent, GameModel, CurrentInGameState, result);
+
+            // Register the action as done and return it
+            DoAction(action, result.ResultingState);
+            return action;
+        }
+
         #endregion
 
         #region Consultation methods

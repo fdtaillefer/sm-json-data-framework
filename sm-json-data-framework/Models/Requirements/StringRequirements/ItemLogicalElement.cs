@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             {
                 // Clone the In-game state to fulfill method contract
                 ExecutionResult result = new ExecutionResult(inGameState.Clone());
-                result.ApplyItemsInvolved(new[] { Item });
+                result.AddItemsInvolved(new[] { Item });
                 return result;
             }
             else

@@ -176,6 +176,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
+            // If there are no bypass strats, bypassing fails
+            if (!NodeLock.BypassStrats.Any())
+            {
+                return null;
+            }
+
             // Look for the best bypass strat
             (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats, inGameState, times: times, usePreviousRoom: usePreviousRoom);
             if(result != null)

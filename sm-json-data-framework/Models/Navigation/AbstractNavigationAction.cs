@@ -264,7 +264,7 @@ namespace sm_json_data_framework.Models.Navigation
             Console.WriteLine($"Action attempted: {IntentDescription}");
             if (!Succeeded)
             {
-                Console.WriteLine("Action failed!");
+                Console.WriteLine("Action failed");
                 return;
             }
 
@@ -274,95 +274,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
             else
             {
-                Console.WriteLine("Action succeeded!");
-            }
-
-            if(outputEffects)
-            {
-                // Position change
-                if (PositionChange.fromNode != PositionChange.toNode)
-                {
-                    Console.WriteLine($"Current node changed from '{PositionChange.fromNode.Name}' to '{PositionChange.toNode.Name}'");
-                }
-
-                // Items gained and lost
-                foreach (Item item in ItemsGained.GetNonConsumableItemsDictionary().Values)
-                {
-                    Console.WriteLine($"Gained item '{item.Name}'");
-                }
-                foreach ( var(item, count) in ItemsGained.GetExpansionItemsDictionary().Values)
-                {
-                    Console.WriteLine($"Gained item '{item.Name}' X {count}");
-                }
-
-                foreach (Item item in ItemsLost.GetNonConsumableItemsDictionary().Values)
-                {
-                    Console.WriteLine($"Lost item '{item.Name}'");
-                }
-                foreach (var (item, count) in ItemsLost.GetExpansionItemsDictionary().Values)
-                {
-                    Console.WriteLine($"Lost item '{item.Name}' X {count}");
-                }
-
-                // Resource variation
-                foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
-                {
-                    int countAfter = ResourcesAfter.GetAmount(currentResource);
-
-                    int variation = countAfter - ResourcesBefore.GetAmount(currentResource);
-                    if(variation < 0)
-                    {
-                        Console.WriteLine($"Used up {variation * -1} of resource {currentResource}, current amount now {countAfter}");
-                    }
-                    else if (variation > 0)
-                    {
-                        Console.WriteLine($"Gained {variation} of resource {currentResource}, current amount now {countAfter}");
-                    }
-                }
-
-                // Game flags gained and lost
-                foreach (GameFlag flag in GameFlagsGained)
-                {
-                    Console.WriteLine($"Gained game flag '{flag.Name}'");
-                }
-
-                foreach (GameFlag flag in GameFlagsLost)
-                {
-                    Console.WriteLine($"Lost game flag '{flag.Name}'");
-                }
-
-                // Locks opened and closed
-                foreach(NodeLock nodeLock in LocksOpened)
-                {
-                    Console.WriteLine($"Opened lock '{nodeLock.Name}'");
-                }
-
-                foreach (NodeLock nodeLock in LocksClosed)
-                {
-                    Console.WriteLine($"Closed lock '{nodeLock.Name}'");
-                }
-
-                // Item locations taken and put back
-                foreach(RoomNode itemLocation in ItemLocationsTaken)
-                {
-                    Console.WriteLine($"Item at location '{itemLocation.Name}' has been taken");
-                }
-
-                foreach (RoomNode itemLocation in ItemLocationsPutBack)
-                {
-                    Console.WriteLine($"Item at location '{itemLocation.Name}' has been put back");
-                }
-
-                //Obstacles destroyed and restored
-                foreach (RoomObstacle obstacle in ObstaclesDestroyed)
-                {
-                    Console.WriteLine($"Destroyed obstacle '{obstacle.Name}'");
-                }
-
-                foreach (RoomObstacle obstacle in ObstaclesRestored)
-                {
-                    Console.WriteLine($"Restored obstacle '{obstacle.Name}'");
-                }
+                Console.WriteLine(GetSuccessOutputString());
             }
 
             if (outputDetails)
@@ -403,6 +315,99 @@ namespace sm_json_data_framework.Models.Navigation
                     Console.WriteLine($"Item '{item.Name}' helped reduce incoming damage.");
                 }
             }
+
+            if (outputEffects)
+            {
+                // Items gained and lost
+                foreach (Item item in ItemsGained.GetNonConsumableItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Gained item '{item.Name}'");
+                }
+                foreach (var (item, count) in ItemsGained.GetExpansionItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Gained item '{item.Name}' X {count}");
+                }
+
+                foreach (Item item in ItemsLost.GetNonConsumableItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Lost item '{item.Name}'");
+                }
+                foreach (var (item, count) in ItemsLost.GetExpansionItemsDictionary().Values)
+                {
+                    Console.WriteLine($"Lost item '{item.Name}' X {count}");
+                }
+
+                // Resource variation
+                foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                {
+                    int countAfter = ResourcesAfter.GetAmount(currentResource);
+
+                    int variation = countAfter - ResourcesBefore.GetAmount(currentResource);
+                    if (variation < 0)
+                    {
+                        Console.WriteLine($"Used up {variation * -1} of resource {currentResource}, current amount now {countAfter}");
+                    }
+                    else if (variation > 0)
+                    {
+                        Console.WriteLine($"Gained {variation} of resource {currentResource}, current amount now {countAfter}");
+                    }
+                }
+
+                // Game flags gained and lost
+                foreach (GameFlag flag in GameFlagsGained)
+                {
+                    Console.WriteLine($"Gained game flag '{flag.Name}'");
+                }
+
+                foreach (GameFlag flag in GameFlagsLost)
+                {
+                    Console.WriteLine($"Lost game flag '{flag.Name}'");
+                }
+
+                // Locks opened and closed
+                foreach (NodeLock nodeLock in LocksOpened)
+                {
+                    Console.WriteLine($"Opened lock '{nodeLock.Name}'");
+                }
+
+                foreach (NodeLock nodeLock in LocksClosed)
+                {
+                    Console.WriteLine($"Closed lock '{nodeLock.Name}'");
+                }
+
+                // Item locations taken and put back
+                foreach (RoomNode itemLocation in ItemLocationsTaken)
+                {
+                    Console.WriteLine($"Item at location '{itemLocation.Name}' has been taken");
+                }
+
+                foreach (RoomNode itemLocation in ItemLocationsPutBack)
+                {
+                    Console.WriteLine($"Item at location '{itemLocation.Name}' has been put back");
+                }
+
+                //Obstacles destroyed and restored
+                foreach (RoomObstacle obstacle in ObstaclesDestroyed)
+                {
+                    Console.WriteLine($"Destroyed obstacle '{obstacle.Name}'");
+                }
+
+                foreach (RoomObstacle obstacle in ObstaclesRestored)
+                {
+                    Console.WriteLine($"Restored obstacle '{obstacle.Name}'");
+                }
+
+                // Position change
+                if (PositionChange.fromNode != PositionChange.toNode)
+                {
+                    Console.WriteLine($"Current node changed from '{PositionChange.fromNode.Name}' to '{PositionChange.toNode.Name}'");
+                }
+            }
+        }
+
+        public virtual string GetSuccessOutputString()
+        {
+            return "Action succeeded";
         }
     }
 }

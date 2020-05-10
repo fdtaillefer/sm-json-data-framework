@@ -247,9 +247,10 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Given an enumeration of executables, attempts to find the least costly one that can be successfully executed.
+        /// <para>Given an enumeration of executables, attempts to find the least costly one that can be successfully executed.
         /// Returns the associated execution result.
-        /// If a no-cost executable is found, its result is returned immediately.
+        /// If a no-cost executable is found, its result is returned immediately.</para>
+        /// <para>If there are no executables, this is an automatic failure.</para>
         /// </summary>
         /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
         /// <param name="executables">An enumeration of executables to attempt executing.</param>
@@ -282,7 +283,8 @@ namespace sm_json_data_framework.Models
                     }
 
                     // If the resulting state is the best we've found yet, retain it
-                    if (comparer.Compare(currentResult.ResultingState, bestResult.result.ResultingState) > 0)
+                    if (bestResult.result == null
+                        || comparer.Compare(currentResult.ResultingState, bestResult.result.ResultingState) > 0)
                     {
                         bestResult = (currentExecutable, currentResult);
                     }
@@ -295,6 +297,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// <para>Given an enumeration of executables, executes them all successively, starting from the provided initialGameState.</para>
         /// <para>This method will give up at the first failed execution and return null.</para>
+        /// <para>If there are no executables, this is an automatic success.</para>
         /// </summary>
         /// <typeparam name="T">The type of the executables to execute.</typeparam>
         /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
