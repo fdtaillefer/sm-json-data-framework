@@ -222,7 +222,7 @@ namespace sm_json_data_framework.Models.Navigation
 
             ExecutionResult result = null;
 
-            bool nodeAccessible = true;
+            List<NodeLock> failedLocks = new List<NodeLock>();
             bool bypassedLock = false;
             foreach(NodeLock currentLock in node.Locks.Where(l => l.IsActive(GameModel, CurrentInGameState)))
             {
@@ -237,7 +237,7 @@ namespace sm_json_data_framework.Models.Navigation
                     // If bypass also failed, we can't interact with the node because of this lock
                     if (currentResult == null)
                     {
-                        nodeAccessible = false;
+                        failedLocks.Add(currentLock);
                     }
                     else
                     {
@@ -256,9 +256,12 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // We couldn't get through a lock, return a failure
-            if (!nodeAccessible)
+            if (failedLocks.Any())
             {
-                intent = intent + ", but a lock is preventing access";
+
+                string lockNames = String.Join(", ", failedLocks.Select(l => "'" + l.Name + "'"));
+                intent = intent + $", but lock{(failedLocks.Count > 1? "s" : "")} {lockNames} " +
+                    $"{(failedLocks.Count > 1 ? "are" : "is")} preventing access";
                 return new Failure(intent);
             }
 
