@@ -56,20 +56,22 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected List<int> VisitedNodeIdsList { get; set; } = new List<int>();
 
+        // This will just return VisitedNodeIdsList as an IEnumerable
         /// <summary>
         /// A sequence of IDs of nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
         /// </summary>
-        public IEnumerable<int> VisitedNodeIds { get; }
+        public IEnumerable<int> VisitedNodeIds { get { return VisitedNodeIdsList; } }
 
         /// <summary>
         /// The inner HashSet containing the ID of obstacles that have been destroyed in this room since entering.
         /// </summary>
         protected HashSet<string> DestroyedObstacleIdsSet { get; set; } = new HashSet<string>();
 
+        // This will just return DestroyedObstacleIdsSet as an IEnumerable
         /// <summary>
         /// A sequence of IDs of obstacles that have been destroyed in this room since entering.
         /// </summary>
-        public IEnumerable<string> DestroyedObstacleIds { get; }
+        public IEnumerable<string> DestroyedObstacleIds { get { return DestroyedObstacleIdsSet; } }
 
         /// <summary>
         /// The strat that was used to reach the current node, if any. Otherwise, is null.
@@ -87,8 +89,11 @@ namespace sm_json_data_framework.Models.InGameStates
 
             if(entryNode != null)
             {
+                // Visit entry node immediately
                 ApplyVisitNode(entryNode, null);
-                if(entryNode.SpawnAtNode != null)
+
+                // If Samus is considered to spawn at a different node, it means she visits that node after entry before player input.
+                if(entryNode.SpawnAtNode != entryNode)
                 {
                     ApplyVisitNode(entryNode.SpawnAtNode, null);
                 }
