@@ -26,6 +26,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             Commands.Add(new HelpCommand(Commands));
             Commands.Add(new ExitCommand());
             Commands.Add(new InteractCommand());
+            Commands.Add(new UnlockCommand());
             Commands.Add(new MoveCommand());
             Commands.Add(new OutputResources());
             Commands.Add(new OutputInventory());

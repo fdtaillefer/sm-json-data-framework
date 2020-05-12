@@ -220,45 +220,11 @@ namespace sm_json_data_framework.Models.Navigation
                 NodeTypeEnum.Junction => $"Interact with {node.Name}"
             };
 
-            ExecutionResult result = null;
-
-            List<NodeLock> failedLocks = new List<NodeLock>();
-            bool bypassedLock = false;
-            foreach(NodeLock currentLock in node.Locks.Where(l => l.IsActive(GameModel, CurrentInGameState)))
-            {
-                // Try to open lock
-                var currentResult = currentLock.OpenExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
-
-                // If opening failed, try to bypass
-                if (currentResult == null)
-                {
-                    currentResult = currentLock.BypassExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
-
-                    // If bypass also failed, we can't interact with the node because of this lock
-                    if (currentResult == null)
-                    {
-                        failedLocks.Add(currentLock);
-                    }
-                    else
-                    {
-                        bypassedLock = true;
-                    }
-                }
-
-                if (result == null)
-                {
-                    result = currentResult;
-                }
-                else
-                {
-                    result.ApplySubsequentResult(currentResult);
-                }
-            }
+            var(failedLocks, _, bypassedLocks, result) = DealWithLocks(node, attemptOpen: true, attemptBypass: true);
 
             // We couldn't get through a lock, return a failure
             if (failedLocks.Any())
             {
-
                 string lockNames = String.Join(", ", failedLocks.Select(l => "'" + l.Name + "'"));
                 intent = intent + $", but lock{(failedLocks.Count > 1? "s" : "")} {lockNames} " +
                     $"{(failedLocks.Count > 1 ? "are" : "is")} preventing access";
@@ -345,7 +311,7 @@ namespace sm_json_data_framework.Models.Navigation
             // Use node to exit the room
             if (node.OutNode != null)
             {
-                result.ResultingState.ApplyEnterRoom(node.OutNode, bypassedLock);
+                result.ResultingState.ApplyEnterRoom(node.OutNode, bypassedLocks.Any());
             }
 
             // Create an action to return
@@ -354,6 +320,110 @@ namespace sm_json_data_framework.Models.Navigation
             // Register the action as done and return it
             DoAction(action, result.ResultingState);
             return action;
+        }
+
+        /// <summary>
+        /// Attempts to unlock the current node, without interacting with it. Fails if there is no active lock.
+        /// </summary>
+        /// <returns>The resulting action. If unlocking fails, returns a failure action.</returns>
+        public AbstractNavigationAction UnlockNode()
+        {
+            RoomNode node = CurrentInGameState.GetCurrentNode();
+
+            string intent = $"Unlock node {node.Name}";
+
+            var(failedLocks, openedLocks, _, result) = DealWithLocks(node, attemptOpen: true, attemptBypass: false);
+
+            // If there were no locks at all, unlocking is a failure
+            if(!failedLocks.Any() && !openedLocks.Any())
+            {
+                intent = intent + ", but no locks are active";
+                return new Failure(intent);
+            }
+
+            // If we failed to open a lock, unlocking is a failure
+            if (failedLocks.Any())
+            {
+                string lockNames = String.Join(", ", failedLocks.Select(l => "'" + l.Name + "'"));
+                intent = intent + $", but lock{(failedLocks.Count > 1 ? "s" : "")} {lockNames} " +
+                    $"{(failedLocks.Count > 1 ? "are" : "is")} preventing access";
+                return new Failure(intent);
+            }
+
+            // Create an action to return
+            UnlockNodeAction action = new UnlockNodeAction(intent, GameModel, CurrentInGameState, result);
+
+            // Register the action as done and return it
+            DoAction(action, result.ResultingState);
+            return action;
+        }
+
+        /// <summary>
+        /// Attempts to open and/or bypass all active locks on the provided node, depending on the provided parameters.
+        /// Returns a list of active locks that weren't handled, a list of active locks that were opened,
+        /// a list of active locks that were bypassed, and the result of execution (which will be null if nothing was attempted).
+        /// </summary>
+        /// <param name="node">The node on which to open or bypass active locks</param>
+        /// <param name="attemptOpen">Whether to attempt to open locks</param>
+        /// <param name="attemptBypass">Whether to attempt to bypass locks</param>
+        /// <returns></returns>
+        private (List<NodeLock> failedLocks, List<NodeLock> openedLocks, List<NodeLock> bypassedLocks, ExecutionResult result)
+            DealWithLocks(RoomNode node, bool attemptOpen, bool attemptBypass)
+        {
+            ExecutionResult result = null;
+
+            List<NodeLock> failedLocks = new List<NodeLock>();
+            List<NodeLock> openedLocks = new List<NodeLock>();
+            List<NodeLock> bypassedLocks = new List<NodeLock>();
+            IEnumerable<NodeLock> activeLocks = node.Locks.Where(l => l.IsActive(GameModel, CurrentInGameState));
+            foreach (NodeLock currentLock in activeLocks)
+            {
+                ExecutionResult currentResult = null;
+
+                // Try to open lock
+                if(attemptOpen)
+                {
+                    currentResult = currentLock.OpenExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
+                }
+
+                // If opening failed, try to bypass
+                if (currentResult == null)
+                {
+                    if(attemptBypass)
+                    {
+                        currentResult = currentLock.BypassExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
+
+                        // If bypass also failed, we can't interact with the node because of this lock
+                        if (currentResult == null)
+                        {
+                            failedLocks.Add(currentLock);
+                        }
+                        else
+                        {
+                            bypassedLocks.Add(currentLock);
+                        }
+                    }
+                    else
+                    {
+                        failedLocks.Add(currentLock);
+                    }
+                }
+                else
+                {
+                    openedLocks.Add(currentLock);
+                }
+
+                if (result == null)
+                {
+                    result = currentResult;
+                }
+                else
+                {
+                    result.ApplySubsequentResult(currentResult);
+                }
+            }
+
+            return (failedLocks, openedLocks, bypassedLocks, result);
         }
 
         #endregion
