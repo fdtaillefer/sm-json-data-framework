@@ -372,7 +372,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             {
                 return null;
             }
-            int numberOfShots = EnemyWithHealth.Health / susceptibility.DamagePerShot;
+            int numberOfShots = susceptibility.NumberOfHits(EnemyWithHealth.Health);
 
             ExecutionResult result = Weapon.ShotRequires.Execute(model, inGameState, times: times * numberOfShots, usePreviousRoom: usePreviousRoom);
 

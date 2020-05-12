@@ -41,6 +41,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <returns>The number of hits to kill the enemy</returns>
         public int NumberOfHits(int enemyHp)
         {
+            // enemyHp / DamagePerShot will floor. Adding DamagePerShot - 1 is like forcing the division to ceiling instead
             return (enemyHp + DamagePerShot - 1) / DamagePerShot;
         }
     }
