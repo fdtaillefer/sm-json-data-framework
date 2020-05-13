@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCo
             Name = "Redo";
             SampleFormat = "y";
             Description = "Redoes last undone action";
-            ValidCommand = str => str == "y";
+            ValidCommand = str => str.ToLower() == "y";
             Execution = (navigator, command) => {
                 AbstractNavigationAction action = navigator.Redo();
                 if (OutputAnything)

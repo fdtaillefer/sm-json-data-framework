@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Name = "Status - Adjacent Nodes";
             SampleFormat = "san";
             Description = "Outputs nodes that current node links to";
-            ValidCommand = str => str == "san";
+            ValidCommand = str => str.ToLower() == "san";
             Execution = (navigator, command) =>
             {
                 IEnumerable<LinkTo> links = navigator.CurrentInGameState.GetCurrentNode().Links.Values;

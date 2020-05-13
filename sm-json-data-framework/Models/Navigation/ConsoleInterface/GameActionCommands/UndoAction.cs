@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCo
             Name = "Undo";
             SampleFormat = "z";
             Description = "Undoes last action";
-            ValidCommand = str => str == "z";
+            ValidCommand = str => str.ToLower() == "z";
             Execution = (navigator, command) => {
                 AbstractNavigationAction action = navigator.Undo();
                 if (OutputAnything)

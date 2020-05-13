@@ -517,6 +517,75 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns whether the provided item is present and disabled in this InGameState.
+        /// </summary>
+        /// <param name="item">Item to check</param>
+        /// <returns></returns>
+        public bool isItemDisabled(Item item)
+        {
+            return Inventory.IsItemDisabled(item);
+        }
+
+        /// <summary>
+        /// Returns whether the item with the provided name is present and disabled in this InGameState.
+        /// </summary>
+        /// <param name="itemName">Name of the item to check</param>
+        /// <returns></returns>
+        public bool IsItemDisabled(string itemName)
+        {
+            return Inventory.IsItemDisabled(itemName);
+        }
+
+        /// <summary>
+        /// Returns the names of items that are disabled in this InGameState.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetDisabledItemNames()
+        {
+            return Inventory.GetDisabledItemNames();
+        }
+
+        /// <summary>
+        ///  Disables the provided non-consumable if it's in this InGameState.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to disable</param>
+        public void ApplyDisableItem(Item item)
+        {
+            Inventory.ApplyDisableItem(item);
+        }
+
+        /// <summary>
+        ///  Disables the non-consumable item with the provided name if it's in this InGameState.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to disable</param>
+        public void ApplyDisableItem(string itemName)
+        {
+            Inventory.ApplyDisableItem(itemName);
+        }
+
+        /// <summary>
+        ///  Re-enables the provided non-consumable if it's in this InGameState and disabled.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to enable</param>
+        public void ApplyEnableItem(Item item)
+        {
+            Inventory.ApplyEnableItem(item);
+        }
+
+        /// <summary>
+        ///  Re-enables the non-consumable item with the provided name if it's in this InGameState and disabled.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to enable</param>
+        public void ApplyEnableItem(string itemName)
+        {
+            Inventory.ApplyEnableItem(itemName);
+        }
+
+        /// <summary>
         /// In-room state of the current room.
         /// </summary>
         protected InRoomState InRoomState { get; set; }

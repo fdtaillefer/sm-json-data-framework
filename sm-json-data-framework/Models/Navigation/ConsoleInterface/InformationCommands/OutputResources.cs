@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Name = "Status - Resources";
             SampleFormat = "sr";
             Description = "Outputs current and maximum resource counts";
-            ValidCommand = str => str == "sr";
+            ValidCommand = str => str.ToLower() == "sr";
             Execution = (navigator, command) =>
             {
                 foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))

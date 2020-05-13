@@ -28,6 +28,8 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             Commands.Add(new InteractCommand());
             Commands.Add(new UnlockCommand());
             Commands.Add(new MoveCommand());
+            Commands.Add(new DisableItemCommand());
+            Commands.Add(new EnableItemCommand());
             Commands.Add(new OutputResources());
             Commands.Add(new OutputInventory());
             Commands.Add(new OutputAdjacentNodes());
@@ -56,7 +58,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             {
                 Console.WriteLine($"Now in {Navigator.CurrentInGameState.GetCurrentRoom().Name} at node {Navigator.CurrentInGameState.GetCurrentNode().Id}");
 
-                string stringCommand = Console.ReadLine().ToLower();
+                string stringCommand = Console.ReadLine();
                 ConsoleCommand matchingCommand = Commands.FirstOrDefault(c => c.ValidCommand(stringCommand));
                 if (matchingCommand != null)
                 {

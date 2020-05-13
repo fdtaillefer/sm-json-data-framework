@@ -14,7 +14,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             Name = "Exit";
             SampleFormat = "x";
             Description = "Stops console navigation";
-            ValidCommand = str => str == "x";
+            ValidCommand = str => str.ToLower() == "x";
             Execution = (navigator, command) => false;
         }
     }

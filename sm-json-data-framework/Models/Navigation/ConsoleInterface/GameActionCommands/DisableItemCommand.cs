@@ -6,9 +6,9 @@ using System.Text.RegularExpressions;
 namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCommands
 {
     /// <summary>
-    /// A console interface command, to move to the specified node.
+    /// A console interface command, to disable an item.
     /// </summary>
-    public class MoveCommand: ConsoleCommand, NavigationActionCommand
+    public class DisableItemCommand: ConsoleCommand, NavigationActionCommand
     {
         public bool OutputAnything { get; set; } = true;
 
@@ -16,17 +16,17 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCo
 
         public bool OutputDetails { get; set; } = true;
 
-        public MoveCommand()
+        public DisableItemCommand()
         {
-            Regex moveRegex = new Regex(@"^m\d+");
+            Regex disableRegex = new Regex(@"^d [a-zA-Z]+");
 
-            Name = "Move";
-            SampleFormat = "m##";
-            Description = "Moves to the given node ID";
-            ValidCommand = command => moveRegex.IsMatch(command.ToLower());
+            Name = "Disable item";
+            SampleFormat = "d ItemName";
+            Description = "Disables the item with the given name";
+            ValidCommand = command => disableRegex.IsMatch(command.ToLower());
             Execution = (navigator, command) => {
-                int nodeId = int.Parse(moveRegex.Match(command).Value.Substring(1));
-                AbstractNavigationAction action = navigator.MoveToNode(nodeId);
+                string itemName = disableRegex.Match(command).Value.Substring(2);
+                AbstractNavigationAction action = navigator.DisableItem(itemName);
                 if (OutputAnything)
                 {
                     action.OutputToConsole(OutputEffects, OutputDetails);

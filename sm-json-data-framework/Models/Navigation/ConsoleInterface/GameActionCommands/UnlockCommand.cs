@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCo
             Name = "Unlock";
             SampleFormat = "u";
             Description = "Unlocks current node";
-            ValidCommand = str => str == "u";
+            ValidCommand = str => str.ToLower() == "u";
             Execution = (navigator, command) => {
                 AbstractNavigationAction action = navigator.UnlockNode();
                 if (OutputAnything)

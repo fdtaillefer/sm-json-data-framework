@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Name = "Help";
             SampleFormat = "h";
             Description = "Outputs existing commands";
-            ValidCommand = str => str == "h";
+            ValidCommand = str => str.ToLower() == "h";
             Execution = (navigator, command) => { 
                 foreach(ConsoleCommand currentCommand in Commands)
                 {

@@ -40,6 +40,10 @@ namespace sm_json_data_framework.Models.Navigation
             // Cannot lose items, just create an empty inventory
             ItemsLost = new ItemInventory(model.StartConditions.BaseResourceMaximums);
 
+            // Initialize enabled and disabled items
+            ItemsDisabledNames = executionResult.ResultingState.GetDisabledItemNames().Except(initialInGameState.GetDisabledItemNames());
+            ItemsEnabledNames = initialInGameState.GetDisabledItemNames().Except(executionResult.ResultingState.GetDisabledItemNames());
+
             // Initialize flags gained
             GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptWith(initialInGameState).Values);
 
@@ -107,6 +111,16 @@ namespace sm_json_data_framework.Models.Navigation
         /// This can only really happen by reversing an action.
         /// </summary>
         public ItemInventory ItemsLost { get; set; }
+
+        /// <summary>
+        /// The names of items that have been disabled by the player as a result of this action.
+        /// </summary>
+        public IEnumerable<string> ItemsDisabledNames { get; set; } = new HashSet<string>();
+
+        /// <summary>
+        /// The names of items that have been enabled by the player as a result of this action.
+        /// </summary>
+        public IEnumerable<string> ItemsEnabledNames { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// The enumeration of game flags that have been obtained by the player as a result of this action.
@@ -225,6 +239,10 @@ namespace sm_json_data_framework.Models.Navigation
             reverseAction.ItemsGained = ItemsLost.Clone();
             reverseAction.ItemsLost = ItemsGained.Clone();
 
+            // Initialize reversed enabled/disabled items
+            reverseAction.ItemsDisabledNames = ItemsEnabledNames;
+            reverseAction.ItemsEnabledNames = ItemsDisabledNames;
+
             // Initialize reversed flags change
             // Don't clone, expect that IEnumerables won't get mutated.
             reverseAction.GameFlagsGained = GameFlagsLost;
@@ -335,6 +353,16 @@ namespace sm_json_data_framework.Models.Navigation
                 foreach (var (item, count) in ItemsLost.GetExpansionItemsDictionary().Values)
                 {
                     Console.WriteLine($"Lost item '{item.Name}' X {count}");
+                }
+
+                // Items enabled and disabled
+                foreach(string itemName in ItemsDisabledNames)
+                {
+                    Console.WriteLine($"Disabled item '{itemName}'");
+                }
+                foreach (string itemName in ItemsEnabledNames)
+                {
+                    Console.WriteLine($"Enabled item '{itemName}'");
                 }
 
                 // Resource variation

@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCo
             Name = "Interact";
             SampleFormat = "i";
             Description = "Interacts with current node";
-            ValidCommand = str => str == "i";
+            ValidCommand = str => str.ToLower() == "i";
             Execution = (navigator, command) => {
                 AbstractNavigationAction action = navigator.InteractWithNode();
                 if (OutputAnything)

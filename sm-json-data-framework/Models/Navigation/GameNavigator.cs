@@ -426,6 +426,70 @@ namespace sm_json_data_framework.Models.Navigation
             return (failedLocks, openedLocks, bypassedLocks, result);
         }
 
+        /// <summary>
+        /// Attempts to disable the item with the provided name. Fails if that item is not present and enabled.
+        /// </summary>
+        /// <returns>The resulting action. If disabling fails, returns a failure action.</returns>
+        public AbstractNavigationAction DisableItem(string itemName)
+        {
+            string intent = $"Disable item {itemName}";
+
+            if (!CurrentInGameState.GetNonConsumableItemsDictionary().ContainsKey(itemName))
+            {
+                intent = intent + ", but that item is not present in inventory";
+                return new Failure(intent);
+            }
+
+            if (!CurrentInGameState.HasItem(itemName))
+            {
+                intent = intent + ", but that item is not enabled";
+                return new Failure(intent);
+            }
+
+            // Item is present and enabled, create new in-game state with item disabled
+            InGameState newState = CurrentInGameState.Clone();
+            newState.ApplyDisableItem(itemName);
+
+            // Create an action to return
+            DisableItemAction action = new DisableItemAction(intent, GameModel, CurrentInGameState, new ExecutionResult(newState));
+
+            // Register the action as done and return it
+            DoAction(action, newState);
+            return action;
+        }
+
+        /// <summary>
+        /// Attempts to enable the item with the provided name. Fails if that item is not present and disabled.
+        /// </summary>
+        /// <returns>The resulting action. If enable fails, returns a failure action.</returns>
+        public AbstractNavigationAction EnableItem(string itemName)
+        {
+            string intent = $"Enable item {itemName}";
+
+            if (!CurrentInGameState.GetNonConsumableItemsDictionary().ContainsKey(itemName))
+            {
+                intent = intent + ", but that item is not present in inventory";
+                return new Failure(intent);
+            }
+
+            if (CurrentInGameState.HasItem(itemName))
+            {
+                intent = intent + ", but that item is already enabled";
+                return new Failure(intent);
+            }
+
+            // Item is present and enabled, create new in-game state with item enabled
+            InGameState newState = CurrentInGameState.Clone();
+            newState.ApplyEnableItem(itemName);
+
+            // Create an action to return
+            EnableItemAction action = new EnableItemAction(intent, GameModel, CurrentInGameState, new ExecutionResult(newState));
+
+            // Register the action as done and return it
+            DoAction(action, newState);
+            return action;
+        }
+
         #endregion
 
         #region Consultation methods

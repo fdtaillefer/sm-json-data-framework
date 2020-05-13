@@ -48,6 +48,7 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             NonConsumableItems = new Dictionary<string, Item>(other.NonConsumableItems);
             ExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.ExpansionItems);
+            DisabledItemNames = new HashSet<string>(other.DisabledItemNames);
 
             BaseResourceMaximums = other.BaseResourceMaximums.Clone();
             ResourceCapacityChanges = other.ResourceCapacityChanges.Clone();
@@ -59,6 +60,12 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         protected IDictionary<string, Item> NonConsumableItems { get; set; } = new Dictionary<string, Item>();
+
+        /// <summary>
+        /// A set of items that have been manually disabled. This doesn't remove them from inventory but does prevent
+        /// <see cref="HasItem(Item)"/> from returning true for them.
+        /// </summary>
+        protected ISet<string> DisabledItemNames { get; set; } = new HashSet<string>();
 
         protected IDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get; set; } = new Dictionary<string, (ExpansionItem item, int count)>();
 
@@ -108,12 +115,12 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Returns whether this inventory contains an item with the provided name.
+        /// Returns whether this inventory contains an item with the provided name. If the item is present but disabled, returns false.
         /// </summary>
         /// <returns></returns>
         public bool HasItem(string itemName)
         {
-            return NonConsumableItems.ContainsKey(itemName) || ExpansionItems.ContainsKey(itemName);
+            return (NonConsumableItems.ContainsKey(itemName) && !DisabledItemNames.Contains(itemName))|| ExpansionItems.ContainsKey(itemName);
         }
 
         /// <summary>
@@ -202,6 +209,81 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns whether the provided item is present and disabled in this inventory.
+        /// </summary>
+        /// <param name="item">Item to check</param>
+        /// <returns></returns>
+        public bool IsItemDisabled(Item item)
+        {
+            return IsItemDisabled(item.Name);
+        }
+
+        /// <summary>
+        /// Returns whether the item with the provided name is present and disabled in this inventory.
+        /// </summary>
+        /// <param name="itemName">Name of the item to check</param>
+        /// <returns></returns>
+        public bool IsItemDisabled(string itemName)
+        {
+            return NonConsumableItems.ContainsKey(itemName) && DisabledItemNames.Contains(itemName);
+        }
+
+        /// <summary>
+        /// Returns the names of items that are disabled in this inventory.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetDisabledItemNames()
+        {
+            return DisabledItemNames;
+        }
+
+        /// <summary>
+        ///  Disables the provided non-consumable if it's in this inventory.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to disable</param>
+        public void ApplyDisableItem(Item item)
+        {
+            ApplyDisableItem(item.Name);
+        }
+
+        /// <summary>
+        ///  Disables the non-consumable item with the provided name if it's in this inventory.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to disable</param>
+        public void ApplyDisableItem(string itemName)
+        {
+            if(NonConsumableItems.ContainsKey(itemName))
+            {
+                DisabledItemNames.Add(itemName);
+            }
+        }
+
+        /// <summary>
+        ///  Re-enables the provided non-consumable if it's in this inventory and disabled.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to enable</param>
+        public void ApplyEnableItem(Item item)
+        {
+            ApplyEnableItem(item.Name);
+        }
+
+        /// <summary>
+        ///  Re-enables the non-consumable item with the provided name if it's in this inventory and disabled.
+        ///  Does nothing otherwise.
+        /// </summary>
+        /// <param name="itemName">Name of the item to enable</param>
+        public void ApplyEnableItem(string itemName)
+        {
+            if (NonConsumableItems.ContainsKey(itemName))
+            {
+                DisabledItemNames.Remove(itemName);
+            }
+        }
+
+        /// <summary>
         /// Creates and returns a new ItemInventory containing all items from this Inventory
         /// that aren't found in the provided other inventory.
         /// </summary>
@@ -211,6 +293,8 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             // Create a new empty inventory
             ItemInventory returnInventory = new ItemInventory(BaseResourceMaximums);
+            // Keeping disabled items makes no sense given what this method does
+            returnInventory.DisabledItemNames.Clear();
 
             // For non-consumable items, just check for absence in other
             foreach (KeyValuePair<string, Item> kvp in NonConsumableItems)

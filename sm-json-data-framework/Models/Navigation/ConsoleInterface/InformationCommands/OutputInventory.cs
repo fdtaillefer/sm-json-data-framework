@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Items;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationCommands
@@ -15,7 +16,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Name = "Status - Inventory";
             SampleFormat = "si";
             Description = "Outputs current items in inventory";
-            ValidCommand = str => str == "si";
+            ValidCommand = str => str.ToLower() == "si";
             Execution = (navigator, command) =>
             {
                 foreach (var (item, count) in navigator.CurrentInGameState.GetExpansionItemsDictionary().Values)
@@ -24,7 +25,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
                 }
                 foreach (Item item in navigator.CurrentInGameState.GetNonConsumableItemsDictionary().Values)
                 {
-                    Console.WriteLine($"Has item '{item.Name}'");
+                    Console.WriteLine($"Has item '{item.Name}'{(navigator.CurrentInGameState.IsItemDisabled(item.Name) ? " (disabled)" : "")}");
                 }
 
                 return true;
