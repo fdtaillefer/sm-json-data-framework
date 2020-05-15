@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_framework.Models.Rooms.Node
+namespace sm_json_data_framework.Models.Rooms.Nodes
 {
     public class CanLeaveCharged : InitializablePostDeserializeInNode, IRunway, IExecutable
     {
@@ -25,24 +25,13 @@ namespace sm_json_data_framework.Models.Rooms.Node
 
         public int ShinesparkFrames { get; set; }
 
-        [JsonPropertyName("initiateAt")]
-        public int? OverrideInitiateAtNodeId { get; set; }
+        public InitiateRemotely InitiateRemotely {get;set;}
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, RoomNode)"/> has been called.</para>
-        /// <para>The node referenced by the <see cref="OverrideInitiateAtNodeId"/> property, if any.</para>
+        /// Returns whether this CanLeaveCharged is initiated at a different node than the door it exits through.
         /// </summary>
         [JsonIgnore]
-        public RoomNode OverrideInitiateAtNode { get; set; }
-
-        public bool MustOpenDoorFirst { get; set; } = false;
-
-        /// <summary>
-        /// <para>Not reliable before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
-        /// <para>The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.</para>
-        /// </summary>
-        [JsonIgnore]
-        public RoomNode InitiateAtNode { get { return OverrideInitiateAtNode ?? Node; } }
+        public bool IsInitiatedRemotely { get { return InitiateRemotely != null; } }
 
         public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
 
@@ -78,12 +67,6 @@ namespace sm_json_data_framework.Models.Rooms.Node
         {
             Node = node;
 
-            // Initialize OverrideInitiateAtNode
-            if (OverrideInitiateAtNodeId != null)
-            {
-                OverrideInitiateAtNode = node.Room.Nodes[(int)OverrideInitiateAtNodeId];
-            }
-
             // Eliminate disabled strats
             Strats = Strats.WhereEnabled(model);
 
@@ -93,6 +76,8 @@ namespace sm_json_data_framework.Models.Rooms.Node
             }
 
             EffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter);
+
+            InitiateRemotely?.Initialize(model, room, node, this);
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
@@ -102,6 +87,11 @@ namespace sm_json_data_framework.Models.Rooms.Node
             foreach(Strat strat in Strats)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
+            }
+
+            if (InitiateRemotely != null)
+            {
+                unhandled.AddRange(InitiateRemotely.InitializeReferencedLogicalElementProperties(model, room, node, this));
             }
 
             return unhandled.Distinct();

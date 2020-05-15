@@ -220,7 +220,7 @@ namespace sm_json_data_framework.Models.Navigation
                 NodeTypeEnum.Junction => $"Interact with {node.Name}"
             };
 
-            var(failedLocks, _, bypassedLocks, result) = DealWithLocks(node, attemptOpen: true, attemptBypass: true);
+            var(failedLocks, openedLocks, bypassedLocks, result) = DealWithLocks(node, attemptOpen: true, attemptBypass: true);
 
             // We couldn't get through a lock, return a failure
             if (failedLocks.Any())
@@ -311,7 +311,7 @@ namespace sm_json_data_framework.Models.Navigation
             // Use node to exit the room
             if (node.OutNode != null)
             {
-                result.ResultingState.ApplyEnterRoom(node.OutNode, bypassedLocks.Any());
+                result.ResultingState.ApplyEnterRoom(node.OutNode, bypassedLocks.Any(), openedLocks.Any());
             }
 
             // Create an action to return

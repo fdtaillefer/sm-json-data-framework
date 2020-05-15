@@ -2,7 +2,7 @@
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
-using sm_json_data_framework.Models.Rooms.Node;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Text;

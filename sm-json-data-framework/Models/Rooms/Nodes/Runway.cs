@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_framework.Models.Rooms.Node
+namespace sm_json_data_framework.Models.Rooms.Nodes
 {
     public class Runway : InitializablePostDeserializeInNode, IRunway
     {

@@ -179,6 +179,19 @@ namespace sm_json_data_framework.Reading
                 {
                     room.Initialize(model);
                 }
+
+                // CanLeaveChargeds need to be initialized once the entire room has been loaded,
+                // so they were left out of the room.Initialize() call and must be done separately.
+                foreach (Room room in model.Rooms.Values)
+                {
+                    foreach(RoomNode node in room.Nodes.Values)
+                    {
+                        foreach(CanLeaveCharged canLeaveCharged in node.CanLeaveCharged)
+                        {
+                            canLeaveCharged.Initialize(model, room, node);
+                        }
+                    }
+                }
             }
 
             model.AssignStartingConditions(itemContainer);

@@ -2,7 +2,6 @@
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
-using sm_json_data_framework.Models.Rooms.Node;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -151,11 +150,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 Links = linksFromHere.Single().To.ToDictionary(l => l.TargetNodeId);
             }
 
-            // Initialize CanLeaveCharged objects
-            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
-            {
-                canLeaveCharged.Initialize(model, room, this);
-            }
+            // Don't initialize CanLeaveChargeds because they need the entire room to be loaded first.
+            // They have to be done manually outside this method.
+
+            // Eliminate any CanLeaveChargeds that are initiated remotely and whose path is impossible to follow
+            CanLeaveCharged = CanLeaveCharged.Where(clc => clc.InitiateRemotely == null || clc.InitiateRemotely.PathToDoor.Any());
 
             // Initialize ViewableNodes
             foreach(ViewableNode viewableNode in ViewableNodes)
