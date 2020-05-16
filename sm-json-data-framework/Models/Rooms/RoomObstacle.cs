@@ -24,9 +24,10 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public Room Room { get; set; }
 
-        public void Initialize(SuperMetroidModel model, Room room)
+        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             Room = room;
+            return Enumerable.Empty<Action>();
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

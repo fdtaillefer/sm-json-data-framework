@@ -112,9 +112,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public Dictionary<int, LinkTo> Links { get; set; }
 
-        public void Initialize(SuperMetroidModel model, Room room)
+        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             Room = room;
+            List<Action> initializedRoomCallbacks = new List<Action>();
 
             // Initialize OutConnection and OutNode
             if(NodeType == NodeTypeEnum.Exit || NodeType == NodeTypeEnum.Door)
@@ -150,11 +151,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 Links = linksFromHere.Single().To.ToDictionary(l => l.TargetNodeId);
             }
 
-            // Don't initialize CanLeaveChargeds because they need the entire room to be loaded first.
-            // They have to be done manually outside this method.
-
-            // Eliminate any CanLeaveChargeds that are initiated remotely and whose path is impossible to follow
-            CanLeaveCharged = CanLeaveCharged.Where(clc => clc.InitiateRemotely == null || clc.InitiateRemotely.PathToDoor.Any());
+            // We can't initialize CanLeaveChargeds now because they need the entire room to be loaded first.
+            // So we'll do it in a callback that we'll return, to be executed after the rest of the room is initialized.
+            initializedRoomCallbacks.Add(() => {
+                foreach(CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+                {
+                    canLeaveCharged.Initialize(model, room, this);
+                }
+                // We are now able to eliminate any CanLeaveCharged that is initiated remotely and whose path is impossible to follow
+                CanLeaveCharged = CanLeaveCharged.Where(clc => clc.InitiateRemotely == null || clc.InitiateRemotely.PathToDoor.Any());
+            });
 
             // Initialize ViewableNodes
             foreach(ViewableNode viewableNode in ViewableNodes)
@@ -173,6 +179,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 runway.Initialize(model, room, this);
             }
+
+            return initializedRoomCallbacks;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

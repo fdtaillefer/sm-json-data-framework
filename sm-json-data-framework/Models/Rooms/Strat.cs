@@ -56,17 +56,20 @@ namespace sm_json_data_framework.Models.Rooms
             return result;
         }
 
-        public void Initialize(SuperMetroidModel model, Room room)
+        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
-            foreach(StratFailure failure in Failures)
+            List<Action> postRoomInitializeCallbacks = new List<Action>();
+            foreach (StratFailure failure in Failures)
             {
-                failure.Initialize(model, room);
+                postRoomInitializeCallbacks.AddRange(failure.Initialize(model, room));
             }
 
             foreach(StratObstacle obstacle in Obstacles)
             {
-                obstacle.Initialize(model, room);
+                postRoomInitializeCallbacks.AddRange(obstacle.Initialize(model, room));
             }
+
+            return postRoomInitializeCallbacks;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

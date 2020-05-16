@@ -49,13 +49,15 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
 
-        public void Initialize(SuperMetroidModel model, Room room)
+        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             Enemy = model.Enemies[EnemyName];
 
             HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
             BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
+
+            return Enumerable.Empty<Action>();
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

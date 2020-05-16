@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
 
-        public void Initialize(SuperMetroidModel model, Room room)
+        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             // Initialize TargetNode
             TargetNode = room.Nodes[TargetNodeId];
@@ -31,10 +31,13 @@ namespace sm_json_data_framework.Models.Rooms
             Strats = Strats.WhereEnabled(model);
 
             // Initialize Strats
-            foreach(Strat strat in Strats)
+            List<Action> postRoomInitializeCallbacks = new List<Action>();
+            foreach (Strat strat in Strats)
             {
-                strat.Initialize(model, room);
+                postRoomInitializeCallbacks.AddRange(strat.Initialize(model, room));
             }
+
+            return postRoomInitializeCallbacks;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

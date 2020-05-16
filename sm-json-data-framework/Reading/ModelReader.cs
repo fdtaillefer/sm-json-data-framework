@@ -36,12 +36,13 @@ namespace sm_json_data_framework.Reading
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(string baseDirectory, SuperMetroidRules rules, bool initialize = true,
+        public static SuperMetroidModel ReadModel(string baseDirectory, SuperMetroidRules rules, LogicalOptions logicalOptions, bool initialize = true,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             SuperMetroidModel model = new SuperMetroidModel();
 
             model.Rules = rules;
+            model.LogicalOptions = logicalOptions;
 
             JsonSerializerOptions options = CreateJsonSerializerOptions(model, overrideTypes);
             StringLogicalElementConverter stringLogicalElementConverter = options.GetConverter(typeof(AbstractStringLogicalElement)) as StringLogicalElementConverter;
@@ -178,19 +179,6 @@ namespace sm_json_data_framework.Reading
                 foreach (Room room in model.Rooms.Values)
                 {
                     room.Initialize(model);
-                }
-
-                // CanLeaveChargeds need to be initialized once the entire room has been loaded,
-                // so they were left out of the room.Initialize() call and must be done separately.
-                foreach (Room room in model.Rooms.Values)
-                {
-                    foreach(RoomNode node in room.Nodes.Values)
-                    {
-                        foreach(CanLeaveCharged canLeaveCharged in node.CanLeaveCharged)
-                        {
-                            canLeaveCharged.Initialize(model, room, node);
-                        }
-                    }
                 }
             }
 

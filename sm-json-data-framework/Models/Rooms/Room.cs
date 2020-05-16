@@ -77,25 +77,30 @@ namespace sm_json_data_framework.Models.Rooms
         {
             SuperMetroidModel = model;
 
+            List<Action> postInitializationCallbacks = new List<Action>();
+
             foreach(RoomNode node in Nodes.Values)
             {
-                node.Initialize(model, this);
+                postInitializationCallbacks.AddRange(node.Initialize(model, this));
             }
 
             foreach(RoomObstacle obstacle in Obstacles.Values)
             {
-                obstacle.Initialize(model, this);
+                postInitializationCallbacks.AddRange(obstacle.Initialize(model, this));
             }
 
             foreach (Link link in Links)
             {
-                link.Initialize(model, this);
+                postInitializationCallbacks.AddRange(link.Initialize(model, this));
             }
 
             foreach(RoomEnemy enemy in Enemies)
             {
-                enemy.Initialize(model, this);
+                postInitializationCallbacks.AddRange(enemy.Initialize(model, this));
             }
+
+            // If we received any callbacks to execute after the room is done, execute them now
+            postInitializationCallbacks.ForEach(action => action.Invoke());
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)

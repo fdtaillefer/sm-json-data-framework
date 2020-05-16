@@ -37,13 +37,15 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public IEnumerable<RoomObstacle> AdditionalObstacles { get; set; }
 
-        public void Initialize(SuperMetroidModel model, Room room)
+        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             // Initialize Obstacle
             Obstacle = room.Obstacles[ObstacleId];
 
             // Initialize AdditionalObstacles
             AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]);
+
+            return Enumerable.Empty<Action>();
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

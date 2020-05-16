@@ -67,7 +67,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// Options that describe what the player is expected to be able or unable to do.
         /// </summary>
-        public LogicalOptions LogicalOptions { get; set; } = new LogicalOptions();
+        public LogicalOptions LogicalOptions { get; set; }
 
         /// <summary>
         /// A repository of game rules we are operating by.
