@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Converters
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnergyAtMost, typeof(EnergyAtMost));
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.HeatFrames, typeof(HeatFrames));
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.HibashiHits, typeof(HibashiHits));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.LavaFrames, typeof(HeatFrames));
+            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.LavaFrames, typeof(LavaFrames));
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.PreviousNode, typeof(PreviousNode));
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.SpikeHits, typeof(SpikeHits));
             defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.ThornHits, typeof(ThornHits));
