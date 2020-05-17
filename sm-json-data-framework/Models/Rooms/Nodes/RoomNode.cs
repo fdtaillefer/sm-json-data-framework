@@ -125,6 +125,17 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                     OutConnection = connection;
                     ConnectionNode otherNode = connection.ToNode;
                     OutNode = model.Rooms[otherNode.RoomName].Nodes[otherNode.Nodeid];
+
+                    // Sanity check for node names and IDs. Take this out if nodeIds get taken out of connections
+                    if (connection.FromNode.NodeName != null && connection.FromNode.NodeName != Name)
+                    {
+                        throw new Exception($"A connection thought to be going from node {Name} claims to be going from a node named {connection.FromNode.NodeName}");
+                    }
+                    if (connection.ToNode.NodeName != null && connection.ToNode.NodeName != OutNode.Name)
+                    {
+                        throw new Exception($"A connection thought to be going from node {OutNode.Name} claims to be going from a node named {connection.ToNode.NodeName}");
+                    }
+
                 }
             }
 

@@ -24,6 +24,8 @@ namespace sm_json_data_framework.Models.Connections
 
         public int Nodeid { get; set; }
 
+        public string NodeName { get; set; }
+
         public ConnectionNodePositionEnum Position { get; set; }
     }
 }
