@@ -90,6 +90,27 @@ namespace sm_json_data_framework.Models
         /// </summary>
         public bool ShineChargesWithStutter { get; set; } = false;
 
+        /// <summary>
+        /// A multiplier applied to all logical heat frame requirements.
+        /// Larger values make strats logically require more energy, making them more lenient.
+        /// Values below 1 are not recommended.
+        /// </summary>
+        public decimal HeatLeniencyMultiplier { get; set; } = 1;
+
+        /// <summary>
+        /// A multiplier applied to all logical lava frame requirements.
+        /// Larger values make strats logically require more energy, making them more lenient.
+        /// Values below 1 are not recommended.
+        /// </summary>
+        public decimal LavaLeniencyMultiplier { get; set; } = 1;
+
+        /// <summary>
+        /// A multiplier applied to all logical acid frame requirements.
+        /// Larger values make strats logically require more energy, making them more lenient.
+        /// Values below 1 are not recommended.
+        /// </summary>
+        public decimal AcidLeniencyMultiplier { get; set; } = 1;
+
         public bool IsTechEnabled(Tech tech)
         {
             if (TechsEnabledByDefault)

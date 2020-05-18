@@ -8,6 +8,10 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
+    /// <summary>
+    /// Contains info relating to a <see cref="CanLeaveCharged"/> being initiated remotely.
+    /// This means it is initiated at a different node that the one by which the room will be exited.
+    /// </summary>
     public class InitiateRemotely : InitializablePostDeserializableInCanLeaveCharged
     {
         [JsonPropertyName("initiateAt")]

@@ -13,7 +13,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     {
         public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            return model.Rules.CalculateHeatDamage(inGameState, Value) * times;
+            int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Value) * times;
+            return (int)(baseDamage * model.LogicalOptions.HeatLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, InGameState inGameState)
