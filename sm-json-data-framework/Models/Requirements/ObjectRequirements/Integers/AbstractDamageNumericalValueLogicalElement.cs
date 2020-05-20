@@ -34,10 +34,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
             int damage = CalculateDamage(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
-            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage))
+            if (inGameState.IsResourceAvailable(model, ConsumableResourceEnum.ENERGY, damage))
             {
                 var resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
+                resultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, damage);
                 ExecutionResult result = new ExecutionResult(resultingState);
                 result.AddDamageReducingItemsInvolved(GetDamageReducingItems(model, inGameState));
                 return result;

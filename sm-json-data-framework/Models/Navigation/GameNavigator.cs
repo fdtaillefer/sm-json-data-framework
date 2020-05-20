@@ -269,10 +269,10 @@ namespace sm_json_data_framework.Models.Navigation
                     switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
                     {
                         case ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP:
-                            result.ResultingState.ApplyAddResource(expansionItem.Resource, expansionItem.ResourceAmount);
+                            result.ResultingState.ApplyAddResource(GameModel, expansionItem.Resource, expansionItem.ResourceAmount);
                             break;
                         case ExpansionPickupRestoreBehaviorEnum.REFILL:
-                            result.ResultingState.ApplyRefillResource(expansionItem.Resource);
+                            result.ResultingState.ApplyRefillResource(GameModel, expansionItem.Resource);
                             break;
                         // If we don't know or if the pickup has no effect, do nothing
                         case ExpansionPickupRestoreBehaviorEnum.NOTHING:
@@ -288,19 +288,19 @@ namespace sm_json_data_framework.Models.Navigation
                 switch(utility)
                 {
                     case UtilityEnum.Energy:
-                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.RegularEnergy);
+                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.RegularEnergy);
                         break;
                     case UtilityEnum.Reserve:
-                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.ReserveEnergy);
+                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.ReserveEnergy);
                         break;
                     case UtilityEnum.Missile:
-                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Missile);
+                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.Missile);
                         break;
                     case UtilityEnum.Super:
-                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Super);
+                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.Super);
                         break;
                     case UtilityEnum.PowerBomb:
-                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.PowerBomb);
+                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.PowerBomb);
                         break;
                     // Other utilities don't do anything for us
                     default:

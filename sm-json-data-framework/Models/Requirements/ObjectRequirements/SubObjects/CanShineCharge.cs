@@ -68,10 +68,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             // If we have enough energy for the shinespark, consume it and return the result
             int energyCost = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames);
-            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, energyCost))
+            if (inGameState.IsResourceAvailable(model, ConsumableResourceEnum.ENERGY, energyCost))
             {
                 InGameState resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
+                resultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, energyCost);
                 ExecutionResult result = new ExecutionResult(resultingState);
                 result.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return result;

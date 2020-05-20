@@ -144,60 +144,92 @@ namespace sm_json_data_framework.Models.InGameStates
             };
         }
 
-        public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
+        public bool IsResourceAvailable(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
         {
             if(quantity == 0)
             {
                 return true;
             }
-            return resource switch
+
+            // If resource tracking is enabled, look at current resource amounts
+            if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                // The other resources can be fully spent, but for energy we don't want to go below 1
-                ConsumableResourceEnum.ENERGY => (GetCurrentAmount(RechargeableResourceEnum.RegularEnergy) + GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy)) > quantity,
-                ConsumableResourceEnum.MISSILE => GetCurrentAmount(RechargeableResourceEnum.Missile) >= quantity,
-                ConsumableResourceEnum.SUPER => GetCurrentAmount(RechargeableResourceEnum.Super) >= quantity,
-                ConsumableResourceEnum.POWER_BOMB => GetCurrentAmount(RechargeableResourceEnum.PowerBomb) >= quantity
-            };
+                return resource switch
+                {
+                    // The other resources can be fully spent, but for energy we don't want to go below 1
+                    ConsumableResourceEnum.ENERGY => (GetCurrentAmount(RechargeableResourceEnum.RegularEnergy) + GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy)) > quantity,
+                    ConsumableResourceEnum.MISSILE => GetCurrentAmount(RechargeableResourceEnum.Missile) >= quantity,
+                    ConsumableResourceEnum.SUPER => GetCurrentAmount(RechargeableResourceEnum.Super) >= quantity,
+                    ConsumableResourceEnum.POWER_BOMB => GetCurrentAmount(RechargeableResourceEnum.PowerBomb) >= quantity
+                };
+            }
+            // If resource tracking is not enabled, use max resource amounts instead of current amounts
+            else
+            {
+                return resource switch
+                {
+                    // The other resources can be fully spent, but for energy we don't want to go below 1
+                    ConsumableResourceEnum.ENERGY => (GetMaxAmount(RechargeableResourceEnum.RegularEnergy) + GetMaxAmount(RechargeableResourceEnum.ReserveEnergy)) > quantity,
+                    ConsumableResourceEnum.MISSILE => GetMaxAmount(RechargeableResourceEnum.Missile) >= quantity,
+                    ConsumableResourceEnum.SUPER => GetMaxAmount(RechargeableResourceEnum.Super) >= quantity,
+                    ConsumableResourceEnum.POWER_BOMB => GetMaxAmount(RechargeableResourceEnum.PowerBomb) >= quantity
+                };
+            }
         }
 
         /// <summary>
         /// Adds the provided quantity of the provided consumable resource. Will not go beyond the maximum
         /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to increase</param>
         /// <param name="quantity">The amount to increase by</param>
-        public void ApplyAddResource(RechargeableResourceEnum resource, int quantity)
+        public void ApplyAddResource(SuperMetroidModel model, RechargeableResourceEnum resource, int quantity)
         {
-            int max = GetMaxAmount(resource);
-            int currentAmount = Resources.GetAmount(resource);
-
-            // We're already at max (or greater, somehow). Don't add anything
-            if (currentAmount >= max)
+            // Don't bother with current resource count if resource tracking is disabled
+            if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                return;
-            }
-            int newAmount = currentAmount + quantity;
+                int max = GetMaxAmount(resource);
+                int currentAmount = Resources.GetAmount(resource);
 
-            Resources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
+                // We're already at max (or greater, somehow). Don't add anything
+                if (currentAmount >= max)
+                {
+                    return;
+                }
+                int newAmount = currentAmount + quantity;
+
+                Resources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
+            }
         }
 
         /// <summary>
         /// Consumes the provided quantity of the provided consumable resource. When consuming energy, regular energy is used up first (down to 1) 
         /// then reserves are used.
         /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to consume</param>
         /// <param name="quantity">The amount to consume</param>
-        public void ApplyConsumeResource(ConsumableResourceEnum resource, int quantity)
+        public void ApplyConsumeResource(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
         {
-            Resources.ApplyAmountReduction(resource, quantity);
+            // Don't bother with current resource count if resource tracking is disabled
+            if(model.LogicalOptions.ResourceTrackingEnabled)
+            {
+                Resources.ApplyAmountReduction(resource, quantity);
+            }
         }
 
         /// <summary>
         /// Sets current value for the provided resource to the current maximum
         /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to refill</param>
-        public void ApplyRefillResource(RechargeableResourceEnum resource)
+        public void ApplyRefillResource(SuperMetroidModel model, RechargeableResourceEnum resource)
         {
-            Resources.ApplyAmount(resource, Inventory.GetMaxAmount(resource));
+            // Don't bother with current resource count if resource tracking is disabled
+            if (model.LogicalOptions.ResourceTrackingEnabled)
+            {
+                Resources.ApplyAmount(resource, Inventory.GetMaxAmount(resource));
+            }
         }
 
         protected IDictionary<string, GameFlag> ActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();

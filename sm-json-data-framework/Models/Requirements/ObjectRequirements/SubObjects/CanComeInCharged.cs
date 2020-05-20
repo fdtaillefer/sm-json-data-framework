@@ -49,8 +49,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             var mustShinespark = ShinesparkFrames > 0;
             var energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times;
-            Predicate<InGameState> hasEnergyForShinespark = state => state.IsResourceAvailable(ConsumableResourceEnum.ENERGY, energyNeededForShinespark);
-            Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyNeededForShinespark);
+            Predicate<InGameState> hasEnergyForShinespark = state => state.IsResourceAvailable(model, ConsumableResourceEnum.ENERGY, energyNeededForShinespark);
+            Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, energyNeededForShinespark);
 
             // Check simple preconditions before looking at anything
             if (!inGameState.HasSpeedBooster() || (mustShinespark && !model.CanShinespark()))

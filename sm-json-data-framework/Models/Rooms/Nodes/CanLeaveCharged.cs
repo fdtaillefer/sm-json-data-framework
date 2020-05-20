@@ -126,7 +126,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Try to execute all strats, obtaining the result
             // of whichever spends the lowest amount of resources while retaining enough for the shinespark
             (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, usePreviousRoom: usePreviousRoom,
-                acceptationCondition: igs => igs.IsResourceAvailable(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend));
+                acceptationCondition: igs => igs.IsResourceAvailable(model, ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend));
 
             // If we couldn't find a successful strat, give up
             if (result == null)
@@ -138,7 +138,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             result.AddExecutedCanLeaveCharged(this, bestStrat);
 
             // Finally, spend the energy for executing a shinespark if needed (we already asked to check that the state has enough)
-            result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
+            result.ResultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
             
             return result;
         }
