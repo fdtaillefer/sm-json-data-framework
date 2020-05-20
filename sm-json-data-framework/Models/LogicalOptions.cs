@@ -78,6 +78,77 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
+        /// An internal dictionary that contains all techs (identified by their name) for which a number of tries should be taken into account by the logic.
+        /// This multiplies resources costs.
+        /// </summary>
+        private IDictionary<string, int> TriesByTech { get; set; } = new Dictionary<string, int>();
+
+        /// <summary>
+        /// <para>Register in this logical options that a tech will the provided name is logically expected
+        /// to take the provided number of tries before succeeding, impacting its resource cost when applicable.</para>
+        /// <para>A higher value makes the tech logically require more resources, making it more lenient.</para>
+        /// 
+        /// </summary>
+        /// <param name="techName">The name of the tech</param>
+        /// <param name="numberOfTries">The number of times the tech must be tried before an expected success</param>
+        public void RegisterTechTries(string techName, int numberOfTries)
+        {
+            TriesByTech.Add(techName, numberOfTries);
+        }
+
+        /// <summary>
+        /// Returns the number of tries that are logically expected to be attempted before a success for the provided tech.
+        /// </summary>
+        /// <param name="tech"></param>
+        /// <returns></returns>
+        public int NumberOfTries(Tech tech)
+        {
+            if (TriesByTech.TryGetValue(tech.Name, out int tries))
+            {
+                return tries;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        /// <summary>
+        /// An internal dictionary that contains all strats (identified by their name) for which a number of tries should be taken into account by the logic.
+        /// This multiplies resources costs.
+        /// </summary>
+        private IDictionary<string, int> TriesByStrat { get; set; } = new Dictionary<string, int>();
+
+        /// <summary>
+        /// <para>Register in this logical options that a notable strat will the provided name is logically expected
+        /// to take the provided number of tries before succeeding, impacting its resource cost when applicable.</para>
+        /// <para>A higher value makes the strat logically require more resources, making it more lenient.</para>
+        /// </summary>
+        /// <param name="stratName">The name of the strat</param>
+        /// <param name="numberOfTries">The number of times the strat must be tried before an expected success</param>
+        public void RegisterStratTries(string stratName, int numberOfTries)
+        {
+            TriesByStrat.Add(stratName, numberOfTries);
+        }
+
+        /// <summary>
+        /// Returns the number of tries that are logically expected to be attempted before a success for the provided strat.
+        /// </summary>
+        /// <param name="strat"></param>
+        /// <returns></returns>
+        public int NumberOfTries(Strat strat)
+        {
+            if (strat.Notable && TriesByStrat.TryGetValue(strat.Name, out int tries))
+            {
+                return tries;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        /// <summary>
         /// If true, current counts for resources are maintained and used by logical elements.
         /// If false, each resource check only looks at the player's max value, so for example two consecutive losses of 200 energy would still only require 2 E-Tanks.
         /// </summary>

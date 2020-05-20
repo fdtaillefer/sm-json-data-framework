@@ -23,6 +23,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
+            times = times * model.LogicalOptions.NumberOfTries(this);
+
             ExecutionResult result = Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
 
             if (result == null)
