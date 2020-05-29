@@ -49,15 +49,24 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
 
+        public IEnumerable<FarmCycle> FarmCycles { get; set; } = Enumerable.Empty<FarmCycle>();
+
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
+            List<Action> postInitializeActions = new List<Action>();
+
             Enemy = model.Enemies[EnemyName];
 
             HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
             BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
-            return Enumerable.Empty<Action>();
+            foreach (var farmCycle in FarmCycles)
+            {
+                postInitializeActions.AddRange(farmCycle.Initialize(model, room));
+            }
+
+            return postInitializeActions;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
@@ -69,6 +78,11 @@ namespace sm_json_data_framework.Models.Rooms
             unhandled.AddRange(StopSpawn.InitializeReferencedLogicalElementProperties(model, room));
 
             unhandled.AddRange(DropRequires.InitializeReferencedLogicalElementProperties(model, room));
+
+            foreach(var farmCycle in FarmCycles)
+            {
+                unhandled.AddRange(farmCycle.InitializeReferencedLogicalElementProperties(model, room));
+            }
 
             return unhandled.Distinct();
         }
