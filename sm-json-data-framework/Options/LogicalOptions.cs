@@ -3,12 +3,13 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
+using sm_json_data_framework.Options.ResourceValues;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_framework.Models
+namespace sm_json_data_framework.Options
 {
     /// <summary>
     /// Options that describe what the player is expected to be able or unable to do.
@@ -17,14 +18,16 @@ namespace sm_json_data_framework.Models
     {
         public LogicalOptions()
         {
-            // Default resource values
-            RelativeResourceValues = new Dictionary<ConsumableResourceEnum, int> {
-                {ConsumableResourceEnum.ENERGY,  1},
-                // Missile drops are super plentiful, AND each drop gives twice as much as Supers.
-                {ConsumableResourceEnum.MISSILE,  3},
-                {ConsumableResourceEnum.SUPER,  30},
-                {ConsumableResourceEnum.POWER_BOMB,  60}
-            };
+            // Default resource comparer
+            InGameResourceEvaluator = new ResourceEvaluatorByFixedValues(
+                new Dictionary<ConsumableResourceEnum, int> {
+                    {ConsumableResourceEnum.ENERGY,  1},
+                    // Missile drops are super plentiful, AND each drop gives twice as much as Supers.
+                    {ConsumableResourceEnum.MISSILE,  3},
+                    {ConsumableResourceEnum.SUPER,  30},
+                    {ConsumableResourceEnum.POWER_BOMB,  60}
+                }
+            );
         }
 
         /// <summary>
@@ -60,20 +63,21 @@ namespace sm_json_data_framework.Models
         /// </summary>
         public decimal TilesSavedWithStutter { get; set; } = 0M;
 
-        private IDictionary<ConsumableResourceEnum, int> _relativeResourceValues;
+        private IInGameResourceEvaluator _inGameResourceEvaluator;
         /// <summary>
-        /// A map that maps a consumable resource type to a relative value vs other resource types.
-        /// It can be used by algorithms if they need to make a decision between several possible options to consume resources.
+        /// A comparer that can comparer snapshots of in-game resources to decide which is more valuable.
         /// </summary>
-        public IDictionary<ConsumableResourceEnum, int> RelativeResourceValues { get
+        public IInGameResourceEvaluator InGameResourceEvaluator
+        {
+            get
             {
-                return _relativeResourceValues;
+                return _inGameResourceEvaluator;
             }
             set
             {
-                _relativeResourceValues = value;
-                // Update the inner InGameStateComparer to use the new resource values
-                InGameStateComparer = new InGameStateComparer(_relativeResourceValues);
+                _inGameResourceEvaluator = value;
+                // Update the inner InGameStateComparer to use the new resource evaluator
+                InGameStateComparer = new InGameStateComparer(_inGameResourceEvaluator);
             }
         }
 

@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options.ResourceValues;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -96,6 +97,16 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         protected ResourceCount Resources { get; set; }
+
+        /// <summary>
+        /// Uses the provided resource evaluator to evaluate the current in-game resources of this state.
+        /// </summary>
+        /// <param name="evaluator"></param>
+        /// <returns></returns>
+        public int EvaluateCurrentResources(IInGameResourceEvaluator evaluator)
+        {
+            return evaluator.CalculateValue(Resources);
+        }
 
         /// <summary>
         /// Returns the maximum possible amount of the provided resource in this InGameState.
@@ -998,16 +1009,16 @@ namespace sm_json_data_framework.Models.InGameStates
     // End of InGameState class
 
     /// <summary>
-    /// A Comparer that can compare two in-game states by their consumable resource count, based on an internal dictionary of relative resource values.
-    /// The "greater" in-game state is the one whose resource total is deemed more valuable according to these values.
+    /// A Comparer that can compare two in-game states by their consumable resource count, based on an internal in-game resource evaluator.
+    /// The "greater" in-game state is the one whose resource total is deemed more valuable according to that evaluator.
     /// </summary>
     public class InGameStateComparer : IComparer<InGameState>
     {
-        private IDictionary<ConsumableResourceEnum, int> RelativeResourceValues {get; set;}
+        private IInGameResourceEvaluator ResourceEvaluator { get; set; }
 
-        public InGameStateComparer(IDictionary<ConsumableResourceEnum, int> relativeResourceValues)
+        public InGameStateComparer(IInGameResourceEvaluator resourceEvaluator)
         {
-            RelativeResourceValues = relativeResourceValues;
+            ResourceEvaluator = resourceEvaluator;
         }
 
         public int Compare(InGameState x, InGameState y)
@@ -1028,15 +1039,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return -1;
             }
 
-            // We are assuming that dead states (0 energy) won't show up. If we wanted to support that, we'd have to check specifically for it and give it a negative value too.
-            // (but greater than the value for null)
-            int value = 0;
-            foreach (ConsumableResourceEnum currentResource in Enum.GetValues(typeof(ConsumableResourceEnum)))
-            {
-                value += inGameState.GetCurrentAmount(currentResource) * RelativeResourceValues[currentResource];
-            }
-
-            return value;
+            return inGameState.EvaluateCurrentResources(ResourceEvaluator);
         }
     }
 }
