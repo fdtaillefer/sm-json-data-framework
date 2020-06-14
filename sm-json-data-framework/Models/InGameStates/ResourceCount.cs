@@ -2,12 +2,13 @@
 using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sm_json_data_framework.Models.InGameStates
 {
     /// <summary>
-    /// Contains values for all resource types. The context of those values is not known by this container.
+    /// Contains values for all rechargeable resource types. The context of those values is not known by this container.
     /// </summary>
     public class ResourceCount
     {
@@ -69,14 +70,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public int GetAmount(ConsumableResourceEnum resource)
         {
-            return resource switch
-            {
-                // The other resources can be fully spent, but for energy we don't want to go below 1
-                ConsumableResourceEnum.ENERGY => GetAmount(RechargeableResourceEnum.RegularEnergy) + GetAmount(RechargeableResourceEnum.ReserveEnergy),
-                ConsumableResourceEnum.MISSILE => GetAmount(RechargeableResourceEnum.Missile),
-                ConsumableResourceEnum.SUPER => GetAmount(RechargeableResourceEnum.Super),
-                ConsumableResourceEnum.POWER_BOMB => GetAmount(RechargeableResourceEnum.PowerBomb)
-            };
+            return resource.ToRechargeableResources().Select(resource => GetAmount(resource)).Sum();
         }
 
         /// <summary>
@@ -91,14 +85,26 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 return true;
             }
-            return resource switch
+
+            // The other resources can be fully spent, but for energy we don't want to go below 1
+            if (resource == ConsumableResourceEnum.ENERGY)
             {
-                // The other resources can be fully spent, but for energy we don't want to go below 1
-                ConsumableResourceEnum.ENERGY => (GetAmount(RechargeableResourceEnum.RegularEnergy) + GetAmount(RechargeableResourceEnum.ReserveEnergy)) > quantity,
-                ConsumableResourceEnum.MISSILE => GetAmount(RechargeableResourceEnum.Missile) >= quantity,
-                ConsumableResourceEnum.SUPER => GetAmount(RechargeableResourceEnum.Super) >= quantity,
-                ConsumableResourceEnum.POWER_BOMB => GetAmount(RechargeableResourceEnum.PowerBomb) >= quantity
-            };
+                return GetAmount(resource) > quantity;
+            }
+            else
+            {
+                return GetAmount(resource) >= quantity;
+            }
+        }
+
+        /// <summary>
+        /// Returns whether any of the resource counts in this ResourceCount fulfill the provided predicate.
+        /// </summary>
+        /// <param name="resourcePredicate"></param>
+        /// <returns></returns>
+        public bool Any(Predicate<int> resourcePredicate)
+        {
+            return Amounts.Values.Any(count => resourcePredicate(count));
         }
 
         /// <summary>

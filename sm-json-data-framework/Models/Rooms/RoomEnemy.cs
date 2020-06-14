@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
@@ -63,7 +64,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             foreach (var farmCycle in FarmCycles)
             {
-                postInitializeActions.AddRange(farmCycle.Initialize(model, room));
+                postInitializeActions.AddRange(farmCycle.Initialize(model, room, this));
             }
 
             return postInitializeActions;
@@ -81,10 +82,89 @@ namespace sm_json_data_framework.Models.Rooms
 
             foreach(var farmCycle in FarmCycles)
             {
-                unhandled.AddRange(farmCycle.InitializeReferencedLogicalElementProperties(model, room));
+                unhandled.AddRange(farmCycle.InitializeReferencedLogicalElementProperties(model, room, this));
             }
 
             return unhandled.Distinct();
+        }
+
+        IExecutable _spawnerFarmExecution = null;
+        /// <summary>
+        /// An IExecutable that corresponds to farming this group of enemies, by camping its spawner(s).
+        /// </summary>
+        public IExecutable SpawnerFarmExecution
+        {
+            get
+            {
+                if (_spawnerFarmExecution == null)
+                {
+                    _spawnerFarmExecution = new SpawnerFarmExecution(this);
+                }
+                return _spawnerFarmExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the farming of a RoomEnemy in an IExecutable interface.
+    /// </summary>
+    internal class SpawnerFarmExecution : IExecutable
+    {
+        private RoomEnemy RoomEnemy { get; set; }
+
+        public SpawnerFarmExecution(RoomEnemy roomEnemy)
+        {
+            RoomEnemy = roomEnemy;
+        }
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        {
+            (FarmCycle bestCycle, ExecutionResult result) bestResult = (null, null);
+            InGameStateComparer comparer = model.GetInGameStateComparer();
+
+            // Order farm cycles, with the shortest execution going first.
+            // We'll execute them all in order, remembering the one that refilled the most resources.
+            // We'll stop as soon as we find one that we can execute and which costs no resources. 
+            // Then we'll return the best result.
+            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.OrderBy(cycle => cycle.CycleFrames);
+            foreach(FarmCycle currentFarmCycle in orderedFarmCycles)
+            {
+                var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+                
+                // If the farming succeeded, evaluate the results.
+                // Otherwise, just skip to the next cycle.
+                if (currentFarmResult != null)
+                {
+                    // If this farm cycle was cost free, we won't find a better one later on.
+                    // Immediately return the best result we've encountered so far.
+                    if(currentFarmCycle.IsFree(model, inGameState, usePreviousRoom: usePreviousRoom))
+                    {
+                        // If the resulting state is the best we've found yet, retain it
+                        if (bestResult.result == null
+                            || comparer.Compare(currentFarmResult.ResultingState, bestResult.result.ResultingState) > 0)
+                        {
+                            bestResult = (currentFarmCycle, currentFarmResult);
+                        }
+
+                        return bestResult.result;
+                    }
+                    else
+                    {
+                        // If the resulting state is the best we've found yet, retain it
+                        if (bestResult.result == null
+                            || comparer.Compare(currentFarmResult.ResultingState, bestResult.result.ResultingState) > 0)
+                        {
+                            bestResult = (currentFarmCycle, currentFarmResult);
+                        }
+
+                        // But because this farm cycle was not free, it's possible the next one has better results.
+                        // So don't return yet.
+                    }
+                } // End if farming the cycle succeeded
+            }// Done iterating over farm cycles
+
+            // If we haven't returned while iterating, return the best result we've found
+            // If we've found none, this will return null which is a failure
+            return bestResult.result;
         }
     }
 }

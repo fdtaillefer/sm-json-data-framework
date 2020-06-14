@@ -2,9 +2,11 @@
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sm_json_data_framework.Rules
@@ -14,6 +16,8 @@ namespace sm_json_data_framework.Rules
     /// </summary>
     public class SuperMetroidRules
     {
+        private const int DROP_RATE_DIVIDER = 102;
+
         public virtual int ThornDamage { get => 16; }
 
         public virtual int SpikeDamage { get => 60; }
@@ -59,6 +63,125 @@ namespace sm_json_data_framework.Rules
         /// A multiplier that can be applied to a number of steep down tiles to obtain the equivalent run length in flat tiles.
         /// </summary>
         public virtual decimal SteepDownTileMultiplier { get => 1; }
+
+        /// <summary>
+        /// Calculates the real in-game drop rate (out of DROP_RATE_DIVIDER) for the provided initial drop rates, after adjusting for the elimination of some drops.
+        /// </summary>
+        /// <param name="enemyDrops">The enemy drops (out of DROP_RATE_DIVIDER), as they would be if all resources can drop.</param>
+        /// <param name="unneededDrops">The enumeration of drops that cannot drop (due to their resource being full).</param>
+        /// <returns>The adjusted drop rates (out of DROP_RATE_DIVIDER).</returns>
+        public virtual EnemyDrops CalculateEffectiveDropRates(EnemyDrops enemyDrops, IEnumerable<EnemyDropEnum> unneededDrops)
+        {
+            // Calculate the base drop rates for the formula, replacing unneeded drops by a rate of 0.
+            // Our drop rates are out of DROP_RATE_DIVIDER. The formula needs them to be out of 255.
+            EnemyDrops baseHexDropRates = new EnemyDrops();
+            // Tier 1 drops
+            baseHexDropRates.NoDrop = enemyDrops.NoDrop * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.SmallEnergy = unneededDrops.Contains(EnemyDropEnum.SMALL_ENERGY) ? 0M : enemyDrops.SmallEnergy * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.BigEnergy = unneededDrops.Contains(EnemyDropEnum.BIG_ENERGY) ? 0M : enemyDrops.BigEnergy * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.Missile = unneededDrops.Contains(EnemyDropEnum.MISSILE) ? 0M : enemyDrops.Missile * 255 / DROP_RATE_DIVIDER;
+
+            // Tier 2 drops
+            baseHexDropRates.Super = unneededDrops.Contains(EnemyDropEnum.SUPER) ? 0M : enemyDrops.Super * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.PowerBomb = unneededDrops.Contains(EnemyDropEnum.POWER_BOMB) ? 0M : enemyDrops.PowerBomb * 255 / DROP_RATE_DIVIDER;
+
+            // Create functions for calculating effective drop rates. One for tier 1 drops and one for tier 2 drops.
+
+            // Formula for tier one drops is (255 - super - pb) / (small + big + missile + nothing) * (current item), truncated
+            Func<EnemyDrops, decimal, decimal> calculateTierOneRate = (baseHexDropRates, individualHexDropRate) =>
+            {
+                decimal tierTwoValue = 255 - baseHexDropRates.Super - baseHexDropRates.PowerBomb;
+                decimal tierOneValue = baseHexDropRates.SmallEnergy + baseHexDropRates.BigEnergy
+                    + baseHexDropRates.Missile + baseHexDropRates.NoDrop;
+                decimal result = decimal.Floor(tierTwoValue / tierOneValue * individualHexDropRate);
+                return result * DROP_RATE_DIVIDER / 255;
+            };
+
+            // Formula for tier two is simply the drop rate itself
+            Func<EnemyDrops, decimal, decimal> calculateTierTwoRate = (baseHexDropRates, baseHexDropRate) =>
+            {
+                return baseHexDropRate * DROP_RATE_DIVIDER / 255;
+            };
+
+            // Calculate new drop rates using the appropriate calculation, except for no drop
+            EnemyDrops returnValue = new EnemyDrops
+            {
+                SmallEnergy = calculateTierOneRate(baseHexDropRates, baseHexDropRates.SmallEnergy),
+                BigEnergy = calculateTierOneRate(baseHexDropRates, baseHexDropRates.BigEnergy),
+                Missile = calculateTierOneRate(baseHexDropRates, baseHexDropRates.Missile),
+                Super = calculateTierTwoRate(baseHexDropRates, baseHexDropRates.Super),
+                PowerBomb = calculateTierTwoRate(baseHexDropRates, baseHexDropRates.PowerBomb)
+            };
+
+            // No drop is just whatever's not another type of drop. It grabs the leftover from truncating on top of its own increase.
+            returnValue.NoDrop = DROP_RATE_DIVIDER - returnValue.SmallEnergy - returnValue.BigEnergy - returnValue.Missile - returnValue.Super - returnValue.PowerBomb;
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Converts the provided drop rate into a drop % chance.
+        /// </summary>
+        /// <param name="dropRate">The drop rate, out of DROP_RATE_DIVIDER</param>
+        /// <returns></returns>
+        public virtual decimal ConvertDropRateToPercent(decimal dropRate)
+        {
+            return dropRate / DROP_RATE_DIVIDER;
+        }
+
+        /// <summary>
+        /// Given an enumeration of full rechargeable resources, returns the enemy drops that aren't needed because the associated resources are full.
+        /// </summary>
+        /// <param name="fullResources">Enumeration of full resources</param>
+        /// <returns></returns>
+        public virtual IEnumerable<EnemyDropEnum> GetUnneededDrops(IEnumerable<RechargeableResourceEnum> fullResources)
+        {
+            return Enum.GetValues(typeof(EnemyDropEnum))
+                .Cast<EnemyDropEnum>()
+                .Where(drop => {
+                    IEnumerable<RechargeableResourceEnum> dropResources = drop.GetRechargeableResources();
+                    // Return all drops that actually refill anything (so never return "no drop")
+                    // and for which all refilled resources are already full
+                    return dropResources.Any()
+                        && dropResources.Intersect(fullResources).Count() == dropResources.Count();
+                });
+        }
+
+        /// <summary>
+        /// Given an enumeration of full consumable resources, returns the enemy drops that aren't needed because the associated resources are full.
+        /// </summary>
+        /// <param name="fullResources">Enumeration of full resources</param>
+        /// <returns></returns>
+        public virtual IEnumerable<EnemyDropEnum> GetUnneededDrops(IEnumerable<ConsumableResourceEnum> fullResources)
+        {
+            return Enum.GetValues(typeof(EnemyDropEnum))
+                .Cast<EnemyDropEnum>()
+                .Where(drop => {
+                    ConsumableResourceEnum? dropResource = drop.GetConsumableResource();
+                    // Return all drops whose consumable resource is already full
+                    return dropResource != null
+                        && fullResources.Contains((ConsumableResourceEnum)dropResource);
+                });
+        }
+
+        /// <summary>
+        /// Returns what quantity of its associated resource the provided enemy drop restores.
+        /// </summary>
+        /// <param name="enemyDrop">The enemy drop to evaluate</param>
+        /// <returns></returns>
+        public virtual int GetDropResourceCount(EnemyDropEnum enemyDrop)
+        {
+            return enemyDrop switch
+            {
+                EnemyDropEnum.NO_DROP => 0,
+                EnemyDropEnum.SMALL_ENERGY => 5,
+                EnemyDropEnum.BIG_ENERGY => 20,
+                EnemyDropEnum.MISSILE => 2,
+                EnemyDropEnum.SUPER => 1,
+                EnemyDropEnum.POWER_BOMB => 1,
+                _ => throw new Exception($"Unrecognized enemy drop {enemyDrop}")
+            };
+        }
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
@@ -454,7 +577,8 @@ namespace sm_json_data_framework.Rules
                 RechargeableResourceEnum.Super => ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP,
                 RechargeableResourceEnum.PowerBomb => ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP,
                 RechargeableResourceEnum.RegularEnergy => ExpansionPickupRestoreBehaviorEnum.REFILL,
-                RechargeableResourceEnum.ReserveEnergy => ExpansionPickupRestoreBehaviorEnum.NOTHING
+                RechargeableResourceEnum.ReserveEnergy => ExpansionPickupRestoreBehaviorEnum.NOTHING,
+                _ => throw new Exception($"Unrecognized rechargeable resource {resource}")
             };
         }
     }

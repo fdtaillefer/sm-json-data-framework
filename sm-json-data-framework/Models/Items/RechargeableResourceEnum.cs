@@ -1,4 +1,6 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.Requirements;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -16,5 +18,36 @@ namespace sm_json_data_framework.Models.Items
         Missile,
         Super,
         PowerBomb
+    }
+
+    public static class RechargeableResourceUtils
+    {
+        /// <summary>
+        /// Returns the enemy drops that can recharge this resource.
+        /// </summary>
+        /// <param name="resource">This resource</param>
+        /// <returns>The enemy drops that can refill this</returns>
+        public static IEnumerable<EnemyDropEnum> GetRelatedDrops(this RechargeableResourceEnum resource)
+        {
+            return resource.ToConsumableResource().GetRelatedDrops();
+        }
+
+        /// <summary>
+        /// Returns the consumable resource that drains this rechargeable resource.
+        /// </summary>
+        /// <param name="resource">This rechargeable resource</param>
+        /// <returns></returns>
+        public static ConsumableResourceEnum ToConsumableResource(this RechargeableResourceEnum resource)
+        {
+            return resource switch
+            {
+                RechargeableResourceEnum.RegularEnergy => ConsumableResourceEnum.ENERGY,
+                RechargeableResourceEnum.ReserveEnergy => ConsumableResourceEnum.ENERGY,
+                RechargeableResourceEnum.Missile => ConsumableResourceEnum.MISSILE,
+                RechargeableResourceEnum.Super => ConsumableResourceEnum.SUPER,
+                RechargeableResourceEnum.PowerBomb => ConsumableResourceEnum.POWER_BOMB,
+                _ => throw new Exception($"Unrecognized rechargeable resource {resource}")
+            };
+        }
     }
 }

@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
+using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements;
 
 namespace sm_json_data_framework.Models.Enemies
 {
@@ -104,6 +107,39 @@ namespace sm_json_data_framework.Models.Enemies
         {
             // No logical elements in here
             return Enumerable.Empty<string>();
+        }
+
+        /// <summary>
+        /// Creates and returns an instance of EnemyDrops reprenting this enemy's effective drop rates,
+        /// given that the provided resources are full.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="fullResources">An enumeration of rechargeable resources that are considered full
+        /// (and hence no longer cause their corresponding enemy drop to happen).</param>
+        /// <returns></returns>
+        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
+        {
+            return model.Rules.CalculateEffectiveDropRates(Drops, model.Rules.GetUnneededDrops(fullResources));
+        }
+
+        /// <summary>
+        /// Creates and returns an instance of EnemyDrops reprenting this enemy's effective drop rates,
+        /// given that the provided resources are full.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="fullResources">An enumeration of consumable resources that are considered full
+        /// (and hence no longer cause their corresponding enemy drop to happen).</param>
+        /// <returns></returns>
+        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
+        {
+            if(fullResources.Any())
+            {
+                return model.Rules.CalculateEffectiveDropRates(Drops, model.Rules.GetUnneededDrops(fullResources));
+            }
+            else
+            {
+                return Drops.Clone();
+            }
         }
     }
 }

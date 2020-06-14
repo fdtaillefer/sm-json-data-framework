@@ -28,6 +28,8 @@ namespace sm_json_data_framework.Options
                     {ConsumableResourceEnum.POWER_BOMB,  60}
                 }
             );
+
+            SpawnerFarmingOptions = new SpawnerFarmingOptions();
         }
 
         /// <summary>
@@ -212,6 +214,7 @@ namespace sm_json_data_framework.Options
         {
             return !RemovedGameFlags.Contains(gameFlag.Name);
         }
-   
+
+        public SpawnerFarmingOptions SpawnerFarmingOptions { get; set; }
     }
 }

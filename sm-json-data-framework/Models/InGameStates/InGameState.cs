@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.GameFlags;
+﻿using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
@@ -111,11 +112,23 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns the maximum possible amount of the provided resource in this InGameState.
         /// </summary>
-        /// <param name="resource">The resource to get the max amount of.19</param>
+        /// <param name="resource">The resource to get the max amount of.</param>
         /// <returns></returns>
         public int GetMaxAmount(RechargeableResourceEnum resource)
         {
             return Inventory.GetMaxAmount(resource);
+        }
+
+        /// <summary>
+        /// Returns the maximum possible amount of the provided consumable resource.
+        /// This is almost the same as getting the max amount of a rechargeable resource,
+        /// except both types of energy are grouped together.
+        /// </summary>
+        /// <param name="resource">The resource to get the max amount of.</param>
+        /// <returns></returns>
+        public int GetMaxAmount(ConsumableResourceEnum resource)
+        {
+            return resource.ToRechargeableResources().Select(resource => GetMaxAmount(resource)).Sum();
         }
 
         /// <summary>
@@ -145,14 +158,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public int GetCurrentAmount(ConsumableResourceEnum resource)
         {
-            return resource switch
-            {
-                // The other resources can be fully spent, but for energy we don't want to go below 1
-                ConsumableResourceEnum.ENERGY => GetCurrentAmount(RechargeableResourceEnum.RegularEnergy) + GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy),
-                ConsumableResourceEnum.MISSILE => GetCurrentAmount(RechargeableResourceEnum.Missile),
-                ConsumableResourceEnum.SUPER => GetCurrentAmount(RechargeableResourceEnum.Super),
-                ConsumableResourceEnum.POWER_BOMB => GetCurrentAmount(RechargeableResourceEnum.PowerBomb)
-            };
+            return resource.ToRechargeableResources().Select(resource => GetCurrentAmount(resource)).Sum();
         }
 
         public bool IsResourceAvailable(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
@@ -165,26 +171,28 @@ namespace sm_json_data_framework.Models.InGameStates
             // If resource tracking is enabled, look at current resource amounts
             if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                return resource switch
+                // The other resources can be fully spent, but for energy we don't want to go below 1
+                if (resource == ConsumableResourceEnum.ENERGY)
                 {
-                    // The other resources can be fully spent, but for energy we don't want to go below 1
-                    ConsumableResourceEnum.ENERGY => (GetCurrentAmount(RechargeableResourceEnum.RegularEnergy) + GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy)) > quantity,
-                    ConsumableResourceEnum.MISSILE => GetCurrentAmount(RechargeableResourceEnum.Missile) >= quantity,
-                    ConsumableResourceEnum.SUPER => GetCurrentAmount(RechargeableResourceEnum.Super) >= quantity,
-                    ConsumableResourceEnum.POWER_BOMB => GetCurrentAmount(RechargeableResourceEnum.PowerBomb) >= quantity
-                };
+                    return GetCurrentAmount(resource) > quantity;
+                }
+                else
+                {
+                    return GetCurrentAmount(resource) >= quantity;
+                }
             }
             // If resource tracking is not enabled, use max resource amounts instead of current amounts
             else
             {
-                return resource switch
+                // The other resources can be fully spent, but for energy we don't want to go below 1
+                if (resource == ConsumableResourceEnum.ENERGY)
                 {
-                    // The other resources can be fully spent, but for energy we don't want to go below 1
-                    ConsumableResourceEnum.ENERGY => (GetMaxAmount(RechargeableResourceEnum.RegularEnergy) + GetMaxAmount(RechargeableResourceEnum.ReserveEnergy)) > quantity,
-                    ConsumableResourceEnum.MISSILE => GetMaxAmount(RechargeableResourceEnum.Missile) >= quantity,
-                    ConsumableResourceEnum.SUPER => GetMaxAmount(RechargeableResourceEnum.Super) >= quantity,
-                    ConsumableResourceEnum.POWER_BOMB => GetMaxAmount(RechargeableResourceEnum.PowerBomb) >= quantity
-                };
+                    return GetMaxAmount(resource) > quantity;
+                }
+                else
+                {
+                    return GetMaxAmount(resource) >= quantity;
+                }
             }
         }
 
@@ -241,6 +249,74 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 Resources.ApplyAmount(resource, Inventory.GetMaxAmount(resource));
             }
+        }
+
+        /// <summary>
+        /// Sets current value for the provided consumable resource to the current maximum.
+        /// This is almost the same as refilling a rechargeable resource,
+        /// except both types of energy are grouped together.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="resource">The resource to refill</param>
+        public void ApplyRefillResource(SuperMetroidModel model, ConsumableResourceEnum resource)
+        {
+            // Don't bother with current resource count if resource tracking is disabled
+            if (model.LogicalOptions.ResourceTrackingEnabled)
+            {
+                foreach (RechargeableResourceEnum rechargeableResource in resource.ToRechargeableResources())
+                {
+                    ApplyRefillResource(model, rechargeableResource);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates and returns a ResourceCount that expresses how many rechargeable resources this in-game state has,
+        /// relative to the provided in-game state. Negative values mean this state has less.
+        /// </summary>
+        /// <param name="other">The other in-game state to compare with.</param>
+        /// <returns></returns>
+        public ResourceCount GetResourceVariationWith(InGameState other)
+        {
+            ResourceCount returnValue = new ResourceCount();
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                returnValue.ApplyAmount(currentResource, GetCurrentAmount(currentResource) - other.GetCurrentAmount(currentResource));
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Returns the enumeration of rechargeable resources that are currently full.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<RechargeableResourceEnum> GetFullRechargeableResources()
+        {
+            return Enum.GetValues(typeof(RechargeableResourceEnum))
+                .Cast<RechargeableResourceEnum>()
+                .Where(resource => Resources.GetAmount(resource) >= GetMaxAmount(resource));
+        }
+
+        /// <summary>
+        /// Returns the enumeration of consumable resources that are currently full.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ConsumableResourceEnum> GetFullConsumableResources()
+        {
+            return Enum.GetValues(typeof(ConsumableResourceEnum))
+                .Cast<ConsumableResourceEnum>()
+                .Where(resource => Resources.GetAmount(resource) >= GetMaxAmount(resource));
+        }
+
+        /// <summary>
+        /// Returns the enumeration of enemy drops that aren't needed by this in-game state because the associated resources are full.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <returns></returns>
+        public IEnumerable<EnemyDropEnum> GetUnneededDrops(SuperMetroidModel model)
+        {
+            return model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
 
         protected IDictionary<string, GameFlag> ActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
@@ -466,23 +542,6 @@ namespace sm_json_data_framework.Models.InGameStates
         public ItemInventory GetInventoryExceptWith(InGameState other)
         {
             return Inventory.ExceptWith(other.Inventory);
-        }
-
-        /// <summary>
-        /// Creates and returns a ResourceCount that expresses how many resources this in-game state has,
-        /// relative to the provided in-game state. Negative values mean this state has less.
-        /// </summary>
-        /// <param name="other">The other in-game state to compare with.</param>
-        /// <returns></returns>
-        public ResourceCount GetResourceVariationWith(InGameState other)
-        {
-            ResourceCount returnValue = new ResourceCount();
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
-            {
-                returnValue.ApplyAmount(currentResource, GetCurrentAmount(currentResource) - other.GetCurrentAmount(currentResource));
-            }
-
-            return returnValue;
         }
 
         /// <summary>
