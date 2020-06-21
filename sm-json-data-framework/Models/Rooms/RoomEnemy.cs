@@ -12,7 +12,6 @@ namespace sm_json_data_framework.Models.Rooms
 {
     public class RoomEnemy : InitializablePostDeserializeInRoom
     {
-        [JsonPropertyName("name")]
         public string EnemyName { get; set; }
 
         /// <summary>
