@@ -52,7 +52,6 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         [JsonIgnore]
         public IDictionary<string, RoomObstacle> Obstacles {
-
             get
             {
                 if (_obstaclesDictionary == null)
@@ -60,11 +59,28 @@ namespace sm_json_data_framework.Models.Rooms
                     _obstaclesDictionary = ObstaclesSequence.ToDictionary(o => o.Id);
                 }
                 return _obstaclesDictionary;
-            }
-                
+            }   
         }
 
-        public IEnumerable<RoomEnemy> Enemies { get; set; } = Enumerable.Empty<RoomEnemy>();
+        [JsonPropertyName("enemies")]
+        public IEnumerable<RoomEnemy> EnemiesSequence { get; set; } = Enumerable.Empty<RoomEnemy>();
+
+        private IDictionary<string, RoomEnemy> _enemiesDictionary;
+        /// <summary>
+        /// The groups of enemies in this room, mapped by id
+        /// </summary>
+        [JsonIgnore]
+        public IDictionary<string, RoomEnemy> Enemies
+        {
+            get
+            {
+                if (_enemiesDictionary == null)
+                {
+                    _enemiesDictionary = EnemiesSequence.ToDictionary(e => e.Id);
+                }
+                return _enemiesDictionary;
+            }
+        }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
@@ -94,7 +110,7 @@ namespace sm_json_data_framework.Models.Rooms
                 postInitializationCallbacks.AddRange(link.Initialize(model, this));
             }
 
-            foreach(RoomEnemy enemy in Enemies)
+            foreach(RoomEnemy enemy in EnemiesSequence)
             {
                 postInitializationCallbacks.AddRange(enemy.Initialize(model, this));
             }
@@ -117,7 +133,7 @@ namespace sm_json_data_framework.Models.Rooms
                 unhandled.AddRange(link.InitializeReferencedLogicalElementProperties(model, this));
             }
 
-            foreach (RoomEnemy enemy in Enemies)
+            foreach (RoomEnemy enemy in EnemiesSequence)
             {
                 unhandled.AddRange(enemy.InitializeReferencedLogicalElementProperties(model, this));
             }

@@ -64,7 +64,7 @@ namespace sm_json_data_framework.Models
         /// If false, the objects in the returned model contain mostly just raw data.
         /// </summary>
         public bool Initialized { get; set; }
-        
+
         /// <summary>
         /// Options that describe what the player is expected to be able or unable to do.
         /// </summary>
@@ -123,6 +123,11 @@ namespace sm_json_data_framework.Models
         /// The node locks in this model, mapped by name.
         /// </summary>
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
+
+        /// <summary>
+        /// All groups of enemies found in any room, mapped by their group name.
+        /// </summary>
+        public IDictionary<string, RoomEnemy> RoomEnemies {get;set;} = new Dictionary<string, RoomEnemy>();
 
         /// <summary>
         /// A dictionary that maps a node's IdentifyingString to a one-way connection with that node as the origin.

@@ -12,6 +12,10 @@ namespace sm_json_data_framework.Models.Rooms
 {
     public class RoomEnemy : InitializablePostDeserializeInRoom
     {
+        public string Id { get; set; }
+
+        public string GroupName { get; set; }
+
         public string EnemyName { get; set; }
 
         /// <summary>
@@ -51,15 +55,26 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<FarmCycle> FarmCycles { get; set; } = Enumerable.Empty<FarmCycle>();
 
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>The Room in which this enemy group is.</para>
+        /// </summary>
+        [JsonIgnore]
+        public Room Room { get; set; }
+
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             List<Action> postInitializeActions = new List<Action>();
+
+            Room = room;
 
             Enemy = model.Enemies[EnemyName];
 
             HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
             BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
+
+            model.RoomEnemies.Add(GroupName, this);
 
             foreach (var farmCycle in FarmCycles)
             {
