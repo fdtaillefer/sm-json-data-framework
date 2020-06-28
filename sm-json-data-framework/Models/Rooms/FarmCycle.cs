@@ -160,7 +160,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             // Calculate the initial effective drop rates, taking into account currently full resources.
             // However, resources that are full but not farmable here should not be taken into account.
-            IEnumerable<ConsumableResourceEnum> fullResources = inGameState.GetFullConsumableResources().Intersect(farmableResources);
+            IEnumerable<ConsumableResourceEnum> fullResources = inGameState.GetFullConsumableResources().Intersect(farmableResources).ToArray();
             EnemyDrops initialEffectiveDropRates = FarmCycle.RoomEnemy.Enemy.GetEffectiveDropRates(model, fullResources);
 
             // Build a dictionary containing the variation per cycle for each consmable resource
@@ -171,7 +171,8 @@ namespace sm_json_data_framework.Models.Rooms
             // Identify resources that are creeping down as we farm
             IEnumerable<ConsumableResourceEnum> initiallyUnstableResources = costingResources
                     .Where(pair => resourceVariationPerCycle[pair.Key] < 0)
-                    .Select(pair => pair.Key);
+                    .Select(pair => pair.Key)
+                    .ToArray();
 
             // If there's no resources we can farm, just return now
             if (!farmableResources.Any())
@@ -203,7 +204,7 @@ namespace sm_json_data_framework.Models.Rooms
             // Now we know we have at least one resource that currently loses out per cycle, but can eventually recharge.
             // Execute some farming to see if we can stabilize those resources before we run out.
 
-            IEnumerable<ConsumableResourceEnum> notFullFarmableResources = farmableResources.Except(fullResources);
+            IEnumerable<ConsumableResourceEnum> notFullFarmableResources = farmableResources.Except(fullResources).ToArray();
             IDictionary<ConsumableResourceEnum, decimal> resourceCounts = Enum.GetValues(typeof(ConsumableResourceEnum))
                 .Cast<ConsumableResourceEnum>()
                 .ToDictionary(resource => resource, resource => (decimal) inGameState.GetCurrentAmount(resource));
@@ -214,9 +215,10 @@ namespace sm_json_data_framework.Models.Rooms
                     .Where(pair => resourceVariationPerCycle[pair.Key] < 0)
                     .Any())
             {
-                // Figure out how many cycles we need to execute in order to refill something farmable
+                // Figure out how many cycles we need to execute in order to refill something farmable and stable
                 int cyclesToRefillSomething = notFullFarmableResources.Select(resource => 
-                    decimal.ToInt32(decimal.Ceiling(inGameState.GetMaxAmount(resource) - resourceCounts[resource] / resourceVariationPerCycle[resource])))
+                    decimal.ToInt32(decimal.Ceiling( (inGameState.GetMaxAmount(resource) - resourceCounts[resource]) / resourceVariationPerCycle[resource])))
+                    .Where(cycleCount => cycleCount > 0)
                     .Min();
 
                 // Apply to each farmable resource the resource variation from executing that many cycles. 
@@ -226,8 +228,8 @@ namespace sm_json_data_framework.Models.Rooms
                     resourceCounts[resource] += resourceVariationPerCycle[resource] * cyclesToRefillSomething;
                 }
 
-                // If we've run out of an unstable resource, return a failure
-                if(resourceCounts.Values.Where(count => cyclesToRefillSomething <= 0).Any())
+                // If an unstable resource has dipped below the cost per cycle, we can't go on. Return a failure.
+                if (costingResources.Where(costingResource => resourceCounts[costingResource.Key] < costingResource.Value).Any())
                 {
                     return null;
                 }
@@ -238,10 +240,11 @@ namespace sm_json_data_framework.Models.Rooms
                 fullResources = resourceCounts
                     .Where(pair => pair.Value >= inGameState.GetMaxAmount(pair.Key))
                     .Select(pair => pair.Key)
-                    .Intersect(farmableResources);
+                    .Intersect(farmableResources)
+                    .ToArray();
 
                 // Update farmable resources by excluding newly-full resources
-                notFullFarmableResources = notFullFarmableResources.Except(fullResources);
+                notFullFarmableResources = notFullFarmableResources.Except(fullResources).ToArray();
 
                 // Calculate a new effective drop rate using the new list of full resources
                 // If that new effective drop rate stabilizes all unstable resources, we'll make it out of the loop
@@ -249,7 +252,7 @@ namespace sm_json_data_framework.Models.Rooms
 
                 // Use the new effective drop rate to calculate the new resourceVariationPerCycle for resources we still care about
                 resourceVariationPerCycle = notFullFarmableResources
-                    .ToDictionary(resource => resource, resource => CalculateResourceVariationPerCycle(model, resource, initialEffectiveDropRates, costingResources));
+                    .ToDictionary(resource => resource, resource => CalculateResourceVariationPerCycle(model, resource, effectiveDropRates, costingResources));
             }
 
             // All resources are now stable. We already checked beforehand that all costing resources eventually become farmable,
@@ -306,7 +309,9 @@ namespace sm_json_data_framework.Models.Rooms
                     {
                         return CalculateResourceVariationPerSecond(model, resource, effectiveDropRates, costingResources)
                             >= model.LogicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[resource];
-                    });
+                    })
+                    // Actualize this to calculate it only once
+                    .ToArray();
 
                 farmableResources.UnionWith(newFarmableResources);
             } // Stop iterating if the last loop revealed no new farmable resource
@@ -361,6 +366,7 @@ namespace sm_json_data_framework.Models.Rooms
                 costPerCycle = 0;
                 dropRateMultiplier = 1M;
             }
+
             decimal netGainPerCycle = resource.GetRelatedDrops()
                 .Select(drop => dropRateMultiplier * model.Rules.ConvertDropRateToPercent(effectiveDropRates.GetDropRate(drop))
                     * FarmCycle.RoomEnemy.Quantity * model.Rules.GetDropResourceCount(drop))

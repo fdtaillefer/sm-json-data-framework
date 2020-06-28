@@ -21,11 +21,12 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.GameActionCo
             Regex moveRegex = new Regex(@"^m\d+");
 
             Name = "Move";
-            SampleFormat = "m##";
+            string commandIdentifier = "m";
+            SampleFormat = $"{commandIdentifier}##";
             Description = "Moves to the given node ID";
             ValidCommand = command => moveRegex.IsMatch(command.ToLower());
             Execution = (navigator, command) => {
-                int nodeId = int.Parse(moveRegex.Match(command).Value.Substring(1));
+                int nodeId = int.Parse(moveRegex.Match(command).Value.Substring(commandIdentifier.Length));
                 AbstractNavigationAction action = navigator.MoveToNode(nodeId);
                 if (OutputAnything)
                 {

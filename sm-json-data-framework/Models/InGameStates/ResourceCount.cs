@@ -123,7 +123,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     int regularEnergyToConsume = regularEnergy > quantity ? quantity : regularEnergy - 1;
                     Amounts[RechargeableResourceEnum.RegularEnergy] -= regularEnergyToConsume;
                     quantity -= regularEnergyToConsume;
-                    if (regularEnergyToConsume > 0)
+                    if (quantity > 0)
                     {
                         Amounts[RechargeableResourceEnum.ReserveEnergy] -= quantity;
                     }

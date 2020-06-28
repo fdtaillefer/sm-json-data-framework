@@ -28,6 +28,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             Commands.Add(new InteractCommand());
             Commands.Add(new UnlockCommand());
             Commands.Add(new MoveCommand());
+            Commands.Add(new FarmSpawnerCommand());
             Commands.Add(new DisableItemCommand());
             Commands.Add(new EnableItemCommand());
             Commands.Add(new OutputResources());

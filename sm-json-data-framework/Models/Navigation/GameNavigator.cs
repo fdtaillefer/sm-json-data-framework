@@ -427,6 +427,67 @@ namespace sm_json_data_framework.Models.Navigation
         }
 
         /// <summary>
+        /// <para>Attempts to farm the spawner of the provided room enemy in order to refill resources.
+        /// This can only be done if the enemy exists, can currently spawn in the room, has a spawner, and is reachable from the current node.</para>
+        /// <para>After that, which resources that are actually refilled depends on the SpawnerFarmingOptions inside the LogicalOptions.</para>
+        /// <para>Farming will only succeed if the execution can be performed without any kind of resource tradeoff
+        /// (i.e. all resources spent during farming must reach the threshold for refilling).</para>
+        /// </summary>
+        /// <param name="roomEnemyId">The in-room ID of the enemy whose spawner to farm.</param>
+        /// <returns>The resulting action. If farming fails, returns a failure action.</returns>
+        public AbstractNavigationAction FarmSpawner(string roomEnemyId)
+        {
+            string intent = $"Farm enemy spawner of enemy {roomEnemyId}";
+
+            // Does that enemy exist?
+            if (!CurrentInGameState.GetCurrentRoom().Enemies.TryGetValue(roomEnemyId, out RoomEnemy enemyToFarm))
+            {
+                intent = intent + $", but that enemy doesn't exist in {CurrentInGameState.GetCurrentRoom().Name}";
+                return new Failure(intent);
+            }
+
+            // Can that enemy spawn?
+            if(!enemyToFarm.Spawns(GameModel, CurrentInGameState))
+            {
+                intent = intent + $", but that enemy currently doesn't spawn";
+                return new Failure(intent);
+            }
+
+            // Is that enemy reachable?
+            if (!enemyToFarm.HomeNodeIds.Contains(CurrentInGameState.GetCurrentNode().Id))
+            {
+                string enemyResides = enemyToFarm.HomeNodeIds.Any()?
+                    $"at node{(enemyToFarm.HomeNodeIds.Count() > 1? "s": "")} {string.Join(", ", enemyToFarm.HomeNodeIds.Select(i => i.ToString()))}":
+                    $"between two nodes ({enemyToFarm.BetweenNodeIds.First()} and {enemyToFarm.BetweenNodeIds.ElementAt(1)})";
+                intent = intent + $", but that enemy is found {enemyResides} which isn't accessible while standing at node {CurrentInGameState.GetCurrentNode().Id}";
+                return new Failure(intent);
+            }
+
+            // Does this enemy have a spawner?
+            if(!enemyToFarm.IsSpawner)
+            {
+                intent = intent + $", but that enemy doesn't have a spawner to farm from";
+                return new Failure(intent);
+            }
+
+            // Try to farm
+            ExecutionResult result = enemyToFarm.SpawnerFarmExecution.Execute(GameModel, CurrentInGameState);
+            // If execution fails
+            if(result == null)
+            {
+                intent = intent + $", but execution failed";
+                return new Failure(intent);
+            }
+
+            // Looks like we managed to farm this spawner. Create a corresponding action.
+            var action = new FarmSpawnerAction(intent, GameModel, CurrentInGameState, result);
+
+            // Register the action as done and return it
+            DoAction(action, result.ResultingState);
+            return action;
+        }
+
+        /// <summary>
         /// Attempts to disable the item with the provided name. Fails if that item is not present and enabled.
         /// </summary>
         /// <returns>The resulting action. If disabling fails, returns a failure action.</returns>
