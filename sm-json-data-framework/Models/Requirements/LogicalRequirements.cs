@@ -15,6 +15,11 @@ namespace sm_json_data_framework.Models.Requirements
     /// </summary>
     public class LogicalRequirements: IExecutable
     {
+        internal class NeverRequirements
+        {
+            public static readonly LogicalRequirements Instance = new LogicalRequirements(new AbstractLogicalElement[] { new NeverLogicalElement() });
+        }
+
         public LogicalRequirements()
         {
 
@@ -25,7 +30,7 @@ namespace sm_json_data_framework.Models.Requirements
             LogicalElements = LogicalElements.Concat(logicalElements);
         }
 
-        public IEnumerable<AbstractLogicalElement> LogicalElements { get; set; } = Enumerable.Empty<AbstractLogicalElement>();
+        public IEnumerable<AbstractLogicalElement> LogicalElements { get; private set; } = Enumerable.Empty<AbstractLogicalElement>();
 
         /// <summary>
         /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),
@@ -116,6 +121,15 @@ namespace sm_json_data_framework.Models.Requirements
         {
             (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, usePreviousRoom: usePreviousRoom);
             return result;
+        }
+
+        /// <summary>
+        /// Returns an instance of LogicalRequirements whose execution never succeeds.
+        /// </summary>
+        /// <returns></returns>
+        public static LogicalRequirements Never()
+        {
+            return NeverRequirements.Instance;
         }
     }
 }

@@ -73,7 +73,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// A model that can be used to obtain data about the current game configuration.
         /// </summary>
-        private SuperMetroidModel GameModel { get; set; }
+        public SuperMetroidModel GameModel { get; private set; }
 
         private int MaxPreviousStatesSize { get; set; }
 

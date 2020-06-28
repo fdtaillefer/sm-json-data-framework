@@ -49,7 +49,9 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements Spawn { get; set; } = new LogicalRequirements();
 
-        public LogicalRequirements StopSpawn { get; set; } = new LogicalRequirements();
+        // Empty requirements default to "always" behavior, but enemies with no StopSpawn behavior never stop spawning.
+        // Make the default state never instead.
+        public LogicalRequirements StopSpawn { get; set; } = LogicalRequirements.Never();
 
         public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
 
@@ -61,6 +63,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         [JsonIgnore]
         public Room Room { get; set; }
+
+        [JsonIgnore]
+        public bool IsSpawner { get => FarmCycles.Any(); }
 
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
@@ -102,6 +107,29 @@ namespace sm_json_data_framework.Models.Rooms
             return unhandled.Distinct();
         }
 
+        /// <summary>
+        /// Indicates whether this room enemy will spawn, given the provided model and inGameState.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to use to check. This will NOT be altered by this method.</param>
+        /// <returns></returns>
+        public bool Spawns(SuperMetroidModel model, InGameState inGameState)
+        {
+            // If spawn conditions for this room enemy aren't met, it's impossible for the enemy to spawn
+            if (Spawn.Execute(model, inGameState) == null)
+            {
+                return false;
+            }
+
+            // If conditions for this room enemy to stop spawning have been met, it's impossible for the enemy to spawn
+            if (StopSpawn.Execute(model, inGameState) != null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         IExecutable _spawnerFarmExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to farming this group of enemies, by camping its spawner(s).
@@ -132,6 +160,12 @@ namespace sm_json_data_framework.Models.Rooms
         }
         public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
+            // The enemy can only be farmed if it currently spawns
+            if (!RoomEnemy.Spawns(model, inGameState))
+            {
+                return null;
+            }
+
             (FarmCycle bestCycle, ExecutionResult result) bestResult = (null, null);
             InGameStateComparer comparer = model.GetInGameStateComparer();
 
@@ -177,7 +211,8 @@ namespace sm_json_data_framework.Models.Rooms
             }// Done iterating over farm cycles
 
             // If we haven't returned while iterating, return the best result we've found
-            // If we've found none, this will return null which is a failure
+            // If we've found none, this will return null which is a failure.
+            // Notably, this happens for any room enemy that doesn't have farm cycles, i.e. which offers no possibility of farming spawners.
             return bestResult.result;
         }
     }
