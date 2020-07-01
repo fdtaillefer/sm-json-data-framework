@@ -11,6 +11,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         Exit,
         Event,
         Item,
-        Junction
+        Junction,
+        Utility
     }
 }

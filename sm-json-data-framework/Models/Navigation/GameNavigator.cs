@@ -217,7 +217,8 @@ namespace sm_json_data_framework.Models.Navigation
                 NodeTypeEnum.Event => $"Activate event {node.Name}",
                 NodeTypeEnum.Item => $"Pick up item at {node.Name}",
                 NodeTypeEnum.Entrance => $"Interact with {node.Name}",
-                NodeTypeEnum.Junction => $"Interact with {node.Name}"
+                NodeTypeEnum.Junction => $"Interact with {node.Name}",
+                NodeTypeEnum.Utility => $"Use utility at {node.Name}"
             };
 
             var(failedLocks, openedLocks, bypassedLocks, result) = DealWithLocks(node, attemptOpen: true, attemptBypass: true);

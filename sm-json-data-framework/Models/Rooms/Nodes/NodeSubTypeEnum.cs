@@ -29,10 +29,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         Junction,
 
-        //Chest,
-        //Dash,
-        //Dig,
-        //Standing,
-        //Tablet
+        Save,
+        Missile,
+        Energy,
+        Ship,
+        Map
     }
 }
