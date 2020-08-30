@@ -120,6 +120,11 @@ namespace sm_json_data_framework.Models
         public IDictionary<string, RoomNode> Nodes { get; set; } = new Dictionary<string, RoomNode>();
 
         /// <summary>
+        /// The runways in this model, mapped by name.
+        /// </summary>
+        public IDictionary<string, Runway> Runways { get; set; } = new Dictionary<string, Runway>();
+
+        /// <summary>
         /// The node locks in this model, mapped by name.
         /// </summary>
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();

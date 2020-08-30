@@ -13,6 +13,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 {
     public class Runway : InitializablePostDeserializeInNode, IRunway
     {
+        public string Name { get; set; }
+
         public int Length { get; set; }
 
         public int GentleUpTiles { get; set; } = 0;

@@ -298,7 +298,7 @@ namespace sm_json_data_framework.Models.Navigation
             {
                 foreach(var (runway, strat) in RunwaysUsed)
                 {
-                    Console.WriteLine($"A runway on node '{runway.Node.Name}' was used, by executing strat '{strat.Name}'");
+                    Console.WriteLine($"Runway '{runway.Name}' was used, by executing strat '{strat.Name}'");
                 }
 
                 foreach(var (canLeaveCharged, strat) in CanLeaveChargedExecuted)

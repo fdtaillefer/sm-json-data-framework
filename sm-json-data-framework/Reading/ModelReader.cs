@@ -172,12 +172,16 @@ namespace sm_json_data_framework.Reading
                     foreach(RoomNode node in room.Nodes.Values)
                     {
                         model.Nodes.Add(node.Name, node);
+                        foreach(Runway runway in node.Runways)
+                        {
+                            model.Runways.Add(runway.Name, runway);
+                        }
                     }
                 }
             }
             // The initialization of rooms initializes the nodes' connection destination node.
             // That requires this node (and, logically, its room beforehand) to have been created already.
-            // This means we can't initialize a room safely until we've created all rooms, so iterate a second on rooms to initialize.
+            // This means we can't initialize a room safely until we've created all rooms, so iterate a second time on rooms to initialize.
             if (initialize)
             {
                 foreach (Room room in model.Rooms.Values)
