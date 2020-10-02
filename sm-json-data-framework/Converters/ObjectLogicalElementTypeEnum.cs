@@ -18,6 +18,7 @@ namespace sm_json_data_framework.Converters
         HeatFrames,
         HibashiHits,
         LavaFrames,
+        LavaPhysicsFrames,
         PreviousNode,
         SpikeHits,
         ThornHits,
@@ -57,6 +58,7 @@ namespace sm_json_data_framework.Converters
                 case ObjectLogicalElementTypeEnum.HeatFrames:
                 case ObjectLogicalElementTypeEnum.HibashiHits:
                 case ObjectLogicalElementTypeEnum.LavaFrames:
+                case ObjectLogicalElementTypeEnum.LavaPhysicsFrames:
                 case ObjectLogicalElementTypeEnum.PreviousNode:
                 case ObjectLogicalElementTypeEnum.SpikeHits:
                 case ObjectLogicalElementTypeEnum.ThornHits:
