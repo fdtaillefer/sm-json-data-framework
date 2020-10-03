@@ -21,6 +21,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         Green,
         Grey,
         //One_way,
+        InRoomTransition,
         Passage,
         Red,
         Sandpit,

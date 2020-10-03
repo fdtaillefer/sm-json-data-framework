@@ -11,6 +11,7 @@ namespace sm_json_data_framework.Models.Connections
         HorizontalMorphTunnel,
         VerticalSandpit,
         Elevator,
-        StoryMarker
+        StoryMarker,
+        InRoomTransition
     }
 }

@@ -112,6 +112,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public Dictionary<int, LinkTo> Links { get; set; }
 
+        public IEnumerable<TwinDoorAddress> TwinDoorAddresses { get; set; } = Enumerable.Empty<TwinDoorAddress>();
+
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             Room = room;
