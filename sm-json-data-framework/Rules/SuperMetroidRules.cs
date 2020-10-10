@@ -552,9 +552,13 @@ namespace sm_json_data_framework.Rules
         /// Calculates the effective length of the provided runway, in flat tiles.
         /// </summary>
         /// <param name="runway">The runway to calculate</param>
-        /// <param name="tilesSavedWithStutter">The number of tiles the player is expected to be saving using a stutter-step.
+        /// <param name="tilesSavedWithStutter"><para>The number of tiles the player is expected to be saving using a stutter-step.
         /// If a portion of the runway to use begins downhill, it will be deemed unusable for a stutter-step and the effective runway length
-        /// will be reduced accordingly.</param>
+        /// will be reduced accordingly.</para>
+        /// <para>For example: If the configuration says the player is expected to use stutter-steps to save 1 tile in a runway,
+        /// and to charge successfully in a 15-tile runway, and the provided runway has 15 tiles but starts on a downward slope, then
+        /// the player is unable to save that one tile using thw stutter-step. So the effective length will be 14 tiles instead
+        /// to reflect that the runway doesn't allow a shine charge with the current configuration.</para></param>
         /// <returns></returns>
         public virtual decimal CalculateEffectiveRunwayLength(IRunway runway, decimal tilesSavedWithStutter)
         {

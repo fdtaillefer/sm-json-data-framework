@@ -26,7 +26,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public IEnumerable<int> InRoomPath { get; set; } = Enumerable.Empty<int>();
 
-        public int UsedTiles { get; set; }
+        public decimal UsedTiles { get; set; }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
@@ -46,9 +46,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
             IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
 
-            // Find all runways from the previous room that can be retroactively attempted and are long enough
+            // Find all runways from the previous room that can be retroactively attempted and are long enough.
+            // We're calculating runway length to account for open ends, but using 0 for tilesSavedWithStutter because no charging is involved.
             IEnumerable<Runway> retroactiveRunways = inGameState.GetRetroactiveRunways(requiredInRoomPath, usePreviousRoom)
-                .Where(r => r.Length >= UsedTiles);
+                .Where(r => model.Rules.CalculateEffectiveRunwayLength(r, tilesSavedWithStutter: 0) >= UsedTiles);
 
             (_, var executionResult) = model.ExecuteBest(retroactiveRunways.Select(runway => runway.AsExecutable(comingIn: false)),
                 inGameState, times: times, usePreviousRoom: usePreviousRoom);
