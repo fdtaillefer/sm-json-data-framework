@@ -472,26 +472,28 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
-        /// Calculates and returns the damage Samus would take for exeucting a shinespark of the provided duration, given the provided in-game state.
+        /// Calculates and returns the damage Samus would take for executing a shinespark of the provided duration n times, given the provided in-game state.
         /// </summary>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <param name="times">The number of times the shinespark will be performed.</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateShinesparkDamage(InGameState inGameState, int shinesparkFrames)
+        public virtual int CalculateShinesparkDamage(InGameState inGameState, int shinesparkFrames, int times = 1)
         {
-            return shinesparkFrames;
+            return shinesparkFrames * times;
         }
 
         /// <summary>
-        /// <para>Returns the energy Samus must have when initiating a shinespark, for that shinespark to complete to the end.
-        /// By default, that is the energy cost of the shinespark + the energy at which a shinespark is interrupted.</para>
+        /// <para>Returns the minimum energy Samus must have before initiating a shinespark n times, for that shinespark to complete to the end all n times.
+        /// By default, that is the energy cost of the shinespark * times + the energy at which a shinespark is interrupted.</para>
         /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
         /// </summary>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark. 0 means no shinespark is being executed.</param>
+        /// <param name="times">The number of times the shinespark will be performed.</param>
         /// <returns></returns>
-        public virtual int CalculateEnergyNeededForShinespark(int shinesparkFrames)
+        public virtual int CalculateEnergyNeededForShinespark(int shinesparkFrames, int times = 1)
         {
-            return shinesparkFrames == 0 ? 0 : shinesparkFrames + ShinesparkEnergyLimit;
+            return shinesparkFrames == 0 ? 0 : shinesparkFrames*times + ShinesparkEnergyLimit;
         }
 
         /// <summary>

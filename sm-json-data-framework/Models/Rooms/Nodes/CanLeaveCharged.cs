@@ -121,12 +121,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Figure out how much energy we will need to have for the shinespark
-            int shinesparkEnergyToSpend = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames) * times;
+            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
+            int shinesparkEnergyToSpend = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
 
-            // Try to execute all strats, obtaining the result
-            // of whichever spends the lowest amount of resources while retaining enough for the shinespark
+            // Try to execute all strats, 
+            // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark
             (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, usePreviousRoom: usePreviousRoom,
-                acceptationCondition: igs => igs.IsResourceAvailable(model, ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend));
+                // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
+                acceptationCondition: igs => igs.GetCurrentResources().GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeededForShinespark);
 
             // If we couldn't find a successful strat, give up
             if (result == null)
