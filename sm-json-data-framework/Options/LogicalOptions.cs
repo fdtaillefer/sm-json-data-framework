@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
@@ -90,7 +91,7 @@ namespace sm_json_data_framework.Options
         private IDictionary<string, int> TriesByTech { get; set; } = new Dictionary<string, int>();
 
         /// <summary>
-        /// <para>Register in this logical options that a tech will the provided name is logically expected
+        /// <para>Register in this logical options that a tech with the provided name is logically expected
         /// to take the provided number of tries before succeeding, impacting its resource cost when applicable.</para>
         /// <para>A higher value makes the tech logically require more resources, making it more lenient.</para>
         /// 
@@ -120,13 +121,49 @@ namespace sm_json_data_framework.Options
         }
 
         /// <summary>
+        /// An internal dictionary that contains all helpers (identified by their name) for which a number of tries should be taken into account by the logic.
+        /// This multiplies resources costs.
+        /// </summary>
+        private IDictionary<string, int> TriesByHelper { get; set; } = new Dictionary<string, int>();
+
+        /// <summary>
+        /// <para>Register in this logical options that a helper with the provided name is logically expected
+        /// to take the provided number of tries before succeeding, impacting its resource cost when applicable.</para>
+        /// <para>A higher value makes the helper logically require more resources, making it more lenient.</para>
+        /// 
+        /// </summary>
+        /// <param name="helperName">The name of the helper</param>
+        /// <param name="numberOfTries">The number of times the helper must be tried before an expected success</param>
+        public void RegisterHelperTries(string helperName, int numberOfTries)
+        {
+            TriesByHelper.Add(helperName, numberOfTries);
+        }
+
+        /// <summary>
+        /// Returns the number of tries that are logically expected to be attempted before a success for the provided helper.
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <returns></returns>
+        public int NumberOfTries(Helper helper)
+        {
+            if (TriesByHelper.TryGetValue(helper.Name, out int tries))
+            {
+                return tries;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        /// <summary>
         /// An internal dictionary that contains all strats (identified by their name) for which a number of tries should be taken into account by the logic.
         /// This multiplies resources costs.
         /// </summary>
         private IDictionary<string, int> TriesByStrat { get; set; } = new Dictionary<string, int>();
 
         /// <summary>
-        /// <para>Register in this logical options that a notable strat will the provided name is logically expected
+        /// <para>Register in this logical options that a notable strat with the provided name is logically expected
         /// to take the provided number of tries before succeeding, impacting its resource cost when applicable.</para>
         /// <para>A higher value makes the strat logically require more resources, making it more lenient.</para>
         /// </summary>

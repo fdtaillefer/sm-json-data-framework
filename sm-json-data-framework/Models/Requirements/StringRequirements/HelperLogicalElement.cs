@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
         {
-            return Helper.Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            return Helper.Requires.Execute(model, inGameState, times: times * model.LogicalOptions.NumberOfTries(Helper), usePreviousRoom: usePreviousRoom);
         }
     }
 }
