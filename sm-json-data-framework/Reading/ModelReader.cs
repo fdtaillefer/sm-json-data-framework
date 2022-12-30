@@ -78,7 +78,7 @@ namespace sm_json_data_framework.Reading
             model.Helpers = helperContainer.Helpers.ToDictionary(h => h.Name);
 
             TechContainer techContainer = JsonSerializer.Deserialize<TechContainer>(File.ReadAllText(techPath), options);
-            model.Techs = techContainer.Techs.SelectMany(tech => tech.SelectWithExtensions()).ToDictionary(t => t.Name);
+            model.Techs = techContainer.SelectAllTechs().ToDictionary(t => t.Name);
 
             // At this point, Techs and Helpers contain some raw string requirements (referencing other techs and helpers)
             // Resolve those now
