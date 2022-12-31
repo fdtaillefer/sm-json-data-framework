@@ -41,6 +41,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public string NodeAddress { get; set; }
 
+        public IEnumerable<DoorEnvironment> DoorEnvironments { get; set; } = Enumerable.Empty<DoorEnvironment>();
+
         public LogicalRequirements InteractionRequires { get; set; } = new LogicalRequirements();
 
         public IEnumerable<Runway> Runways { get; set; } = Enumerable.Empty<Runway>();
@@ -175,8 +177,17 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 CanLeaveCharged = CanLeaveCharged.Where(clc => clc.InitiateRemotely == null || clc.InitiateRemotely.PathToDoor.Any());
             });
 
+            // We can't initialize DoorEnvironments now because they reference other nodes.
+            // So we'll do it in a callback that we'll return, to be executed after the rest of the room is initialized.
+            initializedRoomCallbacks.Add(() => {
+                foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
+                {
+                    doorEnvironment.Initialize(model, room, this);
+                }
+            });
+
             // Initialize ViewableNodes
-            foreach(ViewableNode viewableNode in ViewableNodes)
+            foreach (ViewableNode viewableNode in ViewableNodes)
             {
                 viewableNode.Initialize(model, room, this);
             }
