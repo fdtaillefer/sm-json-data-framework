@@ -25,6 +25,8 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonPropertyName("nodes")]
         public IEnumerable<RoomNode> NodesSequence { get; set; }
 
+        public IEnumerable<RoomEnvironment> RoomEnvironments { get; set; }
+
         private IDictionary<int, RoomNode> _nodesDictionary;
         /// <summary>
         /// The nodes in this room, mapped by id
@@ -95,6 +97,11 @@ namespace sm_json_data_framework.Models.Rooms
 
             List<Action> postInitializationCallbacks = new List<Action>();
 
+            foreach( RoomEnvironment roomEnvironment in RoomEnvironments)
+            {
+                postInitializationCallbacks.AddRange(roomEnvironment.Initialize(model, this));
+            }
+
             foreach(RoomNode node in Nodes.Values)
             {
                 postInitializationCallbacks.AddRange(node.Initialize(model, this));
@@ -122,8 +129,13 @@ namespace sm_json_data_framework.Models.Rooms
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             List<string> unhandled = new List<string>();
-            
-            foreach(RoomNode node in Nodes.Values)
+
+            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            {
+                unhandled.AddRange(roomEnvironment.InitializeReferencedLogicalElementProperties(model, this));
+            }
+
+            foreach (RoomNode node in Nodes.Values)
             {
                 unhandled.AddRange(node.InitializeReferencedLogicalElementProperties(model, this));
             }

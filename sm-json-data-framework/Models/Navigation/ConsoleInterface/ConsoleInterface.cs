@@ -34,6 +34,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             Commands.Add(new OutputResources());
             Commands.Add(new OutputInventory());
             Commands.Add(new OutputAdjacentNodes());
+            Commands.Add(new OutputEnvironment());
             Commands.Add(new OutputEnemySpawners());
 
             Commands.Add(new UndoAction());

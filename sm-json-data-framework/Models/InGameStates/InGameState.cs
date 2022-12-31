@@ -742,6 +742,35 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns the RoomEnvironment applicable to the room the player is currently in. This can be null if in-room state isn't being tracked.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer, so it will return the previous room's environment.</param>
+        /// <returns></returns>
+        public RoomEnvironment GetCurrentRoomEnvironment(bool usePreviousRoom = false)
+        {
+            Room currentRoom = GetCurrentRoom(usePreviousRoom);
+            if(currentRoom == null)
+            {
+                return null;
+            }
+
+            RoomNode entranceNode = GetVisitedPath(usePreviousRoom).First().node;
+            return currentRoom.RoomEnvironments
+                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).First();
+        }
+
+        /// <summary>
+        /// Returns whether the room the player currently in is heated. Defaults to false if in-room state isn't being tracked.
+        /// </summary>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer, so it will return whether the previous room was heated.</param>
+        /// <returns></returns>
+        public bool IsHeatedRoom(bool usePreviousRoom = false)
+        {
+            RoomEnvironment environment = GetCurrentRoomEnvironment(usePreviousRoom);
+            return environment != null && environment.Heated;
+        }
+
+        /// <summary>
         /// Returns the strat that was used to reach the current node, if any. Otherwise, returns null.
         /// </summary>
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer.</param>
