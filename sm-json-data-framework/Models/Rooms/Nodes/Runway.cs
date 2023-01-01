@@ -77,8 +77,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="comingIn">If true, tries to use the runway while coming into the room. If false, tries to use it when already in the room.</param>
         /// <param name="times">The number of consecutive times that this runway should be used.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
         public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)

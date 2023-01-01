@@ -17,8 +17,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <param name="times">The number of consecutive times that Samus will take this damage.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>The calculated amount of damage</returns>
         public abstract int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0);
 

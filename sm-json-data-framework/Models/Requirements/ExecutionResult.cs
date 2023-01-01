@@ -103,8 +103,8 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="obstacles">The obstacles to mark as destroyed.</param>
         /// <param name="usePreviousRoom">Indicates whether the obstacles were destroyed in the context of the previous room.</param>
-        /// <param name="previousRoomCount">Indicates in which previous room to destroy the obstacles, if any.
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">Indicates in which previous playable room to destroy the obstacles, if any.
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         public void ApplyDestroyedObstacles(IEnumerable<RoomObstacle> obstacles, int previousRoomCount = 0)
         {
             // While we can retroactively do some things in previous rooms, we will not retroactively alter the room state.
@@ -210,8 +210,8 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="times">The number of consecutive times that this should be executed.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>The new state of this if execution succeeds, or null in case of failure.</returns>
         public ExecutionResult AndThen(IExecutable executable, SuperMetroidModel model, int times = 1, int previousRoomCount = 0)
         {

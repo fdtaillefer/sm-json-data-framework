@@ -200,8 +200,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <param name="runways">The runways to evaluate.</param>
         /// <param name="times">The number of consecutive times that this should be executed.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <param name="hasEnergyForShinespark">A predicate that checks whether a resulting InGameState has enough energy for the subsequent shinespark</param>
         /// <param name="runwaysReversible">If true, runways can be used in either direction. If false, they can only be used in their normal direction.</param>
         /// <returns></returns>

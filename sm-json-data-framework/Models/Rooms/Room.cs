@@ -17,6 +17,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         public string Subarea { get; set; }
 
+        public bool Playable { get; set; }
+
         public string RoomAddress { get; set; }
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonPropertyName("nodes")]
         public IEnumerable<RoomNode> NodesSequence { get; set; }
 
-        public IEnumerable<RoomEnvironment> RoomEnvironments { get; set; }
+        public IEnumerable<RoomEnvironment> RoomEnvironments { get; set; } = Enumerable.Empty<RoomEnvironment>();
 
         private IDictionary<int, RoomNode> _nodesDictionary;
         /// <summary>

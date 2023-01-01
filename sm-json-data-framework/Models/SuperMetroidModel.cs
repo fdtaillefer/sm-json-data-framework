@@ -202,8 +202,8 @@ namespace sm_json_data_framework.Models
         /// <param name="executables">An enumeration of executables to attempt executing.</param>
         /// <param name="times">The number of consecutive times the executables should be executed.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <param name="acceptationCondition">An optional Predicate that is checked against the resulting in-game state of executions.
         /// Executions whose resulting state does not respect the predicate are rejected.</param>
         /// <returns>The best executable, alongside its ExecutionResult, or default values if none succeeded</returns>
@@ -249,8 +249,8 @@ namespace sm_json_data_framework.Models
         /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
         /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
         /// <param name="times">The number of consecutive times the executables should be executed.
-        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// Only really impacts resource cost, since most items are non-consumable.</param>
         /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.
         /// This will never return the initialInGameState instance.</returns>

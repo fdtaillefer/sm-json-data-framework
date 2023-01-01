@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options.ResourceValues;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -706,7 +707,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns the in-room state that corresponds to the provided previousRoomCount, for this in-game state.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         protected InRoomState GetInRoomState(int previousRoomCount)
         {
@@ -724,12 +726,23 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// <para>
         /// Registers the provided previousState as the most recent previously-visited room state.
         /// If this would cause the number of previous rooms to be over the maximum amount, also forgets the oldest remembered previous state.
+        /// </para>
+        /// <para>
+        /// Note: If the provided previous state is not a playable room, it will not be registered and this method will do nothing
+        /// </para>
         /// </summary>
         /// <param name="previousState"></param>
         protected void RegisterPreviousRoom(InRoomState previousState)
         {
+            // Ignore non-playable rooms in our previous states.
+            if (!previousState.CurrentRoom.Playable)
+            {
+                return;
+            }
+
             if(PreviousRoomStates.Count >= PreviousRooms)
             {
                 PreviousRoomStates.RemoveAt(PreviousRoomStates.Count - 1);
@@ -740,7 +753,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns the node the player is currently at. This can be null if in-room state isn't being tracked.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public RoomNode GetCurrentNode(int previousRoomCount = 0)
         {
@@ -751,7 +765,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns whether the player is exiting the room by bypassing a lock on the node they are exiting by.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by.
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public bool BypassingExitLock(int previousRoomCount = 0)
         {
@@ -762,7 +777,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns whether the player is exiting the room by opening a lock on the node they are exiting by.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by.
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public bool OpeningExitLock(int previousRoomCount = 0)
         {
@@ -773,7 +789,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns the room the player is currently in. This can be null if in-room state isn't being tracked.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public Room GetCurrentRoom(int previousRoomCount = 0)
         {
@@ -784,7 +800,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns the RoomEnvironment applicable to the room the player is currently in. This can be null if in-room state isn't being tracked.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by.
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public RoomEnvironment GetCurrentRoomEnvironment(int previousRoomCount = 0)
         {
@@ -796,13 +813,14 @@ namespace sm_json_data_framework.Models.InGameStates
 
             RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().node;
             return currentRoom.RoomEnvironments
-                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).First();
+                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).FirstOrDefault();
         }
 
         /// <summary>
         /// Returns whether the room the player currently in is heated. Defaults to false if in-room state isn't being tracked.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by.
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public bool IsHeatedRoom(int previousRoomCount = 0)
         {
@@ -811,9 +829,40 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Returns the DoorEnvironment applicable to the node the player is currently in (if it has one). This can also be null if in-room state isn't being tracked.
+        /// </summary>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns></returns>
+        public DoorEnvironment GetCurrentDoorEnvironment(int previousRoomCount = 0)
+        {
+            RoomNode currentNode = GetCurrentNode(previousRoomCount);
+            if (currentNode == null || !currentNode.DoorEnvironments.Any())
+            {
+                return null;
+            }
+
+            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().node;
+            return currentNode.DoorEnvironments
+                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).First();
+        }
+
+        /// <summary>
+        /// Returns the door physics (if any) at the current node.
+        /// </summary>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns></returns>
+        public PhysicsEnum? GetCurrentDoorPhysics(int previousRoomCount = 0) {
+            DoorEnvironment environment = GetCurrentDoorEnvironment(previousRoomCount);
+            return environment?.Physics;
+        }
+
+        /// <summary>
         /// Returns the strat that was used to reach the current node, if any. Otherwise, returns null.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public Strat GetLastStrat(int previousRoomCount = 0)
         {
@@ -825,7 +874,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Returns a sequence of IDs of nodes that have been visited in the current room since entering, in order, 
         /// starting with the node through which the room was entered. May be empty if the in-room state is not being tracked.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by.
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public IEnumerable<int> GetVisitedNodeIds(int previousRoomCount = 0)
         {
@@ -840,7 +890,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
         /// This strat can be null since nodes are reached without using a strat when entering.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public IEnumerable<(RoomNode node, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
         {
@@ -853,7 +903,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Returns a sequence of IDs of obstacles that have been destroyed in the current room since entering.
         /// May be empty if the in-room state is not being tracked.
         /// </summary>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public IEnumerable<string> GetDestroyedObstacleIds(int previousRoomCount = 0)
         {
@@ -949,7 +999,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
         /// to use retroactive runways in the current context. The first node in this path also dictates the node to which the retroactive runways must lead.</param>
         /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGameState.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by, *before* looking for retroactive runways in the room before that. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive runways in the room before that. 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
         {
@@ -1015,7 +1066,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able to use 
         /// retroactive canLeavechargeds in the current context. The first node in this path also dictates the node to which 
         /// the retroactive charged exit must lead.</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by, *before* looking for retroactive canLeaveChargeds in the room before that. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive canLeaveChargeds in the room before that.
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
         {

@@ -15,7 +15,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// Returns whether the provided InGameState fulfills this PreviousNode element.
         /// </summary>
         /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by. 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public bool IsFulfilled(InGameState inGameState, int previousRoomCount = 0)
         {
