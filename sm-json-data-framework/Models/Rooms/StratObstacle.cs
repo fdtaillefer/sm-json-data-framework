@@ -105,12 +105,12 @@ namespace sm_json_data_framework.Models.Rooms
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
 
             // Start with the RoomObstacle's requirements
-            ExecutionResult result = StratObstacle.Obstacle.Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            ExecutionResult result = StratObstacle.Obstacle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // If we couldn't execute the RoomObstacle's requirements, give up
             if (result == null)
             {
@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             // Add this specific StratObstacle's requirements
-            result = result.AndThen(StratObstacle.Requires, model, times: times, usePreviousRoom: usePreviousRoom);
+            result = result.AndThen(StratObstacle.Requires, model, times: times, previousRoomCount: previousRoomCount);
             // If that failed, give up
             if (result == null)
             {
@@ -126,7 +126,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             // We have succeeded, but we must update the ExecutionResult and its InGameState to reflect any destroyed obstacles
-            result.ApplyDestroyedObstacles(new[] { StratObstacle.Obstacle }.Concat(StratObstacle.AdditionalObstacles), usePreviousRoom);
+            result.ApplyDestroyedObstacles(new[] { StratObstacle.Obstacle }.Concat(StratObstacle.AdditionalObstacles), previousRoomCount);
 
             return result;
         }
@@ -143,7 +143,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The bypass attempt fails if there's no way to bypass
             if (StratObstacle.Bypass == null)
@@ -152,7 +152,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
             else
             {
-                return StratObstacle.Bypass.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+                return StratObstacle.Bypass.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             }
         }
     }

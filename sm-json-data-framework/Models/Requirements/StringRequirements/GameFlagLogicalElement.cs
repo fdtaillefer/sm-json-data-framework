@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             GameFlag = gameFlag;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.HasGameFlag(GameFlag))
             {

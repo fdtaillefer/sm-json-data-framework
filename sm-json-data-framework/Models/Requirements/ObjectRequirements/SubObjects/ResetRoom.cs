@@ -95,9 +95,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(usePreviousRoom);
+            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
 
             // If the node at which we entered is not allowed, this is not fulfilled.
             if (!NodeIds.Contains(visitedNodeIds.First()))
@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // If we have destroyed an obstacle that needed to be preserved, this is not fulfilled
-            if (ObstaclesIdsToAvoid.Intersect(inGameState.GetDestroyedObstacleIds(usePreviousRoom)).Any())
+            if (ObstaclesIdsToAvoid.Intersect(inGameState.GetDestroyedObstacleIds(previousRoomCount)).Any())
             {
                 return null;
             }

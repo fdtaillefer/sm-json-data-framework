@@ -21,11 +21,11 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             times = times * model.LogicalOptions.NumberOfTries(this);
 
-            ExecutionResult result = Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            ExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
 
             if (result == null)
             {
@@ -33,15 +33,15 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             // Iterate over intact obstacles that need to be dealt with
-            foreach (StratObstacle obstacle in Obstacles.Where(o => !inGameState.GetDestroyedObstacleIds(usePreviousRoom).Contains(o.ObstacleId)))
+            foreach (StratObstacle obstacle in Obstacles.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.ObstacleId)))
             {
                 // Try destroying the obstacle first
-                ExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, usePreviousRoom: usePreviousRoom);
+                ExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, previousRoomCount: previousRoomCount);
 
                 // If destruction fails, try to bypass instead
                 if (destroyResult == null)
                 {
-                    result = result.AndThen(obstacle.BypassExecution, model, times: times, usePreviousRoom: usePreviousRoom);
+                    result = result.AndThen(obstacle.BypassExecution, model, times: times, previousRoomCount: previousRoomCount);
                     // If bypass also fails, we cannot get past this obstacle. Give up.
                     if (result == null)
                     {

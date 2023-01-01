@@ -15,18 +15,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// Returns whether the provided InGameState fulfills this PreviousNode element.
         /// </summary>
         /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns></returns>
-        public bool IsFulfilled(InGameState inGameState, bool usePreviousRoom)
+        public bool IsFulfilled(InGameState inGameState, int previousRoomCount = 0)
         {
             // Look at second-to-last visited node (last node is the current node)
-            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(usePreviousRoom);
+            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
             return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count() -2) == Value;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            if (IsFulfilled(inGameState, usePreviousRoom))
+            if (IsFulfilled(inGameState, previousRoomCount))
             {
                 // Clone the InGameState to fulfill method contract
                 return new ExecutionResult(inGameState.Clone());

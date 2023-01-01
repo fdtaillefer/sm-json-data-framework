@@ -22,16 +22,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// Returns whether the provided InGameState fulfills this PreviousStratProperty element.
         /// </summary>
         /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// <param name="previousRoomCount">The number of rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns></returns>
-        public bool IsFulfilled(InGameState inGameState, bool usePreviousRoom)
+        public bool IsFulfilled(InGameState inGameState, int previousRoomCount = 0)
         {
-            return inGameState.GetLastStrat(usePreviousRoom)?.StratProperties?.Contains(Value) == true;
+            return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            if (IsFulfilled(inGameState, usePreviousRoom))
+            if (IsFulfilled(inGameState, previousRoomCount))
             {
                 // Clone the InGameState to fulfill method contract
                 return new ExecutionResult(inGameState.Clone());

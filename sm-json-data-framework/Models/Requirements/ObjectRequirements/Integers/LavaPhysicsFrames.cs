@@ -7,11 +7,11 @@ using System.Text;
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     /// <summary>
-    /// A logical element which requires Samus to spend some frames in lava while under lava physics (i.e. with Gravity Suit turned off if available).
+    /// A logical element which requires Samus to spend some frames in lava while under lava physics (i.e. with Gravity Suit turned off even if available).
     /// </summary>
     public class LavaPhysicsFrames: AbstractDamageNumericalValueLogicalElement
     {
-        public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Value) * times;
             return (int)(baseDamage * model.LogicalOptions.LavaLeniencyMultiplier);

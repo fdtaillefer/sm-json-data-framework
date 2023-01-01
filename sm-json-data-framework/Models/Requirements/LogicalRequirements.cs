@@ -101,25 +101,25 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return model.ExecuteAll(LogicalElements, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            return model.ExecuteAll(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 
         /// <summary>
-        /// Attempts to execute one logicalement element inside this LogicalRequirements (the cheapest one) 
+        /// Attempts to execute one logical element inside this LogicalRequirements (the cheapest one) 
         /// based on the provided in-game state (which will not be altered), by fulfilling its execution requirements.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
         /// <param name="times">The number of consecutive times that this should be executed.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
+        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns></returns>
-        public ExecutionResult ExecuteOne(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult ExecuteOne(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;
         }
 

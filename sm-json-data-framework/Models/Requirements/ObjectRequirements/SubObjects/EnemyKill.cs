@@ -128,13 +128,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Create an ExecutionResult immediately so we can record free kills in it
             ExecutionResult result = new ExecutionResult(inGameState.Clone());
 
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom) != null);
+            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null);
 
             // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
             // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),
@@ -193,7 +193,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
                 // Evaluate all combinations and apply the cheapest to our current resulting state
                 (_, ExecutionResult killResult) = model.ExecuteBest(splashCombinations.Select(combination => new EnemyGroupAmmoExecutable(currentEnemyGroup, nonFreeIndividualWeapons, combination.splashWeapon, combination.splashShots)),
-                    result.ResultingState, times: times, usePreviousRoom: usePreviousRoom);
+                    result.ResultingState, times: times, previousRoomCount: previousRoomCount);
 
                 // If we failed to kill an enemy group, we can't kill all enemies
                 if (killResult == null)
@@ -274,7 +274,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         private int SplashShots { get; set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             ExecutionResult result = null;
             // We'll need to track the health of individual enemies, so create an EnemyWithHealth for each
@@ -283,7 +283,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // If using a splash weapon, spend the ammo then apply the damage
             if (SplashWeapon != null && SplashWeapon.HitsGroup)
             {
-                result = SplashWeapon.ShotRequires.Execute(model, inGameState, times: times * SplashShots, usePreviousRoom: usePreviousRoom);
+                result = SplashWeapon.ShotRequires.Execute(model, inGameState, times: times * SplashShots, previousRoomCount: previousRoomCount);
 
                 // If we can't spend the ammo, fail immediately
                 if (result == null)
@@ -326,7 +326,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             foreach (EnemyWithHealth currentEnemy in enemiesWithHealth)
             {
                 var (_, killResult) = model.ExecuteBest(NonSplashWeapons.Select(weapon => currentEnemy.ToExecutable(weapon, SplashWeapon, SplashShots)),
-                    result?.ResultingState ?? inGameState, times: times, usePreviousRoom: usePreviousRoom);
+                    result?.ResultingState ?? inGameState, times: times, previousRoomCount: previousRoomCount);
 
                 // If we can't kill one of the enemies, give up
                 if (killResult == null)
@@ -363,7 +363,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         private int PriorSplashShots { get; set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             bool enemyInitiallyFull = EnemyWithHealth.Health == EnemyWithHealth.Enemy.Hp;
 
@@ -374,7 +374,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
             int numberOfShots = susceptibility.NumberOfHits(EnemyWithHealth.Health);
 
-            ExecutionResult result = Weapon.ShotRequires.Execute(model, inGameState, times: times * numberOfShots, usePreviousRoom: usePreviousRoom);
+            ExecutionResult result = Weapon.ShotRequires.Execute(model, inGameState, times: times * numberOfShots, previousRoomCount: previousRoomCount);
 
             if(result != null)
             {

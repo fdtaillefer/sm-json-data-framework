@@ -103,10 +103,12 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="obstacles">The obstacles to mark as destroyed.</param>
         /// <param name="usePreviousRoom">Indicates whether the obstacles were destroyed in the context of the previous room.</param>
-        public void ApplyDestroyedObstacles(IEnumerable<RoomObstacle> obstacles, bool usePreviousRoom)
+        /// <param name="previousRoomCount">Indicates in which previous room to destroy the obstacles, if any.
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
+        public void ApplyDestroyedObstacles(IEnumerable<RoomObstacle> obstacles, int previousRoomCount = 0)
         {
             // While we can retroactively do some things in previous rooms, we will not retroactively alter the room state.
-            if (!usePreviousRoom)
+            if (previousRoomCount == 0)
             {
                 foreach(var obstacle in obstacles)
                 {
@@ -208,12 +210,12 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="times">The number of consecutive times that this should be executed.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
+        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns>The new state of this if execution succeeds, or null in case of failure.</returns>
-        public ExecutionResult AndThen(IExecutable executable, SuperMetroidModel model, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult AndThen(IExecutable executable, SuperMetroidModel model, int times = 1, int previousRoomCount = 0)
         {
-            ExecutionResult result = executable.Execute(model, ResultingState, times: times, usePreviousRoom: usePreviousRoom);
+            ExecutionResult result = executable.Execute(model, ResultingState, times: times, previousRoomCount: previousRoomCount);
             if (result == null)
             {
                 return null;

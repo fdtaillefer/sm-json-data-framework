@@ -77,11 +77,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="comingIn">If true, tries to use the runway while coming into the room. If false, tries to use it when already in the room.</param>
         /// <param name="times">The number of consecutive times that this runway should be used.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
+        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
         {
             // If we're coming in, this must be usable coming in
             if (!UsableComingIn && comingIn)
@@ -90,7 +90,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Return the result of the best strat execution
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result == null)
             {
                 return null;
@@ -129,9 +129,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public bool ComingIn { get; private set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return Runway.Execute(model, inGameState, ComingIn, times: times, usePreviousRoom: usePreviousRoom);
+            return Runway.Execute(model, inGameState, ComingIn, times: times, previousRoomCount: previousRoomCount);
         }
     }
 }

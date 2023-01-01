@@ -158,7 +158,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             RoomEnemy = roomEnemy;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The enemy can only be farmed if it currently spawns
             if (!RoomEnemy.Spawns(model, inGameState))
@@ -176,7 +176,7 @@ namespace sm_json_data_framework.Models.Rooms
             IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.OrderBy(cycle => cycle.CycleFrames);
             foreach(FarmCycle currentFarmCycle in orderedFarmCycles)
             {
-                var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+                var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
                 
                 // If the farming succeeded, evaluate the results.
                 // Otherwise, just skip to the next cycle.
@@ -184,7 +184,7 @@ namespace sm_json_data_framework.Models.Rooms
                 {
                     // If this farm cycle was cost free, we won't find a better one later on.
                     // Immediately return the best result we've encountered so far.
-                    if(currentFarmCycle.IsFree(model, inGameState, usePreviousRoom: usePreviousRoom))
+                    if(currentFarmCycle.IsFree(model, inGameState, previousRoomCount: previousRoomCount))
                     {
                         // If the resulting state is the best we've found yet, retain it
                         if (bestResult.result == null

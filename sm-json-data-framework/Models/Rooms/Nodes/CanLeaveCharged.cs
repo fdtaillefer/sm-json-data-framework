@@ -97,7 +97,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return unhandled.Distinct();
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There are many things to check...
 
@@ -126,7 +126,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Try to execute all strats, 
             // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, usePreviousRoom: usePreviousRoom,
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, previousRoomCount: previousRoomCount,
                 // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
                 acceptationCondition: igs => igs.GetCurrentResources().GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeededForShinespark);
 

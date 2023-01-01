@@ -15,10 +15,10 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
         /// <param name="times">The number of consecutive times that this should be executed.
         /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
+        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false);
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0);
     }
 }

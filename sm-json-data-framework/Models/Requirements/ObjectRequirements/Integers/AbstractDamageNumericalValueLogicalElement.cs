@@ -17,10 +17,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <param name="times">The number of consecutive times that Samus will take this damage.</param>
-        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
-        /// (whenever in-room state is relevant).</param>
+        /// <param name="previousRoomCount">The number of rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid.</param>
         /// <returns>The calculated amount of damage</returns>
-        public abstract int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false);
+        public abstract int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         /// <summary>
         /// Returns the enumeration of items that are responsible for reducing incurred damage, 
@@ -31,9 +31,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <returns></returns>
         public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, InGameState inGameState);
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int damage = CalculateDamage(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            int damage = CalculateDamage(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (inGameState.IsResourceAvailable(model, ConsumableResourceEnum.ENERGY, damage))
             {
                 var resultingState = inGameState.Clone();

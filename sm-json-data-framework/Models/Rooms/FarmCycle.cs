@@ -50,10 +50,10 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
         /// <returns></returns>
-        public bool IsFree(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public bool IsFree(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Execute the requirements of this cycle once
-            ExecutionResult executionResult = RequirementExecution.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            ExecutionResult executionResult = RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
 
             // If we failed, this can't be farmed for free
             if (executionResult == null)
@@ -117,9 +117,9 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return FarmCycle.Requires.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            return FarmCycle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
     }
 
@@ -134,9 +134,9 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, bool usePreviousRoom = false)
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            var requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, usePreviousRoom: usePreviousRoom);
+            var requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // Can't even execute one cycle, so return a failure
             if(requirementsResult == null)
             {
