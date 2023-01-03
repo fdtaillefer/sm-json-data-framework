@@ -20,6 +20,11 @@ namespace sm_json_data_framework.Models.Requirements
             public static readonly LogicalRequirements Instance = new LogicalRequirements(new AbstractLogicalElement[] { new NeverLogicalElement() });
         }
 
+        internal class AlwaysRequirements
+        {
+            public static readonly LogicalRequirements Instance = new LogicalRequirements();
+        }
+
         public LogicalRequirements()
         {
 

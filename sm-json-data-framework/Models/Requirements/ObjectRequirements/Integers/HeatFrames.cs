@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class HeatFrames : AbstractDamageNumericalValueLogicalElement
     {
+        public HeatFrames()
+        {
+
+        }
+
+        public HeatFrames(int frames)
+        {
+            Value = frames;
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Value) * times;

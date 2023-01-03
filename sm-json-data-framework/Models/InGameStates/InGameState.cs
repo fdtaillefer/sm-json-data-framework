@@ -769,8 +769,8 @@ namespace sm_json_data_framework.Models.InGameStates
             if(PreviousRoomStates.Count >= PreviousRooms)
             {
                 PreviousRoomStates.RemoveAt(PreviousRoomStates.Count - 1);
-                PreviousRoomStates.Insert(0, previousState);
             }
+            PreviousRoomStates.Insert(0, previousState);
         }
 
         /// <summary>
@@ -1017,16 +1017,27 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
         /// to use retroactive runways in the current context. The first node in this path also dictates the node to which the retroactive runways must lead.</param>
         /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGameState.</param>
+        /// <param name="acceptablePhysics">An optional collection of physics, one of which must be active at the runway's door for any runway to be available.</param>
         /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive runways in the room before that. 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
+        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, IEnumerable<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
             // If that "current" room is the last remembered one, we have no way to obtain the state of the room before that so just return
             if (previousRoomCount >= PreviousRoomStates.Count)
             {
                 return Enumerable.Empty<Runway>();
+            }
+
+            // Apply physics restriction if applicable
+            if(acceptablePhysics != null && acceptablePhysics.Any())
+            {
+                PhysicsEnum? activePhysics = GetCurrentDoorPhysics(previousRoomCount + 1);
+                if(acceptablePhysics == null || !acceptablePhysics.Contains(activePhysics.Value))
+                {
+                    return Enumerable.Empty<Runway>();
+                }
             }
 
             // We will need to know what nodes were visited in the current room. If this info is missing, we can't do anything retroactively.
