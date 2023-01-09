@@ -218,7 +218,8 @@ namespace sm_json_data_framework.Models.Navigation
                 NodeTypeEnum.Item => $"Pick up item at {node.Name}",
                 NodeTypeEnum.Entrance => $"Interact with {node.Name}",
                 NodeTypeEnum.Junction => $"Interact with {node.Name}",
-                NodeTypeEnum.Utility => $"Use utility at {node.Name}"
+                NodeTypeEnum.Utility => $"Use utility at {node.Name}",
+                _ => throw new NotImplementedException()
             };
 
             var(failedLocks, openedLocks, bypassedLocks, result) = DealWithLocks(node, attemptOpen: true, attemptBypass: true);
@@ -232,15 +233,22 @@ namespace sm_json_data_framework.Models.Navigation
                 return new Failure(intent);
             }
 
-            // Locks are taken care of, but maybe interaction with the node has straight requirements as well
-            var interactionResult = node.InteractionRequires.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
-            if(result == null)
+            // Locks are taken care of, try to interact with node
+            var interactionResult = node.InteractExecution.Execute(GameModel, result?.ResultingState ?? CurrentInGameState);
+            if(interactionResult == null)
             {
-                result = interactionResult;
+                result = null;
             }
             else
             {
-                result.ApplySubsequentResult(interactionResult);
+                if (result == null)
+                {
+                    result = interactionResult;
+                }
+                else
+                {
+                    result.ApplySubsequentResult(interactionResult);
+                }
             }
             // Interaction failed. Drop the lock phase altogether.
             // If the goal is to unlock the node regardless of interaction, there is a method for that.
@@ -250,69 +258,23 @@ namespace sm_json_data_framework.Models.Navigation
                 return new Failure(intent);
             }
 
-            // At this point, the interaction can happen. Process everything on the node regardless of type.
 
-            // Activate game flags
-            foreach(GameFlag flag in node.Yields)
+            // If an item was picked up, we may want to adjust resources according to normal game behavior
+            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is ExpansionItem expansionItem && !CurrentInGameState.IsItemLocationTaken(node.Name))
             {
-                result.ResultingState.ApplyAddGameFlag(flag);
-            }
-
-            // Take item at location
-            if(node.NodeItem != null && !CurrentInGameState.IsItemLocationTaken(node.Name))
-            {
-                result.ResultingState.ApplyTakeLocation(node);
-                result.ResultingState.ApplyAddItem(node.NodeItem);
-
-                // If we need to adjust resources according to normal game behavior...
-                if (Options.AddResourcesOnExpansionPickup && node.NodeItem is ExpansionItem expansionItem)
+                switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
                 {
-                    switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
-                    {
-                        case ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP:
-                            result.ResultingState.ApplyAddResource(GameModel, expansionItem.Resource, expansionItem.ResourceAmount);
-                            break;
-                        case ExpansionPickupRestoreBehaviorEnum.REFILL:
-                            result.ResultingState.ApplyRefillResource(GameModel, expansionItem.Resource);
-                            break;
-                        // If we don't know or if the pickup has no effect, do nothing
-                        case ExpansionPickupRestoreBehaviorEnum.NOTHING:
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            // Use any refill utility
-            foreach(UtilityEnum utility in node.Utility)
-            {
-                switch(utility)
-                {
-                    case UtilityEnum.Energy:
-                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.RegularEnergy);
+                    case ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP:
+                        result.ResultingState.ApplyAddResource(GameModel, expansionItem.Resource, expansionItem.ResourceAmount);
                         break;
-                    case UtilityEnum.Reserve:
-                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.ReserveEnergy);
+                    case ExpansionPickupRestoreBehaviorEnum.REFILL:
+                        result.ResultingState.ApplyRefillResource(GameModel, expansionItem.Resource);
                         break;
-                    case UtilityEnum.Missile:
-                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.Missile);
-                        break;
-                    case UtilityEnum.Super:
-                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.Super);
-                        break;
-                    case UtilityEnum.PowerBomb:
-                        result.ResultingState.ApplyRefillResource(GameModel, RechargeableResourceEnum.PowerBomb);
-                        break;
-                    // Other utilities don't do anything for us
+                    // If we don't know or if the pickup has no effect, do nothing
+                    case ExpansionPickupRestoreBehaviorEnum.NOTHING:
                     default:
                         break;
                 }
-            }
-
-            // Use node to exit the room
-            if (node.OutNode != null)
-            {
-                result.ResultingState.ApplyEnterRoom(node.OutNode, bypassedLocks.Any(), openedLocks.Any());
             }
 
             // Create an action to return

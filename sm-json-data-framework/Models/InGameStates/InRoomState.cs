@@ -1,8 +1,7 @@
 ﻿using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace sm_json_data_framework.Models.InGameStates
 {
@@ -19,28 +18,40 @@ namespace sm_json_data_framework.Models.InGameStates
         
         public InRoomState(InRoomState other)
         {
-            CurrentNode = other.CurrentNode;
-            VisitedRoomPathList = new List<(RoomNode node, Strat strat)>(other.VisitedRoomPathList);
+            VisitedRoomPathList = other.VisitedRoomPathList.Select(pair => (new InNodeState(pair.nodeState), pair.strat)).ToList();
             DestroyedObstacleIdsSet = new HashSet<string>(other.DestroyedObstacleIdsSet);
-            BypassedExitLock = other.BypassedExitLock;
-            OpenedExitLock = other.OpenedExitLock;
             LastStrat = other.LastStrat;
         }
+
+        public InNodeState CurrentNodeState { get => VisitedRoomPathList.Any() ? VisitedRoomPathList.Last().nodeState : null; }
 
         /// <summary>
         /// The node the player is currently at. This can be null if in-room state isn't being tracked.
         /// </summary>
-        public RoomNode CurrentNode { get; protected set; }
+        /// // Current room is the last node in the visited room path
+        public RoomNode CurrentNode { get => CurrentNodeState?.Node;  }
 
         /// <summary>
-        /// Indicates whether the room described by this state was exited by bypassing the exit door's lock.
+        /// Indicates whether the room described by this state was exited by bypassing the exit door's lock (based on the premise that the room was indeed exited).
         /// </summary>
-        public bool BypassedExitLock { get; protected set; } = false;
+        public bool BypassedExitLock { get
+            {
+                InNodeState state = CurrentNodeState;
+                return state != null && state.BypassedLocks.Any();
+            }
+        }
 
         /// <summary>
-        /// Indicates whether the room described by this state was exited by opening an exit door's lock
+        /// Indicates whether the room described by this state was exited by opening an exit door's lock (based on the premise that the room was indeed exited)
         /// </summary>
-        public bool OpenedExitLock { get; protected set; } = false;
+        public bool OpenedExitLock
+        {
+            get
+            {
+                InNodeState state = CurrentNodeState;
+                return state != null && state.OpenedLocks.Any();
+            }
+        }
 
         /// <summary>
         /// The room the player is currently in. This can be null if in-room state isn't being tracked.
@@ -53,7 +64,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
         /// This strat can be null since nodes are reached without using a strat when entering.
         /// </summary>
-        protected List<(RoomNode node, Strat strat)> VisitedRoomPathList = new List<(RoomNode, Strat)>();
+        protected List<(InNodeState nodeState, Strat strat)> VisitedRoomPathList { get; } = new List<(InNodeState, Strat)>();
 
         // This will just return VisitedRoomPathList as an IEnumerable
         /// <summary>
@@ -62,19 +73,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
         /// This strat can be null since nodes are reached without using a strat when entering.
         /// </summary>
-        public IEnumerable<(RoomNode node, Strat strat)> VisitedRoomPath { get { return VisitedRoomPathList; } }
-
-        // STITCHME Remove this
-        ///// <summary>
-        ///// Inner list containing the ID of nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
-        ///// </summary>
-        //protected List<int> VisitedNodeIdsList { get; set; } = new List<int>();
-
-        //// This will just return VisitedNodeIdsList as an IEnumerable
-        ///// <summary>
-        ///// A sequence of IDs of nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
-        ///// </summary>
-        //public IEnumerable<int> VisitedNodeIds { get { return VisitedNodeIdsList; } }
+        public IEnumerable<(InNodeState nodeState, Strat strat)> VisitedRoomPath { get { return VisitedRoomPathList; } }
 
         /// <summary>
         /// The inner HashSet containing the ID of obstacles that have been destroyed in this room since entering.
@@ -122,20 +121,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// it's on a link that connects previous node to new node.</param>
         public void ApplyVisitNode(RoomNode node, Strat strat)
         {
-            CurrentNode = node;
-            VisitedRoomPathList.Add((node, strat));
+            VisitedRoomPathList.Add((new InNodeState(node), strat));
             LastStrat = strat;
-        }
-
-        /// <summary>
-        /// Finalizes this in-room state to represent how the player exits the room.
-        /// </summary>
-        /// <param name="bypassExitLock">Indicates whether the player exited by bypassing a lock on the exit node. Defaults to false.</param>
-        /// <param name="openExitLock">Indicates whether the player exited by opening a lock on the exit node. Defaults to false.</param>
-        public void ApplyExitRoom(bool bypassExitLock, bool openExitLock)
-        {
-            BypassedExitLock = bypassExitLock;
-            OpenedExitLock = openExitLock;
         }
 
         /// <summary>
@@ -149,6 +136,41 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Registers the provided NodeLock as being opened at the current node.
+        /// </summary>
+        /// <param name="nodeLock">Lock being opened</param>
+        public void ApplyOpenLock(NodeLock nodeLock)
+        {
+            CurrentNodeState.ApplyOpenLock(nodeLock);
+        }
+
+        /// <summary>
+        /// Registers the provided NodeLock as being bypassed at the current node.
+        /// </summary>
+        /// <param name="nodeLock">Lock being bypassed</param>
+        public void ApplyBypassLock(NodeLock nodeLock)
+        {
+            CurrentNodeState.ApplyBypassLock(nodeLock);
+        }
+
+        /// <summary>
+        /// Returns the locks bypassed by Samus in the last node she visited in this room.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<NodeLock> GetBypassedLocks()
+        {
+            InNodeState nodeState = CurrentNodeState;
+            if(nodeState == null)
+            {
+                return Enumerable.Empty<NodeLock>();
+            }
+            else
+            {
+                return nodeState.BypassedLocks;
+            }
+        }
+
+        /// <summary>
         /// Removes all data from this InRoomState. Useful if this has been initialized at a starting node but in-room state is not going to be maintained.
         /// </summary>
         public void ClearRoomState()
@@ -156,9 +178,6 @@ namespace sm_json_data_framework.Models.InGameStates
             DestroyedObstacleIdsSet.Clear();
             VisitedRoomPathList.Clear();
             LastStrat = null;
-            CurrentNode = null;
-            BypassedExitLock = false;
-            OpenedExitLock = false;
         }
     }
 }

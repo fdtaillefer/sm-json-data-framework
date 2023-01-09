@@ -455,15 +455,38 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Adds the provided node lock to the opened node locks in this InGameState.
+        /// Applies the opening of the provided lock in this InGameState. Expects that samus is at the node that has that lock.
         /// </summary>
-        /// <param name="nodeLock">Lock to add</param>
+        /// <param name="nodeLock">Lock to open</param>
         public void ApplyOpenLock(NodeLock nodeLock)
         {
             if (!IsLockOpen(nodeLock))
             {
                 OpenedLocks.Add(nodeLock.Name, nodeLock);
+                InRoomState.ApplyOpenLock(nodeLock);
             }
+        }
+
+        /// <summary>
+        /// Applies the bypassing of the provided lock in this InGameState. Expects that samus is at the node that has that lock.
+        /// </summary>
+        /// <param name="nodeLock">Lock to bypass</param>
+        public void ApplyBypassLock(NodeLock nodeLock) {
+            if (!IsLockOpen(nodeLock))
+            {
+                InRoomState.ApplyBypassLock(nodeLock);
+            }
+        }
+
+        /// <summary>
+        /// Returns the locks bypassed by Samus at the current node.
+        /// </summary>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
+        /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns></returns>
+        public IEnumerable<NodeLock> GetBypassedLocks(int previousRoomCount = 0)
+        {
+            return GetInRoomState(previousRoomCount).GetBypassedLocks();
         }
 
         protected IDictionary<string, RoomNode> TakenItemLocations { get; set; } = new Dictionary<string, RoomNode>();
@@ -811,7 +834,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return null;
             }
 
-            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().node;
+            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().nodeState.Node;
             return currentRoom.RoomEnvironments
                 .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).FirstOrDefault();
         }
@@ -842,7 +865,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return null;
             }
 
-            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().node;
+            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().nodeState.Node;
             return currentNode.DoorEnvironments
                 .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).First();
         }
@@ -880,23 +903,23 @@ namespace sm_json_data_framework.Models.InGameStates
         public IEnumerable<int> GetVisitedNodeIds(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInRoomState(previousRoomCount);
-            IEnumerable<int> returnValue = roomState?.VisitedRoomPath?.Select(pathNode => pathNode.node.Id);
+            IEnumerable<int> returnValue = roomState?.VisitedRoomPath?.Select(pathNodeState => pathNodeState.nodeState.Node.Id);
             return returnValue == null? Enumerable.Empty<int>() : returnValue;
         }
 
         /// <summary>
-        /// Returns a sequence of nodes that have been visited in this room since entering, in order,
+        /// Returns a sequence of nodes (represented as an InNodeState) that have been visited in this room since entering, in order,
         /// starting with the node through which the room was entered. May be empty if the in-room state is not being tracked.
-        /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
+        /// Each node state is accompanied by the strat that was used to reach the node, when applicable.
         /// This strat can be null since nodes are reached without using a strat when entering.
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<(RoomNode node, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
+        public IEnumerable<(InNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInRoomState(previousRoomCount);
             var returnValue = roomState?.VisitedRoomPath;
-            return returnValue == null ? Enumerable.Empty<(RoomNode, Strat)>() : returnValue;
+            return returnValue == null ? Enumerable.Empty<(InNodeState, Strat)>() : returnValue;
         }
 
         /// <summary>
@@ -921,14 +944,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// not considered valid if it's not made use of by a strat in the next room.
         /// </para>
         /// </summary>
-        /// <param name="entryNode">The node (in the next room) through which the next room will be enteted.</param>
-        /// <param name="bypassExitLock">Indicates whether the player is leaving the current room by bypassing a lock on the exit door.</param>
-        /// <param name="openExitLock">Indicates whether the player is leaving the current room by opening a lock on the exit door.</param>
-        public void ApplyEnterRoom(RoomNode entryNode, bool bypassExitLock, bool openExitLock)
+        /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
+        public void ApplyEnterRoom(RoomNode entryNode)
         {
-            // Finalize current room state with exit state
-            InRoomState.ApplyExitRoom(bypassExitLock, openExitLock);
-
             // Copy current room state and remember it as previous
             RegisterPreviousRoom(new InRoomState(InRoomState));
 
@@ -1137,9 +1155,9 @@ namespace sm_json_data_framework.Models.InGameStates
 
                     // Check the last n visited nodes to make sure they correspond to the prescribed path.
                     // But before this, check the node we were at immediately before those, to make sure we're starting at the right place.
-                    IEnumerable<(RoomNode node, Strat strat)> lastRoomFinalPath
+                    IEnumerable<(InNodeState nodeState, Strat strat)> lastRoomFinalPath
                         = lastRoomPath.TakeLast(clc.InitiateRemotely.PathToDoor.Count() + 1);
-                    if (lastRoomFinalPath.First().node != clc.InitiateRemotely.InitiateAtNode)
+                    if (lastRoomFinalPath.First().nodeState.Node != clc.InitiateRemotely.InitiateAtNode)
                     {
                         return false;
                     }
@@ -1147,7 +1165,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     if (!clc.InitiateRemotely.PathToDoor.Zip
                         (lastRoomFinalPath.Skip(1), (expectedPath, actualPath) => {
                             // These two path nodes match up if they go to the same room node, and if the actual path uses one of the valid strats
-                            return expectedPath.link.TargetNode == actualPath.node
+                            return expectedPath.link.TargetNode == actualPath.nodeState.Node
                                 && expectedPath.strats.Contains(actualPath.strat, ObjectReferenceEqualityComparer<Strat>.Default);
                         })
                         // If any node in the actual path does not respect the expected path, 
@@ -1170,7 +1188,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
                         // The exit node must have been visited before the CanLeaveCharge execution would begin.
                         // The node where execution begins is hence the last one where we could have opened the door.
-                        if (!lastRoomPath.SkipLast(clc.InitiateRemotely.PathToDoor.Count()).Where(pathNode => pathNode.node == previousRoomExitNode).Any())
+                        if (!lastRoomPath.SkipLast(clc.InitiateRemotely.PathToDoor.Count()).Where(pathNode => pathNode.nodeState.Node == previousRoomExitNode).Any())
                         {
                             return false;
                         }

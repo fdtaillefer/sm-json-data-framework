@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
@@ -62,6 +63,11 @@ namespace sm_json_data_framework.Models.Requirements
         public IEnumerable<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(NodeLock bypassedLock, Strat stratUsed)>();
 
         /// <summary>
+        /// A sequence of game flags that were activated.
+        /// </summary>
+        public IEnumerable<GameFlag> ActivatedGameFlags { get; set; } = Enumerable.Empty<GameFlag>();
+
+        /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
         /// </summary>
         public IEnumerable<IndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<IndividualEnemyKillResult>();
@@ -91,6 +97,7 @@ namespace sm_json_data_framework.Models.Requirements
             CanLeaveChargedExecuted = CanLeaveChargedExecuted.Concat(subsequentResult.CanLeaveChargedExecuted);
             OpenedLocks = OpenedLocks.Concat(subsequentResult.OpenedLocks);
             BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks);
+            ActivatedGameFlags = ActivatedGameFlags.Concat(subsequentResult.ActivatedGameFlags);
             KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies);
             ItemsInvolved.UnionWith(subsequentResult.ItemsInvolved);
             DamageReducingItemsInvolved.UnionWith(subsequentResult.DamageReducingItemsInvolved);
@@ -129,13 +136,27 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// Adds to this ExecutionResult a record of using the provided strat to bypass the provided lock.
+        /// Applies the bypass of the provided nodeLock both in this ExecutionResult and in its resulting InGameState.
         /// </summary>
-        /// <param name="nodeLock">The lock that was bypassed</param>
+        /// <param name="nodeLock">The lock to bypass</param>
         /// <param name="strat">The strat used to bypass the lock</param>
-        public void AddBypassedLock(NodeLock nodeLock, Strat strat)
+        public void ApplyBypassedLock(NodeLock nodeLock, Strat strat)
         {
             BypassedLocks = BypassedLocks.Append((nodeLock, strat));
+            ResultingState.ApplyBypassLock(nodeLock);
+        }
+
+        /// <summary>
+        /// Applies the activation of the provided gameFlag both in this ExecutionResult and in its resulting InGameState.
+        /// </summary>
+        /// <param name="gameFlag"></param>
+        public void ApplyActivatedGameFlag(GameFlag gameFlag)
+        {
+            if (!ResultingState.HasGameFlag(gameFlag))
+            {
+                ActivatedGameFlags = ActivatedGameFlags.Append(gameFlag);
+                ResultingState.ApplyAddGameFlag(gameFlag);
+            }
         }
 
         /// <summary>

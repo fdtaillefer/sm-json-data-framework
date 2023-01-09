@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Utils;
 using System;
@@ -13,6 +14,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     {
         public LockTypeEnum LockType { get; set; }
 
+        /// <summary>
+        /// Logical requirements that must be met for this lock to be active
+        /// </summary>
         public LogicalRequirements Lock { get; set; } = new LogicalRequirements();
 
         public string Name { get; set; }
@@ -20,6 +24,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IEnumerable<Strat> UnlockStrats { get; set; } = Enumerable.Empty<Strat>();
 
         public IEnumerable<Strat> BypassStrats { get; set; } = Enumerable.Empty<Strat>();
+
+        [JsonPropertyName("yields")]
+        public IEnumerable<string> YieldsStrings { get; set; } = Enumerable.Empty<string>();
+
+        /// <summary>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>The game flags that are activated by unlocking this lock.</para>
+        /// </summary>
+        [JsonIgnore]
+        public IEnumerable<GameFlag> Yields { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
@@ -48,6 +62,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 strat.Initialize(model, room);
             }
+
+            // Initialize Yielded game flags
+            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
@@ -157,6 +174,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
+                foreach (GameFlag gameFlag in NodeLock.Yields)
+                {
+                    result.ApplyActivatedGameFlag(gameFlag);
+                }
             }
             return result;
         }
@@ -186,7 +207,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats, inGameState, times: times, previousRoomCount: previousRoomCount);
             if(result != null)
             {
-                result.AddBypassedLock(NodeLock, bestStrat);
+                result.ApplyBypassedLock(NodeLock, bestStrat);
             }
             return result;
         }

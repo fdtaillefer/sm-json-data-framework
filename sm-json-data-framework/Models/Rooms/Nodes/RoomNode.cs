@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Utils;
@@ -116,6 +117,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public IEnumerable<TwinDoorAddress> TwinDoorAddresses { get; set; } = Enumerable.Empty<TwinDoorAddress>();
 
+        /// <summary>
+        /// Returns the enumeration of locks on this node that are active and locked, according to the provided inGameState.
+        /// </summary>
+        /// <param name="inGameState">InGameState to evaluate for active locks</param>
+        /// <returns></returns>
+        public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, InGameState inGameState)
+        {
+            // Return locks whose locking conditions have been met, and that haven't been opened
+            return Locks.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
+                .Where(nodeLock => !inGameState.IsLockOpen(nodeLock))
+                .ToList();
+        }
+
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             Room = room;
@@ -173,7 +187,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 {
                     canLeaveCharged.Initialize(model, room, this);
                 }
-                // We are now able to eliminate any CanLeaveCharged that is initiated remotely and whose path is impossible to follow
+                // We are now able to eliminate any CanLeaveCharged that is initiated remotely and whose path is impossible to follow.
+                // (The PathToDoor is expected to be left empty if it's impossible to follow due to strats not being possible given the applied settings)
                 CanLeaveCharged = CanLeaveCharged.Where(clc => clc.InitiateRemotely == null || clc.InitiateRemotely.PathToDoor.Any());
             });
 
@@ -234,6 +249,111 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             return unhandled.Distinct();
+        }
+
+        IExecutable _interactExecution = null;
+        /// <summary>
+        /// An IExecutable that corresponds to interacting with this node.
+        /// </summary>
+        public IExecutable InteractExecution
+        {
+            get
+            {
+                if (_interactExecution == null)
+                {
+                    _interactExecution = new InteractExecution(this);
+                }
+                return _interactExecution;
+            }
+        }
+    }
+    /// <summary>
+    /// A class that encloses the opening of a NodeLock in an IExecutable interface. 
+    /// Note that if this picks up a resource item, it does not apply any change to current resources, 
+    /// in an attempt to avoid applying non-repeatable changes that could have logical implications.
+    /// </summary>
+    internal class InteractExecution : IExecutable
+    {
+        private RoomNode Node { get; set; }
+
+        public InteractExecution(RoomNode node)
+        {
+            Node = node;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // First thing is making sure no locks prevent interaction
+            IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedLocks(previousRoomCount);
+            IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState)
+                .Where(activeLock => !bypassedLocks.Contains(activeLock, ObjectReferenceEqualityComparer<NodeLock>.Default));
+
+            // Can't interact with the node if there's active locks that haven't been opened or bypassed
+            if (unhandledLocks.Any())
+            {
+                return null;
+            }
+
+            // Locks are ok, let's try to actually interact with the node
+
+            // Start by executing the node's interaction requirements
+            ExecutionResult result = Node.InteractionRequires.Execute(model, inGameState, times, previousRoomCount);
+
+            // Give up if interaction requirements couldn't be met
+            if(result == null)
+            {
+                return null;
+            }
+
+            // Actually interact with the node now
+
+
+            // Activate game flags
+            foreach (GameFlag flag in Node.Yields)
+            {
+                result.ApplyActivatedGameFlag(flag);
+            }
+
+            // Take item at location
+            if (Node.NodeItem != null && !inGameState.IsItemLocationTaken(Node.Name))
+            {
+                result.ResultingState.ApplyTakeLocation(Node);
+                result.ResultingState.ApplyAddItem(Node.NodeItem);
+            }
+
+            // Use any refill utility
+            foreach (UtilityEnum utility in Node.Utility)
+            {
+                switch (utility)
+                {
+                    case UtilityEnum.Energy:
+                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.RegularEnergy);
+                        break;
+                    case UtilityEnum.Reserve:
+                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.ReserveEnergy);
+                        break;
+                    case UtilityEnum.Missile:
+                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.Missile);
+                        break;
+                    case UtilityEnum.Super:
+                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.Super);
+                        break;
+                    case UtilityEnum.PowerBomb:
+                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.PowerBomb);
+                        break;
+                    // Other utilities don't do anything for us
+                    default:
+                        break;
+                }
+            }
+
+            // Use node to exit the room
+            if (Node.OutNode != null)
+            {
+                result.ResultingState.ApplyEnterRoom(Node.OutNode);
+            }
+
+            return result;
         }
     }
 }

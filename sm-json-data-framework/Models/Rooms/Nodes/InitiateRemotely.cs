@@ -89,7 +89,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // If the path had a node with no link or no strat, leave the path empty to represent that this cannot be done.
-            // Strats can be remove if they're declared out of logic, and a link with no strat would make sense to remove,
+            // Strats can be removed if they're declared out of logic, and a link with no strat would make sense to remove,
             // so we won't just crash on this.
             // The CanLeaveCharged should probably just be taken out itself later by higher-level checks
             if(pathPossible)

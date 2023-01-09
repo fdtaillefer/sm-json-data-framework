@@ -120,6 +120,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 return null;
             }
 
+            // STITCHME Is there any remote initiation check anywhere? If this is remote it should only be executable if the path followed in the room matches the remote config
+
             // Figure out how much energy we will need to have for the shinespark
             int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
             int shinesparkEnergyToSpend = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
