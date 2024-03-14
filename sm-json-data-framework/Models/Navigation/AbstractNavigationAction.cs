@@ -270,28 +270,45 @@ namespace sm_json_data_framework.Models.Navigation
         }
 
         /// <summary>
-        /// Outputs to console a summary of this action. Always outputs succedd/failure,
-        /// and optionally outputs more depending on provided paramters.
+        /// Outputs to console a summary of this action, based on parameters.
+        /// Can independently output succes, failure, effects of the action, and details of the execution.
+        /// This method also initially outputs a preamble explaining the attempted action, but only if at least something else will be outputted.
         /// </summary>
         /// <param name="outputEffects">If true, will output how the action impacted the game state.</param>
         /// <param name="outputDetails">If true, will output details about how the action was performed.</param>
-        public void OutputToConsole(bool outputEffects, bool outputDetails)
+        /// <param name="outputSuccess">If true, will output an indication if the action succeeded.</param>
+        /// <param name="outputFailure">If true, will output an indication if the action failed.</param>
+        public void OutputToConsole(bool outputEffects, bool outputDetails, bool outputSuccess = true, bool outputFailure = true)
         {
-            Console.WriteLine("");
-            Console.WriteLine($"Action attempted: {IntentDescription}");
+            string actionAttemptedOutput = $"Action attempted: {IntentDescription}";
+
+            // Exit fast in case of failure
             if (!Succeeded)
             {
-                Console.WriteLine("Action failed");
+                if (outputFailure)
+                {
+                    OutputExecutionPreamble();
+                    Console.WriteLine("** Action failed **");
+                }
                 return;
             }
 
-            if(IsReverseAction)
+            // Action succeeded, proceed as normal
+            if(outputSuccess || outputDetails || outputEffects)
             {
-                Console.WriteLine("Action reversal executed");
+                OutputExecutionPreamble();
             }
-            else
+
+            if (outputSuccess)
             {
-                Console.WriteLine(GetSuccessOutputString());
+                if(IsReverseAction)
+                {
+                    Console.WriteLine("Action reversal executed");
+                }
+                else
+                {
+                    Console.WriteLine(GetSuccessOutputString());
+                }
             }
 
             if (outputDetails)
@@ -430,6 +447,16 @@ namespace sm_json_data_framework.Models.Navigation
                     Console.WriteLine($"Current node changed from '{PositionChange.fromNode.Name}' to '{PositionChange.toNode.Name}'");
                 }
             }
+        }
+
+        /// <summary>
+        /// Outputs the preamble of an action execution's output, including an empty line as a spacer.
+        /// Should only be called if at least one other portion of the action output will be written out.
+        /// </summary>
+        protected void OutputExecutionPreamble()
+        {
+            Console.WriteLine("");
+            Console.WriteLine($"Action attempted: {IntentDescription}");
         }
 
         public virtual string GetSuccessOutputString()

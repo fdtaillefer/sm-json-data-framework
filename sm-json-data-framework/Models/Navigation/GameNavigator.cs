@@ -177,7 +177,7 @@ namespace sm_json_data_framework.Models.Navigation
             LinkTo linkTo = CurrentInGameState.GetCurrentLinkTo(nodeId);
             if (linkTo == null)
             {
-                intent = intent + $", but no links found to that node from node {CurrentInGameState.GetCurrentNode().Id}";
+                intent = intent + $", but no links found in {CurrentInGameState.GetCurrentRoom().Name} from node {CurrentInGameState.GetCurrentNode().Id} to {nodeId}";
                 return new Failure(intent);
             }
 

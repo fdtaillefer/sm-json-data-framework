@@ -19,10 +19,16 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             ValidCommand = str => str.ToLower() == "si";
             Execution = (navigator, command) =>
             {
+                // Output pickup count
+                int pickupsCount = navigator.CurrentInGameState.GetTakenItemLocationsDictionary().Count();
+                Console.WriteLine($"Number of pickups obtained: {pickupsCount}");
+
+                // Output expansion items with counts
                 foreach (var (item, count) in navigator.CurrentInGameState.GetExpansionItemsDictionary().Values)
                 {
                     Console.WriteLine($"Has item '{item.Name}' X {count}");
                 }
+                // Output non consumable items
                 foreach (Item item in navigator.CurrentInGameState.GetNonConsumableItemsDictionary().Values)
                 {
                     Console.WriteLine($"Has item '{item.Name}'{(navigator.CurrentInGameState.IsItemDisabled(item.Name) ? " (disabled)" : "")}");
