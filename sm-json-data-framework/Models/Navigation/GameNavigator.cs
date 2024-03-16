@@ -161,10 +161,19 @@ namespace sm_json_data_framework.Models.Navigation
         /// This requires a direct link.
         /// </summary>
         /// <param name="nodeId">The ID of the node to move to</param>
+        /// <param name="stratFilters">An optional series of strat filters. If provided, only strats that meet all of those filters can be used to move to the node.</param>
         /// <returns>The resulting action. If moving fails, returns a failure action.</returns>
-        public AbstractNavigationAction MoveToNode(int nodeId)
+        public AbstractNavigationAction MoveToNode(int nodeId, params StratFilter[] stratFilters)
         {
-            string intent = $"Move to node {nodeId}";
+            string intentFiltersSuffix = "";
+            string failureFiltersSuffix = "";
+            if (stratFilters != null && stratFilters.Any())
+            {
+                intentFiltersSuffix = " using strat matching: {" + string.Join(" and ", stratFilters.Select(filter => filter.Description)) + "}";
+                failureFiltersSuffix = " matching the filters";
+            }
+
+            string intent = $"Move to node {nodeId}{intentFiltersSuffix}";
 
             // Does that node exist?
             if (!CurrentInGameState.GetCurrentRoom().Nodes.TryGetValue(nodeId, out RoomNode destinationNode))
@@ -182,12 +191,20 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // We found a link, try to follow it
-            var(strat, result) = GameModel.ExecuteBest(linkTo.Strats, CurrentInGameState);
+            IEnumerable<Strat> potentialStrats = linkTo.Strats;
+            if (stratFilters != null && stratFilters.Any())
+            {
+                foreach (StratFilter filter in stratFilters)
+                {
+                    potentialStrats = potentialStrats.Where(filter.Predicate.Invoke);
+                }
+            }
+            var (strat, result) = GameModel.ExecuteBest(potentialStrats, CurrentInGameState);
             
             // If no strat of the link was successful, this is a failure
             if (strat == null)
             {
-                intent = intent + $", but could not execute any strats";
+                intent = intent + $", but could not execute any strats{failureFiltersSuffix}";
                 return new Failure(intent);
             }
 

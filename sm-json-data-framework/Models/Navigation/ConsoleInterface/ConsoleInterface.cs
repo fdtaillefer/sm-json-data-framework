@@ -62,7 +62,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
             {
                 Console.WriteLine($"Now in {Navigator.CurrentInGameState.GetCurrentRoom().Name} at node {Navigator.CurrentInGameState.GetCurrentNode().Id}");
 
-                string stringCommand = Console.ReadLine();
+                string stringCommand = Console.ReadLine().Trim();
                 ConsoleCommand matchingCommand = Commands.FirstOrDefault(c => c.ValidCommand(stringCommand));
                 if (matchingCommand != null)
                 {

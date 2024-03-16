@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationCommands
@@ -22,6 +23,13 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
                 foreach(ConsoleCommand currentCommand in Commands)
                 {
                     Console.WriteLine($"{currentCommand.SampleFormat} ({currentCommand.Name}): {currentCommand.Description}");
+                    if (currentCommand.Options?.Any() is true)
+                    {
+                        foreach (string option in currentCommand.Options)
+                        {
+                            Console.WriteLine($"    {option}");
+                        }
+                    }
                 }
                 return true;
             };
