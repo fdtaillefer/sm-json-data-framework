@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sm-json-data-framework", "sm-json-data-framework\sm-json-data-framework.csproj", "{5EE636F3-B1CD-4713-8866-2EC08F998CB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sm-json-data-framework", "sm-json-data-framework\sm-json-data-framework.csproj", "{5EE636F3-B1CD-4713-8866-2EC08F998CB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sm-json-data-framework.Tests", "sm-json-data-framework.Tests\sm-json-data-framework.Tests.csproj", "{F80F3AB6-08BF-4BA2-BD10-5680B5C57953}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5EE636F3-B1CD-4713-8866-2EC08F998CB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F80F3AB6-08BF-4BA2-BD10-5680B5C57953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F80F3AB6-08BF-4BA2-BD10-5680B5C57953}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F80F3AB6-08BF-4BA2-BD10-5680B5C57953}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F80F3AB6-08BF-4BA2-BD10-5680B5C57953}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

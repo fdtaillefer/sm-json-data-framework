@@ -90,5 +90,16 @@ namespace sm_json_data_framework.Models.Enemies
                 _ => throw new Exception($"Unrecognized enemy drop {enemyDrop}")
             };
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is EnemyDrops drops &&
+                   NoDrop == drops.NoDrop &&
+                   SmallEnergy == drops.SmallEnergy &&
+                   BigEnergy == drops.BigEnergy &&
+                   Missile == drops.Missile &&
+                   Super == drops.Super &&
+                   PowerBomb == drops.PowerBomb;
+        }
     }
 }
