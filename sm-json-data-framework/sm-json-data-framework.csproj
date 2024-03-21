@@ -10,4 +10,10 @@
     <PackageReference Include="Nito.Collections.Deque" Version="1.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="sm-json-data\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

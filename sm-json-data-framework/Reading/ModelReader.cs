@@ -30,19 +30,25 @@ namespace sm_json_data_framework.Reading
         /// <summary>
         /// Reads all sm-json-data json files, from the provided base directory, and builds a SuperMetroidModel.
         /// </summary>
-        /// <param name="baseDirectory">A path to the base directory of the data model to read</param>
         /// <param name="rules">A repository of game rules to operate by.</param>
         /// <param name="logicalOptions">A container of logical options to go with the representation of the world.</param>
         /// <param name="startConditionsFactory">An object that can create the player's starting conditions for this representation of the world.</param>
+        /// <param name="baseDirectory">An override of the path to the base directory of the data model to read.
+        /// If left null, this method will use the path of the model included with this project.</param>
         /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
         /// If false, the objects in the returned model will contain mostly just raw data.</param>
         /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(string baseDirectory, SuperMetroidRules rules, LogicalOptions logicalOptions, IStartConditionsFactory startConditionsFactory,
-            bool initialize = true, IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
+        public static SuperMetroidModel ReadModel(SuperMetroidRules rules, LogicalOptions logicalOptions, IStartConditionsFactory startConditionsFactory,
+            string baseDirectory = null, bool initialize = true, IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
+            if (baseDirectory == null)
+            {
+                baseDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sm-json-data");
+            }
+
             SuperMetroidModel model = new SuperMetroidModel();
 
             model.Rules = rules;
