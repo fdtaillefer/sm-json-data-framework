@@ -68,7 +68,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                     List<Strat> strats = new List<Strat>();
                     foreach(string stratName in pathNode.StratNames)
                     {
-                        Strat strat = link.Strats.SingleOrDefault(strat => strat.Name == stratName);
+                        Strat strat = link.Strats.Values.SingleOrDefault(strat => strat.Name == stratName);
                         if (strat == null)
                         {
                             pathPossible = false;

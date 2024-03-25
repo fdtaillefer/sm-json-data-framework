@@ -50,14 +50,14 @@ namespace sm_json_data_framework.Utils
         }
 
         /// <summary>
-        /// Returns a sequence containing the strats in this enumerable that are enabled.
+        /// Returns a dictionary containing the strats in this dictionary that are enabled.
         /// </summary>
-        /// <param name="strats">A sequence of strats</param>
+        /// <param name="strats">This dictionary of strats</param>
         /// <param name="model">A model which can be used to figure out whether a strat is enabled</param>
         /// <returns></returns>
-        public static IEnumerable<Strat> WhereEnabled(this IEnumerable<Strat> strats, SuperMetroidModel model)
+        public static IDictionary<string, Strat> WhereEnabled(this IDictionary<string, Strat> strats, SuperMetroidModel model)
         {
-            return strats.Where(s => model.LogicalOptions.IsStratEnabled(s));
+            return strats.Where(kvp => model.LogicalOptions.IsStratEnabled(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
     }
 }

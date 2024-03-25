@@ -21,9 +21,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public string Name { get; set; }
 
-        public IEnumerable<Strat> UnlockStrats { get; set; } = Enumerable.Empty<Strat>();
+        public IDictionary<string, Strat> UnlockStrats { get; set; } = new Dictionary<string, Strat>();
 
-        public IEnumerable<Strat> BypassStrats { get; set; } = Enumerable.Empty<Strat>();
+        public IDictionary<string, Strat> BypassStrats { get; set; } = new Dictionary<string, Strat>();
 
         [JsonPropertyName("yields")]
         public IEnumerable<string> YieldsStrings { get; set; } = Enumerable.Empty<string>();
@@ -50,15 +50,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Eliminate disabled unlock strats
             UnlockStrats = UnlockStrats.WhereEnabled(model);
-
-            foreach (Strat strat in UnlockStrats)
+            foreach (Strat strat in UnlockStrats.Values)
             {
                 strat.Initialize(model, room);
             }
 
             // Eliminate disabled bypass strats
             BypassStrats = BypassStrats.WhereEnabled(model);
-            foreach (Strat strat in BypassStrats)
+            foreach (Strat strat in BypassStrats.Values)
             {
                 strat.Initialize(model, room);
             }
@@ -73,12 +72,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             unhandled.AddRange(Lock.InitializeReferencedLogicalElementProperties(model, room));
 
-            foreach(Strat strat in UnlockStrats)
+            foreach(Strat strat in UnlockStrats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
 
-            foreach (Strat strat in BypassStrats)
+            foreach (Strat strat in BypassStrats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
@@ -170,7 +169,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best unlock strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
@@ -204,7 +203,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best bypass strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
             if(result != null)
             {
                 result.ApplyBypassedLock(NodeLock, bestStrat);

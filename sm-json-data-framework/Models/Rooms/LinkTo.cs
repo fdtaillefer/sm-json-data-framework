@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public RoomNode TargetNode { get; set; }
 
-        public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
+        public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
@@ -32,7 +32,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             // Initialize Strats
             List<Action> postRoomInitializeCallbacks = new List<Action>();
-            foreach (Strat strat in Strats)
+            foreach (Strat strat in Strats.Values)
             {
                 postRoomInitializeCallbacks.AddRange(strat.Initialize(model, room));
             }
@@ -44,7 +44,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             List<string> unhandled = new List<string>();
 
-            foreach(Strat strat in Strats)
+            foreach(Strat strat in Strats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }

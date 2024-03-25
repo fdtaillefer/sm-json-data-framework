@@ -191,7 +191,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // We found a link, try to follow it
-            IEnumerable<Strat> potentialStrats = linkTo.Strats;
+            IEnumerable<Strat> potentialStrats = linkTo.Strats.Values;
             if (stratFilters != null && stratFilters.Any())
             {
                 foreach (StratFilter filter in stratFilters)

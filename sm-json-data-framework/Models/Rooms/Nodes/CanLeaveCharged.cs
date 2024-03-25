@@ -33,7 +33,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public bool IsInitiatedRemotely { get { return InitiateRemotely != null; } }
 
-        public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
+        public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
         [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
@@ -70,7 +70,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Eliminate disabled strats
             Strats = Strats.WhereEnabled(model);
 
-            foreach (Strat strat in Strats)
+            foreach (Strat strat in Strats.Values)
             {
                 strat.Initialize(model, node.Room);
             }
@@ -84,7 +84,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             List<string> unhandled = new List<string>();
 
-            foreach(Strat strat in Strats)
+            foreach(Strat strat in Strats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
@@ -128,7 +128,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Try to execute all strats, 
             // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, previousRoomCount: previousRoomCount,
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount,
                 // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
                 acceptationCondition: igs => igs.GetCurrentResources().GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeededForShinespark);
 

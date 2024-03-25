@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public int EndingUpTiles { get; set; } = 0;
 
-        public IEnumerable<Strat> Strats { get; set; } = Enumerable.Empty<Strat>();
+        public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
         public bool UsableComingIn = true;
 
@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Eliminate disabled strats
             Strats = Strats.WhereEnabled(model);
 
-            foreach (Strat strat in Strats)
+            foreach (Strat strat in Strats.Values)
             {
                 strat.Initialize(model, room);
             }
@@ -60,7 +60,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             List<string> unhandled = new List<string>();
 
-            foreach(Strat strat in Strats)
+            foreach(Strat strat in Strats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
@@ -90,7 +90,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Return the result of the best strat execution
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result == null)
             {
                 return null;
