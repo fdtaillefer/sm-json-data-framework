@@ -15,6 +15,7 @@ using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -43,11 +44,18 @@ namespace sm_json_data_framework.Models
     // This whole process can probably still be applied if I decide to preprocess rooms to eliminate issues of in-room movement with obstacles.
 
     /// <summary>
+    /// <para>
     /// Represents a Super Metroid world, for a set of logical options. Think of this as being able to represent 
     /// e.g. the vanilla game or a randomizer seed.
+    /// </para>
+    /// <para>
+    /// Note that the model and some of its contents are NOT immutable, however normal use is not intended to modify them.
+    /// </para>
     /// </summary>
     public class SuperMetroidModel
     {
+        public const string POWER_BEAM_NAME = "PowerBeam";
+        public const string POWER_SUIT_NAME = "PowerSuit";
         public const string GRAVITY_SUIT_NAME = "Gravity";
         public const string VARIA_SUIT_NAME = "Varia";
         public const string SPEED_BOOSTER_NAME = "SpeedBooster";
@@ -120,6 +128,28 @@ namespace sm_json_data_framework.Models
         public IDictionary<string, RoomNode> Nodes { get; set; } = new Dictionary<string, RoomNode>();
 
         /// <summary>
+        /// Gets and returns a node, referenced by its room name and node ID.
+        /// </summary>
+        /// <param name="roomName">Name of the room that contains the node to find</param>
+        /// <param name="nodeId">ID of the node to find within the room</param>
+        /// <returns>The node</returns>
+        /// <exception cref="Exception">If the room or node is not found</exception>
+        public RoomNode GetNodeInRoom(string roomName, int nodeId)
+        {
+            if (!Rooms.TryGetValue(roomName, out Room room))
+            {
+                throw new Exception($"Room '{roomName}' not found.");
+            }
+
+            if (!room.Nodes.TryGetValue(nodeId, out RoomNode node))
+            {
+                throw new Exception($"Node ID {nodeId} not found in room '{room.Name}'.");
+            }
+
+            return node;
+        }
+
+        /// <summary>
         /// The runways in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Runway> Runways { get; set; } = new Dictionary<string, Runway>();
@@ -184,7 +214,7 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Returns an <see cref="InGameStateComparer"/>, initialized with the internal relative resource values.
+        /// Returns an <see cref="InGameStateComparer"/> obtained from this model's <see cref="LogicalOptions"/>, initialized with the internal relative resource values.
         /// </summary>
         /// <returns></returns>
         public InGameStateComparer GetInGameStateComparer()

@@ -12,6 +12,15 @@ namespace sm_json_data_framework.Models.InGameStates
     /// </summary>
     public class ResourceCount
     {
+        /// <summary>
+        /// Creates and returns an instance of ResourceCount containing the vanilla base maximums.
+        /// </summary>
+        /// <returns>The ResourceCount</returns>
+        public static ResourceCount CreateVanillaBaseResourceMaximums()
+        {
+            return new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, 99);
+        }
+
         public ResourceCount()
         {
             foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
@@ -113,7 +122,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to reduce</param>
         /// <param name="quantity">The amount to reduce</param>
-        public void ApplyAmountReduction(ConsumableResourceEnum resource, int quantity)
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyAmountReduction(ConsumableResourceEnum resource, int quantity)
         {
             switch (resource)
             {
@@ -138,6 +148,8 @@ namespace sm_json_data_framework.Models.InGameStates
                     Amounts[RechargeableResourceEnum.PowerBomb] -= quantity;
                     break;
             }
+
+            return this;
         }
 
         /// <summary>
@@ -145,18 +157,22 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to reduce</param>
         /// <param name="quantity">The amount to reduce</param>
-        public void ApplyAmountIncrease(RechargeableResourceEnum resource, int increase)
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyAmountIncrease(RechargeableResourceEnum resource, int increase)
         {
             Amounts[resource] += increase;
+            return this;
         }
 
         /// <summary>
         /// Sets in this container the resource amounts found in the provided other container
         /// </summary>
         /// <param name="other">The ResourceCount to use amounts from</param>
-        public void ApplyAmounts(ResourceCount other)
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyAmounts(ResourceCount other)
         {
             Amounts = new Dictionary<RechargeableResourceEnum, int>(other.Amounts);
+            return this;
         }
 
         /// <summary>
@@ -164,9 +180,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to apply an amount for</param>
         /// <param name="other">The ResourceCount to use the amount from</param>
-        public void ApplyAmount(RechargeableResourceEnum resource, ResourceCount other)
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyAmount(RechargeableResourceEnum resource, ResourceCount other)
         {
             Amounts[resource] = other.Amounts[resource];
+            return this;
         }
 
         /// <summary>
@@ -174,9 +192,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to apply an amount for.</param>
         /// <param name="newAmount">The new amount to set.</param>
-        public void ApplyAmount(RechargeableResourceEnum resource, int newAmount)
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyAmount(RechargeableResourceEnum resource, int newAmount)
         {
             Amounts[resource] = newAmount;
+            return this;
         }
     }
 }

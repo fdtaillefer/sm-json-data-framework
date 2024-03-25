@@ -33,7 +33,7 @@ namespace sm_json_data_framework.Models.InGameStates
         // We'll see when we get to the step of reducing logical elements *shrug*
 
         /// <summary>
-        /// Creates a new InGameState
+        /// Creates a new InGameState based on the provided ItemContainer. The provided SuperMetroidModel's StartingConditions are not used.
         /// </summary>
         /// <param name="model">A SuperMetroidModel. Its rooms must have both been set and initialized. 
         /// Its items and game flags must also have been set.</param>
@@ -66,6 +66,42 @@ namespace sm_json_data_framework.Models.InGameStates
 
             RoomNode startingNode = model.Rooms[itemContainer.StartingRoomName].Nodes[itemContainer.StartingNodeId];
             InRoomState = new InRoomState(startingNode);
+        }
+
+        /// <summary>
+        /// Creates a new InGameState based on the provided StartConditions. 
+        /// Note that an InGameState created in this way should only be used with the <see cref="SuperMetroidModel"/> that contains
+        /// the node instance found in the StartConditions.
+        /// </summary>
+        /// <param name="startConditions">StartConditions on which to base the new InGame State</param>
+        public InGameState(StartConditions startConditions)
+        {
+            // Initialize starting inventory
+            Inventory = startConditions.StartingInventory.Clone();
+
+            // Start the player's resources at the specified values
+            Resources = startConditions.StartingResources.Clone();
+
+            // Initialize starting game flags
+            foreach (GameFlag gameFlag in startConditions.StartingGameFlags)
+            {
+                ApplyAddGameFlag(gameFlag);
+            }
+
+            // Initialize starting opened locks
+            foreach (NodeLock openLock in startConditions.StartingOpenLocks)
+            {
+                // Can't call ApplyOpenLock() as that is intended for opening a lock specifically at the node Samus it at
+                OpenedLocks.Add(openLock.Name, openLock);
+            }
+
+            // Initialize starting taken item locations
+            foreach (RoomNode itemNode in startConditions.StartingTakenItemLocations)
+            {
+                ApplyTakeLocation(itemNode);
+            }
+
+            InRoomState = new InRoomState(startConditions.StartingNode);
         }
 
         /// <summary>

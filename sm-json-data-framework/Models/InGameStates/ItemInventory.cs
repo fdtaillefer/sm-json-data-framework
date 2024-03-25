@@ -18,6 +18,18 @@ namespace sm_json_data_framework.Models.InGameStates
     public class ItemInventory
     {
         /// <summary>
+        /// Creates and returns an inventory representing the vanilla starting inventory.
+        /// </summary>
+        /// <param name="model">Model from which the Item instances for starting implicit items will be obtained.</param>
+        /// <returns>The inventory</returns>
+        public static ItemInventory CreateVanillaStartingInventory(SuperMetroidModel model)
+        {
+            return new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddItem(model.Items[SuperMetroidModel.POWER_BEAM_NAME])
+                .ApplyAddItem(model.Items[SuperMetroidModel.POWER_SUIT_NAME]);
+        }
+
+        /// <summary>
         /// A constructor that receives an enumeration of ResourceCapacity to express the base resource maximums.
         /// </summary>
         /// <param name="baseResourceMaximums">The base maximum for all resources</param>
@@ -95,6 +107,10 @@ namespace sm_json_data_framework.Models.InGameStates
         /// and the impact on maximum amounts made by this inventory.
         /// </summary>
         protected ResourceCount BaseResourceMaximums { get; set; }
+        public ResourceCount GetBaseResourceMaximumsClone()
+        {
+            return BaseResourceMaximums.Clone();
+        }
 
         /// <summary>
         /// Expresses the change that this inventory applies on maximum resource counts.
@@ -174,7 +190,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Adds the provided item to this inventory.
         /// </summary>
         /// <param name="item"></param>
-        public void ApplyAddItem(Item item)
+        /// <returns>This, for chaining</returns>
+        public ItemInventory ApplyAddItem(Item item)
         {
             // Expansion items have a count
             if (item is ExpansionItem expansionItem)
@@ -206,6 +223,8 @@ namespace sm_json_data_framework.Models.InGameStates
                     NonConsumableItems.Add(item.Name, item);
                 }
             }
+
+            return this;
         }
 
         /// <summary>
@@ -242,9 +261,10 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
-        public void ApplyDisableItem(Item item)
+        /// <returns>This, for chaining</returns>
+        public ItemInventory ApplyDisableItem(Item item)
         {
-            ApplyDisableItem(item.Name);
+            return ApplyDisableItem(item.Name);
         }
 
         /// <summary>
@@ -252,12 +272,14 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
-        public void ApplyDisableItem(string itemName)
+        /// <returns>This, for chaining</returns>
+        public ItemInventory ApplyDisableItem(string itemName)
         {
             if(NonConsumableItems.ContainsKey(itemName))
             {
                 DisabledItemNames.Add(itemName);
             }
+            return this;
         }
 
         /// <summary>
@@ -265,9 +287,10 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
-        public void ApplyEnableItem(Item item)
+        /// <returns>This, for chaining</returns>
+        public ItemInventory ApplyEnableItem(Item item)
         {
-            ApplyEnableItem(item.Name);
+            return ApplyEnableItem(item.Name);
         }
 
         /// <summary>
@@ -275,12 +298,14 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
-        public void ApplyEnableItem(string itemName)
+        /// <returns>This, for chaining</returns>
+        public ItemInventory ApplyEnableItem(string itemName)
         {
             if (NonConsumableItems.ContainsKey(itemName))
             {
                 DisabledItemNames.Remove(itemName);
             }
+            return this;
         }
 
         /// <summary>

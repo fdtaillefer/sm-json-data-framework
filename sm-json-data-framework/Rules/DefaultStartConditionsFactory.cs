@@ -18,16 +18,6 @@ namespace sm_json_data_framework.Rules
     {
         public virtual StartConditions CreateStartConditions(SuperMetroidModel model, ItemContainer itemContainer)
         {
-            if (!model.Rooms.TryGetValue(itemContainer.StartingRoomName, out Room startingRoom))
-            {
-                throw new Exception($"Starting room '{itemContainer.StartingRoomName}' not found.");
-            }
-
-            if (!startingRoom.Nodes.TryGetValue(itemContainer.StartingNodeId, out RoomNode startingNode))
-            {
-                throw new Exception($"Starting node ID {itemContainer.StartingNodeId} not found in room '{startingRoom.Name}'.");
-            }
-
             List<GameFlag> startingFlags = new List<GameFlag>();
             foreach (string flagName in itemContainer.StartingGameFlagNames)
             {
@@ -66,10 +56,9 @@ namespace sm_json_data_framework.Rules
 
             StartConditions startConditions = new StartConditions
             {
-                StartingNode = startingNode,
+                StartingNode = model.GetNodeInRoom(itemContainer.StartingRoomName, itemContainer.StartingNodeId),
                 StartingGameFlags = startingFlags,
                 StartingOpenLocks = startingLocks,
-                BaseResourceMaximums = startingResources,
                 // Default starting resource counts to the starting maximum
                 StartingResources = startingResources.Clone(),
                 StartingInventory = startingInventory

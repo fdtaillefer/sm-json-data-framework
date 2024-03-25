@@ -51,16 +51,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
             startConditions.StartingOpenLocks = startingLocks;
 
             // Start at Ship
-            if (!model.Rooms.TryGetValue("Landing Site", out Room startingRoom))
-            {
-                throw new Exception($"Starting room 'Landing Site' not found.");
-            }
-
-            if (!startingRoom.Nodes.TryGetValue(5, out RoomNode startingNode))
-            {
-                throw new Exception($"Starting node ID 5 not found in room 'Landing Site'.");
-            }
-            startConditions.StartingNode = startingNode;
+            startConditions.StartingNode = model.GetNodeInRoom("Landing Site", 5);
 
             return startConditions;
         }

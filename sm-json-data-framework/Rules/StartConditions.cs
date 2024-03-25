@@ -17,14 +17,23 @@ namespace sm_json_data_framework.Rules
     {
         public RoomNode StartingNode { get; set; }
 
-        public ItemInventory StartingInventory { get; set; }
+        private ItemInventory _itemInventory;
+        public ItemInventory StartingInventory { 
+            get { return _itemInventory; }
+            set {
+                _itemInventory = value;
+                BaseResourceMaximums = value?.GetBaseResourceMaximumsClone();
+            }
+        }
 
-        public ResourceCount BaseResourceMaximums { get; set; }
+        public ResourceCount BaseResourceMaximums { get; private set; }
 
         public ResourceCount StartingResources { get; set; }
 
         public IEnumerable<GameFlag> StartingGameFlags { get; set; } = Enumerable.Empty<GameFlag>();
 
         public IEnumerable<NodeLock> StartingOpenLocks { get; set; } = Enumerable.Empty<NodeLock>();
+
+        public IEnumerable<RoomNode> StartingTakenItemLocations { get; set; } = Enumerable.Empty<RoomNode>();
     }
 }
