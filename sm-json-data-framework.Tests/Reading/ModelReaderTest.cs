@@ -1,7 +1,9 @@
-﻿using sm_json_data_framework.Models.Connections;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Tests.TestSubClasses;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,7 +19,7 @@ namespace sm_json_data_framework.Reading
         [Fact]
         public void ReadModel_ReadsAllData()
         {
-            Models.SuperMetroidModel model = ModelReader.ReadModel(new SuperMetroidRules(), new LogicalOptions(), new DefaultStartConditionsFactory());
+            SuperMetroidModel model = ModelReader.ReadModel();
 
             // Room counts
             Assert.Equal(54, model.Rooms.Values.Where(room => room.Area == "Brinstar").Count());
@@ -54,6 +56,50 @@ namespace sm_json_data_framework.Reading
             Assert.Equal(25, model.Helpers.Count);
 
             Assert.Equal(91, model.Techs.Count);
+
+            // Starting max resources
+            Assert.Equal(99, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(0, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.ReserveEnergy));
+            Assert.Equal(0, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.Missile));
+            Assert.Equal(0, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.Super));
+            Assert.Equal(0, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.PowerBomb));
+
+            // Starting resources
+            Assert.Equal(99, model.StartConditions.StartingResources.GetAmount(Models.Items.RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(0, model.StartConditions.StartingResources.GetAmount(Models.Items.RechargeableResourceEnum.ReserveEnergy));
+            Assert.Equal(0, model.StartConditions.StartingResources.GetAmount(Models.Items.RechargeableResourceEnum.Missile));
+            Assert.Equal(0, model.StartConditions.StartingResources.GetAmount(Models.Items.RechargeableResourceEnum.Super));
+            Assert.Equal(0, model.StartConditions.StartingResources.GetAmount(Models.Items.RechargeableResourceEnum.PowerBomb));
+
+            // Starting items
+            Assert.Equal(2, model.StartConditions.StartingInventory.GetNonConsumableItemsDictionary().Count);
+            Assert.True(model.StartConditions.StartingInventory.GetNonConsumableItemsDictionary().ContainsKey("PowerBeam"));
+            Assert.True(model.StartConditions.StartingInventory.GetNonConsumableItemsDictionary().ContainsKey("PowerSuit"));
+            Assert.Empty(model.StartConditions.StartingInventory.GetExpansionItemsDictionary());
+
+            // Starting game state
+            Assert.Empty(model.StartConditions.StartingGameFlags);
+            Assert.Empty(model.StartConditions.StartingOpenLocks);
+            Assert.Empty(model.StartConditions.StartingTakenItemLocations);
+
+            // Starting location
+            Assert.Equal("Ceres Elevator Room", model.StartConditions.StartingNode.Room.Name);
+            Assert.Equal(1, model.StartConditions.StartingNode.Id);
+        }
+
+        [Fact]
+        public void ReadModel_UsesOptionalParameters()
+        {
+            LogicalOptions options = new LogicalOptions
+            {
+                TilesToShineCharge = 20
+            };
+            SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
+                startConditionsFactory: new RandoStartConditionsFactory());
+
+            Assert.True(model.Rules is RandoSuperMetroidRules);
+            Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
+            Assert.Equal(20, model.LogicalOptions.TilesToShineCharge);
         }
     }
 }

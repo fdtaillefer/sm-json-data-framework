@@ -13,6 +13,7 @@ namespace sm_json_data_framework.Rules
 {
     /// <summary>
     /// A repository of game rules. This offers some base values, as well as calculations based on game rules.
+    /// By default, this class offers rules that align with the vanilla game, but a lot of it can be overridden via a subclass if desired.
     /// </summary>
     public class SuperMetroidRules
     {

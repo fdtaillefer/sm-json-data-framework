@@ -94,7 +94,7 @@ namespace sm_json_data_framework.Rules
         }
 
         [Fact]
-        public void CalculateEffectiveDropRates_FullPowerBombs_DistributesEvenlyToTier1()
+        public void CalculateEffectiveDropRates_FullPowerBombs_DistributesProportionalToTier1()
         {
             EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.POWER_BOMB });
             EnemyDrops expected = new EnemyDrops
