@@ -60,6 +60,8 @@ namespace sm_json_data_framework.Models
         public const string VARIA_SUIT_NAME = "Varia";
         public const string SPEED_BOOSTER_NAME = "SpeedBooster";
 
+        public const string MISSILE_NAME = "Missile";
+
         public SuperMetroidModel()
         {
             // Weapons can't have an initializer directly on itself because of the custom setter
