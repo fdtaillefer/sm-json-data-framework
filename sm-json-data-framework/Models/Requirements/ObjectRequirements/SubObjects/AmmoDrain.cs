@@ -26,7 +26,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int currentAmmo = inGameState.GetCurrentAmount(AmmoType.GetConsumableResourceEnum());
+            int currentAmmo = inGameState.Resources.GetAmount(AmmoType.GetConsumableResourceEnum());
             int ammoCost = Math.Min(currentAmmo, Count);
 
             if (inGameState.IsResourceAvailable(model, AmmoType.GetConsumableResourceEnum(), ammoCost))

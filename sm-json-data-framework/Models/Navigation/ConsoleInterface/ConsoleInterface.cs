@@ -60,7 +60,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
 
             while (keepGoing)
             {
-                Console.WriteLine($"Now in {Navigator.CurrentInGameState.GetCurrentRoom().Name} at node {Navigator.CurrentInGameState.GetCurrentNode().Id}");
+                Console.WriteLine($"Now in {Navigator.CurrentInGameState.CurrentRoom.Name} at node {Navigator.CurrentInGameState.GetCurrentNode().Id}");
 
                 string stringCommand = Console.ReadLine().Trim();
                 ConsoleCommand matchingCommand = Commands.FirstOrDefault(c => c.ValidCommand(stringCommand));
@@ -80,8 +80,8 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
         {
             foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
-                Console.WriteLine($"{currentResource}: {Navigator.CurrentInGameState.GetCurrentAmount(currentResource)} " +
-                    $"out of {Navigator.CurrentInGameState.GetMaxAmount(currentResource)}");
+                Console.WriteLine($"{currentResource}: {Navigator.CurrentInGameState.Resources.GetAmount(currentResource)} " +
+                    $"out of {Navigator.CurrentInGameState.Inventory.GetMaxAmount(currentResource)}");
             }
         }
 

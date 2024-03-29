@@ -15,18 +15,32 @@ namespace sm_json_data_framework.Rules
     /// </summary>
     public class StartConditions
     {
+        public StartConditions()
+        {
+
+        }
+
+        public StartConditions(StartConditions other)
+        {
+            StartingGameFlags = new List<GameFlag>(other.StartingGameFlags);
+            StartingInventory = other.StartingInventory?.Clone();
+            StartingNode = other.StartingNode;
+            StartingOpenLocks = new List<NodeLock>(other.StartingOpenLocks);
+            StartingResources = other.StartingResources?.Clone();
+            StartingTakenItemLocations = new List<RoomNode>(other.StartingTakenItemLocations);
+        }
+
+        public StartConditions Clone()
+        {
+            return new StartConditions(this);
+        }
+
         public RoomNode StartingNode { get; set; }
 
         private ItemInventory _itemInventory;
-        public ItemInventory StartingInventory { 
-            get { return _itemInventory; }
-            set {
-                _itemInventory = value;
-                BaseResourceMaximums = value?.GetBaseResourceMaximumsClone();
-            }
-        }
+        public ItemInventory StartingInventory { get; set; }
 
-        public ResourceCount BaseResourceMaximums { get; private set; }
+        public ReadOnlyResourceCount BaseResourceMaximums { get { return StartingInventory?.BaseResourceMaximums; } }
 
         public ResourceCount StartingResources { get; set; }
 

@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Reading;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,15 +40,15 @@ namespace sm_json_data_framework.InGameStates
 
             InGameState inGameState = new InGameState(startConditions);
 
-            Assert.Equal(startingRoomName, inGameState.GetCurrentRoom().Name);
+            Assert.Equal(startingRoomName, inGameState.CurrentRoom.Name);
             Assert.Equal(startingNodeId, inGameState.GetCurrentNode().Id);
-            Assert.Contains(startingLockName, inGameState.GetOpenedLocksDictionary());
-            Assert.True(inGameState.HasVariaSuit());
-            Assert.True(inGameState.IsItemLocationTaken(variaNode));
+            Assert.Contains(startingLockName, inGameState.OpenedLocks.Keys);
+            Assert.True(inGameState.Inventory.HasVariaSuit());
+            Assert.True(inGameState.TakenItemLocations.ContainsNode(variaNode));
             Assert.Equal(startConditions.BaseResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy),
-                inGameState.GetMaxAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(startingEnergy, inGameState.GetCurrentAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.True(inGameState.HasGameFlag(maridiaTubeFlag));
+                inGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(startingEnergy, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.True(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
         }
 
         [Fact]
@@ -71,15 +72,15 @@ namespace sm_json_data_framework.InGameStates
 
             InGameState inGameState = new InGameState(startConditions).Clone();
 
-            Assert.Equal(startingRoomName, inGameState.GetCurrentRoom().Name);
+            Assert.Equal(startingRoomName, inGameState.CurrentRoom.Name);
             Assert.Equal(startingNodeId, inGameState.GetCurrentNode().Id);
-            Assert.Contains(startingLockName, inGameState.GetOpenedLocksDictionary());
-            Assert.True(inGameState.HasVariaSuit());
-            Assert.True(inGameState.IsItemLocationTaken(variaNode));
+            Assert.Contains(startingLockName, inGameState.OpenedLocks.Keys);
+            Assert.True(inGameState.Inventory.HasVariaSuit());
+            Assert.True(inGameState.TakenItemLocations.ContainsNode(variaNode));
             Assert.Equal(startConditions.BaseResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy),
-                inGameState.GetMaxAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(startingEnergy, inGameState.GetCurrentAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.True(inGameState.HasGameFlag(maridiaTubeFlag));
+                inGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(startingEnergy, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.True(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
         }
 
         [Fact]
@@ -115,15 +116,15 @@ namespace sm_json_data_framework.InGameStates
             clone.ApplyAddGameFlag(Model.GameFlags[maridiaTubeFlag]);
 
             // Make sure the original is unchanged
-            Assert.Equal(startingRoomName, inGameState.GetCurrentRoom().Name);
+            Assert.Equal(startingRoomName, inGameState.CurrentRoom.Name);
             Assert.Equal(startingNodeId, inGameState.GetCurrentNode().Id);
-            Assert.DoesNotContain(secondLockName, inGameState.GetOpenedLocksDictionary());
-            Assert.False(inGameState.HasVariaSuit());
-            Assert.False(inGameState.IsItemLocationTaken(variaNode));
+            Assert.DoesNotContain(secondLockName, inGameState.OpenedLocks.Keys);
+            Assert.False(inGameState.Inventory.HasVariaSuit());
+            Assert.False(inGameState.TakenItemLocations.ContainsNode(variaNode));
             Assert.Equal(startConditions.StartingInventory.GetMaxAmount(RechargeableResourceEnum.Missile),
-                inGameState.GetMaxAmount(RechargeableResourceEnum.Missile));
-            Assert.Equal(5, inGameState.GetCurrentAmount(RechargeableResourceEnum.Missile));
-            Assert.False(inGameState.HasGameFlag(maridiaTubeFlag));
+                inGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.Missile));
+            Assert.Equal(5, inGameState.Resources.GetAmount(RechargeableResourceEnum.Missile));
+            Assert.False(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
         }
     }
 }

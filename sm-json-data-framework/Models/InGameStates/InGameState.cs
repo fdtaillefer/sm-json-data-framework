@@ -42,14 +42,14 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             IEnumerable<ResourceCapacity> startingResources = itemContainer.StartingResources;
 
-            Inventory = new ItemInventory(startingResources);
+            InternalInventory = new ItemInventory(startingResources);
 
-            Resources = new ResourceCount();
+            InternalResources = new ResourceCount();
 
             // Start the player at full
             foreach (ResourceCapacity capacity in startingResources)
             {
-                Resources.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
+                InternalResources.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
             }
 
             // Initialize starting game flags
@@ -77,10 +77,10 @@ namespace sm_json_data_framework.Models.InGameStates
         public InGameState(StartConditions startConditions)
         {
             // Initialize starting inventory
-            Inventory = startConditions.StartingInventory.Clone();
+            InternalInventory = startConditions.StartingInventory.Clone();
 
             // Start the player's resources at the specified values
-            Resources = startConditions.StartingResources.Clone();
+            InternalResources = startConditions.StartingResources.Clone();
 
             // Initialize starting game flags
             foreach (GameFlag gameFlag in startConditions.StartingGameFlags)
@@ -91,8 +91,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // Initialize starting opened locks
             foreach (NodeLock openLock in startConditions.StartingOpenLocks)
             {
-                // Can't call ApplyOpenLock() as that is intended for opening a lock specifically at the node Samus it at
-                OpenedLocks.Add(openLock.Name, openLock);
+                ApplyOpenLock(openLock, applyToRoomState: false);
             }
 
             // Initialize starting taken item locations
@@ -112,15 +111,15 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="other">The InGameState to copy</param>
         public InGameState(InGameState other)
         {
-            ActiveGameFlags = new Dictionary<string, GameFlag>(other.ActiveGameFlags);
+            InternalActiveGameFlags = new Dictionary<string, GameFlag>(other.InternalActiveGameFlags);
 
-            TakenItemLocations = new Dictionary<string, RoomNode>(other.TakenItemLocations);
+            InternalTakenItemLocations = new Dictionary<string, RoomNode>(other.InternalTakenItemLocations);
 
-            OpenedLocks = new Dictionary<string, NodeLock>(other.OpenedLocks);
+            InternalOpenedLocks = new Dictionary<string, NodeLock>(other.InternalOpenedLocks);
 
-            Inventory = other.Inventory.Clone();
+            InternalInventory = other.InternalInventory.Clone();
 
-            Resources = other.Resources.Clone();
+            InternalResources = other.InternalResources.Clone();
 
             InRoomState = new InRoomState(other.InRoomState);
 
@@ -139,70 +138,17 @@ namespace sm_json_data_framework.Models.InGameStates
             return new InGameState(this);
         }
 
-        protected ResourceCount Resources { get; set; }
+        protected ResourceCount InternalResources { get; set; }
+
+        public ReadOnlyResourceCount Resources { get { return InternalResources.AsReadOnly(); } }
 
         /// <summary>
-        /// Uses the provided resource evaluator to evaluate the current in-game resources of this state.
+        /// Returns whether it's possible to spend the provided amount of the provided resource.
         /// </summary>
-        /// <param name="evaluator"></param>
+        /// <param name="model">Model, whose logical options drive the behavior of this method</param>
+        /// <param name="resource">The resource to check for availability</param>
+        /// <param name="quantity">The amount of the resource to check for availability</param>
         /// <returns></returns>
-        public int EvaluateCurrentResources(IInGameResourceEvaluator evaluator)
-        {
-            return evaluator.CalculateValue(Resources);
-        }
-
-        /// <summary>
-        /// Returns the maximum possible amount of the provided resource in this InGameState.
-        /// </summary>
-        /// <param name="resource">The resource to get the max amount of.</param>
-        /// <returns></returns>
-        public int GetMaxAmount(RechargeableResourceEnum resource)
-        {
-            return Inventory.GetMaxAmount(resource);
-        }
-
-        /// <summary>
-        /// Returns the maximum possible amount of the provided consumable resource.
-        /// This is almost the same as getting the max amount of a rechargeable resource,
-        /// except both types of energy are grouped together.
-        /// </summary>
-        /// <param name="resource">The resource to get the max amount of.</param>
-        /// <returns></returns>
-        public int GetMaxAmount(ConsumableResourceEnum resource)
-        {
-            return resource.ToRechargeableResources().Select(resource => GetMaxAmount(resource)).Sum();
-        }
-
-        /// <summary>
-        /// Returns a copy of the current resource count in this in-game state.
-        /// </summary>
-        /// <returns></returns>
-        public ResourceCount GetCurrentResources()
-        {
-            return Resources.Clone();
-        }
-
-        /// <summary>
-        /// Returns the current amount of the provided rechargeable resource.
-        /// </summary>
-        /// <param name="resource">Resource to get the amount of.</param>
-        /// <returns></returns>
-        public int GetCurrentAmount(RechargeableResourceEnum resource)
-        {
-            return Resources.GetAmount(resource);
-        }
-
-        /// <summary>
-        /// Returns the current amount of the provided consumable resource. This is almost the same as getting the current amount of a rechargeable resource,
-        /// except both types of energy are grouped together.
-        /// </summary>
-        /// <param name="resource">Resource to get the amount of.</param>
-        /// <returns></returns>
-        public int GetCurrentAmount(ConsumableResourceEnum resource)
-        {
-            return resource.ToRechargeableResources().Select(resource => GetCurrentAmount(resource)).Sum();
-        }
-
         public bool IsResourceAvailable(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
         {
             if(quantity == 0)
@@ -216,11 +162,11 @@ namespace sm_json_data_framework.Models.InGameStates
                 // The other resources can be fully spent, but for energy we don't want to go below 1
                 if (resource == ConsumableResourceEnum.ENERGY)
                 {
-                    return GetCurrentAmount(resource) > quantity;
+                    return InternalResources.GetAmount(resource) > quantity;
                 }
                 else
                 {
-                    return GetCurrentAmount(resource) >= quantity;
+                    return InternalResources.GetAmount(resource) >= quantity;
                 }
             }
             // If resource tracking is not enabled, use max resource amounts instead of current amounts
@@ -229,11 +175,11 @@ namespace sm_json_data_framework.Models.InGameStates
                 // The other resources can be fully spent, but for energy we don't want to go below 1
                 if (resource == ConsumableResourceEnum.ENERGY)
                 {
-                    return GetMaxAmount(resource) > quantity;
+                    return InternalInventory.GetMaxAmount(resource) > quantity;
                 }
                 else
                 {
-                    return GetMaxAmount(resource) >= quantity;
+                    return InternalInventory.GetMaxAmount(resource) >= quantity;
                 }
             }
         }
@@ -249,8 +195,8 @@ namespace sm_json_data_framework.Models.InGameStates
             // Don't bother with current resource count if resource tracking is disabled
             if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                int max = GetMaxAmount(resource);
-                int currentAmount = Resources.GetAmount(resource);
+                int max = InternalInventory.GetMaxAmount(resource);
+                int currentAmount = InternalResources.GetAmount(resource);
 
                 // We're already at max (or greater, somehow). Don't add anything
                 if (currentAmount >= max)
@@ -259,7 +205,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 }
                 int newAmount = currentAmount + quantity;
 
-                Resources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
+                InternalResources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
             }
         }
 
@@ -275,7 +221,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // Don't bother with current resource count if resource tracking is disabled
             if(model.LogicalOptions.ResourceTrackingEnabled)
             {
-                Resources.ApplyAmountReduction(resource, quantity);
+                InternalResources.ApplyAmountReduction(resource, quantity);
             }
         }
 
@@ -289,7 +235,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // Don't bother with current resource count if resource tracking is disabled
             if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                Resources.ApplyAmount(resource, Inventory.GetMaxAmount(resource));
+                InternalResources.ApplyAmount(resource, InternalInventory.GetMaxAmount(resource));
             }
         }
 
@@ -323,7 +269,7 @@ namespace sm_json_data_framework.Models.InGameStates
             ResourceCount returnValue = new ResourceCount();
             foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
-                returnValue.ApplyAmount(currentResource, GetCurrentAmount(currentResource) - other.GetCurrentAmount(currentResource));
+                returnValue.ApplyAmount(currentResource, InternalResources.GetAmount(currentResource) - other.InternalResources.GetAmount(currentResource));
             }
 
             return returnValue;
@@ -337,7 +283,7 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             return Enum.GetValues(typeof(RechargeableResourceEnum))
                 .Cast<RechargeableResourceEnum>()
-                .Where(resource => Resources.GetAmount(resource) >= GetMaxAmount(resource));
+                .Where(resource => InternalResources.GetAmount(resource) >= InternalInventory.GetMaxAmount(resource));
         }
 
         /// <summary>
@@ -348,7 +294,7 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             return Enum.GetValues(typeof(ConsumableResourceEnum))
                 .Cast<ConsumableResourceEnum>()
-                .Where(resource => Resources.GetAmount(resource) >= GetMaxAmount(resource));
+                .Where(resource => InternalResources.GetAmount(resource) >= InternalInventory.GetMaxAmount(resource));
         }
 
         /// <summary>
@@ -361,21 +307,8 @@ namespace sm_json_data_framework.Models.InGameStates
             return model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
 
-        protected IDictionary<string, GameFlag> ActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
-
-        private IReadOnlyDictionary<string, GameFlag> _activeGameFlags;
-        /// <summary>
-        /// Returns a read-only view of the active game flags, mapped by name.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, GameFlag> GetActiveGameFlagsDictionary()
-        {
-            if (_activeGameFlags == null)
-            {
-                _activeGameFlags = new ReadOnlyDictionary<string, GameFlag>(ActiveGameFlags);
-            }
-            return _activeGameFlags;
-        }
+        protected Dictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
+        public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags { get { return InternalActiveGameFlags.AsReadOnly(); } }
 
         /// <summary>
         /// Creates and returns a new dictionary containing all active game flags from this in-game state
@@ -383,14 +316,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public IDictionary<string, GameFlag> GetActiveGameFlagsExceptWith(InGameState other)
+        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptWith(InGameState other)
         {
-            IDictionary<string, GameFlag> returnFlags = new Dictionary<string, GameFlag>();
+            Dictionary<string, GameFlag> returnFlags = new Dictionary<string, GameFlag>();
 
             // For each flag, just check for absence in other
-            foreach (KeyValuePair<string, GameFlag> kvp in ActiveGameFlags)
+            foreach (KeyValuePair<string, GameFlag> kvp in InternalActiveGameFlags)
             {
-                if (!other.ActiveGameFlags.ContainsKey(kvp.Key))
+                if (!other.InternalActiveGameFlags.ContainsFlag(kvp.Key))
                 {
                     returnFlags.Add(kvp.Key, kvp.Value);
                 }
@@ -400,52 +333,19 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Returns whether the provided game flag is activated in this InGameState.
-        /// </summary>
-        /// <param name="flag">The game flag to check</param>
-        /// <returns></returns>
-        public bool HasGameFlag(GameFlag flag)
-        {
-            return ActiveGameFlags.ContainsKey(flag.Name);
-        }
-
-        /// <summary>
-        /// Returns whether the game flag with the provided name is activated in this InGameState.
-        /// </summary>
-        /// <param name="flagName">The game flag name to check</param>
-        /// <returns></returns>
-        public bool HasGameFlag(string flagName)
-        {
-            return ActiveGameFlags.ContainsKey(flagName);
-        }
-
-        /// <summary>
         /// Adds the provided game flag to the activated game flags in this InGameState.
         /// </summary>
         /// <param name="flag">Flag to add</param>
         public void ApplyAddGameFlag(GameFlag flag)
         {
-            if(!HasGameFlag(flag))
+            if(!InternalActiveGameFlags.ContainsFlag(flag))
             {
-                ActiveGameFlags.Add(flag.Name, flag);
+                InternalActiveGameFlags.Add(flag.Name, flag);
             }
         }
 
-        protected IDictionary<string, NodeLock> OpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
-
-        private IReadOnlyDictionary<string, NodeLock> _readOnlyOpenedLocks;
-        /// <summary>
-        /// Returns a read-only view of the opened locks dictionary, mapped by name.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, NodeLock> GetOpenedLocksDictionary()
-        {
-            if (_readOnlyOpenedLocks == null)
-            {
-                _readOnlyOpenedLocks = new ReadOnlyDictionary<string, NodeLock>(OpenedLocks);
-            }
-            return _readOnlyOpenedLocks;
-        }
+        protected Dictionary<string, NodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
+        public ReadOnlyDictionary<string, NodeLock> OpenedLocks { get{ return InternalOpenedLocks.AsReadOnly(); } }
 
         /// <summary>
         /// Creates and returns a new dictionary containing all OPENED NODE LOCKS from this in-game state
@@ -459,9 +359,9 @@ namespace sm_json_data_framework.Models.InGameStates
             IDictionary<string, NodeLock> returnLocks = new Dictionary<string, NodeLock>();
 
             // For each lock, just check for absence in other
-            foreach (KeyValuePair<string, NodeLock> kvp in OpenedLocks)
+            foreach (KeyValuePair<string, NodeLock> kvp in InternalOpenedLocks)
             {
-                if (!other.OpenedLocks.ContainsKey(kvp.Key))
+                if (!other.InternalOpenedLocks.ContainsLock(kvp.Key))
                 {
                     returnLocks.Add(kvp.Key, kvp.Value);
                 }
@@ -471,35 +371,20 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Returns whether the provided node lock is open in this InGameState.
-        /// </summary>
-        /// <param name="nodeLock">The node lock to check</param>
-        /// <returns></returns>
-        public bool IsLockOpen(NodeLock nodeLock)
-        {
-            return OpenedLocks.ContainsKey(nodeLock.Name);
-        }
-
-        /// <summary>
-        /// Returns whether the node lock with the provided name is open in this InGameState.
-        /// </summary>
-        /// <param name="lockName">The node lock name to check</param>
-        /// <returns></returns>
-        public bool IsLockOpen(string lockName)
-        {
-            return OpenedLocks.ContainsKey(lockName);
-        }
-
-        /// <summary>
         /// Applies the opening of the provided lock in this InGameState. Expects that samus is at the node that has that lock.
         /// </summary>
         /// <param name="nodeLock">Lock to open</param>
-        public void ApplyOpenLock(NodeLock nodeLock)
+        /// <param name="applyToRoomState">If true, will also remember the lock as being opened in the current room visit.
+        /// This can only be done if Samus is at the node that has the lock. Se this to false to unlock a lock remotely.</param>
+        public void ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
         {
-            if (!IsLockOpen(nodeLock))
+            if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
-                OpenedLocks.Add(nodeLock.Name, nodeLock);
-                InRoomState.ApplyOpenLock(nodeLock);
+                InternalOpenedLocks.Add(nodeLock.Name, nodeLock);
+                if(applyToRoomState)
+                {
+                    InRoomState.ApplyOpenLock(nodeLock);
+                }
             }
         }
 
@@ -508,7 +393,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="nodeLock">Lock to bypass</param>
         public void ApplyBypassLock(NodeLock nodeLock) {
-            if (!IsLockOpen(nodeLock))
+            if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
                 InRoomState.ApplyBypassLock(nodeLock);
             }
@@ -525,21 +410,9 @@ namespace sm_json_data_framework.Models.InGameStates
             return GetInRoomState(previousRoomCount).GetBypassedLocks();
         }
 
-        protected IDictionary<string, RoomNode> TakenItemLocations { get; set; } = new Dictionary<string, RoomNode>();
+        protected Dictionary<string, RoomNode> InternalTakenItemLocations { get; set; } = new Dictionary<string, RoomNode>();
 
-        private IReadOnlyDictionary<string, RoomNode> _takenItemLocations;
-        /// <summary>
-        /// Returns a read-only view of the taken item locations, mapped by name.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, RoomNode> GetTakenItemLocationsDictionary()
-        {
-            if (_takenItemLocations == null)
-            {
-                _takenItemLocations = new ReadOnlyDictionary<string, RoomNode>(TakenItemLocations);
-            }
-            return _takenItemLocations;
-        }
+        public ReadOnlyDictionary<string, RoomNode> TakenItemLocations { get { return InternalTakenItemLocations.AsReadOnly(); } }
 
         /// <summary>
         /// Creates and returns a new dictionary containing all taken item locations from this in-game state
@@ -552,9 +425,9 @@ namespace sm_json_data_framework.Models.InGameStates
             IDictionary<string, RoomNode> returnLocations = new Dictionary<string, RoomNode>();
 
             // For each location, just check for absence in other
-            foreach (KeyValuePair<string, RoomNode> kvp in TakenItemLocations)
+            foreach (KeyValuePair<string, RoomNode> kvp in InternalTakenItemLocations)
             {
-                if (!other.TakenItemLocations.ContainsKey(kvp.Key))
+                if (!other.InternalTakenItemLocations.ContainsNode(kvp.Key))
                 {
                     returnLocations.Add(kvp.Key, kvp.Value);
                 }
@@ -564,39 +437,23 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Returns whether the provided item location is taken in this InGameState.
-        /// </summary>
-        /// <param name="roomNode">The node of the location to check</param>
-        /// <returns></returns>
-        public bool IsItemLocationTaken(RoomNode location)
-        {
-            return TakenItemLocations.ContainsKey(location.Name);
-        }
-
-        /// <summary>
-        /// Returns whether the location with the provided name is taken in this InGameState.
-        /// </summary>
-        /// <param name="locationName">The location name to check</param>
-        /// <returns></returns>
-        public bool IsItemLocationTaken(string locationName)
-        {
-            return TakenItemLocations.ContainsKey(locationName);
-        }
-
-        /// <summary>
         /// Adds the provided location to the taken locations in this InGameState.
         /// Does not modify the inventory.
         /// </summary>
         /// <param name="location">Node of the location to add</param>
         public void ApplyTakeLocation(RoomNode location)
         {
-            if (!IsItemLocationTaken(location))
+            if (!TakenItemLocations.ContainsNode(location))
             {
-                TakenItemLocations.Add(location.Name, location);
+                InternalTakenItemLocations.Add(location.Name, location);
             }
         }
 
-        protected ItemInventory Inventory { get; set; }
+        protected ItemInventory InternalInventory { get; set; }
+        /// <summary>
+        /// The inventory of items collected by Samus according to this in-game state.
+        /// </summary>
+        public ReadOnlyItemInventory Inventory { get { return InternalInventory.AsReadOnly(); } }
 
         /// <summary>
         /// Creates and returns a new ItemInventory containing all items from this in-game state
@@ -606,72 +463,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public ItemInventory GetInventoryExceptWith(InGameState other)
         {
-            return Inventory.ExceptWith(other.Inventory);
-        }
-
-        /// <summary>
-        /// Returns a read-only view of the inner non-consumable items dictionary, mapped by name.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, Item> GetNonConsumableItemsDictionary()
-        {
-            return Inventory.GetNonConsumableItemsDictionary();
-        }
-
-        /// <summary>
-        /// Returns a read-only view of the inner dictionary of expansion items (along with how many of each is present), mapped by name.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, (ExpansionItem item, int count)> GetExpansionItemsDictionary()
-        {
-            return Inventory.GetExpansionItemsDictionary();
-        }
-
-        /// <summary>
-        /// Returns whether the player has the provided item in this InGameState.
-        /// </summary>
-        /// <param name="item">The item to check for</param>
-        /// <returns></returns>
-        public bool HasItem(Item item)
-        {
-            return Inventory.HasItem(item);
-        }
-
-        /// <summary>
-        /// Returns whether the player has the item with the provided name in this InGameState.
-        /// </summary>
-        /// <param name="item">The item to check for</param>
-        /// <returns></returns>
-        public bool HasItem(string itemName)
-        {
-            return Inventory.HasItem(itemName);
-        }
-
-        /// <summary>
-        /// Returns specifically whether the player has the Varia Suit in this in-game state.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasVariaSuit()
-        {
-            return Inventory.HasVariaSuit();
-        }
-
-        /// <summary>
-        /// Returns specifically whether the player has the Gravity Suit in this in-game state.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasGravitySuit()
-        {
-            return Inventory.HasGravitySuit();
-        }
-
-        /// <summary>
-        /// Returns specifically whether the player has the Speed Booster in this in-game state.
-        /// </summary>
-        /// <returns></returns>
-        public bool HasSpeedBooster()
-        {
-            return Inventory.HasSpeedBooster();
+            return InternalInventory.ExceptWith(other.InternalInventory);
         }
 
         /// <summary>
@@ -680,36 +472,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="item"></param>
         public void ApplyAddItem(Item item)
         {
-            Inventory.ApplyAddItem(item);
-        }
-
-        /// <summary>
-        /// Returns whether the provided item is present and disabled in this InGameState.
-        /// </summary>
-        /// <param name="item">Item to check</param>
-        /// <returns></returns>
-        public bool isItemDisabled(Item item)
-        {
-            return Inventory.IsItemDisabled(item);
-        }
-
-        /// <summary>
-        /// Returns whether the item with the provided name is present and disabled in this InGameState.
-        /// </summary>
-        /// <param name="itemName">Name of the item to check</param>
-        /// <returns></returns>
-        public bool IsItemDisabled(string itemName)
-        {
-            return Inventory.IsItemDisabled(itemName);
-        }
-
-        /// <summary>
-        /// Returns the names of items that are disabled in this InGameState.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<string> GetDisabledItemNames()
-        {
-            return Inventory.GetDisabledItemNames();
+            InternalInventory.ApplyAddItem(item);
         }
 
         /// <summary>
@@ -719,7 +482,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="itemName">Name of the item to disable</param>
         public void ApplyDisableItem(Item item)
         {
-            Inventory.ApplyDisableItem(item);
+            InternalInventory.ApplyDisableItem(item);
         }
 
         /// <summary>
@@ -729,7 +492,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="itemName">Name of the item to disable</param>
         public void ApplyDisableItem(string itemName)
         {
-            Inventory.ApplyDisableItem(itemName);
+            InternalInventory.ApplyDisableItem(itemName);
         }
 
         /// <summary>
@@ -739,7 +502,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="itemName">Name of the item to enable</param>
         public void ApplyEnableItem(Item item)
         {
-            Inventory.ApplyEnableItem(item);
+            InternalInventory.ApplyEnableItem(item);
         }
 
         /// <summary>
@@ -749,7 +512,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="itemName">Name of the item to enable</param>
         public void ApplyEnableItem(string itemName)
         {
-            Inventory.ApplyEnableItem(itemName);
+            InternalInventory.ApplyEnableItem(itemName);
         }
 
         /// <summary>
@@ -845,26 +608,29 @@ namespace sm_json_data_framework.Models.InGameStates
             return roomState?.OpenedExitLock ?? false;
         }
 
+        public Room CurrentRoom { get { return GetCurrentOrPreviousRoom(0); } }
+
         /// <summary>
-        /// Returns the room the player is currently in. This can be null if in-room state isn't being tracked.
+        /// Returns the room the player is currently in or was previously in.
+        /// This can be null if in-room state isn't being tracked.
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public Room GetCurrentRoom(int previousRoomCount = 0)
+        public Room GetCurrentOrPreviousRoom(int previousRoomCount)
         {
             InRoomState roomState = GetInRoomState(previousRoomCount);
             return roomState?.CurrentRoom;
         }
 
         /// <summary>
-        /// Returns the RoomEnvironment applicable to the room the player is currently in. This can be null if in-room state isn't being tracked.
+        /// Returns the RoomEnvironment applicable to the room the player is currently in, or was previously in. This can be null if in-room state isn't being tracked.
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by.
         /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public RoomEnvironment GetCurrentRoomEnvironment(int previousRoomCount = 0)
+        public RoomEnvironment GetCurrentOrPreviousRoomEnvironment(int previousRoomCount = 0)
         {
-            Room currentRoom = GetCurrentRoom(previousRoomCount);
+            Room currentRoom = GetCurrentOrPreviousRoom(previousRoomCount);
             if(currentRoom == null)
             {
                 return null;
@@ -883,7 +649,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns></returns>
         public bool IsHeatedRoom(int previousRoomCount = 0)
         {
-            RoomEnvironment environment = GetCurrentRoomEnvironment(previousRoomCount);
+            RoomEnvironment environment = GetCurrentOrPreviousRoomEnvironment(previousRoomCount);
             return environment != null && environment.Heated;
         }
 
@@ -1008,7 +774,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>The identified LinkTo, or null if a single LinkTo couldn't be found</returns>
         public LinkTo GetCurrentLinkTo(int targetNodeId)
         {
-            Link linkFromCurrent = GetCurrentRoom().Links
+            Link linkFromCurrent = CurrentRoom.Links
                 .Where(link => link.FromNodeId == GetCurrentNode().Id)
                 .SingleOrDefault();
             // If we don't find exactly one link from current node, can't do anything
@@ -1109,7 +875,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // If we didn't leave the previous room via a node that led to the node by which we entered current room, no runways are usable
-            RoomNode entryNode = GetCurrentRoom(previousRoomCount).Nodes[visitedNodeIds.First()];
+            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds.First()];
             if (previousRoomExitNode.OutNode != entryNode)
             {
                 return Enumerable.Empty<Runway>();
@@ -1157,7 +923,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return Enumerable.Empty<CanLeaveCharged>();
             }
 
-            RoomNode entryNode = GetCurrentRoom(previousRoomCount).Nodes[visitedNodeIds.First()];
+            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds.First()];
 
             // At this point we know our behavior in the current room respects the provided requirements for retroactively using a CanLeaveCharged.
 
@@ -1285,7 +1051,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return -1;
             }
 
-            return inGameState.EvaluateCurrentResources(ResourceEvaluator);
+            return ResourceEvaluator.CalculateValue(inGameState.Resources);
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +18,7 @@ namespace sm_json_data_framework.Models.InGameStates
     /// and expansion items (which can be stacked, and increase the max value of resources).</para>
     /// <para>An ItemInventory has no care for current resource counts, but is aware of maximum resource values.</para>
     /// </summary>
-    public class ItemInventory
+    public class ItemInventory : ReadOnlyItemInventory
     {
         /// <summary>
         /// Creates and returns an inventory representing the vanilla starting inventory.
@@ -38,10 +41,10 @@ namespace sm_json_data_framework.Models.InGameStates
             ResourceCapacityChanges = new ResourceCount();
 
             // Apply startingResources to base maximums
-            BaseResourceMaximums = new ResourceCount();
+            InternalBaseResourceMaximums = new ResourceCount();
             foreach (ResourceCapacity capacity in baseResourceMaximums)
             {
-                BaseResourceMaximums.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
+                InternalBaseResourceMaximums.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
             }
         }
 
@@ -52,17 +55,17 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This instance will be cloned and will never be modified as a result of being passed here.</param>
         public ItemInventory(ResourceCount baseResourceMaximums)
         {
-            BaseResourceMaximums = baseResourceMaximums.Clone();
+            InternalBaseResourceMaximums = baseResourceMaximums.Clone();
             ResourceCapacityChanges = new ResourceCount();
         }
 
         public ItemInventory(ItemInventory other)
         {
-            NonConsumableItems = new Dictionary<string, Item>(other.NonConsumableItems);
-            ExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.ExpansionItems);
-            DisabledItemNames = new HashSet<string>(other.DisabledItemNames);
+            InternalNonConsumableItems = new Dictionary<string, Item>(other.InternalNonConsumableItems);
+            InternalExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.InternalExpansionItems);
+            InternalDisabledItemNames = new HashSet<string>(other.InternalDisabledItemNames);
 
-            BaseResourceMaximums = other.BaseResourceMaximums.Clone();
+            InternalBaseResourceMaximums = other.InternalBaseResourceMaximums.Clone();
             ResourceCapacityChanges = other.ResourceCapacityChanges.Clone();
         }
 
@@ -71,46 +74,41 @@ namespace sm_json_data_framework.Models.InGameStates
             return new ItemInventory(this);
         }
 
-        protected IDictionary<string, Item> NonConsumableItems { get; set; } = new Dictionary<string, Item>();
-
         /// <summary>
-        /// A set of items that have been manually disabled. This doesn't remove them from inventory but does prevent
-        /// <see cref="HasItem(Item)"/> from returning true for them.
+        /// Creates and returns a clone of this inventory, but with the provided base resource maximums
         /// </summary>
-        protected ISet<string> DisabledItemNames { get; set; } = new HashSet<string>();
-
-        protected IDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get; set; } = new Dictionary<string, (ExpansionItem item, int count)>();
+        /// <param name="baseResourceMaximums">The base resource maximums to use for the clone</param>
+        /// <returns>The created clone</returns>
+        public ItemInventory WithBaseResourceMaximums(ReadOnlyResourceCount baseResourceMaximums)
+        {
+            ItemInventory newInventory = Clone();
+            newInventory.InternalBaseResourceMaximums = baseResourceMaximums.Clone();
+            return newInventory;
+        }
 
         /// <summary>
-        /// Returns a read-only view of the dictionary of non-consumable items in this inventory.
-        /// The items are mapped by name.
+        /// Returns a read-only view of this ItemInventory. 
+        /// The view will still be this instance and reflect any changes subsequently applied to it.
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyDictionary<string, Item> GetNonConsumableItemsDictionary()
+        public ReadOnlyItemInventory AsReadOnly()
         {
-            return new ReadOnlyDictionary<string, Item>(NonConsumableItems);
+            return this;
         }
 
-        /// <summary>
-        /// Returns a read-only view of the dictionary of expansion items (along with how many of each is present) in this inventory.
-        /// The items are mapped by name.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, (ExpansionItem item, int count)> GetExpansionItemsDictionary()
-        {
-            return new ReadOnlyDictionary<string, (ExpansionItem item, int count)>(ExpansionItems);
-        }
+        protected IDictionary<string, Item> InternalNonConsumableItems { get; set; } = new Dictionary<string, Item>();
+        public ReadOnlyDictionary<string, Item> NonConsumableItems { get { return InternalNonConsumableItems.AsReadOnly(); } }
 
-        /// <summary>
-        /// The resource maximums that are available with 0 items.
-        /// Useful to differentiate between the maximum amounts associated with this inventory,
-        /// and the impact on maximum amounts made by this inventory.
-        /// </summary>
-        protected ResourceCount BaseResourceMaximums { get; set; }
-        public ResourceCount GetBaseResourceMaximumsClone()
-        {
-            return BaseResourceMaximums.Clone();
-        }
+        protected ISet<string> InternalDisabledItemNames { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> DisabledItemNames { get { return InternalDisabledItemNames.AsReadOnly(); } }
+
+        
+        protected IDictionary<string, (ExpansionItem item, int count)> InternalExpansionItems { get; set ; } = new Dictionary<string, (ExpansionItem item, int count)>();
+        public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get { return InternalExpansionItems.AsReadOnly(); } }
+
+        protected ResourceCount InternalBaseResourceMaximums { get; set; }
+
+        public ReadOnlyResourceCount BaseResourceMaximums { get { return InternalBaseResourceMaximums.AsReadOnly(); } }
 
         /// <summary>
         /// Expresses the change that this inventory applies on maximum resource counts.
@@ -118,72 +116,45 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected ResourceCount ResourceCapacityChanges { get; set; }
 
-        //protected IDictionary<RechargeableResourceEnum, int> ResourceMaximums { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
-
-        /// <summary>
-        /// Returns whether this inventory contains the provided item.
-        /// </summary>
-        /// <param name="item">Item to look for</param>
-        /// <returns></returns>
         public bool HasItem(Item item)
         {
             return HasItem(item.Name);
         }
 
-        /// <summary>
-        /// Returns whether this inventory contains an item with the provided name. If the item is present but disabled, returns false.
-        /// </summary>
-        /// <returns></returns>
         public bool HasItem(string itemName)
         {
-            return (NonConsumableItems.ContainsKey(itemName) && !DisabledItemNames.Contains(itemName))|| ExpansionItems.ContainsKey(itemName);
+            return (InternalNonConsumableItems.ContainsKey(itemName) && !InternalDisabledItemNames.Contains(itemName))|| InternalExpansionItems.ContainsKey(itemName);
         }
 
-        /// <summary>
-        /// Returns specifically whether the Varia Suit is present in this inventory.
-        /// </summary>
-        /// <returns></returns>
         public bool HasVariaSuit()
         {
             return HasItem(SuperMetroidModel.VARIA_SUIT_NAME);
         }
 
-        /// <summary>
-        /// Returns specifically whether the Gravity Suit is present in this inventory.
-        /// </summary>
-        /// <returns></returns>
         public bool HasGravitySuit()
         {
             return HasItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
         }
 
-        /// <summary>
-        /// Returns specifically whether the Speed Booster is present in this inventory.
-        /// </summary>
-        /// <returns></returns>
         public bool HasSpeedBooster()
         {
             return HasItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }
 
-        /// <summary>
-        /// Returns the max amount of the provided resource, according to the contents of this inventory.
-        /// </summary>
-        /// <param name="resource">The resource to return the maximumamount for.</param>
-        /// <returns></returns>
         public int GetMaxAmount(RechargeableResourceEnum resource)
         {
-            return BaseResourceMaximums.GetAmount(resource) + ResourceCapacityChanges.GetAmount(resource);
+            return InternalBaseResourceMaximums.GetAmount(resource) + ResourceCapacityChanges.GetAmount(resource);
         }
 
-        /// <summary>
-        /// Returns whether there is any explicit in-game item in this inventory.
-        /// </summary>
-        /// <returns></returns>
+        public int GetMaxAmount(ConsumableResourceEnum resource)
+        {
+            return resource.ToRechargeableResources().Select(resource => GetMaxAmount(resource)).Sum();
+        }
+
         public bool ContainsAnyInGameItem()
         {
-            return NonConsumableItems.Values.Where(i => i is InGameItem).Any()
-                || ExpansionItems.Values.Where(i => i.item is InGameItem).Any();
+            return InternalNonConsumableItems.Values.Where(i => i is InGameItem).Any()
+                || InternalExpansionItems.Values.Where(i => i.item is InGameItem).Any();
         }
 
         /// <summary>
@@ -196,17 +167,17 @@ namespace sm_json_data_framework.Models.InGameStates
             // Expansion items have a count
             if (item is ExpansionItem expansionItem)
             {
-                if (!ExpansionItems.ContainsKey(expansionItem.Name))
+                if (!InternalExpansionItems.ContainsKey(expansionItem.Name))
                 {
                     // Add item with an initial quantity of 1
-                    ExpansionItems.Add(expansionItem.Name, (expansionItem, 1));
+                    InternalExpansionItems.Add(expansionItem.Name, (expansionItem, 1));
                 }
                 else
                 {
                     // Increment count
-                    var itemWithCount = ExpansionItems[expansionItem.Name];
+                    var itemWithCount = InternalExpansionItems[expansionItem.Name];
                     itemWithCount.count++;
-                    ExpansionItems[expansionItem.Name] = itemWithCount;
+                    InternalExpansionItems[expansionItem.Name] = itemWithCount;
                 }
 
                 // In either case, the inner maximum of the proper resource should increase
@@ -218,42 +189,23 @@ namespace sm_json_data_framework.Models.InGameStates
             // Regular items don't have a count
             else
             {
-                if (!NonConsumableItems.ContainsKey(item.Name))
+                if (!InternalNonConsumableItems.ContainsKey(item.Name))
                 {
-                    NonConsumableItems.Add(item.Name, item);
+                    InternalNonConsumableItems.Add(item.Name, item);
                 }
             }
 
             return this;
         }
 
-        /// <summary>
-        /// Returns whether the provided item is present and disabled in this inventory.
-        /// </summary>
-        /// <param name="item">Item to check</param>
-        /// <returns></returns>
         public bool IsItemDisabled(Item item)
         {
             return IsItemDisabled(item.Name);
         }
 
-        /// <summary>
-        /// Returns whether the item with the provided name is present and disabled in this inventory.
-        /// </summary>
-        /// <param name="itemName">Name of the item to check</param>
-        /// <returns></returns>
         public bool IsItemDisabled(string itemName)
         {
-            return NonConsumableItems.ContainsKey(itemName) && DisabledItemNames.Contains(itemName);
-        }
-
-        /// <summary>
-        /// Returns the names of items that are disabled in this inventory.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<string> GetDisabledItemNames()
-        {
-            return DisabledItemNames;
+            return InternalNonConsumableItems.ContainsKey(itemName) && InternalDisabledItemNames.Contains(itemName);
         }
 
         /// <summary>
@@ -275,9 +227,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public ItemInventory ApplyDisableItem(string itemName)
         {
-            if(NonConsumableItems.ContainsKey(itemName))
+            if(InternalNonConsumableItems.ContainsKey(itemName))
             {
-                DisabledItemNames.Add(itemName);
+                InternalDisabledItemNames.Add(itemName);
             }
             return this;
         }
@@ -301,41 +253,35 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public ItemInventory ApplyEnableItem(string itemName)
         {
-            if (NonConsumableItems.ContainsKey(itemName))
+            if (InternalNonConsumableItems.ContainsKey(itemName))
             {
-                DisabledItemNames.Remove(itemName);
+                InternalDisabledItemNames.Remove(itemName);
             }
             return this;
         }
 
-        /// <summary>
-        /// Creates and returns a new ItemInventory containing all items from this Inventory
-        /// that aren't found in the provided other inventory.
-        /// </summary>
-        /// <param name="other">The other inventory</param>
-        /// <returns></returns>
         public ItemInventory ExceptWith(ItemInventory other)
         {
             // Create a new empty inventory
-            ItemInventory returnInventory = new ItemInventory(BaseResourceMaximums);
+            ItemInventory returnInventory = new ItemInventory(InternalBaseResourceMaximums);
             // Keeping disabled items makes no sense given what this method does
-            returnInventory.DisabledItemNames.Clear();
+            returnInventory.InternalDisabledItemNames.Clear();
 
             // For non-consumable items, just check for absence in other
-            foreach (KeyValuePair<string, Item> kvp in NonConsumableItems)
+            foreach (KeyValuePair<string, Item> kvp in InternalNonConsumableItems)
             {
-                if (!other.NonConsumableItems.ContainsKey(kvp.Key))
+                if (!other.InternalNonConsumableItems.ContainsKey(kvp.Key))
                 {
                     returnInventory.ApplyAddItem(kvp.Value);
                 }
             }
 
             // For expansion items, we need a count difference
-            foreach(var kvp in ExpansionItems)
+            foreach(var kvp in InternalExpansionItems)
             {
                 // Find how many of this item are present in this and not in other
                 int timesMissing = 0;
-                if (other.ExpansionItems.TryGetValue(kvp.Key, out var otherExpansionItem))
+                if (other.InternalExpansionItems.TryGetValue(kvp.Key, out var otherExpansionItem))
                 {
                     // This can turn out negative, the for loop will properly do nothing
                     timesMissing = kvp.Value.count - otherExpansionItem.count;
@@ -354,6 +300,120 @@ namespace sm_json_data_framework.Models.InGameStates
 
             return returnInventory;
         }
+    }
+
+    /// <summary>
+    /// A read-only interface for an <see cref="ItemInventory"/>, allowing consultation without modification.
+    /// </summary>
+    public interface ReadOnlyItemInventory
+    {
+        /// <summary>
+        /// Creates and returns a copy of this ItemInventory.
+        /// </summary>
+        /// <returns>The new copy, as a full-fledged ItemInventory</returns>
+        public ItemInventory Clone();
+
+        /// <summary>
+        /// Returns a clone of this inventory, but with the provided base resource Maximums
+        /// </summary>
+        /// <param name="baseMaximumResourceMaximums">The base resource maximums to assign to the new clone</param>
+        /// <returns>The new copy, as a full-fledged ItemInventory</returns>
+        public ItemInventory WithBaseResourceMaximums(ReadOnlyResourceCount baseResourceMaximums);
+
+        /// <summary>
+        /// A dictionary of the non consumable items in this inventory, mapped by name.
+        /// </summary>
+        public ReadOnlyDictionary<string, Item> NonConsumableItems { get; }
+
+        /// <summary>
+        /// A set of items that have been manually disabled. This doesn't remove them from inventory but does prevent
+        /// <see cref="HasItem(Item)"/> from returning true for them.
+        /// </summary>
+        public IReadOnlySet<string> DisabledItemNames { get; }
+
+        /// <summary>
+        /// A dictionary of the non consumable items in this inventory (bundled with the number of pickups owned), mapped by name.
+        /// </summary>
+        public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get; }
+
+        /// <summary>
+        /// The resource maximums that Samus would have if this item inventory contained no expansion items.
+        /// </summary>
+        public ReadOnlyResourceCount BaseResourceMaximums { get; }
+
+        /// <summary>
+        /// Returns whether this inventory contains the provided item.
+        /// </summary>
+        /// <param name="item">Item to look for</param>
+        /// <returns></returns>
+        public bool HasItem(Item item);
+
+        /// <summary>
+        /// Returns whether this inventory contains an item with the provided name. If the item is present but disabled, returns false.
+        /// </summary>
+        /// <param name="item">Item name to look for</param>
+        /// <returns></returns>
+        public bool HasItem(string itemName);
+
+        /// <summary>
+        /// Returns specifically whether the Varia Suit is present in this inventory. If it's present but disabled, return false.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasVariaSuit();
+
+        /// <summary>
+        /// Returns specifically whether the Gravity Suit is present in this inventory. If it's present but disabled, return false.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasGravitySuit();
+
+        /// <summary>
+        /// Returns specifically whether the Speed Booster is present in this inventory. If it's present but disabled, return false.
+        /// </summary>
+        /// <returns></returns>
+        public bool HasSpeedBooster();
+
+        /// <summary>
+        /// Returns the max amount of the provided resource, according to the contents of this inventory.
+        /// </summary>
+        /// <param name="resource">The resource to return the maximum amount for.</param>
+        /// <returns></returns>
+        public int GetMaxAmount(RechargeableResourceEnum resource);
+
+        /// <summary>
+        /// Returns the max amount of the provided consumable resource, according to the contents of this inventory.
+        /// </summary>
+        /// <param name="resource">The resource to return the maximum amount for.</param>
+        /// <returns></returns>
+        public int GetMaxAmount(ConsumableResourceEnum resource);
+
+        /// <summary>
+        /// Returns whether there is any explicit in-game item in this inventory.
+        /// </summary>
+        /// <returns></returns>
+        public bool ContainsAnyInGameItem();
+
+        /// <summary>
+        /// Returns whether the provided item is present but disabled in this inventory.
+        /// </summary>
+        /// <param name="item">Item to check</param>
+        /// <returns></returns>
+        public bool IsItemDisabled(Item item);
+
+        /// <summary>
+        /// Returns whether the item with the provided name is present but disabled in this inventory.
+        /// </summary>
+        /// <param name="itemName">Name of the item to check</param>
+        /// <returns></returns>
+        public bool IsItemDisabled(string itemName);
+
+        /// <summary>
+        /// Creates and returns a new ItemInventory containing all items from this Inventory
+        /// that aren't found in the provided other inventory.
+        /// </summary>
+        /// <param name="other">The other inventory</param>
+        /// <returns></returns>
+        public ItemInventory ExceptWith(ItemInventory other);
     }
 
 }

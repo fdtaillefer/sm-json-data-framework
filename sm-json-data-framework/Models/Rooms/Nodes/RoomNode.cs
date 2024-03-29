@@ -126,7 +126,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
             return Locks.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
-                .Where(nodeLock => !inGameState.IsLockOpen(nodeLock))
+                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock))
                 .ToList();
         }
 
@@ -315,7 +315,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Take item at location
-            if (Node.NodeItem != null && !inGameState.IsItemLocationTaken(Node.Name))
+            if (Node.NodeItem != null && !inGameState.TakenItemLocations.ContainsNode(Node))
             {
                 result.ResultingState.ApplyTakeLocation(Node);
                 result.ResultingState.ApplyAddItem(Node.NodeItem);

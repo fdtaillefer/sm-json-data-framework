@@ -93,7 +93,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         public bool IsOpen(SuperMetroidModel model, InGameState inGameState)
         {
-            return inGameState.IsLockOpen(this);
+            return inGameState.OpenedLocks.ContainsLock(this);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public bool IsActive(SuperMetroidModel model, InGameState inGameState)
         {
             // This lock cannot be active if it's been opened
-            if (inGameState.IsLockOpen(this))
+            if (inGameState.OpenedLocks.ContainsLock(this))
             {
                 return false;
             }

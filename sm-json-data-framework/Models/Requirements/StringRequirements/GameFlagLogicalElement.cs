@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,7 +21,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            if (inGameState.HasGameFlag(GameFlag))
+            if (inGameState.ActiveGameFlags.ContainsFlag(GameFlag))
             {
                 // Clone the In-game state to fulfill method contract
                 return new ExecutionResult(inGameState.Clone());

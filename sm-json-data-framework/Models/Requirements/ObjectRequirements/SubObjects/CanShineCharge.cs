@@ -49,7 +49,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             bool mustShinespark = ShinesparkFrames > 0;
 
             // Always need the SpeedBooster to charge a bluesuit
-            if (!inGameState.HasSpeedBooster())
+            if (!inGameState.Inventory.HasSpeedBooster())
             {
                 return null;
             }
@@ -70,7 +70,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
 
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
-            if (inGameState.GetCurrentResources().GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeeded)
+            if (inGameState.Resources.GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeeded)
             {
                 int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
                 InGameState resultingState = inGameState.Clone();

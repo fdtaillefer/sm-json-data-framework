@@ -11,10 +11,10 @@ namespace sm_json_data_framework.Options.ResourceValues
     public interface IInGameResourceEvaluator
     {
         /// <summary>
-        /// Calculates a value for the provided ResourceCount. Assumes that dead states (energy of 0) won't show up.
+        /// Calculates a value for the provided ReadOnlyResourceCount. Assumes that dead states (energy of 0) won't show up.
         /// </summary>
         /// <param name="resources">The resource count to calculate a value for</param>
         /// <returns>The calculated value</returns>
-        int CalculateValue(ResourceCount resources);
+        int CalculateValue(ReadOnlyResourceCount resources);
     }
 }

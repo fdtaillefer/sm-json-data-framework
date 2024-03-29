@@ -37,11 +37,11 @@ namespace sm_json_data_framework.Models.Navigation
             ItemInventory gainedInventory = executionResult.ResultingState.GetInventoryExceptWith(initialInGameState);
             ItemsGained = gainedInventory;
             // Cannot lose items, just create an empty inventory
-            ItemsLost = new ItemInventory(model.StartConditions.BaseResourceMaximums);
+            ItemsLost = new ItemInventory(model.StartConditions.BaseResourceMaximums.Clone());
 
             // Initialize enabled and disabled items
-            ItemsDisabledNames = executionResult.ResultingState.GetDisabledItemNames().Except(initialInGameState.GetDisabledItemNames());
-            ItemsEnabledNames = initialInGameState.GetDisabledItemNames().Except(executionResult.ResultingState.GetDisabledItemNames());
+            ItemsDisabledNames = executionResult.ResultingState.Inventory.DisabledItemNames.Except(initialInGameState.Inventory.DisabledItemNames);
+            ItemsEnabledNames = initialInGameState.Inventory.DisabledItemNames.Except(executionResult.ResultingState.Inventory.DisabledItemNames);
 
             // Initialize flags gained
             GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptWith(initialInGameState).Values);
@@ -53,16 +53,16 @@ namespace sm_json_data_framework.Models.Navigation
             ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptWith(initialInGameState).Values);
 
             // Initialize resources before and after
-            ResourcesBefore = initialInGameState.GetCurrentResources();
-            ResourcesAfter = executionResult.ResultingState.GetCurrentResources();
+            ResourcesBefore = initialInGameState.Resources.Clone();
+            ResourcesAfter = executionResult.ResultingState.Resources.Clone();
 
             // Initialize destroyed obstacles, but that's only relevant if we didn't change rooms
-            if (executionResult.ResultingState.GetCurrentRoom() == initialInGameState.GetCurrentRoom())
+            if (executionResult.ResultingState.CurrentRoom == initialInGameState.CurrentRoom)
             {
                 ObstaclesDestroyed = ObstaclesDestroyed.Concat(
                     executionResult.ResultingState.GetDestroyedObstacleIds()
                         .Except(initialInGameState.GetDestroyedObstacleIds())
-                        .Select(obstacleId => executionResult.ResultingState.GetCurrentRoom().Obstacles[obstacleId])
+                        .Select(obstacleId => executionResult.ResultingState.CurrentRoom.Obstacles[obstacleId])
                     );
             }
 
@@ -353,20 +353,20 @@ namespace sm_json_data_framework.Models.Navigation
             if (outputEffects)
             {
                 // Items gained and lost
-                foreach (Item item in ItemsGained.GetNonConsumableItemsDictionary().Values)
+                foreach (Item item in ItemsGained.NonConsumableItems.Values)
                 {
                     Console.WriteLine($"Gained item '{item.Name}'");
                 }
-                foreach (var (item, count) in ItemsGained.GetExpansionItemsDictionary().Values)
+                foreach (var (item, count) in ItemsGained.ExpansionItems.Values)
                 {
                     Console.WriteLine($"Gained item '{item.Name}' X {count}");
                 }
 
-                foreach (Item item in ItemsLost.GetNonConsumableItemsDictionary().Values)
+                foreach (Item item in ItemsLost.NonConsumableItems.Values)
                 {
                     Console.WriteLine($"Lost item '{item.Name}'");
                 }
-                foreach (var (item, count) in ItemsLost.GetExpansionItemsDictionary().Values)
+                foreach (var (item, count) in ItemsLost.ExpansionItems.Values)
                 {
                     Console.WriteLine($"Lost item '{item.Name}' X {count}");
                 }

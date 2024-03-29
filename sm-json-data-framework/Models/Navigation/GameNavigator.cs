@@ -6,8 +6,10 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -176,9 +178,9 @@ namespace sm_json_data_framework.Models.Navigation
             string intent = $"Move to node {nodeId}{intentFiltersSuffix}";
 
             // Does that node exist?
-            if (!CurrentInGameState.GetCurrentRoom().Nodes.TryGetValue(nodeId, out RoomNode destinationNode))
+            if (!CurrentInGameState.CurrentRoom.Nodes.TryGetValue(nodeId, out RoomNode destinationNode))
             {
-                intent = intent + $", but that node doesn't exist in {CurrentInGameState.GetCurrentRoom().Name}";
+                intent = intent + $", but that node doesn't exist in {CurrentInGameState.CurrentRoom.Name}";
                 return new Failure(intent);
             }
 
@@ -186,7 +188,7 @@ namespace sm_json_data_framework.Models.Navigation
             LinkTo linkTo = CurrentInGameState.GetCurrentLinkTo(nodeId);
             if (linkTo == null)
             {
-                intent = intent + $", but no links found in {CurrentInGameState.GetCurrentRoom().Name} from node {CurrentInGameState.GetCurrentNode().Id} to {nodeId}";
+                intent = intent + $", but no links found in {CurrentInGameState.CurrentRoom.Name} from node {CurrentInGameState.GetCurrentNode().Id} to {nodeId}";
                 return new Failure(intent);
             }
 
@@ -277,7 +279,7 @@ namespace sm_json_data_framework.Models.Navigation
 
 
             // If an item was picked up, we may want to adjust resources according to normal game behavior
-            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is ExpansionItem expansionItem && !CurrentInGameState.IsItemLocationTaken(node.Name))
+            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is ExpansionItem expansionItem && !CurrentInGameState.TakenItemLocations.ContainsNode(node))
             {
                 switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
                 {
@@ -420,9 +422,9 @@ namespace sm_json_data_framework.Models.Navigation
             string intent = $"Farm enemy spawner of enemy {roomEnemyId}";
 
             // Does that enemy exist?
-            if (!CurrentInGameState.GetCurrentRoom().Enemies.TryGetValue(roomEnemyId, out RoomEnemy enemyToFarm))
+            if (!CurrentInGameState.CurrentRoom.Enemies.TryGetValue(roomEnemyId, out RoomEnemy enemyToFarm))
             {
-                intent = intent + $", but that enemy doesn't exist in {CurrentInGameState.GetCurrentRoom().Name}";
+                intent = intent + $", but that enemy doesn't exist in {CurrentInGameState.CurrentRoom.Name}";
                 return new Failure(intent);
             }
 
@@ -475,13 +477,13 @@ namespace sm_json_data_framework.Models.Navigation
         {
             string intent = $"Disable item {itemName}";
 
-            if (!CurrentInGameState.GetNonConsumableItemsDictionary().ContainsKey(itemName))
+            if (!CurrentInGameState.Inventory.NonConsumableItems.ContainsItem(itemName))
             {
                 intent = intent + ", but that item is not present in inventory";
                 return new Failure(intent);
             }
 
-            if (!CurrentInGameState.HasItem(itemName))
+            if (!CurrentInGameState.Inventory.HasItem(itemName))
             {
                 intent = intent + ", but that item is not enabled";
                 return new Failure(intent);
@@ -507,13 +509,13 @@ namespace sm_json_data_framework.Models.Navigation
         {
             string intent = $"Enable item {itemName}";
 
-            if (!CurrentInGameState.GetNonConsumableItemsDictionary().ContainsKey(itemName))
+            if (!CurrentInGameState.Inventory.NonConsumableItems.ContainsItem(itemName))
             {
                 intent = intent + ", but that item is not present in inventory";
                 return new Failure(intent);
             }
 
-            if (CurrentInGameState.HasItem(itemName))
+            if (CurrentInGameState.Inventory.HasItem(itemName))
             {
                 intent = intent + ", but that item is already enabled";
                 return new Failure(intent);
@@ -569,7 +571,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentNonReserveEnergy()
         {
-            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.RegularEnergy);
+            return CurrentInGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy);
         }
 
         /// <summary>
@@ -578,7 +580,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentReserveEnergy()
         {
-            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.ReserveEnergy);
+            return CurrentInGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy);
         }
 
         /// <summary>
@@ -587,7 +589,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentTotalEnergy()
         {
-            return CurrentInGameState.GetCurrentAmount(ConsumableResourceEnum.ENERGY);
+            return CurrentInGameState.Resources.GetAmount(ConsumableResourceEnum.ENERGY);
         }
 
         /// <summary>
@@ -596,7 +598,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentMissiles()
         {
-            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.Missile);
+            return CurrentInGameState.Resources.GetAmount(RechargeableResourceEnum.Missile);
         }
 
         /// <summary>
@@ -605,7 +607,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentSuperMissiles()
         {
-            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.Super);
+            return CurrentInGameState.Resources.GetAmount(RechargeableResourceEnum.Super);
         }
 
         /// <summary>
@@ -614,7 +616,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentPowerBombs()
         {
-            return CurrentInGameState.GetCurrentAmount(RechargeableResourceEnum.PowerBomb);
+            return CurrentInGameState.Resources.GetAmount(RechargeableResourceEnum.PowerBomb);
         }
 
         /// <summary>
@@ -624,7 +626,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentAmount(RechargeableResourceEnum resource)
         {
-            return CurrentInGameState.GetCurrentAmount(resource);
+            return CurrentInGameState.Resources.GetAmount(resource);
         }
 
         /// <summary>
@@ -635,7 +637,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetCurrentAmount(ConsumableResourceEnum resource)
         {
-            return CurrentInGameState.GetCurrentAmount(resource);
+            return CurrentInGameState.Resources.GetAmount(resource);
         }
 
         /// <summary>
@@ -644,7 +646,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxNonReserveEnergy()
         {
-            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.RegularEnergy);
+            return CurrentInGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.RegularEnergy);
         }
 
         /// <summary>
@@ -653,7 +655,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxReserveEnergy()
         {
-            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.ReserveEnergy);
+            return CurrentInGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.ReserveEnergy);
         }
 
         /// <summary>
@@ -662,7 +664,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxMissiles()
         {
-            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.Missile);
+            return CurrentInGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.Missile);
         }
 
         /// <summary>
@@ -671,7 +673,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxSuperMissiles()
         {
-            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.Super);
+            return CurrentInGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.Super);
         }
 
         /// <summary>
@@ -680,7 +682,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxPowerBombs()
         {
-            return CurrentInGameState.GetMaxAmount(RechargeableResourceEnum.PowerBomb);
+            return CurrentInGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.PowerBomb);
         }
 
         /// <summary>
@@ -690,7 +692,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public int GetMaxAmount(RechargeableResourceEnum resource)
         {
-            return CurrentInGameState.GetMaxAmount(resource);
+            return CurrentInGameState.Inventory.GetMaxAmount(resource);
         }
 
         /// <summary>
@@ -699,7 +701,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IReadOnlyDictionary<string, Item> GetItemsDictionary()
         {
-            return CurrentInGameState.GetNonConsumableItemsDictionary();
+            return CurrentInGameState.Inventory.NonConsumableItems;
         }
 
         /// <summary>
@@ -708,16 +710,16 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns></returns>
         public IReadOnlyDictionary<string, NodeLock> GetOpenedLocksDictionary()
         {
-            return CurrentInGameState.GetOpenedLocksDictionary();
+            return CurrentInGameState.OpenedLocks;
         }
 
         /// <summary>
         /// Returns a Dictionary of the game flags that are active, mapped by name.
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyDictionary<string, GameFlag> GetActiveGameFlagsDictionary()
+        public ReadOnlyDictionary<string, GameFlag> GetActiveGameFlagsDictionary()
         {
-            return CurrentInGameState.GetActiveGameFlagsDictionary();
+            return CurrentInGameState.ActiveGameFlags;
         }
 
         #endregion

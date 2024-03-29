@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
                 IEnumerable<RoomNode>
                            missingItemNodes = navigator.GameModel.Nodes.Values
                            .Where(node => node.NodeType == NodeTypeEnum.Item)
-                           .Except(navigator.CurrentInGameState.GetTakenItemLocationsDictionary().Values)
+                           .Except(navigator.CurrentInGameState.TakenItemLocations.Values)
                            .OrderBy(node => node.Name);
 
                 // Output missing item location count

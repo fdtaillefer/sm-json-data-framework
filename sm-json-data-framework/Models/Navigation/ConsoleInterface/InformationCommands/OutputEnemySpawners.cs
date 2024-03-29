@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Execution = (navigator, command) =>
             {
                 RoomNode currentNode = navigator.CurrentInGameState.GetCurrentNode();
-                IEnumerable<RoomEnemy> spawners = navigator.CurrentInGameState.GetCurrentRoom().EnemiesSequence
+                IEnumerable<RoomEnemy> spawners = navigator.CurrentInGameState.CurrentRoom.EnemiesSequence
                     .Where(e => e.IsSpawner && e.Spawns(navigator.GameModel, navigator.CurrentInGameState) && e.HomeNodeIds.Contains(currentNode.Id));
                 foreach (RoomEnemy spawner in spawners)
                 {

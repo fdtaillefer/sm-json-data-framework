@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     {
         public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int currentRegularEnergy = inGameState.GetCurrentAmount(Items.RechargeableResourceEnum.RegularEnergy);
+            int currentRegularEnergy = inGameState.Resources.GetAmount(Items.RechargeableResourceEnum.RegularEnergy);
             // Don't take damage if we've already reached the threshold
             return Math.Max(0, currentRegularEnergy - Value);
         }

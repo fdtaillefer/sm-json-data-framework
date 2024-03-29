@@ -102,7 +102,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // There are many things to check...
 
             // If we don't have SpeedBooster, this is not usable
-            if (!inGameState.HasSpeedBooster())
+            if (!inGameState.Inventory.HasSpeedBooster())
             {
                 return null;
             }
@@ -130,7 +130,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark
             (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount,
                 // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
-                acceptationCondition: igs => igs.GetCurrentResources().GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeededForShinespark);
+                acceptationCondition: igs => igs.Resources.GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeededForShinespark);
 
             // If we couldn't find a successful strat, give up
             if (result == null)

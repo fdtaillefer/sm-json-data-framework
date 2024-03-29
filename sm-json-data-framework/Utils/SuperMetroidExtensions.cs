@@ -1,8 +1,12 @@
 ﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Weapons;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -58,6 +62,61 @@ namespace sm_json_data_framework.Utils
         public static IDictionary<string, Strat> WhereEnabled(this IDictionary<string, Strat> strats, SuperMetroidModel model)
         {
             return strats.Where(kvp => model.LogicalOptions.IsStratEnabled(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, string gameFlagName)
+        {
+            return flagDictionary.ContainsKey(gameFlagName);
+        }
+
+        public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, GameFlag gameFlag)
+        {
+            return flagDictionary.ContainsKey(gameFlag.Name);
+        }
+
+        public static bool ContainsLock(this IDictionary<string, NodeLock> lockDictionary, string lockName)
+        {
+            return lockDictionary.ContainsKey(lockName);
+        }
+
+        public static bool ContainsLock(this IDictionary<string, NodeLock> lockDictionary, NodeLock nodeLock)
+        {
+            return lockDictionary.ContainsKey(nodeLock.Name);
+        }
+
+        public static bool ContainsNode(this IDictionary<string, RoomNode> nodeDictionary, string nodeName)
+        {
+            return nodeDictionary.ContainsKey(nodeName);
+        }
+
+        public static bool ContainsNode(this IDictionary<string, RoomNode> nodeDictionary, RoomNode node)
+        {
+            return nodeDictionary.ContainsKey(node.Name);
+        }
+
+        public static bool ContainsItem(this IDictionary<string, Item> itemDictionary, string itemName)
+        {
+            return itemDictionary.ContainsKey(itemName);
+        }
+
+        public static bool ContainsItem(this IDictionary<string, Item> itemDictionary, Item item)
+        {
+            return itemDictionary.ContainsKey(item.Name);
+        }
+
+        public static bool ContainsVariaSuit(this IDictionary<string, Item> itemDictionary, Item item)
+        {
+            return itemDictionary.ContainsItem(SuperMetroidModel.VARIA_SUIT_NAME);
+        }
+
+        public static bool ContainsGravitySuit(this IDictionary<string, Item> itemDictionary, Item item)
+        {
+            return itemDictionary.ContainsItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
+        }
+
+        public static bool ContainsSpeedBooster(this IDictionary<string, Item> itemDictionary, Item item)
+        {
+            return itemDictionary.ContainsItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }
     }
 }

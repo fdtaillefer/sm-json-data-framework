@@ -194,11 +194,11 @@ namespace sm_json_data_framework.Rules
         /// <returns></returns>
         private IEnumerable<Item> GetDamageReducingItemsWhenGravitySupersedesVaria(SuperMetroidModel model, InGameState inGameState)
         {
-            if (inGameState.HasGravitySuit())
+            if (inGameState.Inventory.HasGravitySuit())
             {
                 return new [] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
             }
-            else if (inGameState.HasVariaSuit())
+            else if (inGameState.Inventory.HasVariaSuit())
             {
                 return new [] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
             }
@@ -217,7 +217,7 @@ namespace sm_json_data_framework.Rules
         /// <returns></returns>
         private IEnumerable<Item> GetDamageReducingItemsWhenGravityTurnedOff(SuperMetroidModel model, InGameState inGameState)
         {
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return new[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
             }
@@ -237,11 +237,11 @@ namespace sm_json_data_framework.Rules
         /// <returns></returns>
         private IEnumerable<Item> GetDamageReducingItemsWhenVariaSupersedesGravity(SuperMetroidModel model, InGameState inGameState)
         {
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return new [] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
             }
-            else if (inGameState.HasGravitySuit())
+            else if (inGameState.Inventory.HasGravitySuit())
             {
                 return new [] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
             }
@@ -260,8 +260,8 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateEnvironmentalDamage(InGameState inGameState, int baseDamage)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
-            bool hasGravity = inGameState.HasGravitySuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
+            bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
                 return baseDamage / 4;
@@ -298,8 +298,8 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateHeatDamage(InGameState inGameState, int heatFrames)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
-            bool hasGravity = inGameState.HasGravitySuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
+            bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity || hasVaria)
             {
                 return 0;
@@ -332,8 +332,8 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateLavaDamage(InGameState inGameState, int lavaFrames)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
-            bool hasGravity = inGameState.HasGravitySuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
+            bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
                 return 0;
@@ -357,7 +357,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateLavaPhysicsDamage(InGameState inGameState, int lavaPhysicsFrames)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
             if (hasVaria)
             {
                 return lavaPhysicsFrames / 4;
@@ -404,8 +404,8 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateAcidDamage(InGameState inGameState, int acidFrames)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
-            bool hasGravity = inGameState.HasGravitySuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
+            bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
                 return acidFrames * 3 / 8;
@@ -442,8 +442,8 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateElectricityGrappleDamage(InGameState inGameState, int electricityFrames)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
-            bool hasGravity = inGameState.HasGravitySuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
+            bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
                 return electricityFrames / 4;
@@ -505,8 +505,8 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateEnemyDamage(InGameState inGameState, EnemyAttack attack)
         {
-            bool hasVaria = inGameState.HasVariaSuit();
-            bool hasGravity = inGameState.HasGravitySuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
+            bool hasGravity = inGameState.Inventory.HasGravitySuit();
 
             if (hasGravity && attack.AffectedByGravity)
             {
@@ -538,12 +538,12 @@ namespace sm_json_data_framework.Rules
                 return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
             }
 
-            if (enemyAttack.AffectedByGravity && inGameState.HasGravitySuit())
+            if (enemyAttack.AffectedByGravity && inGameState.Inventory.HasGravitySuit())
             {
                 return new Item[] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
             }
 
-            if (enemyAttack.AffectedByVaria && inGameState.HasVariaSuit())
+            if (enemyAttack.AffectedByVaria && inGameState.Inventory.HasVariaSuit())
             {
                 return new Item[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
             }

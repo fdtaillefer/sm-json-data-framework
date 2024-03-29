@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            if (inGameState.HasItem(Item))
+            if (inGameState.Inventory.HasItem(Item))
             {
                 // Clone the In-game state to fulfill method contract
                 ExecutionResult result = new ExecutionResult(inGameState.Clone());

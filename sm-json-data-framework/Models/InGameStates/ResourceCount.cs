@@ -10,7 +10,7 @@ namespace sm_json_data_framework.Models.InGameStates
     /// <summary>
     /// Contains values for all rechargeable resource types. The context of those values is not known by this container.
     /// </summary>
-    public class ResourceCount
+    public class ResourceCount: ReadOnlyResourceCount
     {
         /// <summary>
         /// Creates and returns an instance of ResourceCount containing the vanilla base maximums.
@@ -29,24 +29,26 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
+        /// <summary>
+        /// Returns a read-only view of this ResourceCount. 
+        /// The view will still be this instance and reflect any changes subsequently applied to it.
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlyResourceCount AsReadOnly()
+        {
+            return this;
+        }
+
         public ResourceCount(ResourceCount other)
         {
             ApplyAmounts(other);
         }
 
-        /// <summary>
-        /// Creates and returns a copy of this ResourceCount.
-        /// </summary>
-        /// <returns></returns>
         public ResourceCount Clone()
         {
             return new ResourceCount(this);
         }
 
-        /// <summary>
-        /// Creates and returns a copy of this ResourceCount, with positive and negative values flipped.
-        /// </summary>
-        /// <returns></returns>
         public ResourceCount CloneNegative()
         {
             ResourceCount clone = Clone();
@@ -60,34 +62,16 @@ namespace sm_json_data_framework.Models.InGameStates
 
         private IDictionary<RechargeableResourceEnum, int> Amounts { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
 
-        /// <summary>
-        /// Returns the amount associated to this container for the provided rechargeable resource.
-        /// </summary>
-        /// <param name="resource">Resource to get the amount of.</param>
-        /// <returns></returns>
         public int GetAmount(RechargeableResourceEnum resource)
         {
             return Amounts[resource];
         }
 
-        /// <summary>
-        /// Returns the amount associated to this container for the provided consumable resource.
-        /// This is almost the same as getting the current amount of a rechargeable resource,
-        /// except both types of energy are grouped together.
-        /// </summary>
-        /// <param name="resource">Resource to get the amount of.</param>
-        /// <returns></returns>
         public int GetAmount(ConsumableResourceEnum resource)
         {
             return resource.ToRechargeableResources().Select(resource => GetAmount(resource)).Sum();
         }
 
-        /// <summary>
-        /// Returns whether the amount in this container for the provided resource could be spent without dying.
-        /// </summary>
-        /// <param name="resource">The resource to check the ability to spend for</param>
-        /// <param name="quantity">The amount to check the ability to spend for</param>
-        /// <returns></returns>
         public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
         {
             if (quantity == 0)
@@ -106,11 +90,6 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
-        /// <summary>
-        /// Returns whether any of the resource counts in this ResourceCount fulfill the provided predicate.
-        /// </summary>
-        /// <param name="resourcePredicate"></param>
-        /// <returns></returns>
         public bool Any(Predicate<int> resourcePredicate)
         {
             return Amounts.Values.Any(count => resourcePredicate(count));
@@ -198,5 +177,54 @@ namespace sm_json_data_framework.Models.InGameStates
             Amounts[resource] = newAmount;
             return this;
         }
+    }
+
+    /// <summary>
+    /// A read-only interface for a <see cref="ResourceCount"/>, allowing consultation without modification.
+    /// </summary>
+    public interface ReadOnlyResourceCount
+    {
+        /// <summary>
+        /// Creates and returns a copy of this ResourceCount.
+        /// </summary>
+        /// <returns>The new copy, as a full-fledged ResourceCount</returns>
+        public ResourceCount Clone();
+
+        /// <summary>
+        /// Creates and returns a copy of this ResourceCount, with positive and negative values flipped.
+        /// </summary>
+        /// <returns>The new copy, as a full-fledged ResourceCount</returns>
+        public ResourceCount CloneNegative();
+
+        /// <summary>
+        /// Returns the amount associated to this container for the provided rechargeable resource.
+        /// </summary>
+        /// <param name="resource">Resource to get the amount of.</param>
+        /// <returns></returns>
+        public int GetAmount(RechargeableResourceEnum resource);
+
+        /// <summary>
+        /// Returns the amount associated to this container for the provided consumable resource.
+        /// This is almost the same as getting the current amount of a rechargeable resource,
+        /// except both types of energy are grouped together.
+        /// </summary>
+        /// <param name="resource">Resource to get the amount of.</param>
+        /// <returns></returns>
+        public int GetAmount(ConsumableResourceEnum resource);
+
+        /// <summary>
+        /// Returns whether the amount in this container for the provided resource could be spent without dying.
+        /// </summary>
+        /// <param name="resource">The resource to check the ability to spend for</param>
+        /// <param name="quantity">The amount to check the ability to spend for</param>
+        /// <returns></returns>
+        public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity);
+
+        /// <summary>
+        /// Returns whether any of the resource counts in this ResourceCount fulfill the provided predicate.
+        /// </summary>
+        /// <param name="resourcePredicate"></param>
+        /// <returns></returns>
+        public bool Any(Predicate<int> resourcePredicate);
     }
 }

@@ -152,7 +152,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="gameFlag"></param>
         public void ApplyActivatedGameFlag(GameFlag gameFlag)
         {
-            if (!ResultingState.HasGameFlag(gameFlag))
+            if (!ResultingState.ActiveGameFlags.ContainsFlag(gameFlag))
             {
                 ActivatedGameFlags = ActivatedGameFlags.Append(gameFlag);
                 ResultingState.ApplyAddGameFlag(gameFlag);

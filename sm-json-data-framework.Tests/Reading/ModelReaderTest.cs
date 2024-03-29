@@ -4,6 +4,7 @@ using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestSubClasses;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -72,10 +73,10 @@ namespace sm_json_data_framework.Reading
             Assert.Equal(0, model.StartConditions.StartingResources.GetAmount(Models.Items.RechargeableResourceEnum.PowerBomb));
 
             // Starting items
-            Assert.Equal(2, model.StartConditions.StartingInventory.GetNonConsumableItemsDictionary().Count);
-            Assert.True(model.StartConditions.StartingInventory.GetNonConsumableItemsDictionary().ContainsKey("PowerBeam"));
-            Assert.True(model.StartConditions.StartingInventory.GetNonConsumableItemsDictionary().ContainsKey("PowerSuit"));
-            Assert.Empty(model.StartConditions.StartingInventory.GetExpansionItemsDictionary());
+            Assert.Equal(2, model.StartConditions.StartingInventory.NonConsumableItems.Count);
+            Assert.True(model.StartConditions.StartingInventory.NonConsumableItems.ContainsItem("PowerBeam"));
+            Assert.True(model.StartConditions.StartingInventory.NonConsumableItems.ContainsItem("PowerSuit"));
+            Assert.Empty(model.StartConditions.StartingInventory.ExpansionItems);
 
             // Starting game state
             Assert.Empty(model.StartConditions.StartingGameFlags);

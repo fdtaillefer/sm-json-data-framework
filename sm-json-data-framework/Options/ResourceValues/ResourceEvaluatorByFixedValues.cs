@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Options.ResourceValues
         /// </summary>
         private IDictionary<ConsumableResourceEnum, int> FixedResourceValues { get; set; }
 
-        public int CalculateValue(ResourceCount resources)
+        public int CalculateValue(ReadOnlyResourceCount resources)
         {
             // Give a negative value to null. It's decidedly less valuable than any existing state.
             if (resources == null)

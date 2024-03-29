@@ -20,18 +20,18 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Execution = (navigator, command) =>
             {
                 // Output pickup count
-                int pickupsCount = navigator.CurrentInGameState.GetTakenItemLocationsDictionary().Count();
+                int pickupsCount = navigator.CurrentInGameState.TakenItemLocations.Count;
                 Console.WriteLine($"Number of pickups obtained: {pickupsCount}");
 
                 // Output expansion items with counts
-                foreach (var (item, count) in navigator.CurrentInGameState.GetExpansionItemsDictionary().Values)
+                foreach (var (item, count) in navigator.CurrentInGameState.Inventory.ExpansionItems.Values)
                 {
                     Console.WriteLine($"Has item '{item.Name}' X {count}");
                 }
                 // Output non consumable items
-                foreach (Item item in navigator.CurrentInGameState.GetNonConsumableItemsDictionary().Values)
+                foreach (Item item in navigator.CurrentInGameState.Inventory.NonConsumableItems.Values)
                 {
-                    Console.WriteLine($"Has item '{item.Name}'{(navigator.CurrentInGameState.IsItemDisabled(item.Name) ? " (disabled)" : "")}");
+                    Console.WriteLine($"Has item '{item.Name}'{(navigator.CurrentInGameState.Inventory.IsItemDisabled(item.Name) ? " (disabled)" : "")}");
                 }
 
                 return true;

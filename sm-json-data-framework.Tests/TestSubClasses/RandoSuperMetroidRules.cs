@@ -19,7 +19,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
         public override int CalculateEnvironmentalDamage(InGameState inGameState, int baseDamage)
         {
             // Make Varia the only suit that reduces environmental damage
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return baseDamage / 4;
             }
@@ -31,7 +31,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
 
         private IEnumerable<Item> ReturnVariaIfPresent(SuperMetroidModel model, InGameState inGameState)
         {
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return new[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
             }
@@ -50,7 +50,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
         public override int CalculateHeatDamage(InGameState inGameState, int heatFrames)
         {
             // Make Varia the only suit that reduces heat damage
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return 0;
             }
@@ -69,7 +69,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
         public override int CalculateLavaDamage(InGameState inGameState, int lavaFrames)
         {
             // Make Varia the only suit that reduces lava damage
-            bool hasVaria = inGameState.HasVariaSuit();
+            bool hasVaria = inGameState.Inventory.HasVariaSuit();
             if (hasVaria)
             {
                 return 0;
@@ -95,7 +95,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
         public override int CalculateAcidDamage(InGameState inGameState, int acidFrames)
         {
             // Make Varia the only suit that reduces acid damage
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return acidFrames * 3 / 8;
             }
@@ -114,7 +114,7 @@ namespace sm_json_data_framework.Tests.TestSubClasses
         public override int CalculateElectricityGrappleDamage(InGameState inGameState, int electricityFrames)
         {
             // Make Varia the only suit that reduces electricity grapple damage
-            if (inGameState.HasVariaSuit())
+            if (inGameState.Inventory.HasVariaSuit())
             {
                 return electricityFrames / 4;
             }
