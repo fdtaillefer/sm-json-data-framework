@@ -193,15 +193,15 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // We found a link, try to follow it
-            IEnumerable<Strat> potentialStrats = linkTo.Strats.Values;
+            IEnumerable<KeyValuePair<string, Strat>> potentialStrats = linkTo.Strats;
             if (stratFilters != null && stratFilters.Any())
             {
                 foreach (StratFilter filter in stratFilters)
                 {
-                    potentialStrats = potentialStrats.Where(filter.Predicate.Invoke);
+                    potentialStrats = filter.Apply(potentialStrats);
                 }
             }
-            var (strat, result) = GameModel.ExecuteBest(potentialStrats, CurrentInGameState);
+            var (strat, result) = GameModel.ExecuteBest(potentialStrats.Select(kvp => kvp.Value), CurrentInGameState);
             
             // If no strat of the link was successful, this is a failure
             if (strat == null)

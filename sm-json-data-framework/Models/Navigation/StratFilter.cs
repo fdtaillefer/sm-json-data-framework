@@ -10,7 +10,13 @@ namespace sm_json_data_framework.Models.Navigation
     // A filter that can be applied when moving nodes, to limit allowedstrats to a ubset of the existing ones.
     public class StratFilter
     {
-        public Predicate<Strat> Predicate { get; }
+        private Predicate<Strat> Predicate { get; }
+
+        /// <summary>
+        /// Keys to obtain from a dictionary, as a potentially faster way to get values out of a dictionary.
+        /// The predicate will be used if applying to something that isn't a dictionary.
+        /// </summary>
+        private ISet<String> Keys { get; set; }
 
         public string Description { get; }
 
@@ -18,6 +24,36 @@ namespace sm_json_data_framework.Models.Navigation
         {
             Predicate = predicate;
             Description = description;
+        }
+
+        public StratFilter(ISet<String> keys, string description)
+        {
+            Description = description;
+            Keys = new HashSet<string>(keys);
+            Predicate = strat => Keys.Contains(strat.Name);
+        }
+
+        /// <summary>
+        /// Applies this StratFilter to an enmeration of Strats.
+        /// </summary>
+        /// <param name="strats"></param>
+        /// <returns></returns>
+        public IEnumerable<Strat> Apply(IEnumerable<Strat> strats) {
+            return strats.Where(Predicate.Invoke);
+        }
+
+        /// <summary>
+        /// Applies this StratFilter to an enmeration of stratName-strat KeyValuePairs.
+        /// </summary>
+        /// <param name="strats"></param>
+        /// <returns></returns>
+        public IEnumerable<KeyValuePair<string, Strat>> Apply(IEnumerable<KeyValuePair<string, Strat>> strats)
+        {
+            if(strats is IDictionary<string, Strat> dictionary && Keys != null)
+            {
+                return Keys.Select(key => dictionary[key]).ToDictionary(strat => strat.Name, strat => strat);
+            }
+            return strats.Where(kvp => Predicate.Invoke(kvp.Value));
         }
 
         /// <summary>
@@ -40,10 +76,8 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The StratFilter</returns>
         public static StratFilter NameIs(string name)
         {
-            Predicate<Strat> predicate = strat => strat.Name?.Equals(name, StringComparison.InvariantCultureIgnoreCase) is true;
             string description = $"Name is '{name}'";
-
-            return new StratFilter(predicate, description);
+            return new StratFilter(new HashSet<string> { name }, description);
         }
 
         /// <summary>
