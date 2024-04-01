@@ -1,6 +1,8 @@
 ﻿using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace sm_json_data_framework.Models.InGameStates
@@ -8,7 +10,7 @@ namespace sm_json_data_framework.Models.InGameStates
     /// <summary>
     /// Represents the logically-relevant parts of the state of the current room.
     /// </summary>
-    public class InRoomState
+    public class InRoomState: ReadOnlyInRoomState
     {
 
         public InRoomState(RoomNode initialNode)
@@ -18,44 +20,44 @@ namespace sm_json_data_framework.Models.InGameStates
         
         public InRoomState(InRoomState other)
         {
-            VisitedRoomPathList = other.VisitedRoomPathList.Select(pair => (new InNodeState(pair.nodeState), pair.strat)).ToList();
+            InternalVisitedRoomPath = other.InternalVisitedRoomPath.Select(pair => (new InNodeState(pair.nodeState), pair.strat)).ToList();
             DestroyedObstacleIdsSet = new HashSet<string>(other.DestroyedObstacleIdsSet);
             LastStrat = other.LastStrat;
         }
 
-        public InNodeState CurrentNodeState { get => VisitedRoomPathList.Any() ? VisitedRoomPathList.Last().nodeState : null; }
+        public InRoomState Clone()
+        {
+            return new InRoomState(this);
+        }
 
-        /// <summary>
-        /// The node the player is currently at. This can be null if in-room state isn't being tracked.
-        /// </summary>
-        /// // Current room is the last node in the visited room path
-        public RoomNode CurrentNode { get => CurrentNodeState?.Node;  }
+        public ReadOnlyInRoomState AsReadOnly()
+        {
+            return this;
+        }
 
-        /// <summary>
-        /// Indicates whether the room described by this state was exited by bypassing the exit door's lock (based on the premise that the room was indeed exited).
-        /// </summary>
+
+        protected InNodeState InternalCurrentNodeState { get => InternalVisitedRoomPath.Any() ? InternalVisitedRoomPath.Last().nodeState : null; }
+
+        public ReadOnlyInNodeState CurrentNodeState { get { return InternalCurrentNodeState?.AsReadOnly(); } }
+
+        public RoomNode CurrentNode { get => InternalCurrentNodeState?.Node;  }
+
         public bool BypassedExitLock { get
             {
-                InNodeState state = CurrentNodeState;
-                return state != null && state.BypassedLocks.Any();
+                InNodeState nodeState = InternalCurrentNodeState;
+                return nodeState != null && nodeState.BypassedLocks.Any();
             }
         }
 
-        /// <summary>
-        /// Indicates whether the room described by this state was exited by opening an exit door's lock (based on the premise that the room was indeed exited)
-        /// </summary>
         public bool OpenedExitLock
         {
             get
             {
-                InNodeState state = CurrentNodeState;
-                return state != null && state.OpenedLocks.Any();
+                InNodeState nodeState = InternalCurrentNodeState;
+                return nodeState != null && nodeState.OpenedLocks.Any();
             }
         }
 
-        /// <summary>
-        /// The room the player is currently in. This can be null if in-room state isn't being tracked.
-        /// </summary>
         public Room CurrentRoom { get => CurrentNode?.Room; }
 
         /// <summary>
@@ -64,31 +66,23 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
         /// This strat can be null since nodes are reached without using a strat when entering.
         /// </summary>
-        protected List<(InNodeState nodeState, Strat strat)> VisitedRoomPathList { get; } = new List<(InNodeState, Strat)>();
+        protected List<(InNodeState nodeState, Strat strat)> InternalVisitedRoomPath { get; } = new List<(InNodeState, Strat)>();
 
-        // This will just return VisitedRoomPathList as an IEnumerable
-        /// <summary>
-        /// A sequence of nodes that have been visited in this room since entering, in order,
-        /// starting with the node through which the room was entered.
-        /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
-        /// This strat can be null since nodes are reached without using a strat when entering.
-        /// </summary>
-        public IEnumerable<(InNodeState nodeState, Strat strat)> VisitedRoomPath { get { return VisitedRoomPathList; } }
+        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath { 
+            get 
+            {
+                return InternalVisitedRoomPath.Select< (InNodeState nodeState, Strat strat), (ReadOnlyInNodeState nodeState, Strat strat)>
+                    (pair => (pair.nodeState.AsReadOnly(), pair.strat));
+            }
+        }
 
         /// <summary>
         /// The inner HashSet containing the ID of obstacles that have been destroyed in this room since entering.
         /// </summary>
         protected HashSet<string> DestroyedObstacleIdsSet { get; set; } = new HashSet<string>();
 
-        // This will just return DestroyedObstacleIdsSet as an IEnumerable
-        /// <summary>
-        /// A sequence of IDs of obstacles that have been destroyed in this room since entering.
-        /// </summary>
-        public IEnumerable<string> DestroyedObstacleIds { get { return DestroyedObstacleIdsSet; } }
+        public ReadOnlySet<string> DestroyedObstacleIds { get { return DestroyedObstacleIdsSet.AsReadOnly(); } }
 
-        /// <summary>
-        /// The strat that was used to reach the current node, if any. Otherwise, is null.
-        /// </summary>
         public Strat LastStrat { get; protected set; }
 
         /// <summary>
@@ -121,7 +115,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// it's on a link that connects previous node to new node.</param>
         public void ApplyVisitNode(RoomNode node, Strat strat)
         {
-            VisitedRoomPathList.Add((new InNodeState(node), strat));
+            InternalVisitedRoomPath.Add((new InNodeState(node), strat));
             LastStrat = strat;
         }
 
@@ -141,7 +135,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeLock">Lock being opened</param>
         public void ApplyOpenLock(NodeLock nodeLock)
         {
-            CurrentNodeState.ApplyOpenLock(nodeLock);
+            InternalCurrentNodeState.ApplyOpenLock(nodeLock);
         }
 
         /// <summary>
@@ -150,23 +144,21 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeLock">Lock being bypassed</param>
         public void ApplyBypassLock(NodeLock nodeLock)
         {
-            CurrentNodeState.ApplyBypassLock(nodeLock);
+            InternalCurrentNodeState.ApplyBypassLock(nodeLock);
         }
 
-        /// <summary>
-        /// Returns the locks bypassed by Samus in the last node she visited in this room.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<NodeLock> GetBypassedLocks()
-        {
-            InNodeState nodeState = CurrentNodeState;
-            if(nodeState == null)
+        public IEnumerable<NodeLock> BypassedExitLocks {
+            get
             {
-                return Enumerable.Empty<NodeLock>();
-            }
-            else
-            {
-                return nodeState.BypassedLocks;
+                InNodeState nodeState = InternalCurrentNodeState;
+                if (nodeState == null)
+                {
+                    return Enumerable.Empty<NodeLock>();
+                }
+                else
+                {
+                    return nodeState.BypassedLocks;
+                }
             }
         }
 
@@ -176,8 +168,68 @@ namespace sm_json_data_framework.Models.InGameStates
         public void ClearRoomState()
         {
             DestroyedObstacleIdsSet.Clear();
-            VisitedRoomPathList.Clear();
+            InternalVisitedRoomPath.Clear();
             LastStrat = null;
         }
+    }
+
+    /// <summary>
+    /// Exposes the read-only portion of an <see cref="InRoomState"/>.
+    /// </summary>
+    public interface ReadOnlyInRoomState
+    {
+        /// <summary>
+        /// Creates and returns a copy of this InRoomState, as a full-fledged modifiable one.
+        /// </summary>
+        /// <returns>The clone</returns>
+        public InRoomState Clone();
+
+        /// <summary>
+        /// The logically-relevant information about Samus' current visit to the current node.
+        /// </summary>
+        public ReadOnlyInNodeState CurrentNodeState { get; }
+
+        /// <summary>
+        /// The node the player is currently at. This can be null if in-room state isn't being tracked.
+        /// </summary>
+        public RoomNode CurrentNode { get; }
+
+        /// <summary>
+        /// Indicates whether the room described by this state was exited by bypassing the exit door's lock (based on the premise that the room was indeed exited).
+        /// </summary>
+        public bool BypassedExitLock { get; }
+
+        /// <summary>
+        /// Indicates whether the room described by this state was exited by opening an exit door's lock (based on the premise that the room was indeed exited)
+        /// </summary>
+        public bool OpenedExitLock { get; }
+
+        /// <summary>
+        /// The room the player is currently in. This can be null if in-room state isn't being tracked.
+        /// </summary>
+        public Room CurrentRoom { get; }
+
+        /// <summary>
+        /// Enumeration of the nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
+        /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
+        /// This strat can be null since nodes are reached without using a strat when entering.
+        /// </summary>
+        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath { get; }
+
+        /// <summary>
+        /// A read-only set of IDs of obstacles that have been destroyed in this room since entering.
+        /// </summary>
+        public ReadOnlySet<string> DestroyedObstacleIds { get; }
+
+        /// <summary>
+        /// The strat that was used to reach the current node, if any. Otherwise, is null.
+        /// </summary>
+        public Strat LastStrat { get; }
+
+        /// <summary>
+        /// Returns the locks bypassed by Samus in the last node she visited in this room.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<NodeLock> BypassedExitLocks { get;}
     }
 }

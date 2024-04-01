@@ -34,7 +34,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Initialize gained and lost items
-            ItemInventory gainedInventory = executionResult.ResultingState.GetInventoryExceptWith(initialInGameState);
+            ItemInventory gainedInventory = executionResult.ResultingState.GetInventoryExceptIn(initialInGameState);
             ItemsGained = gainedInventory;
             // Cannot lose items, just create an empty inventory
             ItemsLost = new ItemInventory(model.StartConditions.BaseResourceMaximums.Clone());
@@ -44,13 +44,13 @@ namespace sm_json_data_framework.Models.Navigation
             ItemsEnabledNames = initialInGameState.Inventory.DisabledItemNames.Except(executionResult.ResultingState.Inventory.DisabledItemNames);
 
             // Initialize flags gained
-            GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptWith(initialInGameState).Values);
+            GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptIn(initialInGameState).Values);
 
             // Initialize locks opened
-            LocksOpened = LocksOpened.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptWith(initialInGameState).Values);
+            LocksOpened = LocksOpened.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptIn(initialInGameState).Values);
 
             // Initialize item locations taken
-            ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptWith(initialInGameState).Values);
+            ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptIn(initialInGameState).Values);
 
             // Initialize resources before and after
             ResourcesBefore = initialInGameState.Resources.Clone();

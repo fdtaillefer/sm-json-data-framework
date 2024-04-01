@@ -10,22 +10,13 @@ namespace sm_json_data_framework.Models.InGameStates
     /// <summary>
     /// Represents the logically-relevant parts of the state during a given visit of Samus at the current node.
     /// </summary>
-    public class InNodeState
+    public class InNodeState : ReadOnlyInNodeState
     {
-        /// <summary>
-        /// The node at which this InNodeState describes the situation.
-        /// </summary>
-        public RoomNode Node { get; set; }
+        public RoomNode Node { get; protected set; }
 
-        /// <summary>
-        /// An enumeration of locks that were opened by Samus during this visit.
-        /// </summary>
-        public IEnumerable<NodeLock> OpenedLocks { get; set; } = Enumerable.Empty<NodeLock>();
+        public IEnumerable<NodeLock> OpenedLocks { get; protected set; } = Enumerable.Empty<NodeLock>();
 
-        /// <summary>
-        /// An enumeration of locks that were bypassed by Samus during this visit.
-        /// </summary>
-        public IEnumerable<NodeLock> BypassedLocks { get; set; } = Enumerable.Empty<NodeLock>();
+        public IEnumerable<NodeLock> BypassedLocks { get; protected set; } = Enumerable.Empty<NodeLock>();
 
 
         public InNodeState(RoomNode node)
@@ -38,6 +29,16 @@ namespace sm_json_data_framework.Models.InGameStates
             Node = other.Node;
             OpenedLocks = new List<NodeLock>(other.OpenedLocks);
             BypassedLocks = new List<NodeLock>(other.BypassedLocks);
+        }
+
+        public InNodeState Clone()
+        {
+            return new InNodeState(this);
+        }
+
+        public InNodeState AsReadOnly()
+        {
+            return this;
         }
 
         /// <summary>
@@ -65,5 +66,32 @@ namespace sm_json_data_framework.Models.InGameStates
             }
             BypassedLocks = BypassedLocks.Append(nodeLock);
         }
+    }
+
+    /// <summary>
+    /// Exposes the read-only portion of an <see cref="InNodeState"/>.
+    /// </summary>
+    public interface ReadOnlyInNodeState
+    {
+        /// <summary>
+        /// The node at which this InNodeState describes the situation.
+        /// </summary>
+        public RoomNode Node { get; }
+
+        /// <summary>
+        /// An enumeration of locks that were opened by Samus during this visit.
+        /// </summary>
+        public IEnumerable<NodeLock> OpenedLocks { get; }
+
+        /// <summary>
+        /// An enumeration of locks that were bypassed by Samus during this visit.
+        /// </summary>
+        public IEnumerable<NodeLock> BypassedLocks { get; }
+
+        /// <summary>
+        /// Creates and returns a copy of this InNodeState, as a full-fledged modifiable one.
+        /// </summary>
+        /// <returns>The clone</returns>
+        public InNodeState Clone();
     }
 }

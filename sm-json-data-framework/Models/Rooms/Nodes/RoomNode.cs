@@ -284,7 +284,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // First thing is making sure no locks prevent interaction
-            IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedLocks(previousRoomCount);
+            IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);
             IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState)
                 .Where(activeLock => !bypassedLocks.Contains(activeLock, ObjectReferenceEqualityComparer<NodeLock>.Default));
 
