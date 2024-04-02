@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Navigation
             IntentDescription = intent;
         }
 
-        public AbstractNavigationAction(string intent, SuperMetroidModel model, InGameState initialInGameState, ExecutionResult executionResult): this(intent)
+        public AbstractNavigationAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult): this(intent)
         {
             Succeeded = true;
 

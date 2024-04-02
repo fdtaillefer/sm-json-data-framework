@@ -260,7 +260,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        public ItemInventory ExceptWith(ReadOnlyItemInventory other)
+        public ItemInventory ExceptIn(ReadOnlyItemInventory other)
         {
             // Create a new empty inventory
             ItemInventory returnInventory = new ItemInventory(InternalBaseResourceMaximums);
@@ -413,7 +413,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other inventory</param>
         /// <returns></returns>
-        public ItemInventory ExceptWith(ReadOnlyItemInventory other);
+        public ItemInventory ExceptIn(ReadOnlyItemInventory other);
     }
 
 }

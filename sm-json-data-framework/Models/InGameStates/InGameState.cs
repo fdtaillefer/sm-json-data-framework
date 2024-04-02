@@ -414,7 +414,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ItemInventory GetInventoryExceptIn(ReadOnlyInGameState other)
         {
-            return InternalInventory.ExceptWith(other.Inventory);
+            return InternalInventory.ExceptIn(other.Inventory);
         }
 
         /// <summary>

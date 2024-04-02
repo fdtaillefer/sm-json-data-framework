@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public EnableItemAction(string intent, SuperMetroidModel model, InGameState initialInGameState, ExecutionResult executionResult) :
+        public EnableItemAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
 

@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public InteractWithNodeAction(string intent, SuperMetroidModel model, InGameState initialInGameState, ExecutionResult executionResult) :
+        public InteractWithNodeAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
             
