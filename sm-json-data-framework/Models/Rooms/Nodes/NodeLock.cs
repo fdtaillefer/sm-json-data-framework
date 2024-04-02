@@ -97,12 +97,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         }
 
         /// <summary>
-        /// Returns whether this lock is currently active.
+        /// Returns whether this lock is currently active in the provided InGameState.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsActive(SuperMetroidModel model, InGameState inGameState)
+        public bool IsActive(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // This lock cannot be active if it's been opened
             if (inGameState.OpenedLocks.ContainsLock(this))
@@ -160,7 +160,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             NodeLock = nodeLock;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Can't open a lock that isn't active
             if (!NodeLock.IsActive(model, inGameState))
@@ -194,7 +194,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             NodeLock = nodeLock;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If there are no bypass strats, bypassing fails
             if (!NodeLock.BypassStrats.Any())

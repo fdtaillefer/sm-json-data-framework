@@ -81,7 +81,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
         {
             // If we're coming in, this must be usable coming in
             if (!UsableComingIn && comingIn)
@@ -129,7 +129,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public bool ComingIn { get; private set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return Runway.Execute(model, inGameState, ComingIn, times: times, previousRoomCount: previousRoomCount);
         }

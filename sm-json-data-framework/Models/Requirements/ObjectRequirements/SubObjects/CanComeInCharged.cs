@@ -45,7 +45,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             var mustShinespark = ShinesparkFrames > 0;
             var energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
@@ -206,7 +206,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <param name="runwaysReversible">If true, runways can be used in either direction. If false, they can only be used in their normal direction.</param>
         /// <returns></returns>
         (IEnumerable<(Runway runway, ExecutionResult executionResult, decimal length)> runwayEvaluations, ExecutionResult bestResults) EvaluateRunways(
-            SuperMetroidModel model, InGameState inGameState,
+            SuperMetroidModel model, ReadOnlyInGameState inGameState,
             IEnumerable<Runway> runways, int times, int previousRoomCount,
             Predicate<InGameState> hasEnergyForShinespark, bool runwaysReversible
         ) {

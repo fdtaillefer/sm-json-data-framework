@@ -210,7 +210,7 @@ namespace sm_json_data_framework.Models
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public int CompareInGameStates(InGameState x, InGameState y)
+        public int CompareInGameStates(ReadOnlyInGameState x, ReadOnlyInGameState y)
         {
             return GetInGameStateComparer().Compare(x, y);
         }
@@ -239,7 +239,7 @@ namespace sm_json_data_framework.Models
         /// <param name="acceptationCondition">An optional Predicate that is checked against the resulting in-game state of executions.
         /// Executions whose resulting state does not respect the predicate are rejected.</param>
         /// <returns>The best executable, alongside its ExecutionResult, or default values if none succeeded</returns>
-        public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, InGameState initialInGameState, int times = 1,
+        public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyInGameState initialInGameState, int times = 1,
             int previousRoomCount = 0, Predicate<InGameState> acceptationCondition = null) where T:IExecutable
         {
             InGameStateComparer comparer = GetInGameStateComparer();
@@ -286,7 +286,7 @@ namespace sm_json_data_framework.Models
         /// Only really impacts resource cost, since most items are non-consumable.</param>
         /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.
         /// This will never return the initialInGameState instance.</returns>
-        public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, InGameState initialInGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, ReadOnlyInGameState initialInGameState, int times = 1, int previousRoomCount = 0)
         {
             // If there are no executables, this is an instant success. Clone the inGameState to respect the contract.
             if(!executables.Any())

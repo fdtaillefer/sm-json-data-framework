@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             times = times * model.LogicalOptions.NumberOfTries(this);
 

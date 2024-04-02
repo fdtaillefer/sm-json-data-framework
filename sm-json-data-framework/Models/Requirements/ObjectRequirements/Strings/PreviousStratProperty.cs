@@ -25,12 +25,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <param name="previousRoomCount">The number of playable rooms to go back by.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public bool IsFulfilled(InGameState inGameState, int previousRoomCount = 0)
+        public bool IsFulfilled(ReadOnlyInGameState inGameState, int previousRoomCount = 0)
         {
             return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (IsFulfilled(inGameState, previousRoomCount))
             {

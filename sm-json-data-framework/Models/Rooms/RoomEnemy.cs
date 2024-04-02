@@ -113,7 +113,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to use to check. This will NOT be altered by this method.</param>
         /// <returns></returns>
-        public bool Spawns(SuperMetroidModel model, InGameState inGameState)
+        public bool Spawns(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // If spawn conditions for this room enemy aren't met, it's impossible for the enemy to spawn
             if (Spawn.Execute(model, inGameState) == null)
@@ -158,7 +158,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             RoomEnemy = roomEnemy;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The enemy can only be farmed if it currently spawns
             if (!RoomEnemy.Spawns(model, inGameState))

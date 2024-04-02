@@ -11,7 +11,7 @@ namespace sm_json_data_framework.Models.InGameStates
     /// A Comparer that can compare two in-game states by their consumable resource count, based on an internal in-game resource evaluator.
     /// The "greater" in-game state is the one whose resource total is deemed more valuable according to that evaluator.
     /// </summary>
-    public class InGameStateComparer : IComparer<InGameState>
+    public class InGameStateComparer : IComparer<ReadOnlyInGameState>
     {
         private IInGameResourceEvaluator ResourceEvaluator { get; set; }
 
@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.InGameStates
             ResourceEvaluator = resourceEvaluator;
         }
 
-        public int Compare(InGameState x, InGameState y)
+        public int Compare(ReadOnlyInGameState x, ReadOnlyInGameState y)
         {
             return CalculateValue(x).CompareTo(CalculateValue(y));
         }
@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="inGameState">The InGameState to assign a value to</param>
         /// <returns></returns>
-        private int CalculateValue(InGameState inGameState)
+        private int CalculateValue(ReadOnlyInGameState inGameState)
         {
             // Give a negative value to null. It's decidedly less valuable than any existing state.
             if (inGameState == null)

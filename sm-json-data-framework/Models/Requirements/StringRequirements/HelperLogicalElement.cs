@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Helper = helper;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return Helper.Requires.Execute(model, inGameState, times: times * model.LogicalOptions.NumberOfTries(Helper), previousRoomCount: previousRoomCount);
         }

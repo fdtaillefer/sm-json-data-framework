@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Requirements
         public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room);
 
         // Inherited from IExecutable.
-        public abstract ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0);
+        public abstract ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         // STITCHME could be nice to ask for always and never? As in isAlwaysFree() and isNever()
     }

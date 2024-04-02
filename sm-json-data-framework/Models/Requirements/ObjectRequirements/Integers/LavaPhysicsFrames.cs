@@ -11,13 +11,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class LavaPhysicsFrames: AbstractDamageNumericalValueLogicalElement
     {
-        public override int CalculateDamage(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Value) * times;
             return (int)(baseDamage * model.LogicalOptions.LavaLeniencyMultiplier);
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, InGameState inGameState)
+        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetLavaPhysicsDamageReducingItems(model, inGameState);
         }

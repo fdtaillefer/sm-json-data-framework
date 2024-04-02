@@ -50,7 +50,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
         /// <returns></returns>
-        public bool IsFree(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public bool IsFree(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Execute the requirements of this cycle once
             ExecutionResult executionResult = RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
@@ -117,7 +117,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return FarmCycle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
@@ -134,7 +134,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             var requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // Can't even execute one cycle, so return a failure
@@ -267,7 +267,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
         /// <param name="resourcesToRefill">The resources that should be refilled.</param>
         /// <returns></returns>
-        private ExecutionResult ExecuteRefill(SuperMetroidModel model, InGameState inGameState, IEnumerable<ConsumableResourceEnum> resourcesToRefill)
+        private ExecutionResult ExecuteRefill(SuperMetroidModel model, ReadOnlyInGameState inGameState, IEnumerable<ConsumableResourceEnum> resourcesToRefill)
         {
             InGameState resultingState = inGameState.Clone();
             foreach (ConsumableResourceEnum resource in resourcesToRefill)

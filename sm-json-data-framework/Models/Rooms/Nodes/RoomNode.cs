@@ -122,7 +122,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         /// <param name="inGameState">InGameState to evaluate for active locks</param>
         /// <returns></returns>
-        public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, InGameState inGameState)
+        public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
             return Locks.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
@@ -281,7 +281,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Node = node;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // First thing is making sure no locks prevent interaction
             IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);

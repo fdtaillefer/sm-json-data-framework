@@ -105,7 +105,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
 
@@ -143,7 +143,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The bypass attempt fails if there's no way to bypass
             if (StratObstacle.Bypass == null)

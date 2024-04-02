@@ -252,12 +252,12 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
-        public ResourceCount GetResourceVariationWith(InGameState other)
+        public ResourceCount GetResourceVariationWith(ReadOnlyInGameState other)
         {
             ResourceCount returnValue = new ResourceCount();
             foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
-                returnValue.ApplyAmount(currentResource, InternalResources.GetAmount(currentResource) - other.InternalResources.GetAmount(currentResource));
+                returnValue.ApplyAmount(currentResource, InternalResources.GetAmount(currentResource) - other.Resources.GetAmount(currentResource));
             }
 
             return returnValue;
@@ -285,14 +285,14 @@ namespace sm_json_data_framework.Models.InGameStates
         protected Dictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
         public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags { get { return InternalActiveGameFlags.AsReadOnly(); } }
 
-        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(InGameState other)
+        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other)
         {
             Dictionary<string, GameFlag> returnFlags = new Dictionary<string, GameFlag>();
 
             // For each flag, just check for absence in other
             foreach (KeyValuePair<string, GameFlag> kvp in InternalActiveGameFlags)
             {
-                if (!other.InternalActiveGameFlags.ContainsFlag(kvp.Key))
+                if (!other.ActiveGameFlags.ContainsFlag(kvp.Key))
                 {
                     returnFlags.Add(kvp.Key, kvp.Value);
                 }
@@ -316,7 +316,7 @@ namespace sm_json_data_framework.Models.InGameStates
         protected Dictionary<string, NodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
         public ReadOnlyDictionary<string, NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
 
-        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(InGameState other)
+        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other)
         {
 
             IDictionary<string, NodeLock> returnLocks = new Dictionary<string, NodeLock>();
@@ -324,7 +324,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // For each lock, just check for absence in other
             foreach (KeyValuePair<string, NodeLock> kvp in InternalOpenedLocks)
             {
-                if (!other.InternalOpenedLocks.ContainsLock(kvp.Key))
+                if (!other.OpenedLocks.ContainsLock(kvp.Key))
                 {
                     returnLocks.Add(kvp.Key, kvp.Value);
                 }
@@ -377,14 +377,14 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ReadOnlyDictionary<string, RoomNode> TakenItemLocations { get { return InternalTakenItemLocations.AsReadOnly(); } }
 
-        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptIn(InGameState other)
+        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other)
         {
             IDictionary<string, RoomNode> returnLocations = new Dictionary<string, RoomNode>();
 
             // For each location, just check for absence in other
             foreach (KeyValuePair<string, RoomNode> kvp in InternalTakenItemLocations)
             {
-                if (!other.InternalTakenItemLocations.ContainsNode(kvp.Key))
+                if (!other.TakenItemLocations.ContainsNode(kvp.Key))
                 {
                     returnLocations.Add(kvp.Key, kvp.Value);
                 }
@@ -412,9 +412,9 @@ namespace sm_json_data_framework.Models.InGameStates
         
         public ReadOnlyResourceCount BaseResourceMaximums { get { return InternalInventory.BaseResourceMaximums; } }
 
-        public ItemInventory GetInventoryExceptIn(InGameState other)
+        public ItemInventory GetInventoryExceptIn(ReadOnlyInGameState other)
         {
-            return InternalInventory.ExceptWith(other.InternalInventory);
+            return InternalInventory.ExceptWith(other.Inventory);
         }
 
         /// <summary>
@@ -903,7 +903,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state to compare with.</param>
         /// <returns></returns>
-        public ResourceCount GetResourceVariationWith(InGameState other);
+        public ResourceCount GetResourceVariationWith(ReadOnlyInGameState other);
 
         /// <summary>
         /// Returns the enumeration of rechargeable resources that are currently full.
@@ -935,7 +935,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(InGameState other);
+        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// The read-only dictionary of locks that are opened in this InGameState, mapped by their name.
@@ -948,7 +948,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(InGameState other);
+        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// Returns the locks bypassed by Samus at the current node.
@@ -970,7 +970,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptIn(InGameState other);
+        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// The read-only inventory of items collected by Samus according to this in-game state.
@@ -990,7 +990,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public ItemInventory GetInventoryExceptIn(InGameState other);
+        public ItemInventory GetInventoryExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// Read-only portion of the in-room state of the current room.

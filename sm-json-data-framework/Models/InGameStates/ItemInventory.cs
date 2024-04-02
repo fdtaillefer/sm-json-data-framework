@@ -260,7 +260,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        public ItemInventory ExceptWith(ItemInventory other)
+        public ItemInventory ExceptWith(ReadOnlyItemInventory other)
         {
             // Create a new empty inventory
             ItemInventory returnInventory = new ItemInventory(InternalBaseResourceMaximums);
@@ -270,7 +270,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // For non-consumable items, just check for absence in other
             foreach (KeyValuePair<string, Item> kvp in InternalNonConsumableItems)
             {
-                if (!other.InternalNonConsumableItems.ContainsKey(kvp.Key))
+                if (!other.NonConsumableItems.ContainsKey(kvp.Key))
                 {
                     returnInventory.ApplyAddItem(kvp.Value);
                 }
@@ -281,7 +281,7 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 // Find how many of this item are present in this and not in other
                 int timesMissing = 0;
-                if (other.InternalExpansionItems.TryGetValue(kvp.Key, out var otherExpansionItem))
+                if (other.ExpansionItems.TryGetValue(kvp.Key, out var otherExpansionItem))
                 {
                     // This can turn out negative, the for loop will properly do nothing
                     timesMissing = kvp.Value.count - otherExpansionItem.count;
@@ -413,7 +413,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other inventory</param>
         /// <returns></returns>
-        public ItemInventory ExceptWith(ItemInventory other);
+        public ItemInventory ExceptWith(ReadOnlyItemInventory other);
     }
 
 }

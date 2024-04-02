@@ -97,7 +97,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return unhandled.Distinct();
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, InGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There are many things to check...
 
