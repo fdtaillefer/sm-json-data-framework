@@ -51,7 +51,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             var energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
             var shinesparkEnergyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
-            Predicate<InGameState> hasEnergyForShinespark = state => state.Resources.GetAmount(ConsumableResourceEnum.ENERGY)>= energyNeededForShinespark;
+            Predicate<ReadOnlyInGameState> hasEnergyForShinespark = state => state.Resources.GetAmount(ConsumableResourceEnum.ENERGY)>= energyNeededForShinespark;
             Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, shinesparkEnergyCost);
 
             // Check simple preconditions before looking at anything
@@ -208,7 +208,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         (IEnumerable<(Runway runway, ExecutionResult executionResult, decimal length)> runwayEvaluations, ExecutionResult bestResults) EvaluateRunways(
             SuperMetroidModel model, ReadOnlyInGameState inGameState,
             IEnumerable<Runway> runways, int times, int previousRoomCount,
-            Predicate<InGameState> hasEnergyForShinespark, bool runwaysReversible
+            Predicate<ReadOnlyInGameState> hasEnergyForShinespark, bool runwaysReversible
         ) {
             Func<IRunway, decimal, decimal> calculateRunwayLength = runwaysReversible? model.Rules.CalculateEffectiveReversibleRunwayLength :
                 (Func<IRunway, decimal, decimal>) model.Rules.CalculateEffectiveRunwayLength;

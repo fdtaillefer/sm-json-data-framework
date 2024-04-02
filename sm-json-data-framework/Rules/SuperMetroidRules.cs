@@ -278,7 +278,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateEnvironmentalDamage(InGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateEnvironmentalDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -312,7 +312,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateHeatDamage(InGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateHeatDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -370,7 +370,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateLavaDamage(InGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateLavaDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -384,7 +384,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateLavaPhysicsDamage(InGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateLavaPhysicsDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -422,7 +422,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateAcidDamage(InGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateAcidDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -460,7 +460,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateElectricityGrappleDamage(InGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateElectricityGrappleDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -524,7 +524,7 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateEnemyDamage(InGameState, EnemyAttack)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateEnemyDamage(ReadOnlyInGameState, EnemyAttack)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>

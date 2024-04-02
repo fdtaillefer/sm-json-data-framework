@@ -202,7 +202,11 @@ namespace sm_json_data_framework.Models
         /// </summary>
         public IDictionary<string, Enemy> Bosses { get; set; } = new Dictionary<string, Enemy>();
 
-        public InGameState InitialGameState { private get; set; }
+        private ReadOnlyInGameState _initialGameState;
+        public ReadOnlyInGameState InitialGameState {
+            get { return _initialGameState; }
+            set { _initialGameState = value?.Clone(); } 
+        }
 
         /// <summary>
         /// Compares the two provided game states, using the comparer returned by <see cref="GetInGameStateComparer"/>.
@@ -240,7 +244,7 @@ namespace sm_json_data_framework.Models
         /// Executions whose resulting state does not respect the predicate are rejected.</param>
         /// <returns>The best executable, alongside its ExecutionResult, or default values if none succeeded</returns>
         public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyInGameState initialInGameState, int times = 1,
-            int previousRoomCount = 0, Predicate<InGameState> acceptationCondition = null) where T:IExecutable
+            int previousRoomCount = 0, Predicate<ReadOnlyInGameState> acceptationCondition = null) where T:IExecutable
         {
             InGameStateComparer comparer = GetInGameStateComparer();
 
@@ -328,7 +332,7 @@ namespace sm_json_data_framework.Models
             {
                 throw new Exception("InGameState is not available for a model that's not initialized.");
             }
-            return new InGameState(InitialGameState);
+            return InitialGameState.Clone();
         }
 
         /// <summary>

@@ -91,7 +91,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsOpen(SuperMetroidModel model, InGameState inGameState)
+        public bool IsOpen(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return inGameState.OpenedLocks.ContainsLock(this);
         }
