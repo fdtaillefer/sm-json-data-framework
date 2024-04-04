@@ -12,7 +12,7 @@ namespace sm_json_data_framework.Models.InGameStates
     /// </summary>
     public class InNodeState : ReadOnlyInNodeState
     {
-        public RoomNode Node { get; protected set; }
+        public RoomNode Node { get; }
 
         public IEnumerable<NodeLock> OpenedLocks { get; protected set; } = Enumerable.Empty<NodeLock>();
 
