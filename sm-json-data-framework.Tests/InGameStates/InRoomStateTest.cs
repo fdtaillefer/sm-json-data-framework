@@ -82,7 +82,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
-        public void ApplyVisitNode_LinkDoesntExist_throwsException()
+        public void ApplyVisitNode_LinkDoesntExist_ThrowsException()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
@@ -90,12 +90,32 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
-        public void ApplyVisitNode_StratNotOnOriginLink_throwsException()
+        public void ApplyVisitNode_StratNotOnOriginLink_ThrowsException()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
             Strat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).Links[1].Strats["Base"];
             Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
+        }
+
+        [Fact]
+        public void ApplyDestroyObstacle_RegistersObstacle()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(initialNode);
+            state.ApplyDestroyObstacle(state.CurrentRoom.Obstacles["A"]);
+
+            Assert.Single(state.DestroyedObstacleIds);
+            Assert.Contains("A", state.DestroyedObstacleIds);
+        }
+
+        [Fact]
+        public void ApplyDestroyObstacle_ObstacleNotInRoom_ThrowsException()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+            
+            Assert.Throws<ArgumentException>(() => state.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
         }
 
     }

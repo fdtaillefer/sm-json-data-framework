@@ -47,24 +47,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<Link> Links { get; set; } = Enumerable.Empty<Link>();
 
-        [JsonPropertyName("obstacles")]
-        public IEnumerable<RoomObstacle> ObstaclesSequence { get; set; } = Enumerable.Empty<RoomObstacle>();
-
-        private IDictionary<string, RoomObstacle> _obstaclesDictionary;
-        /// <summary>
-        /// The obstacles in this room, mapped by id
-        /// </summary>
-        [JsonIgnore]
-        public IDictionary<string, RoomObstacle> Obstacles {
-            get
-            {
-                if (_obstaclesDictionary == null)
-                {
-                    _obstaclesDictionary = ObstaclesSequence.ToDictionary(o => o.Id);
-                }
-                return _obstaclesDictionary;
-            }   
-        }
+        public IDictionary<string, RoomObstacle> Obstacles { get; set; } = new Dictionary<string, RoomObstacle>();
 
         [JsonPropertyName("enemies")]
         public IEnumerable<RoomEnemy> EnemiesSequence { get; set; } = Enumerable.Empty<RoomEnemy>();

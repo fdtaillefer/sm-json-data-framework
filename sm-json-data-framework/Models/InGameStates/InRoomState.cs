@@ -115,6 +115,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="strat">The strat through which the node is being reached. Can be null, but only for the first node visited in the room, 
         /// and for the second node only if Samus is seen as spawning there. Additionally, MUST be null for the first node visited in the room.
         /// If not null, must be present on a link that connects previous node to new node.</param>
+        /// <exception cref="ArgumentException">Thrown if a strat is provided when the node visit is part of spawning in the room; If visit is not part of spawning, 
+        /// thrown if there is no link from current node to target, or if no strat from that link is provided.</exception>
         public void ApplyVisitNode(RoomNode node, Strat strat)
         {
             // Only allow Strat to be null if this is the first visited node in current room visit, or if this is the second visited node
@@ -155,8 +157,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Should not be called for an obstacle that is not in the current room.
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
+        /// <exception cref="ArgumentException">Thrown if the obstacle is not in the current room</exception>
         public void ApplyDestroyObstacle(RoomObstacle obstacle)
         {
+            CurrentRoom.Obstacles.TryGetValue(obstacle.Id, out RoomObstacle foundObstacle);
+            if(foundObstacle != obstacle)
+            {
+                throw new ArgumentException("Provided obstacle must exist in current room");
+            }
             DestroyedObstacleIdsSet.Add(obstacle.Id);
         }
 

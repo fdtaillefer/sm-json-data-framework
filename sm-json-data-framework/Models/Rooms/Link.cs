@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
+    /// <summary>
+    /// Represents all ways to navigate directly from a specific node to any other node in the same room.
+    /// </summary>
     public class Link : InitializablePostDeserializeInRoom
     {
         [JsonPropertyName("from")]
