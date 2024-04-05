@@ -126,7 +126,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             // We have succeeded, but we must update the ExecutionResult and its InGameState to reflect any destroyed obstacles
-            result.ApplyDestroyedObstacles(new[] { StratObstacle.Obstacle }.Concat(StratObstacle.AdditionalObstacles), previousRoomCount);
+            result.ApplyDestroyObstacles(new[] { StratObstacle.Obstacle }.Concat(StratObstacle.AdditionalObstacles), previousRoomCount);
 
             return result;
         }

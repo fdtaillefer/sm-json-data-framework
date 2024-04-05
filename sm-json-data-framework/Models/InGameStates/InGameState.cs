@@ -677,9 +677,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This obstacle should be in the current room.
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
-        public void ApplyDestroyedObstacle(RoomObstacle obstacle)
+        public void ApplyDestroyObstacle(RoomObstacle obstacle)
         {
-            InternalInRoomState.ApplyDestroyedObstacle(obstacle);
+            InternalInRoomState.ApplyDestroyObstacle(obstacle);
         }
 
         /// <summary>

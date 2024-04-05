@@ -112,14 +112,14 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="usePreviousRoom">Indicates whether the obstacles were destroyed in the context of the previous room.</param>
         /// <param name="previousRoomCount">Indicates in which previous playable room to destroy the obstacles, if any.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
-        public void ApplyDestroyedObstacles(IEnumerable<RoomObstacle> obstacles, int previousRoomCount = 0)
+        public void ApplyDestroyObstacles(IEnumerable<RoomObstacle> obstacles, int previousRoomCount = 0)
         {
             // While we can retroactively do some things in previous rooms, we will not retroactively alter the room state.
             if (previousRoomCount == 0)
             {
                 foreach(var obstacle in obstacles)
                 {
-                    ResultingState.ApplyDestroyedObstacle(obstacle);
+                    ResultingState.ApplyDestroyObstacle(obstacle);
                 }
             }
         }

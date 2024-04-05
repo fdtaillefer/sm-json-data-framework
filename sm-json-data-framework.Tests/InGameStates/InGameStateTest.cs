@@ -106,8 +106,8 @@ namespace sm_json_data_framework.InGameStates
 
             // Create and modify a clone
             InGameState clone = inGameState.Clone();
-            clone.ApplyVisitNode(Model.GetNodeInRoom(startingRoomName, 8), inGameState.GetCurrentNode().Links[8].Strats["Base"]);
-            clone.ApplyVisitNode(Model.GetNodeInRoom(startingRoomName, 3), inGameState.GetCurrentNode().Links[8].Strats["Base"]);
+            clone.ApplyVisitNode(Model.GetNodeInRoom(startingRoomName, 8), clone.GetCurrentNode().Links[8].Strats["Base"]);
+            clone.ApplyVisitNode(Model.GetNodeInRoom(startingRoomName, 3), clone.GetCurrentNode().Links[3].Strats["Base"]);
             clone.ApplyOpenLock(Model.Locks[secondLockName]);
             clone.ApplyTakeLocation(variaNode);
             clone.ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
