@@ -99,6 +99,26 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void ApplyDestroyObstacle_ById_RegistersObstacle()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(initialNode);
+            state.ApplyDestroyObstacle("A");
+
+            Assert.Single(state.DestroyedObstacleIds);
+            Assert.Contains("A", state.DestroyedObstacleIds);
+        }
+
+        [Fact]
+        public void ApplyDestroyObstacle_ById_ObstacleNotInRoom_ThrowsException()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+
+            Assert.Throws<ArgumentException>(() => state.ApplyDestroyObstacle("Z"));
+        }
+
+        [Fact]
         public void ApplyDestroyObstacle_RegistersObstacle()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);

@@ -153,8 +153,22 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Updates the in-room state to contain a mention of the destruction of the obstacle in the current room with the provided ID.
+        /// </summary>
+        /// <param name="obstacleId">ID of the obstacle to destroy.</param>
+        /// <exception cref="ArgumentException">Thrown if the obstacle is not in the current room</exception>
+        public void ApplyDestroyObstacle(string obstacleId)
+        {
+            CurrentRoom.Obstacles.TryGetValue(obstacleId, out RoomObstacle obstacle);
+            if(obstacle == null)
+            {
+                throw new ArgumentException($"Obstacle '{obstacleId}' not present in current room");
+            }
+            ApplyDestroyObstacleSafe(obstacle);
+        }
+
+        /// <summary>
         /// Updates the in-room state to contain a mention of the destruction of the provided obstacle.
-        /// Should not be called for an obstacle that is not in the current room.
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
         /// <exception cref="ArgumentException">Thrown if the obstacle is not in the current room</exception>
@@ -165,6 +179,16 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 throw new ArgumentException("Provided obstacle must exist in current room");
             }
+            ApplyDestroyObstacleSafe(obstacle);
+        }
+
+        /// <summary>
+        /// Does the actual updates of the in-room state to contain a mention of the destruction of the provided obstacle,
+        /// which must have been validate by one of the public ApplyDestroyObstacle() methods.
+        /// </summary>
+        /// <param name="obstacle"></param>
+        protected void ApplyDestroyObstacleSafe(RoomObstacle obstacle)
+        {
             DestroyedObstacleIdsSet.Add(obstacle.Id);
         }
 
