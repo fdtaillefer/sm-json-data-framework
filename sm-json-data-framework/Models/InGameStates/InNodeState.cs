@@ -8,7 +8,8 @@ using System.Text;
 namespace sm_json_data_framework.Models.InGameStates
 {
     /// <summary>
-    /// Represents the logically-relevant parts of the state during a given visit of Samus at the current node.
+    /// Represents the logically-relevant parts of the state during a given visit of Samus at a given node.
+    /// An instance of this class is not intended to be moved from node to node, but should be replaced instead.
     /// </summary>
     public class InNodeState : ReadOnlyInNodeState
     {

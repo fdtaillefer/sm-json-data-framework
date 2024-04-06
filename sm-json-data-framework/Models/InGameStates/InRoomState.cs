@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms;
+﻿using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
+using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
@@ -24,7 +25,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public InRoomState(InRoomState other)
         {
             InternalVisitedRoomPath = other.InternalVisitedRoomPath.Select(pair => (new InNodeState(pair.nodeState), pair.strat)).ToList();
-            DestroyedObstacleIdsSet = new HashSet<string>(other.DestroyedObstacleIdsSet);
+            InternalDestroyedObstacleIds = new HashSet<string>(other.InternalDestroyedObstacleIds);
             LastStrat = other.LastStrat;
         }
 
@@ -85,9 +86,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// The inner HashSet containing the ID of obstacles that have been destroyed in this room since entering.
         /// </summary>
-        protected HashSet<string> DestroyedObstacleIdsSet { get; set; } = new HashSet<string>();
+        protected HashSet<string> InternalDestroyedObstacleIds { get; set; } = new HashSet<string>();
 
-        public ReadOnlySet<string> DestroyedObstacleIds { get { return DestroyedObstacleIdsSet.AsReadOnly(); } }
+        public ReadOnlySet<string> DestroyedObstacleIds { get { return InternalDestroyedObstacleIds.AsReadOnly(); } }
 
         public Strat LastStrat { get; protected set; }
 
@@ -123,8 +124,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <exception cref="ArgumentException">Thrown if the nodeId doesn't exist in the room, or if the stratName doesn't exist on the link between the nodes. 
         /// Also thrown if a strat is provided when the node visit is part of spawning in the room; If visit is not part of spawning, 
         /// thrown if there is no link from current node to target, or if no strat from that link is provided.</exception>
+        /// <exception cref="InvalidOperationException">If this is called while this InRoomState has no current room</exception>
         public void ApplyVisitNode(int nodeId, string stratName)
         {
+            if(CurrentRoom == null)
+            {
+                throw new InvalidOperationException("Cannot try to visit a node by ID because there is no current room defined");
+            }
+
             CurrentRoom.Nodes.TryGetValue(nodeId, out RoomNode node);
             if(node == null)
             {
@@ -159,20 +166,29 @@ namespace sm_json_data_framework.Models.InGameStates
         /// thrown if there is no link from current node to target, or if no strat from that link is provided.</exception>
         public void ApplyVisitNode(RoomNode node, Strat strat)
         {
-            // Only allow Strat to be null if this is the first visited node in current room visit, or if this is the second visited node
-            // and the second node is where the first node causes Samus to be considered to spawn.
-            if (strat == null && VisitedRoomPath.Any() && (VisitedRoomPath.Count() > 1 || VisitedRoomPath.First().nodeState.Node.OverrideSpawnAtNodeId != node.Id))
+            // Spawning in the room is ongoing if no nodes have been visited, or only one node has been visited and that node spawns Samus elsewhere
+            bool spawnOngoing = !VisitedRoomPath.Any() || (VisitedRoomPath.Count() == 1 && CurrentNode.SpawnsAtDifferentNode);
+
+            // Only allow Strat to be null if spawn is ongoing
+            if (strat == null && !spawnOngoing)
             {
-                throw new ArgumentException("A strat must be provided when visiting a node except when spawning in the room.");
+                throw new ArgumentException("A strat must be provided when visiting a node except while spawning in the room.");
+            }
+            // Require Strat to be null if spawn is not ongoing
+            else if (spawnOngoing && strat != null)
+            {
+                throw new ArgumentException("A strat must not be provided when visiting a node while spawning in the room.");
+            }
+
+            // If we're trying to visit the second node of a two-node spawning process, only the node referenced by the first node is valid
+            if (spawnOngoing && VisitedRoomPath.Any() && CurrentNode.OverrideSpawnAtNode != node)
+            {
+                throw new ArgumentException($"Spawn is ongoing at node {CurrentNode.Id} of room '{CurrentRoom.Name}', and that node forces the next " +
+                    $"node visit to be at node {CurrentNode.OverrideSpawnAtNodeId}");
             }
 
             if (strat != null)
             {
-                if (!VisitedRoomPath.Any())
-                {
-                    throw new ArgumentException("A strat must not be provided when spawning in the room.");
-                }
-
                 CurrentNode.Links.TryGetValue(node.Id, out LinkTo link);
                 if (link == null)
                 {
@@ -183,7 +199,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     link.Strats.TryGetValue(strat.Name, out Strat existingStrat);
                     if (existingStrat == null || existingStrat != strat)
                     {
-                        throw new ArgumentException($"The specified strat must be in a link fromfrom current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
+                        throw new ArgumentException($"The specified strat must be in a link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
                     }
                 }
             }
@@ -197,8 +213,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="obstacleId">ID of the obstacle to destroy.</param>
         /// <exception cref="ArgumentException">Thrown if the obstacle is not in the current room</exception>
+        /// <exception cref="InvalidOperationException">Thrown if this state is not at a node (and hence has no room)</exception>
         public void ApplyDestroyObstacle(string obstacleId)
         {
+            if (CurrentRoom == null)
+            {
+                throw new InvalidOperationException("Cannot destroy an obstacle when not in a room");
+            }
             CurrentRoom.Obstacles.TryGetValue(obstacleId, out RoomObstacle obstacle);
             if(obstacle == null)
             {
@@ -212,8 +233,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
         /// <exception cref="ArgumentException">Thrown if the obstacle is not in the current room</exception>
+        /// <exception cref="InvalidOperationException">Thrown if this state is not at a node (and hence has no room)</exception>
         public void ApplyDestroyObstacle(RoomObstacle obstacle)
         {
+            if (CurrentRoom == null)
+            {
+                throw new InvalidOperationException("Cannot destroy an obstacle when not in a room");
+            }
             CurrentRoom.Obstacles.TryGetValue(obstacle.Id, out RoomObstacle foundObstacle);
             if(foundObstacle != obstacle)
             {
@@ -229,15 +255,20 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="obstacle">The obstacle to destroy.</param>
         protected void ApplyDestroyObstacleSafe(RoomObstacle obstacle)
         {
-            DestroyedObstacleIdsSet.Add(obstacle.Id);
+            InternalDestroyedObstacleIds.Add(obstacle.Id);
         }
 
         /// <summary>
         /// Registers the lock with the provided name as being opened at the current node.
         /// </summary>
         /// <param name="nodeLock">Lock being opened</param>
+        /// <exception cref="InvalidOperationException">Thrown if this state is not at a node</exception>
         public void ApplyOpenLock(string lockName)
         {
+            if(InternalCurrentNodeState == null)
+            {
+                throw new InvalidOperationException("Cannot open a lock when not at a node");
+            }
             InternalCurrentNodeState.ApplyOpenLock(lockName);
         }
 
@@ -246,8 +277,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Registers the provided NodeLock as being opened at the current node.
         /// </summary>
         /// <param name="nodeLock">Lock being opened</param>
+        /// <exception cref="InvalidOperationException">Thrown if this state is not at a node</exception>
         public void ApplyOpenLock(NodeLock nodeLock)
         {
+            if (InternalCurrentNodeState == null)
+            {
+                throw new InvalidOperationException("Cannot open a lock when not at a node");
+            }
             InternalCurrentNodeState.ApplyOpenLock(nodeLock);
         }
 
@@ -255,8 +291,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Registers the lock with the provided name as being bypassed at the current node.
         /// </summary>
         /// <param name="nodeLock">Lock being bypassed</param>
+        /// <exception cref="InvalidOperationException">Thrown if this state is not at a node</exception>
         public void ApplyBypassLock(string lockName)
         {
+            if (InternalCurrentNodeState == null)
+            {
+                throw new InvalidOperationException("Cannot bypass a lock when not at a node");
+            }
             InternalCurrentNodeState.ApplyBypassLock(lockName);
         }
 
@@ -264,11 +305,19 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Registers the provided NodeLock as being bypassed at the current node.
         /// </summary>
         /// <param name="nodeLock">Lock being bypassed</param>
+        /// <exception cref="InvalidOperationException">Thrown if this state is not at a node</exception>
         public void ApplyBypassLock(NodeLock nodeLock)
         {
+            if (InternalCurrentNodeState == null)
+            {
+                throw new InvalidOperationException("Cannot bypass a lock when not at a node");
+            }
             InternalCurrentNodeState.ApplyBypassLock(nodeLock);
         }
 
+        /// <summary>
+        /// The locks opened by Samus at the last node visited in this room.
+        /// </summary>
         public IEnumerable<NodeLock> OpenedExitLocks
         {
             get
@@ -285,6 +334,9 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
+        /// <summary>
+        /// The locks bypassed by Samus at the last node visited in this room.
+        /// </summary>
         public IEnumerable<NodeLock> BypassedExitLocks {
             get
             {
@@ -302,10 +354,12 @@ namespace sm_json_data_framework.Models.InGameStates
 
         /// <summary>
         /// Removes all data from this InRoomState. Useful if this has been initialized at a starting node but in-room state is not going to be maintained.
+        /// This will leave this InRoomState in a state where it is at no node.
+        /// It's strongly recommended to visit a node after this before anything else.
         /// </summary>
         public void ClearRoomState()
         {
-            DestroyedObstacleIdsSet.Clear();
+            InternalDestroyedObstacleIds.Clear();
             InternalVisitedRoomPath.Clear();
             LastStrat = null;
         }

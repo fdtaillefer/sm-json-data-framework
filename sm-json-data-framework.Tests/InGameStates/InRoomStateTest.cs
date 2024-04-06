@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace sm_json_data_framework.Tests.InGameStates
 {
@@ -97,6 +98,56 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(8, "wrongStrat"));
         }
 
+        [Theory]
+        [InlineData("stratName")]
+        [InlineData(null)]
+        public void ApplyVisitNode_ById_NoCurrentRoom_ThrowsException(string stratName)
+        {
+            InRoomState state = new InRoomState(Model.GetNodeInRoom("Landing Site", 5));
+            state.ClearRoomState();
+            Assert.Throws<InvalidOperationException>(() => state.ApplyVisitNode(8, stratName));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_ById_OngoingSpawnAt_GoesToCorrectNodeWithNoStrat_AccumulatesVisitedNodesAndStrats()
+        {
+            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
+            InRoomState state = new InRoomState(firstNode);
+            state.ClearRoomState();
+            state.ApplyVisitNode(firstNode, null);
+
+            state.ApplyVisitNode(5, null);
+            Assert.Same(secondNode, state.CurrentNode);
+            Assert.Same(secondNode, state.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Null(state.LastStrat);
+            Assert.Null(state.VisitedRoomPath.Last().strat);
+            Assert.Equal(2, state.VisitedRoomPath.Count());
+        }
+
+        [Fact]
+        public void ApplyVisitNode_ById_OngoingSpawnAt_GoesToDifferentNode_ThrowsException()
+        {
+            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 4);
+            InRoomState state = new InRoomState(firstNode);
+            state.ClearRoomState();
+            state.ApplyVisitNode(firstNode, null);
+
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(4, null));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_ById_OngoingSpawnAt_IncludesStrat_ThrowsException()
+        {
+            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            InRoomState state = new InRoomState(firstNode);
+            state.ClearRoomState();
+            state.ApplyVisitNode(firstNode, null);
+
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(5, "Base"));
+        }
+
         [Fact]
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
@@ -146,6 +197,73 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void ApplyVisitNode_NoCurrentRoom_IncludesStrat_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            Strat strat = Model.GetNodeInRoom("Landing Site", 2).Links[5].Strats["Base"];
+            InRoomState state = new InRoomState(node);
+            state.ClearRoomState();
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(node, strat));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_NoCurrentRoom_IncludesNoStrat_AccumulatesVisitedNodesAndStrats()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+            state.ClearRoomState();
+            state.ApplyVisitNode(node, null);
+
+            Assert.Same(node, state.CurrentNode);
+            Assert.Same(node, state.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Null(state.LastStrat);
+            Assert.Null(state.VisitedRoomPath.Last().strat);
+            Assert.Single(state.VisitedRoomPath);
+        }
+
+        [Fact]
+        public void ApplyVisitNode_OngoingSpawnAt_GoesToCorrectNodeWithNoStrat_AccumulatesVisitedNodesAndStrats()
+        {
+            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
+            InRoomState state = new InRoomState(firstNode);
+            state.ClearRoomState();
+            state.ApplyVisitNode(firstNode, null);
+
+            state.ApplyVisitNode(secondNode, null);
+            Assert.Same(secondNode, state.CurrentNode);
+            Assert.Same(secondNode, state.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Null(state.LastStrat);
+            Assert.Null(state.VisitedRoomPath.Last().strat);
+            Assert.Equal(2, state.VisitedRoomPath.Count());
+        }
+
+        [Fact]
+        public void ApplyVisitNode_OngoingSpawnAt_GoesToDifferentNode_ThrowsException()
+        {
+            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 4);
+            InRoomState state = new InRoomState(firstNode);
+            state.ClearRoomState();
+            state.ApplyVisitNode(firstNode, null);
+
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(secondNode, null));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_OngoingSpawnAt_IncludesStrat_ThrowsException()
+        {
+            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
+            Strat strat = Model.GetNodeInRoom("Crocomire's Room", 2).Links[5].Strats["Base"];
+            InRoomState state = new InRoomState(firstNode);
+            state.ClearRoomState();
+            state.ApplyVisitNode(firstNode, null);
+
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(secondNode, strat));
+        }
+
+        [Fact]
         public void ApplyDestroyObstacle_ById_RegistersObstacle()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
@@ -163,6 +281,16 @@ namespace sm_json_data_framework.Tests.InGameStates
             InRoomState state = new InRoomState(initialNode);
 
             Assert.Throws<ArgumentException>(() => state.ApplyDestroyObstacle("Z"));
+        }
+
+        [Fact]
+        public void ApplyDestroyObstacle_ById_NoCurrentRoom_ThrowsException()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+            state.ClearRoomState();
+
+            Assert.Throws<InvalidOperationException>(() => state.ApplyDestroyObstacle("Z"));
         }
 
         [Fact]
@@ -196,6 +324,15 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void ApplyOpenLock_ById_AtNoNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+            state.ClearRoomState();
+            Assert.Throws<InvalidOperationException>(() => state.ApplyOpenLock("FakeLock"));
+        }
+
+        [Fact]
         public void ApplyOpenLock_ById_LockDoesntExist_ThrowsException()
         {
             RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
@@ -211,6 +348,16 @@ namespace sm_json_data_framework.Tests.InGameStates
             InRoomState state = new InRoomState(node);
             state.ApplyOpenLock(openedLock);
             Assert.Contains(openedLock, state.OpenedExitLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_AtNoNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            state.ClearRoomState();
+            Assert.Throws<InvalidOperationException>(() => state.ApplyOpenLock(openedLock));
         }
 
         [Fact]
@@ -233,6 +380,15 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void ApplyBypassLock_ById_AtNoNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+            state.ClearRoomState();
+            Assert.Throws<InvalidOperationException>(() => state.ApplyBypassLock("FakeLock"));
+        }
+
+        [Fact]
         public void ApplyBypassLock_ById_LockNotOnNode_ThrowsException()
         {
             RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
@@ -248,6 +404,16 @@ namespace sm_json_data_framework.Tests.InGameStates
             InRoomState state = new InRoomState(node);
             state.ApplyBypassLock(bypassedLock);
             Assert.Contains(bypassedLock, state.BypassedExitLocks);
+        }
+
+        [Fact]
+        public void ApplyBypassLock_AtNoNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            state.ClearRoomState();
+            Assert.Throws<InvalidOperationException>(() => state.ApplyBypassLock(bypassedLock));
         }
 
         [Fact]

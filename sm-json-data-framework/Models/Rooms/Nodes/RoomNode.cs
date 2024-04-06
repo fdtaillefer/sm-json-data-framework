@@ -68,6 +68,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode SpawnAtNode { get { return OverrideSpawnAtNode ?? this; } }
 
+        /// <summary>
+        /// Whether entering a room at this node effectively spawns Samus at a different node.
+        /// </summary>
+        public bool SpawnsAtDifferentNode { get { return SpawnAtNode != this; } }
+
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
 
         public IEnumerable<UtilityEnum> Utility { get; set; } = Enumerable.Empty<UtilityEnum>();
