@@ -424,5 +424,150 @@ namespace sm_json_data_framework.Tests.InGameStates
             InRoomState state = new InRoomState(node);
             Assert.Throws<ArgumentException>(() => state.ApplyBypassLock(bypassedLock));
         }
+
+        [Fact]
+        public void ClearRoomState_ClearsEverything()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            InRoomState state = new InRoomState(node);
+            state.ApplyDestroyObstacle("A");
+            state.ApplyVisitNode(3, "Base");
+            state.ApplyOpenLock("Landing Site Top Right Yellow Lock (to Power Bombs)");
+            state.ApplyBypassLock("Landing Site Top Right Escape Lock (to Power Bombs)");
+
+            state.ClearRoomState();
+
+            Assert.Null(state.CurrentNode);
+            Assert.Null(state.CurrentRoom);
+            Assert.Null(state.CurrentNodeState);
+            Assert.Empty(state.DestroyedObstacleIds);
+            Assert.Empty(state.OpenedExitLocks);
+            Assert.Empty(state.BypassedExitLocks);
+            Assert.Null(state.LastStrat);
+            Assert.Empty(state.VisitedRoomPath);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_ClearsPreviousState()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            InRoomState state = new InRoomState(node);
+            state.ApplyDestroyObstacle("A");
+            state.ApplyVisitNode(3, "Base");
+            state.ApplyOpenLock("Landing Site Top Right Yellow Lock (to Power Bombs)");
+            state.ApplyBypassLock("Landing Site Top Right Escape Lock (to Power Bombs)");
+
+            RoomNode newNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            state.ApplyEnterRoom(newNode);
+
+            Assert.Same(newNode, state.CurrentNode);
+            Assert.Same(newNode, state.VisitedRoomPath.First().nodeState.Node);
+            Assert.Same(newNode.Room, state.CurrentRoom);
+            Assert.Empty(state.DestroyedObstacleIds);
+            Assert.Empty(state.OpenedExitLocks);
+            Assert.Empty(state.BypassedExitLocks);
+            Assert.Null(state.LastStrat);
+            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Single(state.VisitedRoomPath);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_NoSpawnAt_InitializesCorrectly()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+
+            RoomNode newNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            state.ApplyEnterRoom(newNode);
+
+            Assert.Equal("Parlor and Alcatraz", state.CurrentRoom.Name);
+            Assert.Equal(4, state.CurrentNode.Id);
+            Assert.Null(state.LastStrat);
+            Assert.Single(state.VisitedRoomPath);
+
+            Assert.Equal(4, state.VisitedRoomPath.First().nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath.First().strat);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_NodeHasSpawnAt_InitializesCorrectly()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+
+            RoomNode newNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            state.ApplyEnterRoom(newNode);
+
+            Assert.Equal("Crocomire's Room", state.CurrentRoom.Name);
+            Assert.Null(state.LastStrat);
+            // Node 2 in Crocomire's Room has spawnAt 5
+            Assert.Equal(5, state.CurrentNode.Id);
+            Assert.Equal(2, state.VisitedRoomPath.Count());
+
+            Assert.Equal(2, state.VisitedRoomPath.First().nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath.First().strat);
+
+            Assert.Equal(5, state.VisitedRoomPath.Skip(1).First().nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath.Skip(1).First().strat);
+        }
+
+        [Fact]
+        public void Clone_CopiesCorrectly()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            RoomNode secondNode = Model.GetNodeInRoom("Landing Site", 3);
+            Strat strat = node.Links[3].Strats["Base"];
+            NodeLock openedLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock bypassedLock  = Model.Locks["Landing Site Top Right Escape Lock (to Power Bombs)"];
+            InRoomState state = new InRoomState(node);
+            state.ApplyDestroyObstacle("A");
+            state.ApplyVisitNode(secondNode, strat);
+            state.ApplyOpenLock(openedLock);
+            state.ApplyBypassLock(bypassedLock);
+
+            InRoomState clone = state.Clone();
+            
+            Assert.Same(secondNode, clone.CurrentNode);
+            Assert.Same(secondNode.Room, clone.CurrentRoom);
+            Assert.Same(strat, clone.LastStrat);
+
+            Assert.Equal(2, clone.VisitedRoomPath.Count());
+            Assert.Same(node, clone.VisitedRoomPath.First().nodeState.Node);
+            Assert.Null(clone.VisitedRoomPath.First().strat);
+            Assert.Same(secondNode, clone.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Same(strat, clone.VisitedRoomPath.Last().strat);
+
+            Assert.Single(clone.OpenedExitLocks);
+            Assert.Same(openedLock, clone.OpenedExitLocks.First());
+            Assert.Single(clone.BypassedExitLocks);
+            Assert.Same(bypassedLock, clone.BypassedExitLocks.First());
+            Assert.Single(clone.DestroyedObstacleIds);
+            Assert.Contains("A", clone.DestroyedObstacleIds);
+        }
+
+        [Fact]
+        public void Clone_SeparatesState()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            InRoomState state = new InRoomState(node);
+
+            InRoomState clone = state.Clone();
+            clone.ApplyDestroyObstacle("A");
+            clone.ApplyVisitNode(3, "Base");
+            clone.ApplyOpenLock("Landing Site Top Right Yellow Lock (to Power Bombs)");
+            clone.ApplyBypassLock("Landing Site Top Right Escape Lock (to Power Bombs)");
+
+
+            Assert.Same(node, state.CurrentNode);
+            Assert.Null(state.LastStrat);
+
+            Assert.Single(state.VisitedRoomPath);
+            Assert.Same(node, state.VisitedRoomPath.First().nodeState.Node);
+            Assert.Null(state.VisitedRoomPath.First().strat);
+
+            Assert.Empty(state.OpenedExitLocks);
+            Assert.Empty(state.BypassedExitLocks);
+            Assert.Empty(state.DestroyedObstacleIds);
+        }
     }
 }
