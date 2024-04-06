@@ -97,7 +97,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         /// <summary>
         /// Reduces the provided quantity of the provided consumable resource.
-        /// When reducing energy, regular energy is used up first (down to 1) then reserves are used.
+        /// When reducing energy, regular energy is used up first (down to 1) then reserves are used (down to 0) then regular energy is consumed again into and past death.
         /// </summary>
         /// <param name="resource">The resource to reduce</param>
         /// <param name="quantity">The amount to reduce</param>
@@ -109,12 +109,22 @@ namespace sm_json_data_framework.Models.InGameStates
                 case ConsumableResourceEnum.ENERGY:
                     // Consume regular energy first, down to 1
                     int regularEnergy = GetAmount(RechargeableResourceEnum.RegularEnergy);
-                    int regularEnergyToConsume = regularEnergy > quantity ? quantity : regularEnergy - 1;
+                    int regularEnergyToConsume = Math.Max(0, regularEnergy > quantity ? quantity : regularEnergy - 1);
                     Amounts[RechargeableResourceEnum.RegularEnergy] -= regularEnergyToConsume;
                     quantity -= regularEnergyToConsume;
+
+                    // If more energy left to consume, consume reserve energy down to 0
                     if (quantity > 0)
                     {
-                        Amounts[RechargeableResourceEnum.ReserveEnergy] -= quantity;
+                        int reserveEnergyToConsume = Math.Min(quantity, GetAmount(RechargeableResourceEnum.ReserveEnergy));
+                        Amounts[RechargeableResourceEnum.ReserveEnergy] -= reserveEnergyToConsume;
+                        quantity -= reserveEnergyToConsume;
+                    }
+
+                    // If yet more energy left to consume, consume regular energy
+                    if (quantity > 0)
+                    {
+                        Amounts[RechargeableResourceEnum.RegularEnergy] -= quantity;
                     }
                     break;
                 case ConsumableResourceEnum.MISSILE:
