@@ -97,10 +97,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
+            IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
 
             // If the node at which we entered is not allowed, this is not fulfilled.
-            if (!NodeIds.Contains(visitedNodeIds.First()))
+            if (!NodeIds.Contains(visitedNodeIds[0]))
             {
                 return null;
             }
@@ -112,7 +112,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // If we were supposed to stay put but have visited more than the starting node, this is not fulfilled
-            if (MustStayPut && visitedNodeIds.Count() > 1)
+            if (MustStayPut && visitedNodeIds.Count > 1)
             {
                 return null;
             }

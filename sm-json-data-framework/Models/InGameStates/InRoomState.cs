@@ -66,20 +66,14 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public Room CurrentRoom { get => CurrentNode?.Room; }
 
-        /// <summary>
-        /// Inner list containing the nodes that have been visited in this room since entering, in order,
-        /// starting with the node through which the room was entered.
-        /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
-        /// This strat can be null since nodes are reached without using a strat when entering.
-        /// </summary>
         protected List<(InNodeState nodeState, Strat strat)> InternalVisitedRoomPath { get; } = new List<(InNodeState, Strat)>();
 
-        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath
+        public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath
         {
             get
             {
                 return InternalVisitedRoomPath.Select<(InNodeState nodeState, Strat strat), (ReadOnlyInNodeState nodeState, Strat strat)>
-                    (pair => (pair.nodeState.AsReadOnly(), pair.strat));
+                    (pair => (pair.nodeState.AsReadOnly(), pair.strat)).ToList().AsReadOnly();
             }
         }
 
@@ -167,7 +161,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public void ApplyVisitNode(RoomNode node, Strat strat)
         {
             // Spawning in the room is ongoing if no nodes have been visited, or only one node has been visited and that node spawns Samus elsewhere
-            bool spawnOngoing = !VisitedRoomPath.Any() || (VisitedRoomPath.Count() == 1 && CurrentNode.SpawnsAtDifferentNode);
+            bool spawnOngoing = !VisitedRoomPath.Any() || (VisitedRoomPath.Count == 1 && CurrentNode.SpawnsAtDifferentNode);
 
             // Only allow Strat to be null if spawn is ongoing
             if (strat == null && !spawnOngoing)
@@ -402,11 +396,12 @@ namespace sm_json_data_framework.Models.InGameStates
         public Room CurrentRoom { get; }
 
         /// <summary>
-        /// Enumeration of the nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
+        /// List containing the nodes that have been visited in this room since entering, in order, starting with the node through which the room was entered.
+        /// Note that this list may not stay in sync with future changes to this InRoomState.
         /// Each node ID is accompanied by the strat that was used to reach it, when applicable.
-        /// This strat can be null since nodes are reached without using a strat when entering.
+        /// This strat can be null for nodes visited during the process of spawning in the room (always the first node, and sometimes the second).
         /// </summary>
-        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath { get; }
+        public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath { get; }
 
         /// <summary>
         /// A read-only set of IDs of obstacles that have been destroyed in this room since entering.

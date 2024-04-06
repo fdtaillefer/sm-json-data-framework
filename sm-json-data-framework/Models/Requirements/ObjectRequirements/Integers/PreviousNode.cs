@@ -21,8 +21,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         public bool IsFulfilled(ReadOnlyInGameState inGameState, int previousRoomCount = 0)
         {
             // Look at second-to-last visited node (last node is the current node)
-            IEnumerable<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
-            return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count() -2) == Value;
+            IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
+            return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count -2) == Value;
         }
 
         public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

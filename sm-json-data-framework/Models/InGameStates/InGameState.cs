@@ -568,7 +568,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return null;
             }
 
-            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().nodeState.Node;
+            RoomNode entranceNode = GetVisitedPath(previousRoomCount)[0].nodeState.Node;
             return currentRoom.RoomEnvironments
                 .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).FirstOrDefault();
         }
@@ -587,7 +587,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return null;
             }
 
-            RoomNode entranceNode = GetVisitedPath(previousRoomCount).First().nodeState.Node;
+            RoomNode entranceNode = GetVisitedPath(previousRoomCount)[0].nodeState.Node;
             return currentNode.DoorEnvironments
                 .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).First();
         }
@@ -603,18 +603,18 @@ namespace sm_json_data_framework.Models.InGameStates
             return roomState?.LastStrat;
         }
 
-        public IEnumerable<int> GetVisitedNodeIds(int previousRoomCount = 0)
+        public IReadOnlyList<int> GetVisitedNodeIds(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
-            IEnumerable<int> returnValue = roomState?.VisitedRoomPath?.Select(pathNodeState => pathNodeState.nodeState.Node.Id);
-            return returnValue == null? Enumerable.Empty<int>() : returnValue;
+            IReadOnlyList<int> returnValue = roomState?.VisitedRoomPath?.Select(pathNodeState => pathNodeState.nodeState.Node.Id).ToList().AsReadOnly();
+            return returnValue == null?new List<int>().AsReadOnly() : returnValue;
         }
 
-        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
+        public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             var returnValue = roomState?.VisitedRoomPath;
-            return returnValue == null ? Enumerable.Empty<(ReadOnlyInNodeState, Strat)>() : returnValue;
+            return returnValue == null ? new List<(ReadOnlyInNodeState, Strat)>().AsReadOnly() : returnValue;
         }
 
         public IEnumerable<string> GetDestroyedObstacleIds(int previousRoomCount = 0)
@@ -711,7 +711,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // We will need to know what nodes were visited in the current room. If this info is missing, we can't do anything retroactively.
-            IEnumerable<int> visitedNodeIds = GetVisitedNodeIds(previousRoomCount);
+            IReadOnlyList<int> visitedNodeIds = GetVisitedNodeIds(previousRoomCount);
             // If we don't know at what node we entered, we can't identify any usable runways
             if (!visitedNodeIds.Any())
             {
@@ -743,7 +743,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // If we didn't leave the previous room via a node that led to the node by which we entered current room, no runways are usable
-            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds.First()];
+            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds[0]];
             if (previousRoomExitNode.OutNode != entryNode)
             {
                 return Enumerable.Empty<Runway>();
@@ -763,7 +763,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // We will need to know what nodes were visited in the current room. If this info is missing, we can't do anything retroactively.
-            IEnumerable<int> visitedNodeIds = GetVisitedNodeIds(previousRoomCount);
+            IReadOnlyList<int> visitedNodeIds = GetVisitedNodeIds(previousRoomCount);
             // If we don't know at what node we entered, we can't identify any usable runways
             if (!visitedNodeIds.Any())
             {
@@ -776,7 +776,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return Enumerable.Empty<CanLeaveCharged>();
             }
 
-            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds.First()];
+            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds[0]];
 
             // At this point we know our behavior in the current room respects the provided requirements for retroactively using a CanLeaveCharged.
 
@@ -814,7 +814,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     var lastRoomPath = GetVisitedPath(previousRoomCount + 1);
                     // If we haven't visited as many nodes as the prescribed path to door (+ 1 more node to enter the room),
                     // we know for sure our exit isn't compatible with this CanLeaveCharged. Reject it.
-                    if (lastRoomPath.Count() < clc.InitiateRemotely.PathToDoor.Count() + 1)
+                    if (lastRoomPath.Count < clc.InitiateRemotely.PathToDoor.Count() + 1)
                     {
                         return false;
                     }
@@ -1095,23 +1095,24 @@ namespace sm_json_data_framework.Models.InGameStates
         public Strat GetLastStrat(int previousRoomCount = 0);
 
         /// <summary>
-        /// Returns a sequence of IDs of nodes that have been visited in the current room since entering, in order, 
+        /// Returns a list of IDs of nodes that have been visited in the specified room since entering, in order, 
         /// starting with the node through which the room was entered. May be empty if the in-room state is not being tracked.
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<int> GetVisitedNodeIds(int previousRoomCount = 0);
+        public IReadOnlyList<int> GetVisitedNodeIds(int previousRoomCount = 0);
 
         /// <summary>
-        /// Returns a sequence of nodes (represented as an InNodeState) that have been visited in this room since entering, in order,
+        /// Returns a list of nodes (represented as an InNodeState) that have been visited in the specified room since entering, in order,
         /// starting with the node through which the room was entered. May be empty if the in-room state is not being tracked.
+        /// Note that this list may not stay in sync with future changes to this InGameState.
         /// Each node state is accompanied by the strat that was used to reach the node, when applicable.
-        /// This strat can be null since nodes are reached without using a strat when entering.
+        /// This strat can be null for nodes visited during the process of spawning in the room (always the first node, and sometimes the second).
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0);
+        public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0);
 
         /// <summary>
         /// Returns a sequence of IDs of obstacles that have been destroyed in the current room since entering.

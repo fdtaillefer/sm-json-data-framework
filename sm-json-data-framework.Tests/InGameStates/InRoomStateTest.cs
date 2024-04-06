@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Reading;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,8 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Null(state.LastStrat);
             Assert.Single(state.VisitedRoomPath);
 
-            Assert.Equal(4, state.VisitedRoomPath.First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Equal(4, state.VisitedRoomPath[0].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[0].strat);
         }
 
         [Fact]
@@ -42,13 +43,13 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Null(state.LastStrat);
             // Node 2 in Crocomire's Room has spawnAt 5
             Assert.Equal(5, state.CurrentNode.Id);
-            Assert.Equal(2, state.VisitedRoomPath.Count());
+            Assert.Equal(2, state.VisitedRoomPath.Count);
 
-            Assert.Equal(2, state.VisitedRoomPath.First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Equal(2, state.VisitedRoomPath[0].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[0].strat);
 
-            Assert.Equal(5, state.VisitedRoomPath.Skip(1).First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.Skip(1).First().strat);
+            Assert.Equal(5, state.VisitedRoomPath[1].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[1].strat);
         }
 
         [Fact]
@@ -62,16 +63,16 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Equal("Parlor and Alcatraz", state.CurrentRoom.Name);
             Assert.Equal(1, state.CurrentNode.Id);
             Assert.Equal("Parlor Quick Charge", state.LastStrat.Name);
-            Assert.Equal(3, state.VisitedRoomPath.Count());
+            Assert.Equal(3, state.VisitedRoomPath.Count);
 
-            Assert.Equal(4, state.VisitedRoomPath.First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Equal(4, state.VisitedRoomPath[0].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[0].strat);
 
-            Assert.Equal(8, state.VisitedRoomPath.Skip(1).First().nodeState.Node.Id);
-            Assert.Equal("Base", state.VisitedRoomPath.Skip(1).First().strat.Name);
+            Assert.Equal(8, state.VisitedRoomPath[1].nodeState.Node.Id);
+            Assert.Equal("Base", state.VisitedRoomPath[1].strat.Name);
 
-            Assert.Equal(1, state.VisitedRoomPath.Skip(2).First().nodeState.Node.Id);
-            Assert.Equal("Parlor Quick Charge", state.VisitedRoomPath.Skip(2).First().strat.Name);
+            Assert.Equal(1, state.VisitedRoomPath[2].nodeState.Node.Id);
+            Assert.Equal("Parlor Quick Charge", state.VisitedRoomPath[2].strat.Name);
         }
 
         [Fact]
@@ -119,10 +120,10 @@ namespace sm_json_data_framework.Tests.InGameStates
 
             state.ApplyVisitNode(5, null);
             Assert.Same(secondNode, state.CurrentNode);
-            Assert.Same(secondNode, state.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Same(secondNode, state.VisitedRoomPath[1].nodeState.Node);
             Assert.Null(state.LastStrat);
-            Assert.Null(state.VisitedRoomPath.Last().strat);
-            Assert.Equal(2, state.VisitedRoomPath.Count());
+            Assert.Null(state.VisitedRoomPath[1].strat);
+            Assert.Equal(2, state.VisitedRoomPath.Count);
         }
 
         [Fact]
@@ -159,16 +160,16 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Equal("Parlor and Alcatraz", state.CurrentRoom.Name);
             Assert.Equal(1, state.CurrentNode.Id);
             Assert.Equal("Parlor Quick Charge", state.LastStrat.Name);
-            Assert.Equal(3, state.VisitedRoomPath.Count());
+            Assert.Equal(3, state.VisitedRoomPath.Count);
 
-            Assert.Equal(4, state.VisitedRoomPath.First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Equal(4, state.VisitedRoomPath[0].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[0].strat);
 
-            Assert.Equal(8, state.VisitedRoomPath.Skip(1).First().nodeState.Node.Id);
-            Assert.Equal("Base", state.VisitedRoomPath.Skip(1).First().strat.Name);
+            Assert.Equal(8, state.VisitedRoomPath[1].nodeState.Node.Id);
+            Assert.Equal("Base", state.VisitedRoomPath[1].strat.Name);
 
-            Assert.Equal(1, state.VisitedRoomPath.Skip(2).First().nodeState.Node.Id);
-            Assert.Equal("Parlor Quick Charge", state.VisitedRoomPath.Skip(2).First().strat.Name);
+            Assert.Equal(1, state.VisitedRoomPath[2].nodeState.Node.Id);
+            Assert.Equal("Parlor Quick Charge", state.VisitedRoomPath[2].strat.Name);
         }
 
         [Fact]
@@ -215,9 +216,9 @@ namespace sm_json_data_framework.Tests.InGameStates
             state.ApplyVisitNode(node, null);
 
             Assert.Same(node, state.CurrentNode);
-            Assert.Same(node, state.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Same(node, state.VisitedRoomPath[0].nodeState.Node);
             Assert.Null(state.LastStrat);
-            Assert.Null(state.VisitedRoomPath.Last().strat);
+            Assert.Null(state.VisitedRoomPath[0].strat);
             Assert.Single(state.VisitedRoomPath);
         }
 
@@ -232,10 +233,10 @@ namespace sm_json_data_framework.Tests.InGameStates
 
             state.ApplyVisitNode(secondNode, null);
             Assert.Same(secondNode, state.CurrentNode);
-            Assert.Same(secondNode, state.VisitedRoomPath.Last().nodeState.Node);
+            Assert.Same(secondNode, state.VisitedRoomPath[1].nodeState.Node);
             Assert.Null(state.LastStrat);
-            Assert.Null(state.VisitedRoomPath.Last().strat);
-            Assert.Equal(2, state.VisitedRoomPath.Count());
+            Assert.Null(state.VisitedRoomPath[1].strat);
+            Assert.Equal(2, state.VisitedRoomPath.Count);
         }
 
         [Fact]
@@ -320,7 +321,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
             state.ApplyOpenLock("Bomb Torizo Room Grey Lock (to Flyway)");
-            Assert.Contains(openedLock, state.OpenedExitLocks);
+            Assert.Contains(openedLock, state.OpenedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
 
         [Fact]
@@ -347,7 +348,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
             state.ApplyOpenLock(openedLock);
-            Assert.Contains(openedLock, state.OpenedExitLocks);
+            Assert.Contains(openedLock, state.OpenedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
 
         [Fact]
@@ -376,7 +377,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
             state.ApplyBypassLock("Animal Escape Grey Lock (to Flyway)");
-            Assert.Contains(bypassedLock, state.BypassedExitLocks);
+            Assert.Contains(bypassedLock, state.BypassedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
 
         [Fact]
@@ -403,7 +404,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
             state.ApplyBypassLock(bypassedLock);
-            Assert.Contains(bypassedLock, state.BypassedExitLocks);
+            Assert.Contains(bypassedLock, state.BypassedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
 
         [Fact]
@@ -461,13 +462,13 @@ namespace sm_json_data_framework.Tests.InGameStates
             state.ApplyEnterRoom(newNode);
 
             Assert.Same(newNode, state.CurrentNode);
-            Assert.Same(newNode, state.VisitedRoomPath.First().nodeState.Node);
+            Assert.Same(newNode, state.VisitedRoomPath[0].nodeState.Node);
             Assert.Same(newNode.Room, state.CurrentRoom);
             Assert.Empty(state.DestroyedObstacleIds);
             Assert.Empty(state.OpenedExitLocks);
             Assert.Empty(state.BypassedExitLocks);
             Assert.Null(state.LastStrat);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Null(state.VisitedRoomPath[0].strat);
             Assert.Single(state.VisitedRoomPath);
         }
 
@@ -485,8 +486,8 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Null(state.LastStrat);
             Assert.Single(state.VisitedRoomPath);
 
-            Assert.Equal(4, state.VisitedRoomPath.First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Equal(4, state.VisitedRoomPath[0].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[0].strat);
         }
 
         [Fact]
@@ -502,13 +503,13 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Null(state.LastStrat);
             // Node 2 in Crocomire's Room has spawnAt 5
             Assert.Equal(5, state.CurrentNode.Id);
-            Assert.Equal(2, state.VisitedRoomPath.Count());
+            Assert.Equal(2, state.VisitedRoomPath.Count);
 
-            Assert.Equal(2, state.VisitedRoomPath.First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Equal(2, state.VisitedRoomPath[0].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[0].strat);
 
-            Assert.Equal(5, state.VisitedRoomPath.Skip(1).First().nodeState.Node.Id);
-            Assert.Null(state.VisitedRoomPath.Skip(1).First().strat);
+            Assert.Equal(5, state.VisitedRoomPath[1].nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath[1].strat);
         }
 
         [Fact]
@@ -531,16 +532,16 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Same(secondNode.Room, clone.CurrentRoom);
             Assert.Same(strat, clone.LastStrat);
 
-            Assert.Equal(2, clone.VisitedRoomPath.Count());
-            Assert.Same(node, clone.VisitedRoomPath.First().nodeState.Node);
-            Assert.Null(clone.VisitedRoomPath.First().strat);
-            Assert.Same(secondNode, clone.VisitedRoomPath.Last().nodeState.Node);
-            Assert.Same(strat, clone.VisitedRoomPath.Last().strat);
+            Assert.Equal(2, clone.VisitedRoomPath.Count);
+            Assert.Same(node, clone.VisitedRoomPath[0].nodeState.Node);
+            Assert.Null(clone.VisitedRoomPath[0].strat);
+            Assert.Same(secondNode, clone.VisitedRoomPath[1].nodeState.Node);
+            Assert.Same(strat, clone.VisitedRoomPath[1].strat);
 
             Assert.Single(clone.OpenedExitLocks);
-            Assert.Same(openedLock, clone.OpenedExitLocks.First());
+            Assert.Contains(openedLock, clone.OpenedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
             Assert.Single(clone.BypassedExitLocks);
-            Assert.Same(bypassedLock, clone.BypassedExitLocks.First());
+            Assert.Contains(bypassedLock, clone.BypassedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
             Assert.Single(clone.DestroyedObstacleIds);
             Assert.Contains("A", clone.DestroyedObstacleIds);
         }
@@ -562,8 +563,8 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Null(state.LastStrat);
 
             Assert.Single(state.VisitedRoomPath);
-            Assert.Same(node, state.VisitedRoomPath.First().nodeState.Node);
-            Assert.Null(state.VisitedRoomPath.First().strat);
+            Assert.Same(node, state.VisitedRoomPath[0].nodeState.Node);
+            Assert.Null(state.VisitedRoomPath[0].strat);
 
             Assert.Empty(state.OpenedExitLocks);
             Assert.Empty(state.BypassedExitLocks);
