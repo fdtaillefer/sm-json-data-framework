@@ -51,6 +51,53 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void ApplyVisitNode_ById_AccumulatesVisitedNodesAndStrats()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+            state.ApplyVisitNode(8, "Base");
+            state.ApplyVisitNode(1, "Parlor Quick Charge");
+
+            Assert.Equal("Parlor and Alcatraz", state.CurrentRoom.Name);
+            Assert.Equal(1, state.CurrentNode.Id);
+            Assert.Equal("Parlor Quick Charge", state.LastStrat.Name);
+            Assert.Equal(3, state.VisitedRoomPath.Count());
+
+            Assert.Equal(4, state.VisitedRoomPath.First().nodeState.Node.Id);
+            Assert.Null(state.VisitedRoomPath.First().strat);
+
+            Assert.Equal(8, state.VisitedRoomPath.Skip(1).First().nodeState.Node.Id);
+            Assert.Equal("Base", state.VisitedRoomPath.Skip(1).First().strat.Name);
+
+            Assert.Equal(1, state.VisitedRoomPath.Skip(2).First().nodeState.Node.Id);
+            Assert.Equal("Parlor Quick Charge", state.VisitedRoomPath.Skip(2).First().strat.Name);
+        }
+
+        [Fact]
+        public void ApplyVisitNode_ById_NotSpawningInRoom_RejectsNullStrat()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(8, null));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_ById_LinkDoesntExist_ThrowsException()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(1, "Base"));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_ById_StratNotOnOriginLink_ThrowsException()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(8, "wrongStrat"));
+        }
+
+        [Fact]
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);

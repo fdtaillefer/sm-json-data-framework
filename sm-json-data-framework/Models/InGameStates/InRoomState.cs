@@ -5,20 +5,22 @@ using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace sm_json_data_framework.Models.InGameStates
 {
     /// <summary>
     /// Represents the logically-relevant parts of the state of the current room.
     /// </summary>
-    public class InRoomState: ReadOnlyInRoomState
+    public class InRoomState : ReadOnlyInRoomState
     {
         public InRoomState(RoomNode initialNode)
         {
             ApplyEnterRoom(initialNode);
         }
-        
+
         public InRoomState(InRoomState other)
         {
             InternalVisitedRoomPath = other.InternalVisitedRoomPath.Select(pair => (new InNodeState(pair.nodeState), pair.strat)).ToList();
@@ -41,9 +43,11 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ReadOnlyInNodeState CurrentNodeState { get { return InternalCurrentNodeState?.AsReadOnly(); } }
 
-        public RoomNode CurrentNode { get => InternalCurrentNodeState?.Node;  }
+        public RoomNode CurrentNode { get => InternalCurrentNodeState?.Node; }
 
-        public bool BypassedExitLock { get
+        public bool BypassedExitLock
+        {
+            get
             {
                 InNodeState nodeState = InternalCurrentNodeState;
                 return nodeState != null && nodeState.BypassedLocks.Any();
@@ -69,10 +73,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected List<(InNodeState nodeState, Strat strat)> InternalVisitedRoomPath { get; } = new List<(InNodeState, Strat)>();
 
-        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath { 
-            get 
+        public IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> VisitedRoomPath
+        {
+            get
             {
-                return InternalVisitedRoomPath.Select< (InNodeState nodeState, Strat strat), (ReadOnlyInNodeState nodeState, Strat strat)>
+                return InternalVisitedRoomPath.Select<(InNodeState nodeState, Strat strat), (ReadOnlyInNodeState nodeState, Strat strat)>
                     (pair => (pair.nodeState.AsReadOnly(), pair.strat));
             }
         }
@@ -95,13 +100,13 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             ClearRoomState();
 
-            if(entryNode != null)
+            if (entryNode != null)
             {
                 // Visit entry node immediately
                 ApplyVisitNode(entryNode, null);
 
                 // If Samus is considered to spawn at a different node, it means she visits that node after entry before player input.
-                if(entryNode.SpawnAtNode != entryNode)
+                if (entryNode.SpawnAtNode != entryNode)
                 {
                     ApplyVisitNode(entryNode.SpawnAtNode, null);
                 }
@@ -109,7 +114,42 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Updates the in-room state by moving the player to the provided node. Should not be called for a node that is not in the current room.
+        /// Updates the in-room state by moving the player to the provided node.
+        /// </summary>
+        /// <param name="nodeId">ID of the node to visit.</param>
+        /// <param name="stratName">The name of the strat through which the node is being reached. Can be null, but only for the first node visited in the room, 
+        /// and for the second node only if Samus is seen as spawning there. Additionally, MUST be null for the first node visited in the room.
+        /// If not null, must be present on a link that connects previous node to new node.</param>
+        /// <exception cref="ArgumentException">Thrown if the nodeId doesn't exist in the room, or if the stratName doesn't exist on the link between the nodes. 
+        /// Also thrown if a strat is provided when the node visit is part of spawning in the room; If visit is not part of spawning, 
+        /// thrown if there is no link from current node to target, or if no strat from that link is provided.</exception>
+        public void ApplyVisitNode(int nodeId, string stratName)
+        {
+            CurrentRoom.Nodes.TryGetValue(nodeId, out RoomNode node);
+            if(node == null)
+            {
+                throw new ArgumentException($"Node {nodeId} doesn't exist in room '{CurrentRoom.Name}'");
+            }
+            CurrentNode.Links.TryGetValue(nodeId, out LinkTo linkTo);
+            if (linkTo == null)
+            {
+                throw new ArgumentException($"There is no link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
+            }
+            Strat strat = null;
+            if(stratName != null)
+            {
+                linkTo.Strats.TryGetValue(stratName, out strat);
+                if (strat == null)
+                {
+                    throw new ArgumentException($"There is no strat '{stratName}' in the link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
+                }
+            }
+
+            ApplyVisitNode(node, strat);
+        }
+
+        /// <summary>
+        /// Updates the in-room state by moving the player to the provided node.
         /// </summary>
         /// <param name="node">Node to visit.</param>
         /// <param name="strat">The strat through which the node is being reached. Can be null, but only for the first node visited in the room, 
@@ -121,29 +161,29 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             // Only allow Strat to be null if this is the first visited node in current room visit, or if this is the second visited node
             // and the second node is where the first node causes Samus to be considered to spawn.
-            if(strat == null && VisitedRoomPath.Any() && (VisitedRoomPath.Count() > 1 || VisitedRoomPath.First().nodeState.Node.OverrideSpawnAtNodeId != node.Id))
+            if (strat == null && VisitedRoomPath.Any() && (VisitedRoomPath.Count() > 1 || VisitedRoomPath.First().nodeState.Node.OverrideSpawnAtNodeId != node.Id))
             {
                 throw new ArgumentException("A strat must be provided when visiting a node except when spawning in the room.");
             }
 
             if (strat != null)
             {
-                if(!VisitedRoomPath.Any())
+                if (!VisitedRoomPath.Any())
                 {
                     throw new ArgumentException("A strat must not be provided when spawning in the room.");
                 }
 
                 CurrentNode.Links.TryGetValue(node.Id, out LinkTo link);
-                if(link == null)
+                if (link == null)
                 {
-                    throw new ArgumentException("There must be a link from current node to next node");
+                    throw new ArgumentException($"There is no link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
                 }
                 else
                 {
                     link.Strats.TryGetValue(strat.Name, out Strat existingStrat);
-                    if(existingStrat == null || existingStrat != strat)
+                    if (existingStrat == null || existingStrat != strat)
                     {
-                        throw new ArgumentException("The specified strat must be in a link from current node to next node");
+                        throw new ArgumentException($"The specified strat must be in a link fromfrom current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
                     }
                 }
             }
@@ -162,7 +202,7 @@ namespace sm_json_data_framework.Models.InGameStates
             CurrentRoom.Obstacles.TryGetValue(obstacleId, out RoomObstacle obstacle);
             if(obstacle == null)
             {
-                throw new ArgumentException($"Obstacle '{obstacleId}' not present in current room");
+                throw new ArgumentException($"Obstacle '{obstacleId}' not present in current room '{CurrentRoom.Name}'");
             }
             ApplyDestroyObstacleSafe(obstacle);
         }
@@ -183,10 +223,10 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Does the actual updates of the in-room state to contain a mention of the destruction of the provided obstacle,
-        /// which must have been validate by one of the public ApplyDestroyObstacle() methods.
+        /// Does the actual updates of the in-room state to contain a mention of the destruction of the provided obstacle.
+        /// This should only be called by one of the public ApplyDestroyObstacle() methods, after validating the operation.
         /// </summary>
-        /// <param name="obstacle"></param>
+        /// <param name="obstacle">The obstacle to destroy.</param>
         protected void ApplyDestroyObstacleSafe(RoomObstacle obstacle)
         {
             DestroyedObstacleIdsSet.Add(obstacle.Id);
