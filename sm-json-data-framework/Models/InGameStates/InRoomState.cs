@@ -26,7 +26,6 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             InternalVisitedRoomPath = other.InternalVisitedRoomPath.Select(pair => (new InNodeState(pair.nodeState), pair.strat)).ToList();
             InternalDestroyedObstacleIds = new HashSet<string>(other.InternalDestroyedObstacleIds);
-            LastStrat = other.LastStrat;
         }
 
         public InRoomState Clone()
@@ -84,7 +83,11 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ReadOnlySet<string> DestroyedObstacleIds { get { return InternalDestroyedObstacleIds.AsReadOnly(); } }
 
-        public Strat LastStrat { get; protected set; }
+        /// <summary>
+        /// The strat that was used to reach to current node, if any. Can be null if there is no current node 
+        /// or current node was reached during the process of spawning in the room.
+        /// </summary>
+        public Strat LastStrat { get { return VisitedRoomPath.LastOrDefault().strat; } } 
 
         /// <summary>
         /// Sets this InRoomState's state to that of immediate entry of a room via the provided entry node.
@@ -199,7 +202,6 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             InternalVisitedRoomPath.Add((new InNodeState(node), strat));
-            LastStrat = strat;
         }
 
         /// <summary>
@@ -355,7 +357,6 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             InternalDestroyedObstacleIds.Clear();
             InternalVisitedRoomPath.Clear();
-            LastStrat = null;
         }
     }
 
