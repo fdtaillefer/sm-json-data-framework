@@ -68,7 +68,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode SpawnAtNode { get { return OverrideSpawnAtNode ?? this; } }
 
-        public IEnumerable<NodeLock> Locks { get; set; } = Enumerable.Empty<NodeLock>();
+        public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
 
         public IEnumerable<UtilityEnum> Utility { get; set; } = Enumerable.Empty<UtilityEnum>();
 
@@ -125,7 +125,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
-            return Locks.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
+            return Locks.Values.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
                 .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock))
                 .ToList();
         }
@@ -208,7 +208,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Initialize Locks
-            foreach(NodeLock nodeLock in Locks)
+            foreach(NodeLock nodeLock in Locks.Values)
             {
                 nodeLock.Initialize(model, room, this);
             }
@@ -238,7 +238,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 unhandled.AddRange(canLeaveCharged.InitializeReferencedLogicalElementProperties(model, room, this));
             }
 
-            foreach(NodeLock nodeLock in Locks)
+            foreach(NodeLock nodeLock in Locks.Values)
             {
                 unhandled.AddRange(nodeLock.InitializeReferencedLogicalElementProperties(model, room, this));
             }

@@ -262,6 +262,7 @@ namespace sm_json_data_framework.Reading
             options.Converters.Add(new ObjectLogicalElementConverter(overrideTypes));
             options.Converters.Add(new StratsDictionaryConverter());
             options.Converters.Add(new RoomObstaclesDictionaryConverter());
+            options.Converters.Add(new LocksDictionaryConverter());
 
             return options;
         }

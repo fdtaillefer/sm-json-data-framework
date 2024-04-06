@@ -185,5 +185,78 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Throws<ArgumentException>(() => state.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
         }
 
+        [Fact]
+        public void ApplyOpenLock_ById_RegistersLock()
+        {
+            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            state.ApplyOpenLock("Bomb Torizo Room Grey Lock (to Flyway)");
+            Assert.Contains(openedLock, state.OpenedExitLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_ById_LockDoesntExist_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+            Assert.Throws<ArgumentException>(() => state.ApplyOpenLock("FakeLock"));
+        }
+
+        [Fact]
+        public void ApplyOpenLock_RegistersLock()
+        {
+            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            state.ApplyOpenLock(openedLock);
+            Assert.Contains(openedLock, state.OpenedExitLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_LockNotOnNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            Assert.Throws<ArgumentException>(() => state.ApplyOpenLock(openedLock));
+        }
+
+        [Fact]
+        public void ApplyBypassLock_ById_RemembersLock()
+        {
+            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            state.ApplyBypassLock("Animal Escape Grey Lock (to Flyway)");
+            Assert.Contains(bypassedLock, state.BypassedExitLocks);
+        }
+
+        [Fact]
+        public void ApplyBypassLock_ById_LockNotOnNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InRoomState state = new InRoomState(node);
+            Assert.Throws<ArgumentException>(() => state.ApplyBypassLock("FakeLock"));
+        }
+
+        [Fact]
+        public void ApplyBypassLock_RemembersLock()
+        {
+            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            state.ApplyBypassLock(bypassedLock);
+            Assert.Contains(bypassedLock, state.BypassedExitLocks);
+        }
+
+        [Fact]
+        public void ApplyBypassLock_LockNotOnNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            InRoomState state = new InRoomState(node);
+            Assert.Throws<ArgumentException>(() => state.ApplyBypassLock(bypassedLock));
+        }
     }
 }

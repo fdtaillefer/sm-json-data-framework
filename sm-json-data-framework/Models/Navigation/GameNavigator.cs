@@ -359,7 +359,7 @@ namespace sm_json_data_framework.Models.Navigation
             List<NodeLock> failedLocks = new List<NodeLock>();
             List<NodeLock> openedLocks = new List<NodeLock>();
             List<NodeLock> bypassedLocks = new List<NodeLock>();
-            IEnumerable<NodeLock> activeLocks = node.Locks.Where(l => l.IsActive(GameModel, CurrentInGameState));
+            IEnumerable<NodeLock> activeLocks = node.Locks.Values.Where(l => l.IsActive(GameModel, CurrentInGameState));
             foreach (NodeLock currentLock in activeLocks)
             {
                 ExecutionResult currentResult = null;

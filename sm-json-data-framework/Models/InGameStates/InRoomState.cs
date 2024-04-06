@@ -233,6 +233,16 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Registers the lock with the provided name as being opened at the current node.
+        /// </summary>
+        /// <param name="nodeLock">Lock being opened</param>
+        public void ApplyOpenLock(string lockName)
+        {
+            InternalCurrentNodeState.ApplyOpenLock(lockName);
+        }
+
+
+        /// <summary>
         /// Registers the provided NodeLock as being opened at the current node.
         /// </summary>
         /// <param name="nodeLock">Lock being opened</param>
@@ -242,12 +252,37 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Registers the lock with the provided name as being bypassed at the current node.
+        /// </summary>
+        /// <param name="nodeLock">Lock being bypassed</param>
+        public void ApplyBypassLock(string lockName)
+        {
+            InternalCurrentNodeState.ApplyBypassLock(lockName);
+        }
+
+        /// <summary>
         /// Registers the provided NodeLock as being bypassed at the current node.
         /// </summary>
         /// <param name="nodeLock">Lock being bypassed</param>
         public void ApplyBypassLock(NodeLock nodeLock)
         {
             InternalCurrentNodeState.ApplyBypassLock(nodeLock);
+        }
+
+        public IEnumerable<NodeLock> OpenedExitLocks
+        {
+            get
+            {
+                InNodeState nodeState = InternalCurrentNodeState;
+                if (nodeState == null)
+                {
+                    return Enumerable.Empty<NodeLock>();
+                }
+                else
+                {
+                    return nodeState.OpenedLocks;
+                }
+            }
         }
 
         public IEnumerable<NodeLock> BypassedExitLocks {
@@ -330,9 +365,15 @@ namespace sm_json_data_framework.Models.InGameStates
         public Strat LastStrat { get; }
 
         /// <summary>
-        /// Returns the locks bypassed by Samus in the last node she visited in this room.
+        /// The locks opened by Samus in the last node she visited in this room.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<NodeLock> BypassedExitLocks { get;}
+        public IEnumerable<NodeLock> OpenedExitLocks { get; }
+
+        /// <summary>
+        /// The locks bypassed by Samus in the last node she visited in this room.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<NodeLock> BypassedExitLocks { get; }
     }
 }

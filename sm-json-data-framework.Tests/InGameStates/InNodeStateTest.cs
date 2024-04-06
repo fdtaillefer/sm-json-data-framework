@@ -16,6 +16,24 @@ namespace sm_json_data_framework.Tests.InGameStates
         private static SuperMetroidModel Model { get; set; } = ModelReader.ReadModel();
 
         [Fact]
+        public void ApplyOpenLock_ById_RemembersLock()
+        {
+            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            InNodeState state = new InNodeState(node);
+            state.ApplyOpenLock("Bomb Torizo Room Grey Lock (to Flyway)");
+            Assert.Contains(openedLock, state.OpenedLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_ById_LockNotOnNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InNodeState state = new InNodeState(node);
+            Assert.Throws<ArgumentException>(() => state.ApplyOpenLock("FakeLock"));
+        }
+
+        [Fact]
         public void ApplyOpenLock_RemembersLock()
         {
             RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
@@ -32,6 +50,24 @@ namespace sm_json_data_framework.Tests.InGameStates
             NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
             Assert.Throws<ArgumentException>(() => state.ApplyOpenLock(openedLock));
+        }
+
+        [Fact]
+        public void ApplyBypassLock_ById_RemembersLock()
+        {
+            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            InNodeState state = new InNodeState(node);
+            state.ApplyBypassLock("Animal Escape Grey Lock (to Flyway)");
+            Assert.Contains(bypassedLock, state.BypassedLocks);
+        }
+
+        [Fact]
+        public void ApplyBypassLock_ById_LockNotOnNode_ThrowsException()
+        {
+            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            InNodeState state = new InNodeState(node);
+            Assert.Throws<ArgumentException>(() => state.ApplyBypassLock("FakeLock"));
         }
 
         [Fact]
