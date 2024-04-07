@@ -61,6 +61,10 @@ namespace sm_json_data_framework.Models
         public const string SPEED_BOOSTER_NAME = "SpeedBooster";
 
         public const string MISSILE_NAME = "Missile";
+        public const string SUPER_NAME = "Super";
+        public const string POWER_BOMB_NAME = "PowerBomb";
+        public const string ENERGY_TANK_NAME = "ETank";
+        public const string RESERVE_TANK_NAME = "ReserveTank";
 
         public SuperMetroidModel()
         {
