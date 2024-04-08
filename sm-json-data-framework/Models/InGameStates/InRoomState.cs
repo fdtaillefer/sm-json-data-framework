@@ -79,7 +79,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// The inner HashSet containing the ID of obstacles that have been destroyed in this room since entering.
         /// </summary>
-        protected HashSet<string> InternalDestroyedObstacleIds { get; set; } = new HashSet<string>();
+        protected HashSet<string> InternalDestroyedObstacleIds { get; } = new HashSet<string>();
 
         public ReadOnlySet<string> DestroyedObstacleIds { get { return InternalDestroyedObstacleIds.AsReadOnly(); } }
 

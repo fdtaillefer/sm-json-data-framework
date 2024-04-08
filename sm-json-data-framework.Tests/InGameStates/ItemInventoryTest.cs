@@ -387,16 +387,16 @@ namespace sm_json_data_framework.Tests.InGameStates
                 .ApplyAddItem(missilePack).ApplyAddItem(missilePack);
 
             ItemInventory clone = inventory.Clone();
-            Assert.Equal(2, inventory.NonConsumableItems.Count);
-            Assert.Contains(varia.Name, inventory.NonConsumableItems.Keys);
-            Assert.Contains(speedBooster.Name, inventory.NonConsumableItems.Keys);
-            Assert.Contains(speedBooster.Name, inventory.DisabledItemNames);
-            Assert.Single(inventory.ExpansionItems);
-            Assert.Contains(missilePack.Name, inventory.ExpansionItems.Keys);
-            Assert.Equal(2, inventory.ExpansionItems[missilePack.Name].count);
+            Assert.Equal(2, clone.NonConsumableItems.Count);
+            Assert.Contains(varia.Name, clone.NonConsumableItems.Keys);
+            Assert.Contains(speedBooster.Name, clone.NonConsumableItems.Keys);
+            Assert.Contains(speedBooster.Name, clone.DisabledItemNames);
+            Assert.Single(clone.ExpansionItems);
+            Assert.Contains(missilePack.Name, clone.ExpansionItems.Keys);
+            Assert.Equal(2, clone.ExpansionItems[missilePack.Name].count);
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
-                Assert.Equal(resourceCount.GetAmount(resource), inventory.BaseResourceMaximums.GetAmount(resource));
+                Assert.Equal(resourceCount.GetAmount(resource), clone.BaseResourceMaximums.GetAmount(resource));
             }
         }
 
@@ -409,6 +409,62 @@ namespace sm_json_data_framework.Tests.InGameStates
             ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             ItemInventory clone = inventory.Clone();
+            inventory.ApplyAddItem(varia)
+                .ApplyAddItem(speedBooster).ApplyDisableItem(speedBooster)
+                .ApplyAddItem(missilePack).ApplyAddItem(missilePack);
+
+            Assert.Empty(clone.NonConsumableItems);
+            Assert.Empty(clone.ExpansionItems);
+            Assert.Empty(clone.DisabledItemNames);
+        }
+
+        [Fact]
+        public void WithResourceMaximums_CopiesCorrectly()
+        {
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            inventory.ApplyAddItem(varia)
+                .ApplyAddItem(speedBooster).ApplyDisableItem(speedBooster)
+                .ApplyAddItem(missilePack).ApplyAddItem(missilePack);
+            ResourceCount resourceCount = new ResourceCount();
+            int value = 1;
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                resourceCount.ApplyAmount(resource, value++);
+            }
+            ItemInventory clone = inventory.WithBaseResourceMaximums(resourceCount);
+
+            Assert.Equal(2, clone.NonConsumableItems.Count);
+            Assert.Contains(varia.Name, clone.NonConsumableItems.Keys);
+            Assert.Contains(speedBooster.Name, clone.NonConsumableItems.Keys);
+            Assert.Contains(speedBooster.Name, clone.DisabledItemNames);
+            Assert.Single(clone.ExpansionItems);
+            Assert.Contains(missilePack.Name, clone.ExpansionItems.Keys);
+            Assert.Equal(2, clone.ExpansionItems[missilePack.Name].count);
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                Assert.Equal(resourceCount.GetAmount(resource), clone.BaseResourceMaximums.GetAmount(resource));
+            }
+        }
+
+        [Fact]
+        public void WithResourceMaximums_SeparatesState()
+        {
+            ResourceCount resourceCount = new ResourceCount();
+            int value = 1;
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                resourceCount.ApplyAmount(resource, value++);
+            }
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+
+            ItemInventory clone = inventory.WithBaseResourceMaximums(resourceCount);
             inventory.ApplyAddItem(varia)
                 .ApplyAddItem(speedBooster).ApplyDisableItem(speedBooster)
                 .ApplyAddItem(missilePack).ApplyAddItem(missilePack);

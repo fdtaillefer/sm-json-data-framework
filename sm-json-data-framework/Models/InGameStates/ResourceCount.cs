@@ -60,7 +60,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return clone;
         }
 
-        private IDictionary<RechargeableResourceEnum, int> Amounts { get; set; } = new Dictionary<RechargeableResourceEnum, int>();
+        private IDictionary<RechargeableResourceEnum, int> Amounts { get; } = new Dictionary<RechargeableResourceEnum, int>();
 
         public int GetAmount(RechargeableResourceEnum resource)
         {
@@ -160,7 +160,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public ResourceCount ApplyAmounts(ResourceCount other)
         {
-            Amounts = new Dictionary<RechargeableResourceEnum, int>(other.Amounts);
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                Amounts[resource] = other.GetAmount(resource);
+            }
+
             return this;
         }
 

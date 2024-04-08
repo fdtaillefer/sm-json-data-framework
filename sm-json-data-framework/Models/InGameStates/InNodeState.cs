@@ -15,10 +15,13 @@ namespace sm_json_data_framework.Models.InGameStates
     {
         public RoomNode Node { get; }
 
-        public IEnumerable<NodeLock> OpenedLocks { get; protected set; } = Enumerable.Empty<NodeLock>();
+        protected List<NodeLock> InternalOpenedLocks { get; } = new List<NodeLock>();
 
-        public IEnumerable<NodeLock> BypassedLocks { get; protected set; } = Enumerable.Empty<NodeLock>();
+        public IReadOnlyCollection<NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
 
+        protected List<NodeLock> InternalBypassedLocks { get; } = new List<NodeLock>();
+
+        public IReadOnlyCollection<NodeLock> BypassedLocks { get { return InternalBypassedLocks.AsReadOnly(); } }
 
         public InNodeState(RoomNode node)
         {
@@ -28,8 +31,8 @@ namespace sm_json_data_framework.Models.InGameStates
         public InNodeState(InNodeState other)
         {
             Node = other.Node;
-            OpenedLocks = new List<NodeLock>(other.OpenedLocks);
-            BypassedLocks = new List<NodeLock>(other.BypassedLocks);
+            InternalOpenedLocks = new List<NodeLock>(other.InternalOpenedLocks);
+            InternalBypassedLocks = new List<NodeLock>(other.InternalBypassedLocks);
         }
 
         public InNodeState Clone()
@@ -76,7 +79,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeLock">Lock being opened</param>
         protected void ApplyOpenLockSafe(NodeLock nodeLock)
         {
-            OpenedLocks = OpenedLocks.Append(nodeLock);
+            InternalOpenedLocks.Add(nodeLock);
         }
 
         /// <summary>
@@ -113,7 +116,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeLock">Lock being bypassed</param>
         protected void ApplyBypassLockSafe(NodeLock nodeLock)
         {
-            BypassedLocks = BypassedLocks.Append(nodeLock);
+            InternalBypassedLocks.Add(nodeLock);
         }
     }
 
@@ -130,12 +133,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// An enumeration of locks that were opened by Samus during this visit.
         /// </summary>
-        public IEnumerable<NodeLock> OpenedLocks { get; }
+        public IReadOnlyCollection<NodeLock> OpenedLocks { get; }
 
         /// <summary>
         /// An enumeration of locks that were bypassed by Samus during this visit.
         /// </summary>
-        public IEnumerable<NodeLock> BypassedLocks { get; }
+        public IReadOnlyCollection<NodeLock> BypassedLocks { get; }
 
         /// <summary>
         /// Creates and returns a copy of this InNodeState, as a full-fledged modifiable one.

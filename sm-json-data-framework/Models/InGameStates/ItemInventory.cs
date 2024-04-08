@@ -69,6 +69,17 @@ namespace sm_json_data_framework.Models.InGameStates
             ResourceCapacityChanges = other.ResourceCapacityChanges.Clone();
         }
 
+        /// <summary>
+        /// Creates and returns a new ItemInventory containing data copied from the provided otherInventory, 
+        /// except the base resource maximums which will be a clone of the provided baseResourceMaximums
+        /// </summary>
+        /// <param name="otherInventory">The other inventory, on which most data will be based</param>
+        /// <param name="baseResourceMaximums">The base resource maximums to use instead of the one from otherInventory</param>
+        public ItemInventory(ItemInventory otherInventory, ReadOnlyResourceCount baseResourceMaximums) : this(otherInventory)
+        {
+            InternalBaseResourceMaximums = baseResourceMaximums.Clone();
+        }
+
         public ItemInventory Clone()
         {
             return new ItemInventory(this);
@@ -81,9 +92,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>The created clone</returns>
         public ItemInventory WithBaseResourceMaximums(ReadOnlyResourceCount baseResourceMaximums)
         {
-            ItemInventory newInventory = Clone();
-            newInventory.InternalBaseResourceMaximums = baseResourceMaximums.Clone();
-            return newInventory;
+            return new ItemInventory(this, baseResourceMaximums);
         }
 
         /// <summary>
@@ -96,17 +105,17 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        protected IDictionary<string, Item> InternalNonConsumableItems { get; set; } = new Dictionary<string, Item>();
+        protected IDictionary<string, Item> InternalNonConsumableItems { get; } = new Dictionary<string, Item>();
         public ReadOnlyDictionary<string, Item> NonConsumableItems { get { return InternalNonConsumableItems.AsReadOnly(); } }
 
-        protected ISet<string> InternalDisabledItemNames { get; set; } = new HashSet<string>();
+        protected ISet<string> InternalDisabledItemNames { get; } = new HashSet<string>();
         public IReadOnlySet<string> DisabledItemNames { get { return InternalDisabledItemNames.AsReadOnly(); } }
 
         
-        protected IDictionary<string, (ExpansionItem item, int count)> InternalExpansionItems { get; set ; } = new Dictionary<string, (ExpansionItem item, int count)>();
+        protected IDictionary<string, (ExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (ExpansionItem item, int count)>();
         public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get { return InternalExpansionItems.AsReadOnly(); } }
 
-        protected ResourceCount InternalBaseResourceMaximums { get; set; }
+        protected ResourceCount InternalBaseResourceMaximums { get; }
 
         public ReadOnlyResourceCount BaseResourceMaximums { get { return InternalBaseResourceMaximums.AsReadOnly(); } }
 
@@ -114,7 +123,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Expresses the change that this inventory applies on maximum resource counts.
         /// This differs from maximum counts because it excludes base maximum counts.
         /// </summary>
-        protected ResourceCount ResourceCapacityChanges { get; set; }
+        protected ResourceCount ResourceCapacityChanges { get; }
 
         public bool HasItem(Item item)
         {
