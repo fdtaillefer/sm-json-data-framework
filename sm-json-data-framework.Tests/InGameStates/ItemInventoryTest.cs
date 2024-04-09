@@ -245,44 +245,44 @@ namespace sm_json_data_framework.Tests.InGameStates
 
         [Theory]
         [MemberData(nameof(RechargeableResourceValues))]
-        public void GetMaxAmount_RechargeableResource_NoExpansions_ReturnsBaseValue(RechargeableResourceEnum resource)
+        public void ResourceMaximums_RechargeableResource_NoExpansions_ReturnsBaseValue(RechargeableResourceEnum resource)
         {
             int amount = 5;
             ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, amount));
 
-            Assert.Equal(amount, inventory.GetMaxAmount(resource));
+            Assert.Equal(amount, inventory.ResourceMaximums.GetAmount(resource));
         }
 
         [Theory]
         [InlineData(RechargeableResourceEnum.Missile)]
         [InlineData(RechargeableResourceEnum.Super)]
         [InlineData(RechargeableResourceEnum.PowerBomb)]
-        public void GetMaxAmount_ConsumableAmmo_NoExpansions_ReturnsBaseValue(RechargeableResourceEnum resource)
+        public void ResourceMaximums_ConsumableAmmo_NoExpansions_ReturnsBaseValue(RechargeableResourceEnum resource)
         {
             int amount = 5;
             ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, amount));
 
-            Assert.Equal(amount, inventory.GetMaxAmount(resource.ToConsumableResource()));
+            Assert.Equal(amount, inventory.ResourceMaximums.GetAmount(resource.ToConsumableResource()));
         }
 
         [Fact]
-        public void GetMaxAmount_ConsumableEnergy_NoExpansions_ReturnsBaseValuesSum()
+        public void ResourceMaximums_ConsumableEnergy_NoExpansions_ReturnsBaseValuesSum()
         {
             ItemInventory inventory = new ItemInventory(
                 new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, 2).ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 4)
             );
 
-            Assert.Equal(6, inventory.GetMaxAmount(ConsumableResourceEnum.ENERGY));
+            Assert.Equal(6, inventory.ResourceMaximums.GetAmount(ConsumableResourceEnum.ENERGY));
         }
 
         [Theory]
         [MemberData(nameof(RechargeableResourceValuesWithExpansionItem))]
-        public void GetMaxAmount_RechargeableResource_WithExpansions_ReturnsSumOfBaseAndExpansion(RechargeableResourceEnum resource, ExpansionItem item)
+        public void ResourceMaximums_RechargeableResource_WithExpansions_ReturnsSumOfBaseAndExpansion(RechargeableResourceEnum resource, ExpansionItem item)
         {
             int baseAmount = 5;
             ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
                 .ApplyAddItem(item).ApplyAddItem(item);
-            Assert.Equal(baseAmount + 2*item.ResourceAmount, inventory.GetMaxAmount(resource));
+            Assert.Equal(baseAmount + 2*item.ResourceAmount, inventory.ResourceMaximums.GetAmount(resource));
 
         }
 
@@ -290,17 +290,17 @@ namespace sm_json_data_framework.Tests.InGameStates
         [InlineData(RechargeableResourceEnum.Missile, SuperMetroidModel.MISSILE_NAME)]
         [InlineData(RechargeableResourceEnum.Super, SuperMetroidModel.SUPER_NAME)]
         [InlineData(RechargeableResourceEnum.PowerBomb, SuperMetroidModel.POWER_BOMB_NAME)]
-        public void GetMaxAmount_ConsumableAmmo_WithExpansions_ReturnsSumOfBaseAndExpansion(RechargeableResourceEnum resource, string itemName)
+        public void ResourceMaximums_ConsumableAmmo_WithExpansions_ReturnsSumOfBaseAndExpansion(RechargeableResourceEnum resource, string itemName)
         {
             int baseAmount = 5;
             ExpansionItem item = (ExpansionItem) Model.Items[itemName];
             ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
                 .ApplyAddItem(item).ApplyAddItem(item);
-            Assert.Equal(baseAmount + 2 * item.ResourceAmount, inventory.GetMaxAmount(resource.ToConsumableResource()));
+            Assert.Equal(baseAmount + 2 * item.ResourceAmount, inventory.ResourceMaximums.GetAmount(resource.ToConsumableResource()));
         }
 
         [Fact]
-        public void GetMaxAmount_Consumableenergy_WithExpansions_ReturnsSumOfBaseAndExpansionForBothEnergyTypes()
+        public void ResourceMaximums_Consumableenergy_WithExpansions_ReturnsSumOfBaseAndExpansionForBothEnergyTypes()
         {
             ExpansionItem etank = (ExpansionItem)Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
             ExpansionItem reserve = (ExpansionItem)Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
@@ -310,7 +310,7 @@ namespace sm_json_data_framework.Tests.InGameStates
                 .ApplyAddItem(etank)
                 .ApplyAddItem(reserve);
             // 2 + 4 + 100*3
-            Assert.Equal(306, inventory.GetMaxAmount(ConsumableResourceEnum.ENERGY));
+            Assert.Equal(306, inventory.ResourceMaximums.GetAmount(ConsumableResourceEnum.ENERGY));
         }
 
         [Fact]

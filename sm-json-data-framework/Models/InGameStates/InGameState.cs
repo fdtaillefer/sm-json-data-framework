@@ -169,11 +169,11 @@ namespace sm_json_data_framework.Models.InGameStates
                 // The other resources can be fully spent, but for energy we don't want to go below 1
                 if (resource == ConsumableResourceEnum.ENERGY)
                 {
-                    return InternalInventory.GetMaxAmount(resource) > quantity;
+                    return ResourceMaximums.GetAmount(resource) > quantity;
                 }
                 else
                 {
-                    return InternalInventory.GetMaxAmount(resource) >= quantity;
+                    return ResourceMaximums.GetAmount(resource) >= quantity;
                 }
             }
         }
@@ -189,7 +189,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // Don't bother with current resource count if resource tracking is disabled
             if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                int max = InternalInventory.GetMaxAmount(resource);
+                int max = ResourceMaximums.GetAmount(resource);
                 int currentAmount = InternalResources.GetAmount(resource);
 
                 // We're already at max (or greater, somehow). Don't add anything
@@ -229,7 +229,7 @@ namespace sm_json_data_framework.Models.InGameStates
             // Don't bother with current resource count if resource tracking is disabled
             if (model.LogicalOptions.ResourceTrackingEnabled)
             {
-                InternalResources.ApplyAmount(resource, InternalInventory.GetMaxAmount(resource));
+                InternalResources.ApplyAmount(resource, ResourceMaximums.GetAmount(resource));
             }
         }
 
@@ -267,14 +267,14 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             return Enum.GetValues(typeof(RechargeableResourceEnum))
                 .Cast<RechargeableResourceEnum>()
-                .Where(resource => InternalResources.GetAmount(resource) >= InternalInventory.GetMaxAmount(resource));
+                .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
         public IEnumerable<ConsumableResourceEnum> GetFullConsumableResources()
         {
             return Enum.GetValues(typeof(ConsumableResourceEnum))
                 .Cast<ConsumableResourceEnum>()
-                .Where(resource => InternalResources.GetAmount(resource) >= InternalInventory.GetMaxAmount(resource));
+                .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
         public IEnumerable<EnemyDropEnum> GetUnneededDrops(SuperMetroidModel model)
@@ -411,6 +411,8 @@ namespace sm_json_data_framework.Models.InGameStates
         public ReadOnlyItemInventory Inventory { get { return InternalInventory.AsReadOnly(); } }
         
         public ReadOnlyResourceCount BaseResourceMaximums { get { return InternalInventory.BaseResourceMaximums; } }
+
+        public ReadOnlyResourceCount ResourceMaximums { get { return InternalInventory.ResourceMaximums; } }
 
         public ItemInventory GetInventoryExceptIn(ReadOnlyInGameState other)
         {
@@ -978,11 +980,16 @@ namespace sm_json_data_framework.Models.InGameStates
         public ReadOnlyItemInventory Inventory { get; }
 
         // We won't do delegate properties for inventory properties that more obviously belong to the inventory,
-        // but BaseResourceMaximums isn't that obvious so this one could be helpful.
+        // but BaseResourceMaximums and ResourceMaximums aren't that obvious so those two could be helpful.
         /// <summary>
         /// The resource maximums that the player would have in this InGameState if inventory were empty.
         /// </summary>
         public ReadOnlyResourceCount BaseResourceMaximums { get; }
+
+        /// <summary>
+        /// The resource maximums that the player currently has in this InGameState.
+        /// </summary>
+        public ReadOnlyResourceCount ResourceMaximums { get; }
 
         /// <summary>
         /// Creates and returns a new ItemInventory containing all items from this in-game state

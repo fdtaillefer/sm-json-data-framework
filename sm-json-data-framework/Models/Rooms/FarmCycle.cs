@@ -217,7 +217,7 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 // Figure out how many cycles we need to execute in order to refill something farmable and stable
                 int cyclesToRefillSomething = notFullFarmableResources.Select(resource => 
-                    decimal.ToInt32(decimal.Ceiling( (inGameState.Inventory.GetMaxAmount(resource) - resourceCounts[resource]) / resourceVariationPerCycle[resource])))
+                    decimal.ToInt32(decimal.Ceiling( (inGameState.ResourceMaximums.GetAmount(resource) - resourceCounts[resource]) / resourceVariationPerCycle[resource])))
                     .Where(cycleCount => cycleCount > 0)
                     .Min();
 
@@ -238,7 +238,7 @@ namespace sm_json_data_framework.Models.Rooms
 
                 // Update full resources
                 fullResources = resourceCounts
-                    .Where(pair => pair.Value >= inGameState.Inventory.GetMaxAmount(pair.Key))
+                    .Where(pair => pair.Value >= inGameState.ResourceMaximums.GetAmount(pair.Key))
                     .Select(pair => pair.Key)
                     .Intersect(farmableResources)
                     .ToArray();

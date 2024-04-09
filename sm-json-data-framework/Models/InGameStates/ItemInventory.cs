@@ -125,6 +125,19 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected ResourceCount ResourceCapacityChanges { get; }
 
+        private ReadOnlyResourceCount _resourceMaximums;
+        public ReadOnlyResourceCount ResourceMaximums 
+        {
+            get
+            {
+                if(_resourceMaximums == null)
+                {
+                    _resourceMaximums = new AggregateResourceCount(BaseResourceMaximums, ResourceCapacityChanges);
+                }
+                return _resourceMaximums;
+            } 
+        }
+
         public bool HasItem(Item item)
         {
             return HasItem(item.Name);
@@ -148,16 +161,6 @@ namespace sm_json_data_framework.Models.InGameStates
         public bool HasSpeedBooster()
         {
             return HasItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
-        }
-
-        public int GetMaxAmount(RechargeableResourceEnum resource)
-        {
-            return InternalBaseResourceMaximums.GetAmount(resource) + ResourceCapacityChanges.GetAmount(resource);
-        }
-
-        public int GetMaxAmount(ConsumableResourceEnum resource)
-        {
-            return resource.ToRechargeableResources().Select(resource => GetMaxAmount(resource)).Sum();
         }
 
         public bool ContainsAnyInGameItem()
@@ -351,6 +354,11 @@ namespace sm_json_data_framework.Models.InGameStates
         public ReadOnlyResourceCount BaseResourceMaximums { get; }
 
         /// <summary>
+        /// Expresses the actual maximum resources for this inventory, accounting for both base resource maximums and expansion items.
+        /// </summary>
+        public ReadOnlyResourceCount ResourceMaximums { get; }
+
+        /// <summary>
         /// Returns whether this inventory contains the provided item.
         /// </summary>
         /// <param name="item">Item to look for</param>
@@ -381,20 +389,6 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <returns></returns>
         public bool HasSpeedBooster();
-
-        /// <summary>
-        /// Returns the max amount of the provided resource, according to the contents of this inventory.
-        /// </summary>
-        /// <param name="resource">The resource to return the maximum amount for.</param>
-        /// <returns></returns>
-        public int GetMaxAmount(RechargeableResourceEnum resource);
-
-        /// <summary>
-        /// Returns the max amount of the provided consumable resource, according to the contents of this inventory.
-        /// </summary>
-        /// <param name="resource">The resource to return the maximum amount for.</param>
-        /// <returns></returns>
-        public int GetMaxAmount(ConsumableResourceEnum resource);
 
         /// <summary>
         /// Returns whether there is any explicit in-game item in this inventory.

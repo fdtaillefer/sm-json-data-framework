@@ -46,7 +46,7 @@ namespace sm_json_data_framework.InGameStates
             Assert.True(inGameState.Inventory.HasVariaSuit());
             Assert.True(inGameState.TakenItemLocations.ContainsNode(variaNode));
             Assert.Equal(startConditions.BaseResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy),
-                inGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.RegularEnergy));
+                inGameState.ResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(startingEnergy, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.True(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
         }
@@ -78,7 +78,7 @@ namespace sm_json_data_framework.InGameStates
             Assert.True(inGameState.Inventory.HasVariaSuit());
             Assert.True(inGameState.TakenItemLocations.ContainsNode(variaNode));
             Assert.Equal(startConditions.BaseResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy),
-                inGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.RegularEnergy));
+                inGameState.ResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(startingEnergy, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.True(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
         }
@@ -121,8 +121,8 @@ namespace sm_json_data_framework.InGameStates
             Assert.DoesNotContain(secondLockName, inGameState.OpenedLocks.Keys);
             Assert.False(inGameState.Inventory.HasVariaSuit());
             Assert.False(inGameState.TakenItemLocations.ContainsNode(variaNode));
-            Assert.Equal(startConditions.StartingInventory.GetMaxAmount(RechargeableResourceEnum.Missile),
-                inGameState.Inventory.GetMaxAmount(RechargeableResourceEnum.Missile));
+            Assert.Equal(startConditions.StartingInventory.ResourceMaximums.GetAmount(RechargeableResourceEnum.Missile),
+                inGameState.ResourceMaximums.GetAmount(RechargeableResourceEnum.Missile));
             Assert.Equal(5, inGameState.Resources.GetAmount(RechargeableResourceEnum.Missile));
             Assert.False(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
         }

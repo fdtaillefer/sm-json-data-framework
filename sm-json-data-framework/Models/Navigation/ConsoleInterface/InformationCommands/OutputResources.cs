@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
                 foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
                 {
                     Console.WriteLine($"{currentResource}: {navigator.CurrentInGameState.Resources.GetAmount(currentResource)} " +
-                        $"out of {navigator.CurrentInGameState.Inventory.GetMaxAmount(currentResource)}");
+                        $"out of {navigator.CurrentInGameState.ResourceMaximums.GetAmount(currentResource)}");
                 }
 
                 return true;
