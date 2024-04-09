@@ -39,7 +39,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        public ResourceCount(ResourceCount other)
+        public ResourceCount(ReadOnlyResourceCount other)
         {
             ApplyAmounts(other);
         }
@@ -47,17 +47,6 @@ namespace sm_json_data_framework.Models.InGameStates
         public ResourceCount Clone()
         {
             return new ResourceCount(this);
-        }
-
-        public ResourceCount CloneNegative()
-        {
-            ResourceCount clone = Clone();
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
-            {
-                clone.ApplyAmount(currentResource, clone.GetAmount(currentResource) * -1);
-            }
-
-            return clone;
         }
 
         private IDictionary<RechargeableResourceEnum, int> Amounts { get; } = new Dictionary<RechargeableResourceEnum, int>();
@@ -74,20 +63,9 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
         {
-            if (quantity == 0)
-            {
-                return true;
-            }
+            int actualAmount = GetAmount(resource);
 
-            // The other resources can be fully spent, but for energy we don't want to go below 1
-            if (resource == ConsumableResourceEnum.ENERGY)
-            {
-                return GetAmount(resource) > quantity;
-            }
-            else
-            {
-                return GetAmount(resource) >= quantity;
-            }
+            return IsResourceAvailable(resource, quantity, actualAmount);
         }
 
         public bool Any(Predicate<int> resourcePredicate)
@@ -158,7 +136,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The ResourceCount to use amounts from</param>
         /// <returns>This, for chaining</returns>
-        public ResourceCount ApplyAmounts(ResourceCount other)
+        public ResourceCount ApplyAmounts(ReadOnlyResourceCount other)
         {
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -191,6 +169,32 @@ namespace sm_json_data_framework.Models.InGameStates
             Amounts[resource] = newAmount;
             return this;
         }
+
+        /// <summary>
+        /// Contains the logic, detached from any <see cref="ResourceCount"/> instance, for determining whether a given quantity of a given resource should be 
+        /// considered available (can be consumed without dying) if it has a given actualAmount.
+        /// </summary>
+        /// <param name="resource">The resource for which we are checking for availability.</param>
+        /// <param name="quantity">The quantity to check for availability</param>
+        /// <param name="actualAmount">The amount of the resource that is present.</param>
+        /// <returns></returns>
+        public static bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity, int actualAmount)
+        {
+            if (quantity == 0)
+            {
+                return true;
+            }
+
+            // The other resources can be fully spent, but for energy we don't want to go below 1
+            if (resource == ConsumableResourceEnum.ENERGY)
+            {
+                return actualAmount > quantity;
+            }
+            else
+            {
+                return actualAmount >= quantity;
+            }
+        }
     }
 
     /// <summary>
@@ -203,12 +207,6 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <returns>The new copy, as a full-fledged ResourceCount</returns>
         public ResourceCount Clone();
-
-        /// <summary>
-        /// Creates and returns a copy of this ResourceCount, with positive and negative values flipped.
-        /// </summary>
-        /// <returns>The new copy, as a full-fledged ResourceCount</returns>
-        public ResourceCount CloneNegative();
 
         /// <summary>
         /// Returns the amount associated to this container for the provided rechargeable resource.

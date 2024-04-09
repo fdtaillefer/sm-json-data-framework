@@ -333,7 +333,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         [InlineData(RechargeableResourceEnum.Missile)]
         [InlineData(RechargeableResourceEnum.Super)]
         [InlineData(RechargeableResourceEnum.PowerBomb)]
-        public void IsResourceAvailable_RequestingMoreThanPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
+        public void IsResourceAvailable_RequestingLessThanPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
         {
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
@@ -343,7 +343,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
-        public void IsResourceAvailable_RequestingMoreThanPresentAmount_Energy_ReturnsTrue()
+        public void IsResourceAvailable_RequestingLessThanPresentAmount_Energy_ReturnsTrue()
         {
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
@@ -353,7 +353,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
-        public void IsResourceAvailable_RequestingMoreThanPresentAmount_EnergyMixOfReserveAndNormal_ReturnsTrue()
+        public void IsResourceAvailable_RequestingLessThanPresentAmount_EnergyMixOfReserveAndNormal_ReturnsTrue()
         {
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 3);
@@ -366,7 +366,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         [InlineData(RechargeableResourceEnum.Missile)]
         [InlineData(RechargeableResourceEnum.Super)]
         [InlineData(RechargeableResourceEnum.PowerBomb)]
-        public void IsResourceAvailable_RequestingLessThanPresentAmount_Ammo_ReturnsFalse(RechargeableResourceEnum resource)
+        public void IsResourceAvailable_RequestingMoreThanPresentAmount_Ammo_ReturnsFalse(RechargeableResourceEnum resource)
         {
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
@@ -376,7 +376,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
-        public void IsResourceAvailable_RequestingLessThanPresentAmount_Energy_ReturnsFalse()
+        public void IsResourceAvailable_RequestingMoreThanPresentAmount_Energy_ReturnsFalse()
         {
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
