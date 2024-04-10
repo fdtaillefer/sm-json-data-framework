@@ -27,10 +27,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int ammoCost = Count * times;
-            if (inGameState.IsResourceAvailable(model, AmmoType.GetConsumableResourceEnum(), ammoCost))
+            if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
             {
                 var resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(model, AmmoType.GetConsumableResourceEnum(), ammoCost);
+                resultingState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
                 return new ExecutionResult(resultingState);
             }
             else

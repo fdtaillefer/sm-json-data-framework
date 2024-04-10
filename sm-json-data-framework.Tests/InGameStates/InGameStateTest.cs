@@ -112,7 +112,7 @@ namespace sm_json_data_framework.InGameStates
             clone.ApplyTakeLocation(variaNode);
             clone.ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
             clone.ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME]);
-            clone.ApplyAddResource(Model, RechargeableResourceEnum.Missile, 2);
+            clone.ApplyAddResource(RechargeableResourceEnum.Missile, 2);
             clone.ApplyAddGameFlag(Model.GameFlags[maridiaTubeFlag]);
 
             // Make sure the original is unchanged

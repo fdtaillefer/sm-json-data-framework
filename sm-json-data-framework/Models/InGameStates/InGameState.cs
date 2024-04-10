@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ReadOnlyResourceCount Resources { get { return InternalResources.AsReadOnly(); } }
 
-        public bool IsResourceAvailable(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
+        public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
         {
             if (quantity == 0)
             {
@@ -139,10 +139,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Adds the provided quantity of the provided consumable resource. Will not go beyond the maximum
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to increase</param>
         /// <param name="quantity">The amount to increase by</param>
-        public void ApplyAddResource(SuperMetroidModel model, RechargeableResourceEnum resource, int quantity)
+        public void ApplyAddResource(RechargeableResourceEnum resource, int quantity)
         {
             int max = ResourceMaximums.GetAmount(resource);
             int currentAmount = InternalResources.GetAmount(resource);
@@ -161,10 +160,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Consumes the provided quantity of the provided consumable resource. When consuming energy, regular energy is used up first (down to 1) 
         /// then reserves are used.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to consume</param>
         /// <param name="quantity">The amount to consume</param>
-        public void ApplyConsumeResource(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
+        public void ApplyConsumeResource(ConsumableResourceEnum resource, int quantity)
         {
             InternalResources.ApplyAmountReduction(resource, quantity);
         }
@@ -172,9 +170,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Sets current value for the provided resource to the current maximum
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to refill</param>
-        public void ApplyRefillResource(SuperMetroidModel model, RechargeableResourceEnum resource)
+        public void ApplyRefillResource(RechargeableResourceEnum resource)
         {
             InternalResources.ApplyAmount(resource, ResourceMaximums.GetAmount(resource));
         }
@@ -184,13 +181,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This is almost the same as refilling a rechargeable resource,
         /// except both types of energy are grouped together.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="resource">The resource to refill</param>
-        public void ApplyRefillResource(SuperMetroidModel model, ConsumableResourceEnum resource)
+        public void ApplyRefillResource(ConsumableResourceEnum resource)
         {
             foreach (RechargeableResourceEnum rechargeableResource in resource.ToRechargeableResources())
             {
-                ApplyRefillResource(model, rechargeableResource);
+                ApplyRefillResource(rechargeableResource);
             }
         }
 
@@ -835,11 +831,10 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns whether it's possible to spend the provided amount of the provided resource.
         /// </summary>
-        /// <param name="model">Model, whose logical options drive the behavior of this method</param>
         /// <param name="resource">The resource to check for availability</param>
         /// <param name="quantity">The amount of the resource to check for availability</param>
         /// <returns></returns>
-        public bool IsResourceAvailable(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity);
+        public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity);
 
         /// <summary>
         /// Creates and returns a ResourceCount that expresses how many rechargeable resources this in-game state has,

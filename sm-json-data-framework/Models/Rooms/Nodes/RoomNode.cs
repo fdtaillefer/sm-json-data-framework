@@ -332,19 +332,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 switch (utility)
                 {
                     case UtilityEnum.Energy:
-                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.RegularEnergy);
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.RegularEnergy);
                         break;
                     case UtilityEnum.Reserve:
-                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.ReserveEnergy);
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.ReserveEnergy);
                         break;
                     case UtilityEnum.Missile:
-                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.Missile);
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Missile);
                         break;
                     case UtilityEnum.Super:
-                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.Super);
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Super);
                         break;
                     case UtilityEnum.PowerBomb:
-                        result.ResultingState.ApplyRefillResource(model, RechargeableResourceEnum.PowerBomb);
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.PowerBomb);
                         break;
                     // Other utilities don't do anything for us
                     default:

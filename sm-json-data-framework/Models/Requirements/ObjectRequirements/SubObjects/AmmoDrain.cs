@@ -29,10 +29,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             int currentAmmo = inGameState.Resources.GetAmount(AmmoType.GetConsumableResourceEnum());
             int ammoCost = Math.Min(currentAmmo, Count);
 
-            if (inGameState.IsResourceAvailable(model, AmmoType.GetConsumableResourceEnum(), ammoCost))
+            if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
             {
                 var resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(model, AmmoType.GetConsumableResourceEnum(), ammoCost);
+                resultingState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
                 return new ExecutionResult(resultingState);
             }
             else

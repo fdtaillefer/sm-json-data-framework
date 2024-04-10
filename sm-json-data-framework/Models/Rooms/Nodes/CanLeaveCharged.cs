@@ -142,7 +142,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             result.AddExecutedCanLeaveCharged(this, bestStrat);
 
             // Finally, spend the energy for executing a shinespark if needed (we already asked to check that the state has enough)
-            result.ResultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
+            result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, shinesparkEnergyToSpend);
             
             return result;
         }

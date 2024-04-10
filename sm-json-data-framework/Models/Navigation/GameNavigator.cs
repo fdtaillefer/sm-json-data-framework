@@ -286,10 +286,10 @@ namespace sm_json_data_framework.Models.Navigation
                 switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
                 {
                     case ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP:
-                        result.ResultingState.ApplyAddResource(GameModel, expansionItem.Resource, expansionItem.ResourceAmount);
+                        result.ResultingState.ApplyAddResource(expansionItem.Resource, expansionItem.ResourceAmount);
                         break;
                     case ExpansionPickupRestoreBehaviorEnum.REFILL:
-                        result.ResultingState.ApplyRefillResource(GameModel, expansionItem.Resource);
+                        result.ResultingState.ApplyRefillResource(expansionItem.Resource);
                         break;
                     // If we don't know or if the pickup has no effect, do nothing
                     case ExpansionPickupRestoreBehaviorEnum.NOTHING:

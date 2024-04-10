@@ -74,7 +74,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             {
                 int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
                 InGameState resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(model, ConsumableResourceEnum.ENERGY, energyCost);
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
                 ExecutionResult result = new ExecutionResult(resultingState);
                 result.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return result;

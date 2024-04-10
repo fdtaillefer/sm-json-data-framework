@@ -272,7 +272,7 @@ namespace sm_json_data_framework.Models.Rooms
             InGameState resultingState = inGameState.Clone();
             foreach (ConsumableResourceEnum resource in resourcesToRefill)
             {
-                resultingState.ApplyRefillResource(model, resource);
+                resultingState.ApplyRefillResource(resource);
             }
             return new ExecutionResult(resultingState);
         }
