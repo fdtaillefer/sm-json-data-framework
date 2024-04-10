@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Reading;
 using sm_json_data_framework.Rules;
@@ -16,6 +17,19 @@ namespace sm_json_data_framework.InGameStates
 {
     public class InGameStateTest
     {
+        /// <summary>
+        /// Returns all values of <see cref="ConsumableResourceEnum"/> in a format that can be used by <see cref="MemberDataAttribute"/>.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<object[]> ConsumableResourceValues()
+        {
+
+            foreach (ConsumableResourceEnum resource in Enum.GetValues(typeof(ConsumableResourceEnum)))
+            {
+                yield return new object[] { resource };
+            }
+        }
+
         // Use a static model to read it only once.
         private static SuperMetroidModel Model { get; set; } = ModelReader.ReadModel();
 
@@ -49,6 +63,127 @@ namespace sm_json_data_framework.InGameStates
                 inGameState.ResourceMaximums.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(startingEnergy, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.True(inGameState.ActiveGameFlags.ContainsFlag(maridiaTubeFlag));
+        }
+
+        [Theory]
+        [MemberData(nameof(ConsumableResourceValues))]
+        public void IsResourceAvailable_Requesting0_ReturnsTrue(ConsumableResourceEnum resource)
+        {
+            ResourceCount resourceCount = new ResourceCount();
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.True(inGameState.IsResourceAvailable(resource, 0));
+        }
+
+        [Theory]
+        [InlineData(RechargeableResourceEnum.Missile)]
+        [InlineData(RechargeableResourceEnum.Super)]
+        [InlineData(RechargeableResourceEnum.PowerBomb)]
+        public void IsResourceAvailable_RequestingExactPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
+        {
+            int amount = 5;
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(resource, amount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.True(inGameState.IsResourceAvailable(resource.ToConsumableResource(), amount));
+        }
+
+        [Fact]
+        public void IsResourceAvailable_RequestingExactPresentAmount_Energy_ReturnsFalse()
+        {
+            int amount = 5;
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            // X energy is not available to spend if you have exactly X energy, because you'd die
+            Assert.False(inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amount));
+        }
+
+        [Theory]
+        [InlineData(RechargeableResourceEnum.Missile)]
+        [InlineData(RechargeableResourceEnum.Super)]
+        [InlineData(RechargeableResourceEnum.PowerBomb)]
+        public void IsResourceAvailable_RequestingLessThanPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
+        {
+            int amountToRequest = 5;
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(resource, amountToRequest + 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.True(inGameState.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest));
+        }
+
+        [Fact]
+        public void IsResourceAvailable_RequestingLessThanPresentAmount_Energy_ReturnsTrue()
+        {
+            int amountToRequest = 5;
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest + 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.True(inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest));
+        }
+
+        [Fact]
+        public void IsResourceAvailable_RequestingLessThanPresentAmount_EnergyMixOfReserveAndNormal_ReturnsTrue()
+        {
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 3);
+            resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.True(inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 5));
+        }
+
+        [Theory]
+        [InlineData(RechargeableResourceEnum.Missile)]
+        [InlineData(RechargeableResourceEnum.Super)]
+        [InlineData(RechargeableResourceEnum.PowerBomb)]
+        public void IsResourceAvailable_RequestingMoreThanPresentAmount_Ammo_ReturnsFalse(RechargeableResourceEnum resource)
+        {
+            int amountToRequest = 5;
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(resource, amountToRequest - 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.False(inGameState.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest));
+        }
+
+        [Fact]
+        public void IsResourceAvailable_RequestingMoreThanPresentAmount_Energy_ReturnsFalse()
+        {
+            int amountToRequest = 5;
+            ResourceCount resourceCount = new ResourceCount();
+            resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest - 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
+            startConditions.StartingResources = resourceCount;
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.False(inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest));
         }
 
         [Fact]

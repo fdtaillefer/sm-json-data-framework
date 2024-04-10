@@ -120,20 +120,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
         {
-            if (quantity == 0)
-            {
-                return true;
-            }
-
-            // The other resources can be fully spent, but for energy we don't want to go below 1
-            if (resource == ConsumableResourceEnum.ENERGY)
-            {
-                return InternalResources.GetAmount(resource) > quantity;
-            }
-            else
-            {
-                return InternalResources.GetAmount(resource) >= quantity;
-            }
+            return InternalResources.IsResourceAvailable(resource, quantity);
         }
 
         /// <summary>
