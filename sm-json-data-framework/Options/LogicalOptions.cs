@@ -192,12 +192,6 @@ namespace sm_json_data_framework.Options
         }
 
         /// <summary>
-        /// If true, current counts for resources are maintained and used by logical elements.
-        /// If false, each resource check only looks at the player's max value, so for example two consecutive losses of 200 energy would still only require 2 E-Tanks.
-        /// </summary>
-        public bool ResourceTrackingEnabled { get; set; } = true;
-
-        /// <summary>
         /// An instance of <see cref="InGameStateComparer"/>, initialized with the current relative resource values.
         /// </summary>
         public InGameStateComparer InGameStateComparer { get; private set; }

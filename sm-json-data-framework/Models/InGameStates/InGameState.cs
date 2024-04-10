@@ -150,31 +150,14 @@ namespace sm_json_data_framework.Models.InGameStates
                 return true;
             }
 
-            // If resource tracking is enabled, look at current resource amounts
-            if (model.LogicalOptions.ResourceTrackingEnabled)
+            // The other resources can be fully spent, but for energy we don't want to go below 1
+            if (resource == ConsumableResourceEnum.ENERGY)
             {
-                // The other resources can be fully spent, but for energy we don't want to go below 1
-                if (resource == ConsumableResourceEnum.ENERGY)
-                {
-                    return InternalResources.GetAmount(resource) > quantity;
-                }
-                else
-                {
-                    return InternalResources.GetAmount(resource) >= quantity;
-                }
+                return InternalResources.GetAmount(resource) > quantity;
             }
-            // If resource tracking is not enabled, use max resource amounts instead of current amounts
             else
             {
-                // The other resources can be fully spent, but for energy we don't want to go below 1
-                if (resource == ConsumableResourceEnum.ENERGY)
-                {
-                    return ResourceMaximums.GetAmount(resource) > quantity;
-                }
-                else
-                {
-                    return ResourceMaximums.GetAmount(resource) >= quantity;
-                }
+                return InternalResources.GetAmount(resource) >= quantity;
             }
         }
 
@@ -186,21 +169,17 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="quantity">The amount to increase by</param>
         public void ApplyAddResource(SuperMetroidModel model, RechargeableResourceEnum resource, int quantity)
         {
-            // Don't bother with current resource count if resource tracking is disabled
-            if (model.LogicalOptions.ResourceTrackingEnabled)
+            int max = ResourceMaximums.GetAmount(resource);
+            int currentAmount = InternalResources.GetAmount(resource);
+
+            // We're already at max (or greater, somehow). Don't add anything
+            if (currentAmount >= max)
             {
-                int max = ResourceMaximums.GetAmount(resource);
-                int currentAmount = InternalResources.GetAmount(resource);
-
-                // We're already at max (or greater, somehow). Don't add anything
-                if (currentAmount >= max)
-                {
-                    return;
-                }
-                int newAmount = currentAmount + quantity;
-
-                InternalResources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
+                return;
             }
+            int newAmount = currentAmount + quantity;
+
+            InternalResources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
         }
 
         /// <summary>
@@ -212,11 +191,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="quantity">The amount to consume</param>
         public void ApplyConsumeResource(SuperMetroidModel model, ConsumableResourceEnum resource, int quantity)
         {
-            // Don't bother with current resource count if resource tracking is disabled
-            if (model.LogicalOptions.ResourceTrackingEnabled)
-            {
-                InternalResources.ApplyAmountReduction(resource, quantity);
-            }
+            InternalResources.ApplyAmountReduction(resource, quantity);
         }
 
         /// <summary>
@@ -226,11 +201,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="resource">The resource to refill</param>
         public void ApplyRefillResource(SuperMetroidModel model, RechargeableResourceEnum resource)
         {
-            // Don't bother with current resource count if resource tracking is disabled
-            if (model.LogicalOptions.ResourceTrackingEnabled)
-            {
-                InternalResources.ApplyAmount(resource, ResourceMaximums.GetAmount(resource));
-            }
+            InternalResources.ApplyAmount(resource, ResourceMaximums.GetAmount(resource));
         }
 
         /// <summary>
@@ -242,13 +213,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="resource">The resource to refill</param>
         public void ApplyRefillResource(SuperMetroidModel model, ConsumableResourceEnum resource)
         {
-            // Don't bother with current resource count if resource tracking is disabled
-            if (model.LogicalOptions.ResourceTrackingEnabled)
+            foreach (RechargeableResourceEnum rechargeableResource in resource.ToRechargeableResources())
             {
-                foreach (RechargeableResourceEnum rechargeableResource in resource.ToRechargeableResources())
-                {
-                    ApplyRefillResource(model, rechargeableResource);
-                }
+                ApplyRefillResource(model, rechargeableResource);
             }
         }
 
