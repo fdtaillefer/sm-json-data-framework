@@ -39,13 +39,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public ItemInventory(IEnumerable<ResourceCapacity> baseResourceMaximums)
         {
             ResourceCapacityChanges = new ResourceCount();
-
-            // Apply startingResources to base maximums
-            InternalBaseResourceMaximums = new ResourceCount();
-            foreach (ResourceCapacity capacity in baseResourceMaximums)
-            {
-                InternalBaseResourceMaximums.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
-            }
+            InternalBaseResourceMaximums = new ResourceCount(baseResourceMaximums);
         }
 
         /// <summary>

@@ -38,34 +38,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="model">A SuperMetroidModel. Its rooms must have both been set and initialized. 
         /// Its items and game flags must also have been set.</param>
         /// <param name="itemContainer">The result of reading the items.json file.</param>
-        public InGameState(SuperMetroidModel model, ItemContainer itemContainer)
+        public InGameState(SuperMetroidModel model, ItemContainer itemContainer) : this(new StartConditions(itemContainer, model))
         {
-            IEnumerable<ResourceCapacity> startingResources = itemContainer.StartingResources;
-
-            InternalInventory = new ItemInventory(startingResources);
-
-            InternalResources = new ResourceCount();
-
-            // Start the player at full
-            foreach (ResourceCapacity capacity in startingResources)
-            {
-                InternalResources.ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
-            }
-
-            // Initialize starting game flags
-            foreach (string gameFlagName in itemContainer.StartingGameFlagNames)
-            {
-                ApplyAddGameFlag(model.GameFlags[gameFlagName]);
-            }
-
-            // Initialize starting items
-            foreach (string itemName in itemContainer.StartingItemNames)
-            {
-                ApplyAddItem(model.Items[itemName]);
-            }
-
-            RoomNode startingNode = model.Rooms[itemContainer.StartingRoomName].Nodes[itemContainer.StartingNodeId];
-            InternalInRoomState = new InRoomState(startingNode);
+            
         }
 
         /// <summary>

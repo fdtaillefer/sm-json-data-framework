@@ -29,6 +29,15 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
+        public ResourceCount(IEnumerable<ResourceCapacity> resourceAmounts): this()
+        {
+            // Apply each resource amount
+            foreach (ResourceCapacity capacity in resourceAmounts)
+            {
+                ApplyAmountIncrease(capacity.Resource, capacity.MaxAmount);
+            }
+        }
+
         /// <summary>
         /// Returns a read-only view of this ResourceCount. 
         /// The view will still be this instance and reflect any changes subsequently applied to it.
