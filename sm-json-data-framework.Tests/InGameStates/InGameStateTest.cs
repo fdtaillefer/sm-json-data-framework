@@ -18,6 +18,19 @@ namespace sm_json_data_framework.InGameStates
     public class InGameStateTest
     {
         /// <summary>
+        /// Returns all values of <see cref="RechargeableResourceEnum"/> in a format that can be used by <see cref="MemberDataAttribute"/>.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<object[]> RechargeableResourceValues()
+        {
+
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                yield return new object[] { resource };
+            }
+        }
+
+        /// <summary>
         /// Returns all values of <see cref="ConsumableResourceEnum"/> in a format that can be used by <see cref="MemberDataAttribute"/>.
         /// </summary>
         /// <returns></returns>
@@ -184,6 +197,435 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             Assert.False(inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest));
+        }
+
+        [Theory]
+        [MemberData(nameof(RechargeableResourceValues))]
+        public void ApplyAddResource_AddsAmount(RechargeableResourceEnum resource)
+        {
+            int initialAmount = 2;
+            int addedAmount = 5;
+            int expectedamount = 7;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                startResources.ApplyAmount(loopResource, initialAmount);
+                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyAddResource(resource, addedAmount);
+
+            Assert.Equal(expectedamount, inGameState.Resources.GetAmount(resource));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                if (otherResource != resource)
+                {
+                    Assert.Equal(initialAmount, inGameState.Resources.GetAmount(otherResource));
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(RechargeableResourceValues))]
+        public void ApplyAddResource_DoesNotExceedMax(RechargeableResourceEnum resource)
+        {
+            int initialAmount = 2;
+            int addedAmount = 150;
+            int expectedamount = 100;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                startResources.ApplyAmount(loopResource, initialAmount);
+                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyAddResource(resource, addedAmount);
+
+            Assert.Equal(expectedamount, inGameState.Resources.GetAmount(resource));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                if (otherResource != resource)
+                {
+                    Assert.Equal(initialAmount, inGameState.Resources.GetAmount(otherResource));
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(RechargeableResourceEnum.Missile)]
+        [InlineData(RechargeableResourceEnum.Super)]
+        [InlineData(RechargeableResourceEnum.PowerBomb)]
+        public void ApplyConsumeResource_Ammo_SetsAmount(RechargeableResourceEnum resource)
+        {
+            int initialAmount = 5;
+            int removedAmount = 2;
+            int expectedAmount = 3;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                startResources.ApplyAmount(loopResource, initialAmount);
+                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+
+
+            inGameState.ApplyConsumeResource(resource.ToConsumableResource(), removedAmount);
+
+            Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(resource));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                if (otherResource != resource)
+                {
+                    Assert.Equal(initialAmount, inGameState.Resources.GetAmount(otherResource));
+                }
+            }
+        }
+
+        [Fact]
+        public void ApplyConsumeResource_RegularEnergy_SetsAmount()
+        {
+            int initialAmount = 5;
+            int removedAmount = 2;
+            int expectedAmount = 3;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                // Don't put any reserve energy in, we're checking regular energy
+                if (loopResource != RechargeableResourceEnum.ReserveEnergy)
+                {
+                    startResources.ApplyAmount(loopResource, initialAmount);
+                }
+                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, removedAmount);
+
+
+
+            Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                if (otherResource != RechargeableResourceEnum.RegularEnergy && otherResource != RechargeableResourceEnum.ReserveEnergy)
+                {
+                    Assert.Equal(initialAmount, inGameState.Resources.GetAmount(otherResource));
+                }
+            }
+        }
+
+        [Fact]
+        public void ApplyConsumeResource_ReserveEnergy_SetsAmount()
+        {
+            int initialAmount = 5;
+            int removedAmount = 2;
+            int expectedAmount = 3;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                // Don't put any regular energy in, we're checking reserve energy
+                if (loopResource != RechargeableResourceEnum.RegularEnergy)
+                {
+                    startResources.ApplyAmount(loopResource, initialAmount);
+                }
+                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, removedAmount);
+
+            Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                if (otherResource != RechargeableResourceEnum.RegularEnergy && otherResource != RechargeableResourceEnum.ReserveEnergy)
+                {
+                    Assert.Equal(initialAmount, inGameState.Resources.GetAmount(otherResource));
+                }
+            }
+        }
+
+        [Fact]
+        public void ApplyConsumeResource_MixedEnergy_ConsumesRegularEnergyFirst()
+        {
+            int initialRegularAmount = 10;
+            int initialReserveAmount = 10;
+            int reductionAmount = 12;
+            int expectedRegularAmount = 1;
+            int expectedReserveAmount = 7;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, initialRegularAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, initialReserveAmount);
+            ResourceCount maxResources = startResources.Clone()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, reductionAmount);
+
+            Assert.Equal(expectedRegularAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(expectedReserveAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+        }
+
+        [Fact]
+        public void ApplyConsumeResource_MixedEnergy_ConsumesReservesBeforeGoingTo0Regular()
+        {
+            int initialRegularAmount = 10;
+            int initialReserveAmount = 10;
+            int reductionAmount = 19;
+            int expectedRegularAmount = 1;
+            int expectedReserveAmount = 0;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, initialRegularAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, initialReserveAmount);
+            ResourceCount maxResources = startResources.Clone()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, reductionAmount);
+
+            Assert.Equal(expectedRegularAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(expectedReserveAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+        }
+
+        [Fact]
+        public void ApplyConsumeResource_MixedEnergy_ConsumesReservesBeforeGoingToNegativeRegular()
+        {
+            int initialRegularAmount = 10;
+            int initialReserveAmount = 10;
+            int reductionAmount = 22;
+            int expectedRegularAmount = -2;
+            int expectedReserveAmount = 0;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, initialRegularAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, initialReserveAmount);
+            ResourceCount maxResources = startResources.Clone()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, reductionAmount);
+
+            Assert.Equal(expectedRegularAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(expectedReserveAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+        }
+
+        [Theory]
+        [MemberData(nameof(RechargeableResourceValues))]
+        public void ApplyRefillResource_RechargeableResource_SetsToMax(RechargeableResourceEnum resource)
+        {
+            int initialAmount = 5;
+            int maxAmount = 100;
+
+            ResourceCount startResources = new ResourceCount() 
+                .ApplyAmount(resource, initialAmount);
+            ResourceCount maxResources = startResources.Clone()
+                .ApplyAmount(resource, maxAmount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyRefillResource(resource);
+
+            Assert.Equal(maxAmount, inGameState.Resources.GetAmount(resource));
+        }
+
+        [Theory]
+        [InlineData(RechargeableResourceEnum.Missile)]
+        [InlineData(RechargeableResourceEnum.Super)]
+        [InlineData(RechargeableResourceEnum.PowerBomb)]
+        public void ApplyRefillResource_ConsumableAmmo_SetsToMax(RechargeableResourceEnum resource)
+        {
+            int initialAmount = 5;
+            int maxAmount = 100;
+
+            ResourceCount startResources = new ResourceCount()
+                .ApplyAmount(resource, initialAmount);
+            ResourceCount maxResources = startResources.Clone()
+                .ApplyAmount(resource, maxAmount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyRefillResource(resource.ToConsumableResource());
+
+            Assert.Equal(maxAmount, inGameState.Resources.GetAmount(resource));
+        }
+
+        [Fact]
+        public void ApplyRefillResource_ConsumableEnergy_SetsBothTypesToMax()
+        {
+            int initialAmount = 5;
+            int maxAmount = 100;
+
+            ResourceCount startResources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, initialAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, initialAmount);
+            ResourceCount maxResources = startResources.Clone()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyRefillResource(ConsumableResourceEnum.ENERGY);
+
+            Assert.Equal(maxAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(maxAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+        }
+
+        [Fact]
+        public void GetResourceVariationWith_ReturnsPositiveAndNegativeAnd0()
+        {
+            ResourceCount resourceMaximums = new ResourceCount();
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                resourceMaximums.ApplyAmount(resource, 100);
+            }
+
+            ResourceCount resources1 = new ResourceCount();
+            ResourceCount resources2 = new ResourceCount();
+
+            resources1.ApplyAmount(RechargeableResourceEnum.Missile, 50);
+            resources2.ApplyAmount(RechargeableResourceEnum.Missile, 45);
+
+            resources1.ApplyAmount(RechargeableResourceEnum.Super, 45);
+            resources2.ApplyAmount(RechargeableResourceEnum.Super, 50);
+
+            resources1.ApplyAmount(RechargeableResourceEnum.PowerBomb, 10);
+            resources2.ApplyAmount(RechargeableResourceEnum.PowerBomb, 0);
+
+            resources1.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 0);
+            resources2.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 10);
+
+            resources1.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
+            resources2.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
+
+            StartConditions startConditions1 = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions1.StartingInventory = startConditions1.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
+            startConditions1.StartingResources = resources1;
+            InGameState inGameState1 = new InGameState(startConditions1);
+
+            StartConditions startConditions2 = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions2.StartingInventory = startConditions2.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
+            startConditions2.StartingResources = resources2;
+            InGameState inGameState2 = new InGameState(startConditions2);
+
+            ResourceCount result = inGameState1.GetResourceVariationWith(inGameState2);
+
+            Assert.Equal(5, result.GetAmount(RechargeableResourceEnum.Missile));
+            Assert.Equal(-5, result.GetAmount(RechargeableResourceEnum.Super));
+            Assert.Equal(10, result.GetAmount(RechargeableResourceEnum.PowerBomb));
+            Assert.Equal(-10, result.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(0, result.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+        }
+
+        [Fact]
+        public void GetFullRechargeableResources_ReturnsFullResources()
+        {
+            ResourceCount resourceMaximums = new ResourceCount();
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                resourceMaximums.ApplyAmount(resource, 100);
+            }
+            ResourceCount resources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.Super, 100)
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
+            startConditions.StartingResources = resources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<RechargeableResourceEnum> result = inGameState.GetFullRechargeableResources();
+            Assert.Equal(2, result.Count());
+            Assert.Contains(RechargeableResourceEnum.Super, result);
+            Assert.Contains(RechargeableResourceEnum.RegularEnergy, result);
+        }
+
+        [Fact]
+        public void GetFullConsumableResources_ReturnsFullResources()
+        {
+            ResourceCount resourceMaximums = new ResourceCount();
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                resourceMaximums.ApplyAmount(resource, 100);
+            }
+            ResourceCount resources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.Super, 100)
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100)
+                .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 100);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
+            startConditions.StartingResources = resources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<ConsumableResourceEnum> result = inGameState.GetFullConsumableResources();
+            Assert.Equal(2, result.Count());
+            Assert.Contains(ConsumableResourceEnum.SUPER, result);
+            Assert.Contains(ConsumableResourceEnum.ENERGY, result);
+        }
+
+        [Fact]
+        public void GetFullConsumableResources_OneEnergyTypeFull_DoesNotReturnEnergy()
+        {
+            ResourceCount resourceMaximums = new ResourceCount();
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                resourceMaximums.ApplyAmount(resource, 100);
+            }
+            ResourceCount resources = new ResourceCount()
+                .ApplyAmount(RechargeableResourceEnum.Super, 100)
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
+            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
+            startConditions.StartingResources = resources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<ConsumableResourceEnum> result = inGameState.GetFullConsumableResources();
+            Assert.Single(result);
+            Assert.Contains(ConsumableResourceEnum.SUPER, result);
         }
 
         [Fact]

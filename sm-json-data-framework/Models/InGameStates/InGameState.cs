@@ -145,7 +145,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         /// <summary>
         /// Consumes the provided quantity of the provided consumable resource. When consuming energy, regular energy is used up first (down to 1) 
-        /// then reserves are used.
+        /// then reserves are used (down to 0), then regular energy is consumed into negatives if necessary.
         /// </summary>
         /// <param name="resource">The resource to consume</param>
         /// <param name="quantity">The amount to consume</param>
