@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Rules
         /// </summary>
         /// <param name="model">Model from which any needed Item/GameFlag/etc. instances will be obtained.</param>
         /// <returns>The StartConditions</returns>
-        public static StartConditions CreateVanillaStartconditions(SuperMetroidModel model)
+        public static StartConditions CreateVanillaStartConditions(SuperMetroidModel model)
         {
             StartConditions vanillaStartConditions = new StartConditions();
             vanillaStartConditions.StartingInventory = ItemInventory.CreateVanillaStartingInventory(model);

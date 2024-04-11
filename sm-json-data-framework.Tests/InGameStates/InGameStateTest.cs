@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
@@ -62,7 +63,7 @@ namespace sm_json_data_framework.InGameStates
                 StartingNode = Model.GetNodeInRoom(startingRoomName, startingNodeId),
                 StartingOpenLocks = new NodeLock[] { Model.Locks[startingLockName] },
                 StartingTakenItemLocations = new RoomNode[] { variaNode },
-                StartingResources = new ResourceCount().ApplyAmountIncrease(RechargeableResourceEnum.RegularEnergy, startingEnergy)
+                StartingResources = new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
             };
 
             InGameState inGameState = new InGameState(startConditions);
@@ -83,7 +84,7 @@ namespace sm_json_data_framework.InGameStates
         public void IsResourceAvailable_Requesting0_ReturnsTrue(ConsumableResourceEnum resource)
         {
             ResourceCount resourceCount = new ResourceCount();
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -100,7 +101,7 @@ namespace sm_json_data_framework.InGameStates
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -114,7 +115,7 @@ namespace sm_json_data_framework.InGameStates
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -132,7 +133,7 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest + 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -146,7 +147,7 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest + 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -160,7 +161,7 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 3);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -177,7 +178,7 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest - 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -191,7 +192,7 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest - 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
             startConditions.StartingResources = resourceCount;
             InGameState inGameState = new InGameState(startConditions);
@@ -212,9 +213,9 @@ namespace sm_json_data_framework.InGameStates
             foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
-                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+                maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -244,9 +245,9 @@ namespace sm_json_data_framework.InGameStates
             foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
-                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+                maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -278,9 +279,9 @@ namespace sm_json_data_framework.InGameStates
             foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
-                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+                maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -315,9 +316,9 @@ namespace sm_json_data_framework.InGameStates
                 {
                     startResources.ApplyAmount(loopResource, initialAmount);
                 }
-                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+                maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -352,9 +353,9 @@ namespace sm_json_data_framework.InGameStates
                 {
                     startResources.ApplyAmount(loopResource, initialAmount);
                 }
-                maxResources.ApplyAmountIncrease(loopResource, maxAmount);
+                maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -386,7 +387,7 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -412,7 +413,7 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -438,7 +439,7 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -456,11 +457,11 @@ namespace sm_json_data_framework.InGameStates
             int initialAmount = 5;
             int maxAmount = 100;
 
-            ResourceCount startResources = new ResourceCount() 
+            ResourceCount startResources = new ResourceCount()
                 .ApplyAmount(resource, initialAmount);
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(resource, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -483,7 +484,7 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAmount(resource, initialAmount);
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(resource, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -505,7 +506,7 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
             startConditions.StartingResources = startResources;
             InGameState inGameState = new InGameState(startConditions);
@@ -543,12 +544,12 @@ namespace sm_json_data_framework.InGameStates
             resources1.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
             resources2.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
 
-            StartConditions startConditions1 = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions1 = StartConditions.CreateVanillaStartConditions(Model);
             startConditions1.StartingInventory = startConditions1.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
             startConditions1.StartingResources = resources1;
             InGameState inGameState1 = new InGameState(startConditions1);
 
-            StartConditions startConditions2 = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions2 = StartConditions.CreateVanillaStartConditions(Model);
             startConditions2.StartingInventory = startConditions2.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
             startConditions2.StartingResources = resources2;
             InGameState inGameState2 = new InGameState(startConditions2);
@@ -573,12 +574,13 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount resources = new ResourceCount()
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
             startConditions.StartingResources = resources;
             InGameState inGameState = new InGameState(startConditions);
 
             IEnumerable<RechargeableResourceEnum> result = inGameState.GetFullRechargeableResources();
+
             Assert.Equal(2, result.Count());
             Assert.Contains(RechargeableResourceEnum.Super, result);
             Assert.Contains(RechargeableResourceEnum.RegularEnergy, result);
@@ -596,12 +598,13 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 100);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
             startConditions.StartingResources = resources;
             InGameState inGameState = new InGameState(startConditions);
 
             IEnumerable<ConsumableResourceEnum> result = inGameState.GetFullConsumableResources();
+
             Assert.Equal(2, result.Count());
             Assert.Contains(ConsumableResourceEnum.SUPER, result);
             Assert.Contains(ConsumableResourceEnum.ENERGY, result);
@@ -618,14 +621,272 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount resources = new ResourceCount()
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
-            StartConditions startConditions = StartConditions.CreateVanillaStartconditions(Model);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
             startConditions.StartingResources = resources;
             InGameState inGameState = new InGameState(startConditions);
 
             IEnumerable<ConsumableResourceEnum> result = inGameState.GetFullConsumableResources();
+
             Assert.Single(result);
             Assert.Contains(ConsumableResourceEnum.SUPER, result);
+        }
+
+        [Fact]
+        public void GetUnneededDrops_SamusIsFull_ReturnsAllButNoDrops()
+        {
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
+
+            IEnumerable<EnemyDropEnum> expected = Enum.GetValues<EnemyDropEnum>().Except(new EnemyDropEnum[] { EnemyDropEnum.NO_DROP });
+            Assert.Equal(expected.Count(), result.Count());
+            foreach (EnemyDropEnum drop in expected)
+            {
+                Assert.Contains(drop, result);
+            }
+        }
+
+        [Fact]
+        public void GetUnneededDrops_SamusNeedsEverything_ReturnsEmpty()
+        {
+            int initialAmount = 5;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                startResources.ApplyAmount(loopResource, initialAmount);
+                maxResources.ApplyAmount(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
+
+            Assert.Empty(result);
+        }
+
+        [Theory]
+        [InlineData(RechargeableResourceEnum.RegularEnergy)]
+        [InlineData(RechargeableResourceEnum.ReserveEnergy)]
+        public void GetUnneededDrops_OnlyOneTypeOfEnergyNotFull_DoesNotReturnEnergyDrops(RechargeableResourceEnum energyResource)
+        {
+            int initialAmount = 5;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                if (loopResource == energyResource)
+                {
+                    startResources.ApplyAmount(loopResource, initialAmount);
+                }
+                else
+                {
+                    startResources.ApplyAmount(loopResource, maxAmount);
+                }
+                maxResources.ApplyAmount(loopResource, maxAmount);
+            }
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
+            startConditions.StartingResources = startResources;
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
+
+            // Although one type of energy is full, the other isn't, so energy drops are needed and should NOT be returned
+            Assert.DoesNotContain(EnemyDropEnum.SMALL_ENERGY, result);
+            Assert.DoesNotContain(EnemyDropEnum.BIG_ENERGY, result);
+        }
+
+        [Fact]
+        public void ApplyAddGameFlag_AddsIt()
+        {
+            GameFlag flag1 = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flag2 = Model.GameFlags["f_DefeatedBombTorizo"];
+
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            inGameState
+                .ApplyAddGameFlag(flag1)
+                .ApplyAddGameFlag(flag2);
+
+            Assert.Equal(2, inGameState.ActiveGameFlags.Count);
+            Assert.Contains(flag1, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<GameFlag>.Default);
+            Assert.Contains(flag2, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<GameFlag>.Default);
+        }
+
+        [Fact]
+        public void GetActiveGameFlagsExceptIn_ReturnsDifference()
+        {
+            GameFlag flagIn1 = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flagIn2 = Model.GameFlags["f_DefeatedBombTorizo"];
+            GameFlag flagInBoth = Model.GameFlags["f_DefeatedCeresRidley"];
+
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyAddGameFlag(flagIn1)
+                .ApplyAddGameFlag(flagInBoth);
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyAddGameFlag(flagIn2)
+                .ApplyAddGameFlag(flagInBoth);
+
+            Dictionary<string, GameFlag> result = inGameState1.GetActiveGameFlagsExceptIn(inGameState2);
+            Assert.Single(result);
+            Assert.Same(flagIn1, result[flagIn1.Name]);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_AddsIt()
+        {
+            NodeLock lock1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lock2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            inGameState
+                .ApplyOpenLock(lock1, applyToRoomState: false)
+                .ApplyOpenLock(lock2, applyToRoomState: false);
+
+            Assert.Equal(2, inGameState.OpenedLocks.Count);
+            Assert.Contains(lock1, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(lock2, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Empty(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_ApplyingToRoomStateWhileNotOnNode_ThrowsArgumentException()
+        {
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyOpenLock(nodeLock, applyToRoomState: true));
+        }
+
+        [Fact]
+        public void ApplyOpenLock_ApplyingToRoomStateWhileOnNode_SucceedsAndAltersNodeState()
+        {
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyOpenLock(nodeLock, applyToRoomState: true);
+
+            Assert.Single(inGameState.OpenedLocks);
+            Assert.Contains(nodeLock, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Single(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
+            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.OpenedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+        }
+
+        [Fact]
+        public void GetOpenedNodeLocksExceptIn_ReturnsDifference()
+        {
+            NodeLock lockIn1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lockIn2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            NodeLock lockInBoth = Model.Locks["Parlor Bottom Right Red Lock (to Pre-Map)"];
+
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyOpenLock(lockIn1, applyToRoomState: false)
+                .ApplyOpenLock(lockInBoth, applyToRoomState: false);
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyOpenLock(lockIn2, applyToRoomState: false)
+                .ApplyOpenLock(lockInBoth, applyToRoomState: false);
+
+            Dictionary<string, NodeLock> result = inGameState1.GetOpenedNodeLocksExceptIn(inGameState2);
+            Assert.Single(result);
+            Assert.Same(lockIn1, result[lockIn1.Name]);
+        }
+
+        [Fact]
+        public void ApplyBypassLock_NotOnNode_AltersInNodeState()
+        {
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyBypassLock(nodeLock);
+
+            Assert.Single(inGameState.InRoomState.CurrentNodeState.BypassedLocks);
+            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.BypassedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+        }
+
+        [Fact]
+        public void ApplyBypassLock_NotOnNode_ThrowsArgumentException()
+        {
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyBypassLock(nodeLock));
+        }
+
+        [Fact]
+        public void GetBypassedExitLocks_CurrentRoom_ReturnsBypassedLocks()
+        {
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(nodeLock);
+
+            IEnumerable<NodeLock> result = inGameState.GetBypassedExitLocks();
+
+            Assert.Single(result);
+            Assert.Contains(nodeLock, result, ObjectReferenceEqualityComparer<NodeLock>.Default);
+        }
+
+        [Fact]
+        public void GetBypassedExitLocks_PreviousRoom_ReturnsBypassedLocksOnlyFromCorrectRoom()
+        {
+            NodeLock previousRoomLock = Model.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            NodeLock currentRoomLock = Model.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(previousRoomLock);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crateria Kihunter Room", 3));
+            inGameState.ApplyBypassLock(currentRoomLock);
+
+            IEnumerable<NodeLock> result = inGameState.GetBypassedExitLocks(1);
+
+            Assert.Single(result);
+            Assert.Contains(previousRoomLock, result, ObjectReferenceEqualityComparer<NodeLock>.Default);
+        }
+
+        [Fact]
+        public void ApplyTakeLocation_AddsIt()
+        {
+            RoomNode node1 = Model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Spazer Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            inGameState
+                .ApplyTakeLocation(node1)
+                .ApplyTakeLocation(node2);
+
+            Assert.Equal(2, inGameState.TakenItemLocations.Count);
+            Assert.Contains(node1, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
+            Assert.Contains(node2, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
+        }
+
+        [Fact]
+        public void GetTakenItemLocationsExceptIn_ReturnsDifference()
+        {
+            RoomNode nodeIn1 = Model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode nodeIn2 = Model.GetNodeInRoom("Spazer Room", 2);
+            RoomNode nodeInBoth = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
+
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyTakeLocation(nodeIn1)
+                .ApplyTakeLocation(nodeInBoth);
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyTakeLocation(nodeIn2)
+                .ApplyTakeLocation(nodeInBoth);
+
+            Dictionary<string, RoomNode> result = inGameState1.GetTakenItemLocationsExceptIn(inGameState2);
+            Assert.Single(result);
+            Assert.Same(nodeIn1, result[nodeIn1.Name]);
         }
 
         [Fact]
@@ -644,7 +905,7 @@ namespace sm_json_data_framework.InGameStates
                 StartingNode = Model.GetNodeInRoom(startingRoomName, startingNodeId),
                 StartingOpenLocks = new NodeLock[] { Model.Locks[startingLockName] },
                 StartingTakenItemLocations = new RoomNode[] { variaNode },
-                StartingResources = new ResourceCount().ApplyAmountIncrease(RechargeableResourceEnum.RegularEnergy, startingEnergy)
+                StartingResources = new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
             };
 
             InGameState inGameState = new InGameState(startConditions).Clone();
@@ -675,8 +936,8 @@ namespace sm_json_data_framework.InGameStates
                 StartingInventory = ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items["Missile"]),
                 StartingNode = Model.GetNodeInRoom(startingRoomName, startingNodeId),
                 StartingOpenLocks = new NodeLock[] { Model.Locks[startingLockName] },
-                StartingResources = new ResourceCount().ApplyAmountIncrease(RechargeableResourceEnum.RegularEnergy, startingEnergy)
-                    .ApplyAmountIncrease(RechargeableResourceEnum.Missile, 5)
+                StartingResources = new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
+                    .ApplyAmount(RechargeableResourceEnum.Missile, 5)
             };
 
             InGameState inGameState = new InGameState(startConditions);

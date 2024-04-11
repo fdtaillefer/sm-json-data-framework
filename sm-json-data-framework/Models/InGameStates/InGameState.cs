@@ -252,10 +252,10 @@ namespace sm_json_data_framework.Models.InGameStates
         protected Dictionary<string, NodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
         public ReadOnlyDictionary<string, NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
 
-        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other)
+        public Dictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other)
         {
 
-            IDictionary<string, NodeLock> returnLocks = new Dictionary<string, NodeLock>();
+            Dictionary<string, NodeLock> returnLocks = new Dictionary<string, NodeLock>();
 
             // For each lock, just check for absence in other
             foreach (KeyValuePair<string, NodeLock> kvp in InternalOpenedLocks)
@@ -317,9 +317,9 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ReadOnlyDictionary<string, RoomNode> TakenItemLocations { get { return InternalTakenItemLocations.AsReadOnly(); } }
 
-        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other)
+        public Dictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other)
         {
-            IDictionary<string, RoomNode> returnLocations = new Dictionary<string, RoomNode>();
+            Dictionary<string, RoomNode> returnLocations = new Dictionary<string, RoomNode>();
 
             // For each location, just check for absence in other
             foreach (KeyValuePair<string, RoomNode> kvp in InternalTakenItemLocations)
@@ -911,7 +911,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public IDictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other);
+        public Dictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// Returns the locks bypassed by Samus at the current node.
@@ -933,7 +933,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public IDictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other);
+        public Dictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// The read-only inventory of items collected by Samus according to this in-game state.
