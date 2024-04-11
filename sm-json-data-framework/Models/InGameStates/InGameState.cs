@@ -128,7 +128,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to increase</param>
         /// <param name="quantity">The amount to increase by</param>
-        public void ApplyAddResource(RechargeableResourceEnum resource, int quantity)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyAddResource(RechargeableResourceEnum resource, int quantity)
         {
             int max = ResourceMaximums.GetAmount(resource);
             int currentAmount = InternalResources.GetAmount(resource);
@@ -136,11 +137,13 @@ namespace sm_json_data_framework.Models.InGameStates
             // We're already at max (or greater, somehow). Don't add anything
             if (currentAmount >= max)
             {
-                return;
+                return this;
             }
             int newAmount = currentAmount + quantity;
 
             InternalResources.ApplyAmount(resource, Math.Min(max, currentAmount + quantity));
+
+            return this;
         }
 
         /// <summary>
@@ -149,18 +152,22 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="resource">The resource to consume</param>
         /// <param name="quantity">The amount to consume</param>
-        public void ApplyConsumeResource(ConsumableResourceEnum resource, int quantity)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyConsumeResource(ConsumableResourceEnum resource, int quantity)
         {
             InternalResources.ApplyAmountReduction(resource, quantity);
+            return this;
         }
 
         /// <summary>
         /// Sets current value for the provided resource to the current maximum
         /// </summary>
         /// <param name="resource">The resource to refill</param>
-        public void ApplyRefillResource(RechargeableResourceEnum resource)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyRefillResource(RechargeableResourceEnum resource)
         {
             InternalResources.ApplyAmount(resource, ResourceMaximums.GetAmount(resource));
+            return this;
         }
 
         /// <summary>
@@ -169,12 +176,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// except both types of energy are grouped together.
         /// </summary>
         /// <param name="resource">The resource to refill</param>
-        public void ApplyRefillResource(ConsumableResourceEnum resource)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyRefillResource(ConsumableResourceEnum resource)
         {
             foreach (RechargeableResourceEnum rechargeableResource in resource.ToRechargeableResources())
             {
                 ApplyRefillResource(rechargeableResource);
             }
+            return this;
         }
 
         public ResourceCount GetResourceVariationWith(ReadOnlyInGameState other)
@@ -230,12 +239,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Adds the provided game flag to the activated game flags in this InGameState.
         /// </summary>
         /// <param name="flag">Flag to add</param>
-        public void ApplyAddGameFlag(GameFlag flag)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyAddGameFlag(GameFlag flag)
         {
             if (!InternalActiveGameFlags.ContainsFlag(flag))
             {
                 InternalActiveGameFlags.Add(flag.Name, flag);
             }
+            return this;
         }
 
         protected Dictionary<string, NodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
@@ -264,7 +275,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeLock">Lock to open</param>
         /// <param name="applyToRoomState">If true, will also remember the lock as being opened in the current room visit.
         /// This can only be done if Samus is at the node that has the lock. Se this to false to unlock a lock remotely.</param>
-        public void ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
         {
             if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
@@ -274,17 +286,20 @@ namespace sm_json_data_framework.Models.InGameStates
                     InternalInRoomState.ApplyOpenLock(nodeLock);
                 }
             }
+            return this;
         }
 
         /// <summary>
         /// Applies the bypassing of the provided lock in this InGameState. Expects that samus is at the node that has that lock.
         /// </summary>
         /// <param name="nodeLock">Lock to bypass</param>
-        public void ApplyBypassLock(NodeLock nodeLock) {
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyBypassLock(NodeLock nodeLock) {
             if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
                 InternalInRoomState.ApplyBypassLock(nodeLock);
             }
+            return this;
         }
 
         /// <summary>
@@ -323,12 +338,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Does not modify the inventory.
         /// </summary>
         /// <param name="location">Node of the location to add</param>
-        public void ApplyTakeLocation(RoomNode location)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyTakeLocation(RoomNode location)
         {
             if (!TakenItemLocations.ContainsNode(location))
             {
                 InternalTakenItemLocations.Add(location.Name, location);
             }
+            return this;
         }
 
         protected ItemInventory InternalInventory { get; set; }
@@ -348,9 +365,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Adds the provided item to the player's inventory for this InGameState.
         /// </summary>
         /// <param name="item"></param>
-        public void ApplyAddItem(Item item)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyAddItem(Item item)
         {
             InternalInventory.ApplyAddItem(item);
+            return this;
         }
 
         /// <summary>
@@ -358,9 +377,11 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
-        public void ApplyDisableItem(Item item)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyDisableItem(Item item)
         {
             InternalInventory.ApplyDisableItem(item);
+            return this;
         }
 
         /// <summary>
@@ -368,9 +389,11 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
-        public void ApplyDisableItem(string itemName)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyDisableItem(string itemName)
         {
             InternalInventory.ApplyDisableItem(itemName);
+            return this;
         }
 
         /// <summary>
@@ -378,9 +401,11 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
-        public void ApplyEnableItem(Item item)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyEnableItem(Item item)
         {
             InternalInventory.ApplyEnableItem(item);
+            return this;
         }
 
         /// <summary>
@@ -388,9 +413,11 @@ namespace sm_json_data_framework.Models.InGameStates
         ///  Does nothing otherwise.
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
-        public void ApplyEnableItem(string itemName)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyEnableItem(string itemName)
         {
             InternalInventory.ApplyEnableItem(itemName);
+            return this;
         }
 
         /// <summary>
@@ -561,13 +588,16 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </para>
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
-        public void ApplyEnterRoom(RoomNode entryNode)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyEnterRoom(RoomNode entryNode)
         {
             // Copy current room state and remember it as previous
             RegisterPreviousRoom(new InRoomState(InternalInRoomState));
 
             // Enter next room
             InternalInRoomState.ApplyEnterRoom(entryNode);
+
+            return this;
         }
 
         /// <summary>
@@ -576,9 +606,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="nodeToVisit">The node to go to</param>
         /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
         /// it's on a link that connects previous node to new node.</param>
-        public void ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
         {
             InternalInRoomState.ApplyVisitNode(nodeToVisit, strat);
+
+            return this;
         }
 
         public LinkTo GetCurrentLinkTo(int targetNodeId)
@@ -604,18 +637,22 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This obstacle should be in the current room.
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
-        public void ApplyDestroyObstacle(RoomObstacle obstacle)
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyDestroyObstacle(RoomObstacle obstacle)
         {
             InternalInRoomState.ApplyDestroyObstacle(obstacle);
+            return this;
         }
 
         /// <summary>
         /// Removes all in-room data from this InGameState. Useful if this has been initialized at a starting node but in-room state is not going to be maintained.
         /// </summary>
-        public void ApplyClearRoomState()
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyClearRoomState()
         {
             InternalInRoomState.ClearRoomState();
             InternalPreviousRoomStates.ForEach(state => InternalInRoomState.ClearRoomState());
+            return this;
         }
 
         public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, IEnumerable<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
