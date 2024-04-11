@@ -353,7 +353,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public ReadOnlyResourceCount ResourceMaximums { get; }
 
         /// <summary>
-        /// Returns whether this inventory contains the provided item.
+        /// Returns whether this inventory contains the provided item. If the item is present but disabled, returns false.
         /// </summary>
         /// <param name="item">Item to look for</param>
         /// <returns></returns>

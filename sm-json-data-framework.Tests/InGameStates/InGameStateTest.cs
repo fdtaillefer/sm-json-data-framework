@@ -890,6 +890,162 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void ApplyAddItem_NonConsumableItem_AddsIt()
+        {
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState
+                .ApplyAddItem(item1)
+                .ApplyAddItem(item2);
+
+            Assert.Equal(2, inGameState.Inventory.NonConsumableItems.Count);
+            Assert.Same(item1, inGameState.Inventory.NonConsumableItems[item1.Name]);
+            Assert.Same(item2, inGameState.Inventory.NonConsumableItems[item2.Name]);
+        }
+
+        [Fact]
+        public void ApplyAddItem_ExpansionItem_AddsItAndIncreasesCount()
+        {
+            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState
+                .ApplyAddItem(item1)
+                .ApplyAddItem(item1)
+                .ApplyAddItem(item2);
+
+            Assert.Equal(2, inGameState.Inventory.ExpansionItems.Count);
+            Assert.Same(item1, inGameState.Inventory.ExpansionItems[item1.Name].item);
+            Assert.Equal(2, inGameState.Inventory.ExpansionItems[item1.Name].count);
+            Assert.Same(item2, inGameState.Inventory.ExpansionItems[item2.Name].item);
+            Assert.Equal(1, inGameState.Inventory.ExpansionItems[item2.Name].count);
+        }
+
+        [Fact]
+        public void ApplyDisableItem_NonConsumableItem_DisablesIt()
+        {
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState
+                .ApplyAddItem(item1)
+                .ApplyAddItem(item2);
+
+            inGameState
+                .ApplyDisableItem(item1)
+                .ApplyDisableItem(notPresentItem);
+
+            Assert.True(inGameState.Inventory.IsItemDisabled(item1));
+            Assert.False(inGameState.Inventory.IsItemDisabled(item2));
+            Assert.False(inGameState.Inventory.IsItemDisabled(notPresentItem));
+            Assert.False(inGameState.Inventory.HasItem(item1));
+            Assert.True(inGameState.Inventory.HasItem(item2));
+        }
+
+        [Fact]
+        public void ApplyDisableItem_ExpansionItem_DoesNothing()
+        {
+            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState
+                .ApplyAddItem(item1)
+                .ApplyAddItem(item2);
+
+            inGameState
+                .ApplyDisableItem(item1)
+                .ApplyDisableItem(notPresentItem);
+
+            Assert.False(inGameState.Inventory.IsItemDisabled(item1));
+            Assert.False(inGameState.Inventory.IsItemDisabled(item2));
+            Assert.False(inGameState.Inventory.IsItemDisabled(notPresentItem));
+            Assert.True(inGameState.Inventory.HasItem(item1));
+            Assert.True(inGameState.Inventory.HasItem(item2));
+        }
+
+        [Fact]
+        public void ApplyDisableItem_NonConsumableItem_EnablesIt()
+        {
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyAddItem(item1);
+            inGameState.ApplyDisableItem(item1);
+
+            inGameState.ApplyEnableItem(item1);
+
+            Assert.False(inGameState.Inventory.IsItemDisabled(item1));
+            Assert.True(inGameState.Inventory.HasItem(item1));
+        }
+
+        [Fact]
+        public void GetInventoryExceptIn_ReturnsDifference()
+        {
+            Item nonConsumableItemIn1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item nonConsumableItemIn2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item nonConsumableItemInBoth = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+
+            Item expansionItemIn1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item expansionItemIn2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            Item expansionItemInBoth = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            Item expansionItemMoreIn1 = Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
+            Item expansionItemMoreIn2 = Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
+
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyAddItem(nonConsumableItemIn1)
+                .ApplyAddItem(nonConsumableItemInBoth)
+                .ApplyAddItem(expansionItemIn1)
+                .ApplyAddItem(expansionItemInBoth)
+                .ApplyAddItem(expansionItemMoreIn1)
+                .ApplyAddItem(expansionItemMoreIn1)
+                .ApplyAddItem(expansionItemMoreIn1)
+                .ApplyAddItem(expansionItemMoreIn2);
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+                .ApplyAddItem(nonConsumableItemIn2)
+                .ApplyAddItem(nonConsumableItemInBoth)
+                .ApplyAddItem(expansionItemIn2)
+                .ApplyAddItem(expansionItemInBoth)
+                .ApplyAddItem(expansionItemMoreIn1)
+                .ApplyAddItem(expansionItemMoreIn2)
+                .ApplyAddItem(expansionItemMoreIn2)
+                .ApplyAddItem(expansionItemMoreIn2);
+
+            ItemInventory result = inGameState1.GetInventoryExceptIn(inGameState2);
+
+            Assert.True(result.HasItem(nonConsumableItemIn1));
+            Assert.True(result.HasItem(expansionItemIn1));
+            Assert.Equal(1, result.ExpansionItems[expansionItemIn1.Name].count);
+            Assert.True(result.HasItem(expansionItemMoreIn1));
+            Assert.Equal(2, result.ExpansionItems[expansionItemMoreIn1.Name].count);
+            Assert.False(result.HasItem(nonConsumableItemIn2));
+            Assert.False(result.HasItem(nonConsumableItemInBoth));
+            Assert.False(result.HasItem(expansionItemIn2));
+            Assert.False(result.HasItem(expansionItemInBoth));
+            Assert.False(result.HasItem(expansionItemMoreIn2));
+        }
+
+
+
+
+
+
+
+
+        [Fact]
         public void Clone_CopiesCorrectly()
         {
             string startingRoomName = "Business Center";
