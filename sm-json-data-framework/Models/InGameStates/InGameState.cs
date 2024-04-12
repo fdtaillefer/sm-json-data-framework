@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Indicates how many previous rooms to keep.
         /// </summary>
-        private const int PreviousRooms = 2;
+        private const int MaxPreviousRooms = 2;
 
         // STITCHME It might be valuable to eventually have InGameState be able to say which nodes are reachable?
 
@@ -448,6 +448,10 @@ namespace sm_json_data_framework.Models.InGameStates
                 return InternalInRoomState;
             } else if (previousRoomCount > 0)
             {
+                if (previousRoomCount > InternalPreviousRoomStates.Count)
+                {
+                    return null;
+                }
                 return InternalPreviousRoomStates[previousRoomCount - 1];
             }
             else
@@ -458,7 +462,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ReadOnlyInRoomState GetInRoomState(int previousRoomCount)
         {
-            return GetInternalInRoomState(previousRoomCount).AsReadOnly();
+            return GetInternalInRoomState(previousRoomCount)?.AsReadOnly();
         }
 
         /// <summary>
@@ -479,7 +483,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 return;
             }
 
-            if(InternalPreviousRoomStates.Count >= PreviousRooms)
+            if(InternalPreviousRoomStates.Count >= MaxPreviousRooms)
             {
                 InternalPreviousRoomStates.RemoveAt(InternalPreviousRoomStates.Count - 1);
             }

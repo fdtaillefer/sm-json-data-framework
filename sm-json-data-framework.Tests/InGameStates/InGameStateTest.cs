@@ -1038,12 +1038,77 @@ namespace sm_json_data_framework.InGameStates
             Assert.False(result.HasItem(expansionItemMoreIn2));
         }
 
+        [Fact]
+        public void GetInRoomState_CurrentRoom_ReturnsCurrentRoomState()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(expectedNode);
 
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(0);
 
+            Assert.Same(expectedNode.Room, result.CurrentRoom);
+        }
 
+        [Fact]
+        public void GetInRoomState_PreviousRoom_ReturnsPreviousRoomState()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = expectedNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(1);
 
+            Assert.Same(expectedNode.Room, result.CurrentRoom);
+        }
 
+        [Fact]
+        public void GetInRoomState_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = expectedNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(1);
+
+            Assert.Same(expectedNode.Room, result.CurrentRoom);
+        }
+
+        [Fact]
+        public void GetInRoomState_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetInRoomState(-1));
+        }
+
+        [Fact]
+        public void GetInRoomState_GoingBeyondRememberedRooms_ReturnsNull()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            RoomNode entryNode = Model.GetNodeInRoom("Bat Room", 1);
+            inGameState.ApplyEnterRoom(entryNode);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Bat Room", 2), entryNode.Links[2].Strats["Base"]);
+            entryNode = Model.GetNodeInRoom("Below Spazer", 1);
+            inGameState.ApplyEnterRoom(entryNode);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Below Spazer", 2), entryNode.Links[2].Strats["Base"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("West (Glass Tube) Tunnel", 1));
+
+            Assert.Null(inGameState.GetInRoomState(4));
+        }
 
         [Fact]
         public void Clone_CopiesCorrectly()
