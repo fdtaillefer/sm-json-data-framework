@@ -1357,6 +1357,203 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void GetCurrentDoorEnvironment_CurrentRoom_ReturnsCurrentRoomData()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(expectedNode);
+
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
+
+            Assert.Same(expectedNode, result.Node);
+        }
+
+        [Fact]
+        public void GetCurrentDoorEnvironment_ConditionalFromSameEntranceNode_ReturnsCorrectEnvironment()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
+
+            Assert.Equal(PhysicsEnum.Normal, result.Physics);
+        }
+
+        [Fact]
+        public void GetCurrentDoorEnvironment_ConditionalFromDifferentEntranceNode_ReturnsCorrectEnvironment()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Volcano Room", 2), startNode.Links[2].Strats["Base"]);
+
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
+
+            Assert.Equal(PhysicsEnum.Lava, result.Physics);
+        }
+
+        [Fact]
+        public void GetCurrentDoorEnvironment_PreviousRoom_ReturnsPreviousRoomData()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Crab Hole", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = expectedNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Boyon Gate Hall", 3));
+
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
+
+            Assert.Same(expectedNode, result.Node);
+            Assert.Equal(PhysicsEnum.Water, result.Physics);
+        }
+
+        [Fact]
+        public void GetCurrentDoorEnvironment_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(expectedNode, startNode.Links[3].Strats["Base"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
+
+            Assert.Same(expectedNode, result.Node);
+            Assert.Equal(PhysicsEnum.Water, result.Physics);
+        }
+
+        [Fact]
+        public void GetCurrentDoorEnvironment_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetCurrentDoorEnvironment(-1));
+        }
+
+        [Fact]
+        public void GetCurrentDoorEnvironment_GoingBeyondRememberedRooms_ReturnsNull()
+        {
+            RoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
+
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = node1;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyEnterRoom(node1);
+
+            Assert.Null(inGameState.GetCurrentDoorEnvironment(4));
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_CurrentRoom_ReturnsCurrentRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Boyon Gate Hall", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crab Hole", 2));
+
+            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(0);
+
+            Assert.Equal(PhysicsEnum.Water, result);
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_ConditionalFromSameEntranceNode_ReturnsCorrectEnvironment()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+
+            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(0);
+
+            Assert.Equal(PhysicsEnum.Normal, result);
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_ConditionalFromDifferentEntranceNode_ReturnsCorrectEnvironment()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Volcano Room", 2), startNode.Links[2].Strats["Base"]);
+
+            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(0);
+
+            Assert.Equal(PhysicsEnum.Lava, result);
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_PreviousRoom_ReturnsPreviousRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Crab Hole", 2);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Boyon Gate Hall", 3));
+
+            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(1);
+
+            Assert.Equal(PhysicsEnum.Water, result);
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), startNode.Links[3].Strats["Base"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(1);
+
+            Assert.Equal(PhysicsEnum.Water, result);
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetCurrentDoorPhysics(-1));
+        }
+
+        [Fact]
+        public void GetCurrentDoorPhysics_GoingBeyondRememberedRooms_ReturnsNull()
+        {
+            RoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
+
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = node1;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyEnterRoom(node1);
+
+            Assert.Null(inGameState.GetCurrentDoorPhysics(4));
+        }
+
+        [Fact]
         public void GetCurrentNode_CurrentRoom_ReturnsCurrentNode()
         {
             RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
