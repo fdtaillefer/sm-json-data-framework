@@ -1264,7 +1264,7 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
-        public void IsHeated_CurrentRoom_ReturnsCurrentRoom()
+        public void IsHeatedRoom_CurrentRoom_ReturnsCurrentRoom()
         {
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
@@ -1277,7 +1277,31 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
-        public void IsHeated_PreviousRoom_ReturnsPreviousRoom()
+        public void IsHeatedRoom_ConditionalEnteringFromHeatedNode_ReturnsTrue()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+
+            bool result = inGameState.IsHeatedRoom(0);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsHeatedRoom_ConditionalEnteringFromNonHeatedNode_ReturnsTrue()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            bool result = inGameState.IsHeatedRoom(0);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void IsHeatedRoom_PreviousRoom_ReturnsPreviousRoom()
         {
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
@@ -1290,7 +1314,7 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
-        public void IsHeated_PreviousRoom_SkipsNonPlayableRooms()
+        public void IsHeatedRoom_PreviousRoom_SkipsNonPlayableRooms()
         {
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
@@ -1305,7 +1329,7 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
-        public void IsHeated_NegativePreviousRoomCount_ThrowsException()
+        public void IsHeatedRoom_NegativePreviousRoomCount_ThrowsException()
         {
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
@@ -1316,7 +1340,7 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
-        public void IsHeated_GoingBeyondRememberedRooms_ReturnsFalse()
+        public void IsHeatedRoom_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             RoomNode node1 = Model.GetNodeInRoom("Bat Cave", 2);
             RoomNode node2 = Model.GetNodeInRoom("Speed Booster Hall", 1);
