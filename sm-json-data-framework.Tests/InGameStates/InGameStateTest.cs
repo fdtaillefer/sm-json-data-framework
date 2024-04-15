@@ -1070,10 +1070,12 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetInRoomState_PreviousRoom_SkipsNonPlayableRooms()
         {
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 1);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
+            startConditions.StartingNode = startNode;
             InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(expectedNode, startNode.Links[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
@@ -1142,10 +1144,12 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetCurrentOrPreviousRoom_PreviousRoom_SkipsNonPlayableRooms()
         {
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 1);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
+            startConditions.StartingNode = startNode;
             InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(expectedNode, startNode.Links[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
@@ -1216,10 +1220,12 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetCurrentOrPreviousRoomEnvironment_PreviousRoom_SkipsNonPlayableRooms()
         {
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 1);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
+            startConditions.StartingNode = startNode;
             InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(expectedNode, startNode.Links[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
@@ -1320,8 +1326,8 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(node2);
             inGameState.ApplyEnterRoom(node1);
-            inGameState.ApplyEnterRoom(node1);
             inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyEnterRoom(node1);
 
             Assert.False(inGameState.IsHeatedRoom(4));
         }
@@ -1357,10 +1363,12 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetCurrentNode_PreviousRoom_SkipsNonPlayableRooms()
         {
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 1);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
+            startConditions.StartingNode = startNode;
             InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(expectedNode, startNode.Links[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
@@ -1396,6 +1404,191 @@ namespace sm_json_data_framework.InGameStates
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("West (Glass Tube) Tunnel", 1));
 
             Assert.Null(inGameState.GetCurrentNode(4));
+        }
+
+        [Fact]
+        public void BypassingExitLock_CurrentRoomNotBypassing_ReturnsFalse()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            bool result = inGameState.BypassingExitLock(0);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void BypassingExitLock_CurrentRoomBypassing_ReturnsTrue()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
+
+            bool result = inGameState.BypassingExitLock(0);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void BypassingExitLock_PreviousRoom_ReturnsLastRoomData()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 4));
+
+            bool result = inGameState.BypassingExitLock(1);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void BypassingExitLock_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(exitNode, startNode.Links[3].Strats["Base"]);
+            inGameState.ApplyBypassLock(exitNode.Locks["Oasis Green Lock (to Toilet)"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            bool result = inGameState.BypassingExitLock(1);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void BypassingExitLock_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.BypassingExitLock(-1));
+        }
+
+        [Fact]
+        public void BypassingExitLock_GoingBeyondRememberedRooms_ReturnsFalse()
+        {
+            RoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            NodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            RoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
+            NodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = node1;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(lock1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyBypassLock(lock2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyBypassLock(lock1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyBypassLock(lock2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyBypassLock(lock1);
+
+            Assert.False(inGameState.BypassingExitLock(4));
+        }
+
+        [Fact]
+        public void OpeningExitLock_CurrentRoomNotOpening_ReturnsFalse()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            bool result = inGameState.OpeningExitLock(0);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void OpeningExitLock_CurrentRoomOpening_ReturnsTrue()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyOpenLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
+
+            bool result = inGameState.OpeningExitLock(0);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void OpeningExitLock_PreviousRoom_ReturnsLastRoomData()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyOpenLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 4));
+
+            bool result = inGameState.OpeningExitLock(1);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void OpeningExitLock_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = startNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(exitNode, startNode.Links[3].Strats["Base"]);
+            inGameState.ApplyOpenLock(exitNode.Locks["Oasis Green Lock (to Toilet)"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            bool result = inGameState.OpeningExitLock(1);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void OpeningExitLock_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.OpeningExitLock(-1));
+        }
+
+        [Fact]
+        public void OpeningExitLock_GoingBeyondRememberedRooms_ReturnsFalse()
+        {
+            RoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            NodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            RoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
+            NodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = node1;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyOpenLock(lock1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyOpenLock(lock2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyEnterRoom(node1);
+
+            Assert.False(inGameState.OpeningExitLock(4));
         }
 
         [Fact]
