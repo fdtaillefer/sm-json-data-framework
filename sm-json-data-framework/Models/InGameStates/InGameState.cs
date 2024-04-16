@@ -565,21 +565,21 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             IReadOnlyList<int> returnValue = roomState?.VisitedRoomPath?.Select(pathNodeState => pathNodeState.nodeState.Node.Id).ToList().AsReadOnly();
-            return returnValue == null?new List<int>().AsReadOnly() : returnValue;
+            return returnValue ?? new List<int>().AsReadOnly();
         }
 
         public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             var returnValue = roomState?.VisitedRoomPath;
-            return returnValue == null ? new List<(ReadOnlyInNodeState, Strat)>().AsReadOnly() : returnValue;
+            return returnValue ?? new List<(ReadOnlyInNodeState, Strat)>().AsReadOnly();
         }
 
         public IEnumerable<string> GetDestroyedObstacleIds(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             IEnumerable<string> returnValue = roomState?.DestroyedObstacleIds;
-            return returnValue == null ? Enumerable.Empty<string>() : returnValue;
+            return returnValue ?? Enumerable.Empty<string>();
         }
 
         /// <summary>

@@ -1264,6 +1264,381 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void GetLastStrat_CurrentRoom_ReturnsCurrentRoomLastStrat()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.Links[8].Strats["Base"]);
+            Strat expectedStrat = inGameState.CurrentNode.Links[4].Strats["Base"];
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), expectedStrat);
+
+            Strat result = inGameState.GetLastStrat(0);
+
+            Assert.Same(expectedStrat, result);
+        }
+
+        [Fact]
+        public void GetLastStrat_NoLastStrat_ReturnsNull()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Strat result = inGameState.GetLastStrat(0);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetLastStrat_PreviousRoom_ReturnsPreviousRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 8);
+            InGameState inGameState = new InGameState(startConditions);
+            Strat expectedStrat = inGameState.CurrentNode.Links[6].Strats["Base"];
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), expectedStrat);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+
+            Strat result = inGameState.GetLastStrat(1);
+
+            Assert.Same(expectedStrat, result);
+        }
+
+        [Fact]
+        public void GetLastStrat_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Oasis", 4);
+            InGameState inGameState = new InGameState(startConditions);
+            Strat expectedStrat = inGameState.CurrentNode.Links[3].Strats["Base"];
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), expectedStrat);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            Strat result = inGameState.GetLastStrat(1);
+
+            Assert.Same(expectedStrat, result);
+        }
+
+        [Fact]
+        public void GetLastStrat_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetLastStrat(-1));
+        }
+
+        [Fact]
+        public void GetLastStrat_GoingBeyondRememberedRooms_ReturnsNull()
+        {
+            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = room1OtherNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room2DoorNode);
+            inGameState.ApplyVisitNode(room2OtherNode, inGameState.CurrentNode.Links[room2OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room2DoorNode, inGameState.CurrentNode.Links[room2DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room1DoorNode);
+            inGameState.ApplyVisitNode(room1OtherNode, inGameState.CurrentNode.Links[room1OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room2DoorNode);
+            inGameState.ApplyVisitNode(room2OtherNode, inGameState.CurrentNode.Links[room2OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room2DoorNode, inGameState.CurrentNode.Links[room2DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room1DoorNode);
+            inGameState.ApplyVisitNode(room1OtherNode, inGameState.CurrentNode.Links[room1OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+
+            Assert.Null(inGameState.GetCurrentOrPreviousRoomEnvironment(4));
+        }
+
+        [Fact]
+        public void GetVisitedNodeIds_CurrentRoom_ReturnsCurrentRoomVisitedNodeIds()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.Links[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), inGameState.CurrentNode.Links[4].Strats["Base"]);
+
+            var result = inGameState.GetVisitedNodeIds(0);
+
+            Assert.Equal(3, result.Count);
+            Assert.Equal(3, result[0]);
+            Assert.Equal(8, result[1]);
+            Assert.Equal(4, result[2]);
+        }
+
+        [Fact]
+        public void GetVisitedNodeIds_PreviousRoom_ReturnsPreviousRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 8);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), inGameState.CurrentNode.Links[6].Strats["Base"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+
+            var result = inGameState.GetVisitedNodeIds(1);
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal(8, result[0]);
+            Assert.Equal(6, result[1]);
+        }
+
+        [Fact]
+        public void GetVisitedNodeIds_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Oasis", 4);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), inGameState.CurrentNode.Links[3].Strats["Base"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            var result = inGameState.GetVisitedNodeIds(1);
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal(4, result[0]);
+            Assert.Equal(3, result[1]);
+        }
+
+        [Fact]
+        public void GetVisitedNodeIds_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetVisitedNodeIds(-1));
+        }
+
+        [Fact]
+        public void GetVisitedNodeIds_GoingBeyondRememberedRooms_ReturnsEmpty()
+        {
+            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = room1OtherNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room2DoorNode);
+            inGameState.ApplyVisitNode(room2OtherNode, inGameState.CurrentNode.Links[room2OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room2DoorNode, inGameState.CurrentNode.Links[room2DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room1DoorNode);
+            inGameState.ApplyVisitNode(room1OtherNode, inGameState.CurrentNode.Links[room1OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room2DoorNode);
+            inGameState.ApplyVisitNode(room2OtherNode, inGameState.CurrentNode.Links[room2OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room2DoorNode, inGameState.CurrentNode.Links[room2DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room1DoorNode);
+            inGameState.ApplyVisitNode(room1OtherNode, inGameState.CurrentNode.Links[room1OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+
+            Assert.Empty(inGameState.GetVisitedNodeIds(4));
+        }
+
+        [Fact]
+        public void GetVisitedPath_CurrentRoom_ReturnsCurrentRoomVisitedPath()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            RoomNode expectedNode1 = Model.GetNodeInRoom("Red Tower", 3);
+            inGameState.ApplyEnterRoom(expectedNode1);
+            RoomNode expectedNode2 = Model.GetNodeInRoom("Red Tower", 8);
+            Strat expectedStrat2 = inGameState.CurrentNode.Links[8].Strats["Base"];
+            inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
+            RoomNode expectedNode3 = Model.GetNodeInRoom("Red Tower", 4);
+            Strat expectedStrat3 = inGameState.CurrentNode.Links[4].Strats["Base"];
+            inGameState.ApplyVisitNode(expectedNode3, expectedStrat3);
+
+            var result = inGameState.GetVisitedPath(0);
+
+            Assert.Equal(3, result.Count);
+            Assert.Equal(expectedNode1, result[0].nodeState.Node);
+            Assert.Null(result[0].strat);
+            Assert.Equal(expectedNode2, result[1].nodeState.Node);
+            Assert.Equal(expectedStrat2, result[1].strat);
+            Assert.Equal(expectedNode3, result[2].nodeState.Node);
+            Assert.Equal(expectedStrat3, result[2].strat);
+        }
+
+        [Fact]
+        public void GetVisitedPath_PreviousRoom_ReturnsPreviousRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            RoomNode expectedNode1 = Model.GetNodeInRoom("Business Center", 8);
+            startConditions.StartingNode = expectedNode1;
+            InGameState inGameState = new InGameState(startConditions);
+            RoomNode expectedNode2 = Model.GetNodeInRoom("Business Center", 6);
+            Strat expectedStrat2 = inGameState.CurrentNode.Links[6].Strats["Base"];
+            inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+
+            var result = inGameState.GetVisitedPath(1);
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal(expectedNode1, result[0].nodeState.Node);
+            Assert.Null(result[0].strat);
+            Assert.Equal(expectedNode2, result[1].nodeState.Node);
+            Assert.Equal(expectedStrat2, result[1].strat);
+        }
+
+        [Fact]
+        public void GetVisitedPath_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            RoomNode expectedNode1 = Model.GetNodeInRoom("Oasis", 4);
+            startConditions.StartingNode = expectedNode1;
+            InGameState inGameState = new InGameState(startConditions);
+            RoomNode expectedNode2 = Model.GetNodeInRoom("Oasis", 3);
+            Strat expectedStrat2 = inGameState.CurrentNode.Links[3].Strats["Base"];
+            inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            var result = inGameState.GetVisitedPath(1);
+
+            Assert.Equal(2, result.Count);
+            Assert.Equal(expectedNode1, result[0].nodeState.Node);
+            Assert.Null(result[0].strat);
+            Assert.Equal(expectedNode2, result[1].nodeState.Node);
+            Assert.Equal(expectedStrat2, result[1].strat);
+        }
+
+        [Fact]
+        public void GetVisitedPath_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetVisitedPath(-1));
+        }
+
+        [Fact]
+        public void GetVisitedPath_GoingBeyondRememberedRooms_ReturnsEmpty()
+        {
+            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = room1OtherNode;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room2DoorNode);
+            inGameState.ApplyVisitNode(room2OtherNode, inGameState.CurrentNode.Links[room2OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room2DoorNode, inGameState.CurrentNode.Links[room2DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room1DoorNode);
+            inGameState.ApplyVisitNode(room1OtherNode, inGameState.CurrentNode.Links[room1OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room2DoorNode);
+            inGameState.ApplyVisitNode(room2OtherNode, inGameState.CurrentNode.Links[room2OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room2DoorNode, inGameState.CurrentNode.Links[room2DoorNode.Id].Strats["Base"]);
+            inGameState.ApplyEnterRoom(room1DoorNode);
+            inGameState.ApplyVisitNode(room1OtherNode, inGameState.CurrentNode.Links[room1OtherNode.Id].Strats["Base"]);
+            inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.Links[room1DoorNode.Id].Strats["Base"]);
+
+            Assert.Empty(inGameState.GetVisitedPath(4));
+        }
+
+        [Fact]
+        public void GetDestroyedObstacleIds_CurrentRoom_ReturnsCurrentRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Hellway", 2);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Caterpillar Room", 2));
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+
+            IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(0);
+
+            Assert.Single(result);
+            Assert.Equal("A", result.First());
+        }
+
+        [Fact]
+        public void GetDestroyedObstacleIds_PreviousRoom_ReturnsPreviousRoomData()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Caterpillar Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Hellway", 2));
+
+            IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(1);
+
+            Assert.Single(result);
+            Assert.Equal("A", result.First());
+        }
+
+        [Fact]
+        public void GetDestroyedObstacleIds_PreviousRoom_SkipsNonPlayableRooms()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Caterpillar Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+            //Note: This is an invalid connection, but it's not InGameState's to validate that
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+
+            IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(1);
+
+            Assert.Single(result);
+            Assert.Equal("A", result.First());
+        }
+
+        [Fact]
+        public void GetDestroyedObstacleIds_NegativePreviousRoomCount_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+
+            Assert.Throws<ArgumentException>(() => inGameState.GetDestroyedObstacleIds(-1));
+        }
+
+        [Fact]
+        public void GetDestroyedObstacleIds_GoingBeyondRememberedRooms_ReturnsEmpty()
+        {
+            RoomNode node1 = Model.GetNodeInRoom("Caterpillar Room", 2);
+            RoomObstacle obstacle1 = node1.Room.Obstacles["A"];
+            RoomNode node2 = Model.GetNodeInRoom("Beta Power Bomb Room", 1);
+            RoomObstacle obstacle2 = node2.Room.Obstacles["B"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = node1;
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyDestroyObstacle(obstacle1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyDestroyObstacle(obstacle2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyDestroyObstacle(obstacle1);
+            inGameState.ApplyEnterRoom(node2);
+            inGameState.ApplyDestroyObstacle(obstacle2);
+            inGameState.ApplyEnterRoom(node1);
+            inGameState.ApplyDestroyObstacle(obstacle1);
+
+            Assert.False(inGameState.IsHeatedRoom(4));
+        }
+
+        [Fact]
         public void IsHeatedRoom_CurrentRoom_ReturnsCurrentRoom()
         {
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
