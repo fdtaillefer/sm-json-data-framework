@@ -421,6 +421,18 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
+        /// Updates the in-room state to contain a mention of the destruction of the provided obstacle.
+        /// This obstacle should be in the current room.
+        /// </summary>
+        /// <param name="obstacle">The obstacle to destroy.</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyDestroyObstacle(RoomObstacle obstacle)
+        {
+            InternalInRoomState.ApplyDestroyObstacle(obstacle);
+            return this;
+        }
+
+        /// <summary>
         /// In-room state of the current room.
         /// </summary>
         protected InRoomState InternalInRoomState { get; set; }
@@ -615,18 +627,6 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             InternalInRoomState.ApplyVisitNode(nodeToVisit, strat);
 
-            return this;
-        }
-
-        /// <summary>
-        /// Updates the in-room state to contain a mention of the destruction of the provided obstacle.
-        /// This obstacle should be in the current room.
-        /// </summary>
-        /// <param name="obstacle">The obstacle to destroy.</param>
-        /// <returns>This, for chaining</returns>
-        public InGameState ApplyDestroyObstacle(RoomObstacle obstacle)
-        {
-            InternalInRoomState.ApplyDestroyObstacle(obstacle);
             return this;
         }
 

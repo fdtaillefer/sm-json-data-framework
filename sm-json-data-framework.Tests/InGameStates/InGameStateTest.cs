@@ -1040,6 +1040,29 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void ApplyDestroyObstacle_AddsItToDestroyedObstacles()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+
+            Assert.Single(inGameState.InRoomState.DestroyedObstacleIds);
+            Assert.Contains("A", inGameState.InRoomState.DestroyedObstacleIds);
+        }
+
+        [Fact]
+        public void ApplyDestroyObstacle_ObstacleNotInRoom_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
+        }
+
+        [Fact]
         public void ApplyEnterRoom_ChangesCurrentNode()
         {
             RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
