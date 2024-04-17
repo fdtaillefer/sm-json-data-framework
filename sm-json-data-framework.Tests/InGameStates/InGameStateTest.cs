@@ -1117,6 +1117,52 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), inGameState.CurrentNode.Links[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.Links[1].Strats["Parlor Quick Charge"]);
+
+            Assert.Equal("Parlor and Alcatraz", inGameState.CurrentRoom.Name);
+            Assert.Equal(1, inGameState.CurrentNode.Id);
+            Assert.Equal("Parlor Quick Charge", inGameState.InRoomState.LastStrat.Name);
+            Assert.Equal(3, inGameState.GetVisitedPath().Count);
+
+            Assert.Equal(4, inGameState.GetVisitedPath()[0].nodeState.Node.Id);
+            Assert.Null(inGameState.GetVisitedPath()[0].strat);
+
+            Assert.Equal(8, inGameState.GetVisitedPath()[1].nodeState.Node.Id);
+            Assert.Equal("Base", inGameState.GetVisitedPath()[1].strat.Name);
+
+            Assert.Equal(1, inGameState.GetVisitedPath()[2].nodeState.Node.Id);
+            Assert.Equal("Parlor Quick Charge", inGameState.GetVisitedPath()[2].strat.Name);
+        }
+
+        [Fact]
+        public void ApplyVisitNode_LinkDoesntExist_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.Links[8].Strats["Base"]));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_StratNotOnOriginLink_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InGameState inGameState = new InGameState(startConditions);
+            Strat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).Links[1].Strats["Base"];
+
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
+        }
+
+        [Fact]
         public void GetInRoomState_CurrentRoom_ReturnsCurrentRoomState()
         {
             RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
