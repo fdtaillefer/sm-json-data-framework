@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Indicates how many previous rooms to keep.
         /// </summary>
-        private const int MaxPreviousRooms = 2;
+        public const int MaxPreviousRooms = 2;
 
         // STITCHME It might be valuable to eventually have InGameState be able to say which nodes are reachable?
 
