@@ -618,24 +618,6 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        public LinkTo GetCurrentLinkTo(int targetNodeId)
-        {
-            Link linkFromCurrent = CurrentRoom.Links
-                .Where(link => link.FromNodeId == GetCurrentNode().Id)
-                .SingleOrDefault();
-            // If we don't find exactly one link from current node, can't do anything
-            if (linkFromCurrent == null)
-            {
-                return null;
-            }
-            else
-            {
-                return linkFromCurrent.To
-                    .Where(to => to.TargetNodeId == targetNodeId)
-                    .SingleOrDefault();
-            }
-        }
-
         /// <summary>
         /// Updates the in-room state to contain a mention of the destruction of the provided obstacle.
         /// This obstacle should be in the current room.
@@ -1093,13 +1075,6 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
         public IEnumerable<string> GetDestroyedObstacleIds(int previousRoomCount = 0);
-
-        /// <summary>
-        /// Identifies and returns a LinkTo that allows navigation from the current node to the provided node.
-        /// </summary>
-        /// <param name="targetNodeId">The node to which the LinkTo should lead</param>
-        /// <returns>The identified LinkTo, or null if a single LinkTo couldn't be found</returns>
-        public LinkTo GetCurrentLinkTo(int targetNodeId);
 
         /// <summary>
         /// <para>Returns all runways that the player could possibly be able to retroactively use, according to the pathing in this in-game state.

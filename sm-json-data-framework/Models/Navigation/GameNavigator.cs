@@ -187,7 +187,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Find a link from current node to that node
-            LinkTo linkTo = InternalInGameState.GetCurrentLinkTo(nodeId);
+            LinkTo linkTo = InternalInGameState.InRoomState.GetLinkToNode(nodeId);
             if (linkTo == null)
             {
                 intent = intent + $", but no links found in {InternalInGameState.CurrentRoom.Name} from node {InternalInGameState.GetCurrentNode().Id} to {nodeId}";
