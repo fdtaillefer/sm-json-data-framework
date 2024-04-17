@@ -630,17 +630,6 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        /// <summary>
-        /// Removes all in-room data from this InGameState. Useful if this has been initialized at a starting node but in-room state is not going to be maintained.
-        /// </summary>
-        /// <returns>This, for chaining</returns>
-        public InGameState ApplyClearRoomState()
-        {
-            InternalInRoomState.ClearRoomState();
-            InternalPreviousRoomStates.ForEach(state => InternalInRoomState.ClearRoomState());
-            return this;
-        }
-
         public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, IEnumerable<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
