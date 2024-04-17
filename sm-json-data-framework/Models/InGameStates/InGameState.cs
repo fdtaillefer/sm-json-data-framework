@@ -433,7 +433,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected List<InRoomState> InternalPreviousRoomStates { get; } = new List<InRoomState>();
 
-        public IEnumerable<ReadOnlyInRoomState> PreviousRoomStates { get { return InternalPreviousRoomStates.Select(state => state.AsReadOnly()); } }
+        public IReadOnlyList<ReadOnlyInRoomState> PreviousRoomStates { get { return InternalPreviousRoomStates.Select(state => state.AsReadOnly()).ToList().AsReadOnly(); } }
 
         /// <summary>
         /// Returns the in-room state that corresponds to the provided previousRoomCount, for this in-game state.
@@ -596,7 +596,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public InGameState ApplyEnterRoom(RoomNode entryNode)
         {
             // Copy current room state and remember it as previous
-            RegisterPreviousRoom(new InRoomState(InternalInRoomState));
+            RegisterPreviousRoom(InternalInRoomState.Clone());
 
             // Enter next room
             InternalInRoomState.ApplyEnterRoom(entryNode);
@@ -973,7 +973,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Read-only in-room state of the last few rooms when they were left. This list remembers no more room states than the PreviousRooms constant.
         /// The closer to the start of the list a state is, the more recently Samus was in it.
         /// </summary>
-        public IEnumerable<ReadOnlyInRoomState> PreviousRoomStates { get; }
+        public IReadOnlyList<ReadOnlyInRoomState> PreviousRoomStates { get; }
 
         /// <summary>
         /// Returns the read-only in-room state that corresponds to the provided previousRoomCount, for this in-game state.

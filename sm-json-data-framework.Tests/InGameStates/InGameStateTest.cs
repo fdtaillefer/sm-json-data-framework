@@ -1040,6 +1040,83 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void ApplyEnterRoom_ChangesCurrentNode()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyEnterRoom(expectedNode);
+
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_ClearsPreviousRoomState()
+        {
+            // path and obstacles
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Parlor and Alcatraz", 4));
+
+            Assert.Empty(inGameState.InRoomState.DestroyedObstacleIds);
+            Assert.Single(inGameState.InRoomState.VisitedRoomPath);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_AddsCurrentRoomStateCopyToRememberedRooms()
+        {
+            Room initialRoom = Model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom(initialRoom.Name, 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            
+            Assert.Same(initialRoom, inGameState.PreviousRoomStates[0].CurrentRoom);
+            Assert.NotSame(inGameState.InRoomState, inGameState.PreviousRoomStates[0]);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_SpawnsAtDifferentNode_GoesToCorrectNode()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Ice Beam Tutorial Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 1));
+
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_GoingBeyondRememberedRooms_EliminatesOldestRoom()
+        {
+            string initialRoomName = "Sloaters Refill";
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom(initialRoomName, 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.Links[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.Links[4].Strats["Base"]);
+            for (int i = 0; i < InGameState.MaxPreviousRooms; i++)
+            {
+                RoomNode node = i % 2 == 0 ? node2 : node1;
+                inGameState.ApplyEnterRoom(node);
+            }
+
+            Assert.NotEqual(initialRoomName, inGameState.PreviousRoomStates.Last().CurrentRoom.Name);
+        }
+
+        [Fact]
         public void GetInRoomState_CurrentRoom_ReturnsCurrentRoomState()
         {
             RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
@@ -1098,7 +1175,7 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetInRoomState_GoingBeyondRememberedRooms_ReturnsNull()
         {
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 3);
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
             RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = node1;
@@ -1171,7 +1248,7 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetCurrentOrPreviousRoom_GoingBeyondRememberedRooms_ReturnsNull()
         {
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 3);
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
             RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = node1;
@@ -1246,7 +1323,7 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetCurrentOrPreviousRoomEnvironment_GoingBeyondRememberedRooms_ReturnsNull()
         {
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 3);
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
             RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = node1;
@@ -1971,7 +2048,7 @@ namespace sm_json_data_framework.InGameStates
         [Fact]
         public void GetCurrentNode_GoingBeyondRememberedRooms_ReturnsNull()
         {
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 3);
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
             RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = node1;
