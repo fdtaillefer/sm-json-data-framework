@@ -53,6 +53,40 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void GetStratToNode_LinkAndStratExist_ReturnsStrat()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            Strat expectedStrat = initialNode.Links[8].Strats["Base"];
+            InRoomState state = new InRoomState(initialNode);
+
+            Strat result = state.GetStratToNode(8, "Base");
+
+            Assert.Same(expectedStrat, result);
+        }
+
+        [Fact]
+        public void GetStratToNode_LinkExistsButNotStrat_ReturnsNull()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+
+            Strat result = state.GetStratToNode(8, "BLECH");
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetStratToNode_LinkDoesntExist_ReturnsNull()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+
+            Strat result = state.GetStratToNode(88, "Base");
+
+            Assert.Null(result);
+        }
+
+        [Fact]
         public void ApplyVisitNode_ById_AccumulatesVisitedNodesAndStrats()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);

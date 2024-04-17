@@ -204,6 +204,14 @@ namespace sm_json_data_framework.Models.InGameStates
             InternalVisitedRoomPath.Add((new InNodeState(node), strat));
         }
 
+        public Strat GetStratToNode(int targetNodeId, string stratName)
+        {
+            Strat resultStrat = null;
+            CurrentNode.Links.TryGetValue(targetNodeId, out LinkTo link);
+            link?.Strats.TryGetValue(stratName, out resultStrat);
+            return resultStrat;
+        }
+
         /// <summary>
         /// Updates the in-room state to contain a mention of the destruction of the obstacle in the current room with the provided ID.
         /// </summary>
@@ -413,6 +421,15 @@ namespace sm_json_data_framework.Models.InGameStates
         /// The strat that was used to reach the current node, if any. Otherwise, is null.
         /// </summary>
         public Strat LastStrat { get; }
+
+        /// <summary>
+        /// Tries to find a link from current node to provided targetNodeId, then a strat on that link with provided stratName.
+        /// Returns null if either portion fails.
+        /// </summary>
+        /// <param name="targetNodeId">Target node ID of the link to look for</param>
+        /// <param name="stratName">Name of the strat to look on the link</param>
+        /// <returns>The obtained Strat, or null</returns>
+        public Strat GetStratToNode(int targetNodeId, string stratName);
 
         /// <summary>
         /// The locks opened by Samus in the last node she visited in this room.
