@@ -204,10 +204,17 @@ namespace sm_json_data_framework.Models.InGameStates
             InternalVisitedRoomPath.Add((new InNodeState(node), strat));
         }
 
+        public LinkTo GetLinkToNode(int targetNodeId)
+        {
+            LinkTo link;
+            CurrentNode.Links.TryGetValue(targetNodeId, out link);
+            return link;
+        }
+
         public Strat GetStratToNode(int targetNodeId, string stratName)
         {
             Strat resultStrat = null;
-            CurrentNode.Links.TryGetValue(targetNodeId, out LinkTo link);
+            LinkTo link = GetLinkToNode(targetNodeId);
             link?.Strats.TryGetValue(stratName, out resultStrat);
             return resultStrat;
         }
@@ -421,6 +428,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// The strat that was used to reach the current node, if any. Otherwise, is null.
         /// </summary>
         public Strat LastStrat { get; }
+
+        /// <summary>
+        /// Tries to return a LinkTo from current node to provided targetNodeId. Returns null if not found.
+        /// </summary>
+        /// <param name="targetNodeId">Target node ID of the link to look for</param>
+        /// <returns>The obtained LinkTo, or null if not found</returns>
+        public LinkTo GetLinkToNode(int targetNodeId);
 
         /// <summary>
         /// Tries to find a link from current node to provided targetNodeId, then a strat on that link with provided stratName.

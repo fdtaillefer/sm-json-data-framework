@@ -53,6 +53,29 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
 
         [Fact]
+        public void GetLinkToNode_LinkExists_ReturnsLink()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            LinkTo expectedLink = initialNode.Links[8];
+            InRoomState state = new InRoomState(initialNode);
+
+            LinkTo result = state.GetLinkToNode(8);
+
+            Assert.Same(expectedLink, result);
+        }
+
+        [Fact]
+        public void GetLinkToNode_LinkDoesntExist_ReturnsNull()
+        {
+            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            InRoomState state = new InRoomState(initialNode);
+
+            LinkTo result = state.GetLinkToNode(88);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
         public void GetStratToNode_LinkAndStratExist_ReturnsStrat()
         {
             RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
