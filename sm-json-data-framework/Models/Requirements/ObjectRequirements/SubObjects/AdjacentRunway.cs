@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public decimal UsedTiles { get; set; }
 
-        public IEnumerable<PhysicsEnum> Physics { get; set; }
+        public ISet<PhysicsEnum> Physics { get; set; }
 
         public int UseFrames { get; set; } = 0;
 
@@ -51,7 +51,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
+            // If no in-room path is specified, then player will be required to have entered at fromNode and not moved
             IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
 
             // Find all runways from the previous room that can be retroactively attempted and are long enough.

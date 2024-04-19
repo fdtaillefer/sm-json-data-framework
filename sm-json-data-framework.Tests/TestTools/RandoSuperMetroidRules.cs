@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Tests.TestSubClasses
+namespace sm_json_data_framework.Tests.TestTools
 {
     /// <summary>
     /// A subclass of SuperMetroidRules which has typical randomizer adjustments, to be used intests as an alternate when relevant.

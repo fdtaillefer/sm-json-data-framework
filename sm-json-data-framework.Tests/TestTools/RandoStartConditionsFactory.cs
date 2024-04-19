@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 using System.Runtime.ConstrainedExecution;
 
-namespace sm_json_data_framework.Tests.TestSubClasses
+namespace sm_json_data_framework.Tests.TestTools
 {
     /// <summary>
     /// An override of DefaultStartConditionsFactory, which also overrides some of the contents of items.json to give 

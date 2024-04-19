@@ -3,7 +3,7 @@ using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
-using sm_json_data_framework.Tests.TestSubClasses;
+using sm_json_data_framework.Tests.TestTools;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;

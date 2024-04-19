@@ -2316,6 +2316,340 @@ namespace sm_json_data_framework.InGameStates
         }
 
         [Fact]
+        public void GetRetroactiveRunways_NoPreviousRoom_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { 5 }, acceptablePhysics: null);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_ReturnsRunways()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways;
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<Runway>.Default).Count());
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_PreviousRoomNodeUnconnected_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 2));
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_VisitedPathMismatch_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.GetVisitedNodeIds()[0]}, acceptablePhysics: null);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_MultiNodePathMatch_ReturnsRunways()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways;
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(inGameState.GetVisitedNodeIds(), acceptablePhysics: null);
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<Runway>.Default).Count());
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_PhysicsMatch_ReturnsRunways()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways;
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Normal });
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<Runway>.Default).Count());
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_PhysicsMismatch_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Water });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveRunways_BypassingLock_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crateria Tube", 1));
+
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_NoPreviousRoom_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
+            InGameState inGameState = new InGameState(startConditions);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { 5 });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_ReturnsCanLeaveChargeds()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<CanLeaveCharged>.Default).Count());
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_PreviousRoomNodeUnconnected_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2));
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_VisitedPathMismatch_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.GetVisitedNodeIds()[0] });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_MultiNodePathMatch_ReturnsCanLeaveChargeds()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, inGameState.GetVisitedNodeIds());
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<CanLeaveCharged>.Default).Count());
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_BypassingLock_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Crab Shaft", 2);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Crab Shaft Green Lock (to Aqueduct)"]);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Aqueduct", 1));
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoor_ReturnsCanLeaveCharged()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.Links[2].Strats["Speed Through"]);
+            IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<CanLeaveCharged>.Default).Count());
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoor_BypassingLock_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.Links[2].Strats["Speed Through"]);
+            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Early Supers Red Lock (to Brinstar Reserve)"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_NotFollowingPathToDoor_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.Links[2].Strats["Speed Through"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 4), inGameState.CurrentNode.Links[4].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoorWithWrongStrat_ReturnsEmpty()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.Links[2].Strats["Early Supers Mockball"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorButNotVisited_ExcludesCanLeaveCharged()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 1), inGameState.CurrentNode.Links[1].Strats["Shinespark"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorAndWasVisited_IncludesCanLeaveCharged()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 4), inGameState.CurrentNode.Links[4].Strats["Shinespark"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 3), inGameState.CurrentNode.Links[3].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 1), inGameState.CurrentNode.Links[1].Strats["Shinespark"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Single(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenLockedDoorAndWasVisitedButNotUnlocked_ExcludesCanLeaveCharged()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.Links[1].Strats["In-Room Shinespark"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenLockedDoorAndWasVisitedButNotUnlockedUntilLeaving_ExcludesCanLeaveCharged()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.Links[1].Strats["In-Room Shinespark"]);
+            inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Red Firefleas Red Lock (to X-Ray)"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Empty(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
+        }
+
+        [Fact]
+        public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorLockedAndWasUnlocked_IncludesCanLeaveCharged()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Red Firefleas Red Lock (to X-Ray)"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.Links[1].Strats["In-Room Shinespark"]);
+            inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
+
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+
+            Assert.Single(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
+        }
+
+        [Fact]
         public void Clone_CopiesCorrectly()
         {
             string startingRoomName = "Business Center";

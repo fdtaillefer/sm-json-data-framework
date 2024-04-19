@@ -630,7 +630,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, IEnumerable<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
+        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, ISet<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
             // If that "current" room is the last remembered one, we have no way to obtain the state of the room before that so just return
@@ -751,7 +751,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     // to see if it can possibly be executed retroactively.
 
                     var lastRoomPath = GetVisitedPath(previousRoomCount + 1);
-                    // If we haven't visited as many nodes as the prescribed path to door (+ 1 more node to enter the room),
+                    // If we haven't visited as many nodes as the prescribed path to door (+ at least 1 more node to visit the initiateAtNode),
                     // we know for sure our exit isn't compatible with this CanLeaveCharged. Reject it.
                     if (lastRoomPath.Count < clc.InitiateRemotely.PathToDoor.Count() + 1)
                     {
@@ -759,7 +759,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     }
 
                     // Check the last n visited nodes to make sure they correspond to the prescribed path.
-                    // But before this, check the node we were at immediately before those, to make sure we're starting at the right place.
+                    // But before this, check the node we were at immediately before those, to make sure we're starting at the right node.
                     IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> lastRoomFinalPath
                         = lastRoomPath.TakeLast(clc.InitiateRemotely.PathToDoor.Count() + 1);
                     if (lastRoomFinalPath.First().nodeState.Node != clc.InitiateRemotely.InitiateAtNode)
@@ -786,7 +786,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     {
                         // The exit node must not have any active locks when the CanLeaveCharged execution begins.
                         // This means we can't have opened the lock on the way out
-                        if(OpeningExitLock(previousRoomCount + 1))
+                        if (OpeningExitLock(previousRoomCount + 1))
                         {
                             return false;
                         }
@@ -795,6 +795,11 @@ namespace sm_json_data_framework.Models.InGameStates
                         // The node where execution begins is hence the last one where we could have opened the door.
                         if (!lastRoomPath.SkipLast(clc.InitiateRemotely.PathToDoor.Count()).Where(pathNode => pathNode.nodeState.Node == previousRoomExitNode).Any())
                         {
+                            return false;
+                        }
+
+                        // If there's any active locks on the exit door, then the door can't possibly have been opened first.
+                        if (previousRoomExitNode.GetActiveLocks(model, this).Any()) {
                             return false;
                         }
                     }
@@ -1067,7 +1072,8 @@ namespace sm_json_data_framework.Models.InGameStates
 
         /// <summary>
         /// <para>Returns all runways that the player could possibly be able to retroactively use, according to the pathing in this in-game state.
-        /// Does not check whether the player is also able to use any strats on those runways.</para>
+        /// Does not check whether the player is also able to use any strats on those runways.
+        /// Also does not check whether charging is currently doable.</para>
         /// <para>"Retroactive use" is meant to be done right after entering a room, and aims to retroactively decide how the last room was exited.</para>
         /// <para>A runway would typically be used retroactively to satisfy an adjacentRunway or canComeInCharged
         /// that is being executed soon after entry of the new room.</para>
@@ -1075,11 +1081,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able 
         /// to use retroactive runways in the current context. The first node in this path also dictates the node to which the retroactive runways must lead.</param>
         /// <param name="usePreviousRoom">If true, indicates that the "new" room is already the previous room in this InGameState.</param>
-        /// <param name="acceptablePhysics">An optional collection of physics, one of which must be active at the runway's door for any runway to be available.</param>
+        /// <param name="acceptablePhysics">An optional set of physics, one of which must be active at the runway's door for any runway to be available.
+        /// If null, all physics are acceptable.</param>
         /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive runways in the room before that. 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, IEnumerable<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0);
+        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, ISet<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0);
 
         /// <summary>
         /// <para>Returns all canLeaveChargeds that the player could possibly be able to retroactively use, according to the pathing in this in-game state.
