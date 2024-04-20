@@ -17,11 +17,14 @@ namespace sm_json_data_framework.Reading
 {
     public class ModelReaderTest
     {
+        #region Tests for ReadModel()
         [Fact]
         public void ReadModel_ReadsAllData()
         {
+            // When
             SuperMetroidModel model = ModelReader.ReadModel();
 
+            // Expect
             // Room counts
             Assert.Equal(54, model.Rooms.Values.Where(room => room.Area == "Brinstar").Count());
             Assert.Equal(6, model.Rooms.Values.Where(room => room.Area == "Ceres Station").Count());
@@ -91,16 +94,21 @@ namespace sm_json_data_framework.Reading
         [Fact]
         public void ReadModel_UsesOptionalParameters()
         {
+            // Given
             LogicalOptions options = new LogicalOptions
             {
                 TilesToShineCharge = 20
             };
+
+            // When
             SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
                 startConditionsFactory: new RandoStartConditionsFactory());
 
+            // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
             Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
             Assert.Equal(20, model.LogicalOptions.TilesToShineCharge);
         }
+        #endregion
     }
 }

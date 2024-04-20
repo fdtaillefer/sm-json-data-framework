@@ -51,22 +51,33 @@ namespace sm_json_data_framework.Tests.InGameStates
             return ConsumableResourceValues().Except(new[] { new object[] { ConsumableResourceEnum.ENERGY } });
         }
 
+        #region Tests for GetAmount()
         [Theory]
         [InlineData(RechargeableResourceEnum.Missile)]
         [InlineData(RechargeableResourceEnum.Super)]
         [InlineData(RechargeableResourceEnum.PowerBomb)]
         public void GetAmount_ConsumableAmmo_ReturnsCorrectValue(RechargeableResourceEnum resource)
         {
+            // Given
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amount);
-            Assert.Equal(amount, resourceCount.GetAmount(resource.ToConsumableResource()));
+
+            // When
+            int result = resourceCount.GetAmount(resource.ToConsumableResource());
+
+            // Expect
+            Assert.Equal(amount, result);
 
             foreach (ConsumableResourceEnum loopResource in Enum.GetValues(typeof(ConsumableResourceEnum)))
             {
                 if(loopResource != resource.ToConsumableResource())
                 {
-                    Assert.Equal(0, resourceCount.GetAmount(loopResource));
+                    // And when
+                    result = resourceCount.GetAmount(loopResource);
+
+                    // Expect
+                    Assert.Equal(0, result);
                 }
             }
         }
@@ -74,31 +85,45 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void GetAmount_ConsumableEnergy_ReturnsSumOfBothEnergies()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 5);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 6);
 
-            Assert.Equal(11, resourceCount.GetAmount(ConsumableResourceEnum.ENERGY));
-        }
+            // When
+            int result = resourceCount.GetAmount(ConsumableResourceEnum.ENERGY);
 
+            // Expect
+            Assert.Equal(11, result);
+        }
+        #endregion
+
+        #region Tests for ctor()
         [Theory]
         [MemberData(nameof(RechargeableResourceValues))]
         public void Constructor_InitializesAt0(RechargeableResourceEnum resource)
         {
+            // When
             ResourceCount resourceCount = new ResourceCount();
 
+            // Expect
             Assert.Equal(0, resourceCount.GetAmount(resource));
         }
+        #endregion
 
+        #region Tests for ApplyAmount()
         [Theory]
         [MemberData(nameof(RechargeableResourceValues))]
         public void ApplyAmount_SetsAmount(RechargeableResourceEnum resource)
         {
+            // Given
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
 
+            // When
             resourceCount.ApplyAmount(resource, amount);
 
+            // Expect
             Assert.Equal(amount, resourceCount.GetAmount(resource));
             foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -113,13 +138,16 @@ namespace sm_json_data_framework.Tests.InGameStates
         [MemberData(nameof(RechargeableResourceValues))]
         public void ApplyAmount_FromOther_SetsAmount(RechargeableResourceEnum resource)
         {
+            // Given
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             ResourceCount otherResourceCount = new ResourceCount();
             otherResourceCount.ApplyAmount(resource, amount);
 
+            // When
             resourceCount.ApplyAmount(resource, otherResourceCount);
 
+            // Expect
             Assert.Equal(otherResourceCount.GetAmount(resource), resourceCount.GetAmount(resource));
             foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -129,10 +157,13 @@ namespace sm_json_data_framework.Tests.InGameStates
                 }
             }
         }
+        #endregion
 
+        #region Tests for ApplyAmounts()
         [Fact]
         public void ApplyAmounts_AppliesCorrectValues()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             ResourceCount otherResourceCount = new ResourceCount();
             int value = 1;
@@ -141,18 +172,23 @@ namespace sm_json_data_framework.Tests.InGameStates
                 otherResourceCount.ApplyAmount(resource, value++);
             }
 
+            // When
             resourceCount.ApplyAmounts(otherResourceCount);
 
+            // Expect
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 Assert.Equal(otherResourceCount.GetAmount(resource), resourceCount.GetAmount(resource));
             }
         }
+        #endregion
 
+        #region Tests for ApplyAmountIncrease()
         [Theory]
         [MemberData(nameof(RechargeableResourceValues))]
         public void ApplyAmountIncrease_SetsAmount(RechargeableResourceEnum resource)
         {
+            // Given
             int initialAmount = 2;
             int addedAmount = 5;
             ResourceCount resourceCount = new ResourceCount();
@@ -162,8 +198,10 @@ namespace sm_json_data_framework.Tests.InGameStates
                 resourceCount.ApplyAmount(loopResource, initialAmount);
             }
 
+            // When
             resourceCount.ApplyAmountIncrease(resource, addedAmount);
 
+            // Expect
             Assert.Equal(initialAmount + addedAmount, resourceCount.GetAmount(resource));
             foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -173,24 +211,28 @@ namespace sm_json_data_framework.Tests.InGameStates
                 }
             }
         }
+        #endregion
 
+        #region Tests for ApplyAmountReduction()
         [Theory]
         [InlineData(RechargeableResourceEnum.Missile)]
         [InlineData(RechargeableResourceEnum.Super)]
         [InlineData(RechargeableResourceEnum.PowerBomb)]
         public void ApplyAmountReduction_Ammo_SetsAmount(RechargeableResourceEnum resource)
         {
+            // Given
             int initialAmount = 5;
             int removedAmount = 2;
             ResourceCount resourceCount = new ResourceCount();
-
             foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 resourceCount.ApplyAmount(loopResource, initialAmount);
             }
 
+            // When
             resourceCount.ApplyAmountReduction(resource.ToConsumableResource(), removedAmount);
 
+            // Expect
             Assert.Equal(initialAmount - removedAmount, resourceCount.GetAmount(resource));
             foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -204,10 +246,10 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void ApplyAmountReduction_RegularEnergy_SetsAmount()
         {
+            // Given
             int initialAmount = 5;
             int removedAmount = 2;
             ResourceCount resourceCount = new ResourceCount();
-
             foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 // Don't put any reserve energy in, we're checking regular energy
@@ -217,8 +259,10 @@ namespace sm_json_data_framework.Tests.InGameStates
                 }
             }
 
+            // When
             resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, removedAmount);
 
+            // Expect
             Assert.Equal(initialAmount - removedAmount, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
             foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -232,10 +276,10 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void ApplyAmountReduction_ReserveEnergy_SetsAmount()
         {
+            // Given
             int initialAmount = 5;
             int removedAmount = 2;
             ResourceCount resourceCount = new ResourceCount();
-
             foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 // Don't put any regular energy in, we're checking reserve energy
@@ -245,8 +289,10 @@ namespace sm_json_data_framework.Tests.InGameStates
                 }
             }
 
+            // When
             resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, removedAmount);
 
+            // Expect
             Assert.Equal(initialAmount - removedAmount, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
             foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -260,12 +306,15 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void ApplyAmountReduction_MixedEnergy_ConsumesRegularEnergyFirst()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 10);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 10);
 
+            // When
             resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, 12);
 
+            // Expect
             Assert.Equal(1, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(7, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
         }
@@ -273,12 +322,15 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void ApplyAmountReduction_MixedEnergy_ConsumesReservesBeforeGoingTo0Regular()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 10);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 10);
 
+            // When
             resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, 19);
 
+            // Expect
             Assert.Equal(1, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(0, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
         }
@@ -286,23 +338,33 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void ApplyAmountReduction_MixedEnergy_ConsumesReservesBeforeGoingToNegativeRegular()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 10);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 10);
 
+            // When
             resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, 22);
 
+            // Expect
             Assert.Equal(-2, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(0, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
         }
+        #endregion
 
+        #region Tests for IsResourceAvailable()
         [Theory]
         [MemberData(nameof(ConsumableResourceValues))]
         public void IsResourceAvailable_Requesting0_ReturnsTrue(ConsumableResourceEnum resource)
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
 
-            Assert.True(resourceCount.IsResourceAvailable(resource, 0));
+            // When
+            bool result = resourceCount.IsResourceAvailable(resource, 0);
+
+            // Expect
+            Assert.True(result);
         }
 
         [Theory]
@@ -311,22 +373,32 @@ namespace sm_json_data_framework.Tests.InGameStates
         [InlineData(RechargeableResourceEnum.PowerBomb)]
         public void IsResourceAvailable_RequestingExactPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
         {
+            // Given
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amount);
 
-            Assert.True(resourceCount.IsResourceAvailable(resource.ToConsumableResource(), amount));
+            // When
+            bool result = resourceCount.IsResourceAvailable(resource.ToConsumableResource(), amount);
+
+            // Expect
+            Assert.True(result);
         }
 
         [Fact]
         public void IsResourceAvailable_RequestingExactPresentAmount_Energy_ReturnsFalse()
         {
+            // Given
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amount);
 
+            // When
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amount);
+
+            // Expect
             // X energy is not available to spend if you have exactly X energy, because you'd die
-            Assert.False(resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amount));
+            Assert.False(result);
         }
 
         [Theory]
@@ -335,31 +407,46 @@ namespace sm_json_data_framework.Tests.InGameStates
         [InlineData(RechargeableResourceEnum.PowerBomb)]
         public void IsResourceAvailable_RequestingLessThanPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
         {
+            // Given
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest + 1);
 
-            Assert.True(resourceCount.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest));
+            // When
+            bool result = resourceCount.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest);
+
+            // Expect
+            Assert.True(result);
         }
 
         [Fact]
         public void IsResourceAvailable_RequestingLessThanPresentAmount_Energy_ReturnsTrue()
         {
+            // Given
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest + 1);
 
-            Assert.True(resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest));
+            // When
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest);
+
+            // Expect
+            Assert.True(result);
         }
 
         [Fact]
         public void IsResourceAvailable_RequestingLessThanPresentAmount_EnergyMixOfReserveAndNormal_ReturnsTrue()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 3);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 3);
 
-            Assert.True(resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 5));
+            // When
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 5);
+
+            // Expect
+            Assert.True(result);
         }
 
         [Theory]
@@ -368,26 +455,39 @@ namespace sm_json_data_framework.Tests.InGameStates
         [InlineData(RechargeableResourceEnum.PowerBomb)]
         public void IsResourceAvailable_RequestingMoreThanPresentAmount_Ammo_ReturnsFalse(RechargeableResourceEnum resource)
         {
+            // Given
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest - 1);
 
-            Assert.False(resourceCount.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest));
+            // When
+            bool result = resourceCount.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest);
+
+            // Expect
+            Assert.False(result);
         }
 
         [Fact]
         public void IsResourceAvailable_RequestingMoreThanPresentAmount_Energy_ReturnsFalse()
         {
+            // Given
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest - 1);
 
-            Assert.False(resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest));
-        }
+            // When
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest);
 
+            // Expect
+            Assert.False(result);
+        }
+        #endregion
+
+        #region Tests for Clone()
         [Fact]
         public void Clone_CopiesCorrectly()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
             int value = 1;
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
@@ -395,7 +495,10 @@ namespace sm_json_data_framework.Tests.InGameStates
                 resourceCount.ApplyAmount(resource, value++);
             }
 
+            // When
             ResourceCount clone = resourceCount.Clone();
+
+            // Expect
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 Assert.Equal(resourceCount.GetAmount(resource), clone.GetAmount(resource));
@@ -405,18 +508,25 @@ namespace sm_json_data_framework.Tests.InGameStates
         [Fact]
         public void Clone_SeparatesState()
         {
+            // Given
             ResourceCount resourceCount = new ResourceCount();
+
+            // When
             ResourceCount clone = resourceCount.Clone();
+
+            // Subsequently given
             int value = 1;
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 clone.ApplyAmount(resource, value++);
             }
 
+            // Expect
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
                 Assert.Equal(0, resourceCount.GetAmount(resource));
             }
         }
+        #endregion
     }
 }
