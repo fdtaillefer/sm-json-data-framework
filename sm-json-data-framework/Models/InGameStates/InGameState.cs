@@ -597,10 +597,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// <para>Positions the in-game state as it would be after entering a room via the provided node. This may place the player at a different node immediately
         /// if the node calls for it.</para>
-        /// <para>This method allows for leaving "remotely": leaving through a node the player is not at, by performing an action that must be initiated where the player is.
-        /// A known example is using a CanLeaveCharged that initiates at a different node than the door it's on.</para>
-        /// <para>Be aware that when leaving remotely, the exact action used is only determined retroactively once in the next room, and that leaving remotely is
-        /// not considered valid if it's not made use of by a strat in the next room.
+        /// <para>This will be executed regardless of the current in-room state. To exit with more applied intelligence, see <see cref="ApplyExitRoom(SuperMetroidModel)"/></para>
         /// </para>
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
@@ -612,6 +609,35 @@ namespace sm_json_data_framework.Models.InGameStates
 
             // Enter next room
             InternalInRoomState.ApplyEnterRoom(entryNode);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Attends to exit the current room at the current node, going to the adjacent room this node is connected to.
+        /// This is only possible if the current node allows exiting the room, and if no locks are active on the node.
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel, which will be used to when determining whether current node has any active locks</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyExitRoom(SuperMetroidModel model)
+        {
+            RoomNode outNode = CurrentNode.OutNode;
+            if (outNode == null)
+            {
+                throw new InvalidOperationException($"Cannot exit '{CurrentRoom.Name}' via node {CurrentNode.Id} " +
+                    $"because it does not have an out connection to another room.");
+            }
+
+            IEnumerable<NodeLock> activeLocks = CurrentNode.GetActiveLocks(model, this)
+                .Except(GetBypassedExitLocks(), ObjectReferenceEqualityComparer<NodeLock>.Default);
+            if (activeLocks.Any())
+            {
+                throw new InvalidOperationException($"Cannot exit '{CurrentRoom.Name}' via node {CurrentNode.Id} " +
+                    $"because the following locks are active on that node: {String.Join(", ", activeLocks.Select(nodeLock => nodeLock.Name))}.");
+            }
+
+            // Exiting is legal, so enter the next room
+            ApplyEnterRoom(outNode);
 
             return this;
         }

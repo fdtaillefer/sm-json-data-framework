@@ -1139,6 +1139,150 @@ namespace sm_json_data_framework.InGameStates
             Assert.NotEqual(initialRoomName, inGameState.PreviousRoomStates.Last().CurrentRoom.Name);
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [Fact]
+        public void ApplyExitRoom_ChangesCurrentNode()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyExitRoom(Model);
+
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyExitRoom_ClearsPreviousRoomState()
+        {
+            // path and obstacles
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
+
+            inGameState.ApplyExitRoom(Model);
+
+            Assert.Empty(inGameState.InRoomState.DestroyedObstacleIds);
+            Assert.Single(inGameState.InRoomState.VisitedRoomPath);
+        }
+
+        [Fact]
+        public void ApplyExitRoom_AddsCurrentRoomStateCopyToRememberedRooms()
+        {
+            Room initialRoom = Model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom(initialRoom.Name, 1);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyExitRoom(Model);
+
+            Assert.Same(initialRoom, inGameState.PreviousRoomStates[0].CurrentRoom);
+            Assert.NotSame(inGameState.InRoomState, inGameState.PreviousRoomStates[0]);
+        }
+
+        [Fact]
+        public void ApplyExitRoom_SpawnsAtDifferentNode_GoesToCorrectNode()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Ice Beam Tutorial Room", 2);
+            InGameState inGameState = new InGameState(startConditions);
+
+            inGameState.ApplyExitRoom(Model);
+
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyExitRoom_GoingBeyondRememberedRooms_EliminatesOldestRoom()
+        {
+            string initialRoomName = "Sloaters Refill";
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom(initialRoomName, 1);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.Links[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), inGameState.CurrentNode.Links[4].Strats["Base"]);
+            for (int i = 0; i < InGameState.MaxPreviousRooms; i++)
+            {
+                inGameState.ApplyExitRoom(Model);
+            }
+
+            Assert.NotEqual(initialRoomName, inGameState.PreviousRoomStates.Last().CurrentRoom.Name);
+        }
+        [Fact]
+        public void ApplyExitRoom_NonDoorNode_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 7);
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.Throws<InvalidOperationException>(() => inGameState.ApplyExitRoom(Model));
+        }
+
+        [Fact]
+        public void ApplyExitRoom_OneWayEntranceDoorNode_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("West Sand Hall", 3);
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.Throws<InvalidOperationException>(() => inGameState.ApplyExitRoom(Model));
+        }
+
+        [Fact]
+        public void ApplyExitRoom_LockedDoorNode_ThrowsException()
+        {
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
+            InGameState inGameState = new InGameState(startConditions);
+
+            Assert.Throws<InvalidOperationException>(() => inGameState.ApplyExitRoom(Model));
+        }
+
+        [Fact]
+        public void ApplyExitRoom_UnlockedDoorNode_Succeeds()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
+
+            inGameState.ApplyExitRoom(Model);
+
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyExitRoom_BypassedLock_Succeeds()
+        {
+            RoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
+            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
+
+            inGameState.ApplyExitRoom(Model);
+
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
         [Fact]
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
