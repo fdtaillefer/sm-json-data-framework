@@ -367,7 +367,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             );
 
             // When
-            int result = inventory.ResourceMaximums.GetAmount(ConsumableResourceEnum.ENERGY);
+            int result = inventory.ResourceMaximums.GetAmount(ConsumableResourceEnum.Energy);
 
             // Expect
             Assert.Equal(6, result);
@@ -424,7 +424,7 @@ namespace sm_json_data_framework.Tests.InGameStates
                 .ApplyAddItem(reserve);
 
             // When
-            int result = inventory.ResourceMaximums.GetAmount(ConsumableResourceEnum.ENERGY);
+            int result = inventory.ResourceMaximums.GetAmount(ConsumableResourceEnum.Energy);
 
             // Expect
             int expected = 306; // 2 + 4 + 100 * 3

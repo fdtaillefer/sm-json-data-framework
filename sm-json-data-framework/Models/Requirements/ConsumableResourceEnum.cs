@@ -12,10 +12,10 @@ namespace sm_json_data_framework.Models.Requirements
     /// </summary>
     public enum ConsumableResourceEnum
     {
-        ENERGY,
-        MISSILE,
-        SUPER,
-        POWER_BOMB
+        Energy,
+        Missile,
+        Super,
+        PowerBomb
     }
     public static class ConsumableResourceUtils
     {
@@ -28,10 +28,10 @@ namespace sm_json_data_framework.Models.Requirements
         {
             return resource switch
             {
-                ConsumableResourceEnum.ENERGY => new[] { EnemyDropEnum.SMALL_ENERGY, EnemyDropEnum.BIG_ENERGY },
-                ConsumableResourceEnum.MISSILE => new[] { EnemyDropEnum.MISSILE },
-                ConsumableResourceEnum.SUPER => new[] { EnemyDropEnum.SUPER },
-                ConsumableResourceEnum.POWER_BOMB => new[] { EnemyDropEnum.POWER_BOMB },
+                ConsumableResourceEnum.Energy => new[] { EnemyDropEnum.SmallEnergy, EnemyDropEnum.BigEnergy },
+                ConsumableResourceEnum.Missile => new[] { EnemyDropEnum.Missile },
+                ConsumableResourceEnum.Super => new[] { EnemyDropEnum.Super },
+                ConsumableResourceEnum.PowerBomb => new[] { EnemyDropEnum.PowerBomb },
                 _ => throw new Exception($"Unrecognized consumable resource {resource}")
             };
         }
@@ -45,10 +45,10 @@ namespace sm_json_data_framework.Models.Requirements
         {
             return resource switch
             {
-                ConsumableResourceEnum.ENERGY => new[] { RechargeableResourceEnum.RegularEnergy, RechargeableResourceEnum.ReserveEnergy },
-                ConsumableResourceEnum.MISSILE => new[] { RechargeableResourceEnum.Missile },
-                ConsumableResourceEnum.SUPER => new[] { RechargeableResourceEnum.Super },
-                ConsumableResourceEnum.POWER_BOMB => new[] { RechargeableResourceEnum.PowerBomb },
+                ConsumableResourceEnum.Energy => new[] { RechargeableResourceEnum.RegularEnergy, RechargeableResourceEnum.ReserveEnergy },
+                ConsumableResourceEnum.Missile => new[] { RechargeableResourceEnum.Missile },
+                ConsumableResourceEnum.Super => new[] { RechargeableResourceEnum.Super },
+                ConsumableResourceEnum.PowerBomb => new[] { RechargeableResourceEnum.PowerBomb },
                 _ => throw new Exception($"Unrecognized consumable resource {resource}")
             };
         }

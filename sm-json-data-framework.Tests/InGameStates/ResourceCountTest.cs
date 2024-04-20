@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public static IEnumerable<object[]> ConsumableOneToOneResourceValues()
         {
 
-            return ConsumableResourceValues().Except(new[] { new object[] { ConsumableResourceEnum.ENERGY } });
+            return ConsumableResourceValues().Except(new[] { new object[] { ConsumableResourceEnum.Energy } });
         }
 
         #region Tests for GetAmount()
@@ -91,7 +91,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 6);
 
             // When
-            int result = resourceCount.GetAmount(ConsumableResourceEnum.ENERGY);
+            int result = resourceCount.GetAmount(ConsumableResourceEnum.Energy);
 
             // Expect
             Assert.Equal(11, result);
@@ -260,7 +260,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             }
 
             // When
-            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, removedAmount);
+            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.Energy, removedAmount);
 
             // Expect
             Assert.Equal(initialAmount - removedAmount, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -290,7 +290,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             }
 
             // When
-            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, removedAmount);
+            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.Energy, removedAmount);
 
             // Expect
             Assert.Equal(initialAmount - removedAmount, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
@@ -312,7 +312,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 10);
 
             // When
-            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, 12);
+            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.Energy, 12);
 
             // Expect
             Assert.Equal(1, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -328,7 +328,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 10);
 
             // When
-            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, 19);
+            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.Energy, 19);
 
             // Expect
             Assert.Equal(1, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -344,7 +344,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 10);
 
             // When
-            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.ENERGY, 22);
+            resourceCount.ApplyAmountReduction(ConsumableResourceEnum.Energy, 22);
 
             // Expect
             Assert.Equal(-2, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -394,7 +394,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amount);
 
             // When
-            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amount);
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, amount);
 
             // Expect
             // X energy is not available to spend if you have exactly X energy, because you'd die
@@ -428,7 +428,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest + 1);
 
             // When
-            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest);
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
 
             // Expect
             Assert.True(result);
@@ -443,7 +443,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 3);
 
             // When
-            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 5);
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, 5);
 
             // Expect
             Assert.True(result);
@@ -476,7 +476,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest - 1);
 
             // When
-            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest);
+            bool result = resourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
 
             // Expect
             Assert.False(result);

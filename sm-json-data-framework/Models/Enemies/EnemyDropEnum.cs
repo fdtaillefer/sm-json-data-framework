@@ -10,12 +10,12 @@ namespace sm_json_data_framework.Models.Enemies
 {
     public enum EnemyDropEnum
     {
-        NO_DROP,
-        SMALL_ENERGY,
-        BIG_ENERGY,
-        MISSILE,
-        SUPER,
-        POWER_BOMB
+        NoDrop,
+        SmallEnergy,
+        BigEnergy,
+        Missile,
+        Super,
+        PowerBomb
     }
 
     public static class EnemyDropsUtils
@@ -42,12 +42,12 @@ namespace sm_json_data_framework.Models.Enemies
         {
             return enemyDrop switch
             {
-                EnemyDropEnum.NO_DROP => null,
-                EnemyDropEnum.SMALL_ENERGY => ConsumableResourceEnum.ENERGY,
-                EnemyDropEnum.BIG_ENERGY => ConsumableResourceEnum.ENERGY,
-                EnemyDropEnum.MISSILE => ConsumableResourceEnum.MISSILE,
-                EnemyDropEnum.SUPER => ConsumableResourceEnum.SUPER,
-                EnemyDropEnum.POWER_BOMB => ConsumableResourceEnum.POWER_BOMB,
+                EnemyDropEnum.NoDrop => null,
+                EnemyDropEnum.SmallEnergy => ConsumableResourceEnum.Energy,
+                EnemyDropEnum.BigEnergy => ConsumableResourceEnum.Energy,
+                EnemyDropEnum.Missile => ConsumableResourceEnum.Missile,
+                EnemyDropEnum.Super => ConsumableResourceEnum.Super,
+                EnemyDropEnum.PowerBomb => ConsumableResourceEnum.PowerBomb,
                 _ => throw new Exception($"Unrecognized enemy drop {enemyDrop}")
             };
         }

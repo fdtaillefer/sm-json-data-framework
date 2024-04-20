@@ -22,9 +22,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             return ammoEnum switch
             {
-                AmmoEnum.Missile => ConsumableResourceEnum.MISSILE,
-                AmmoEnum.Super => ConsumableResourceEnum.SUPER,
-                AmmoEnum.PowerBomb => ConsumableResourceEnum.POWER_BOMB
+                AmmoEnum.Missile => ConsumableResourceEnum.Missile,
+                AmmoEnum.Super => ConsumableResourceEnum.Super,
+                AmmoEnum.PowerBomb => ConsumableResourceEnum.PowerBomb
             };
         }
     }

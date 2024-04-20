@@ -51,22 +51,22 @@ namespace sm_json_data_framework.Models.Enemies
         {
             switch(enemyDrop)
             {
-                case EnemyDropEnum.NO_DROP:
+                case EnemyDropEnum.NoDrop:
                     NoDrop = dropRate;
                     break;
-                case EnemyDropEnum.SMALL_ENERGY:
+                case EnemyDropEnum.SmallEnergy:
                     SmallEnergy = dropRate;
                     break;
-                case EnemyDropEnum.BIG_ENERGY:
+                case EnemyDropEnum.BigEnergy:
                     BigEnergy = dropRate;
                     break;
-                case EnemyDropEnum.MISSILE:
+                case EnemyDropEnum.Missile:
                     Missile = dropRate;
                     break;
-                case EnemyDropEnum.SUPER:
+                case EnemyDropEnum.Super:
                     Super = dropRate;
                     break;
-                case EnemyDropEnum.POWER_BOMB:
+                case EnemyDropEnum.PowerBomb:
                     PowerBomb = dropRate;
                     break;
             }
@@ -81,12 +81,12 @@ namespace sm_json_data_framework.Models.Enemies
         {
             return enemyDrop switch
             {
-                EnemyDropEnum.NO_DROP => NoDrop,
-                EnemyDropEnum.SMALL_ENERGY => SmallEnergy,
-                EnemyDropEnum.BIG_ENERGY => BigEnergy,
-                EnemyDropEnum.MISSILE => Missile,
-                EnemyDropEnum.SUPER => Super,
-                EnemyDropEnum.POWER_BOMB => PowerBomb,
+                EnemyDropEnum.NoDrop => NoDrop,
+                EnemyDropEnum.SmallEnergy => SmallEnergy,
+                EnemyDropEnum.BigEnergy => BigEnergy,
+                EnemyDropEnum.Missile => Missile,
+                EnemyDropEnum.Super => Super,
+                EnemyDropEnum.PowerBomb => PowerBomb,
                 _ => throw new Exception($"Unrecognized enemy drop {enemyDrop}")
             };
         }

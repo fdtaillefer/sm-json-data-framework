@@ -104,7 +104,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             AggregateResourceCount aggregateResourceCount = new AggregateResourceCount(resourceCount1, resourceCount2);
 
             // When
-            int result = aggregateResourceCount.GetAmount(ConsumableResourceEnum.ENERGY);
+            int result = aggregateResourceCount.GetAmount(ConsumableResourceEnum.Energy);
 
             // Expect
             Assert.Equal(16, result);
@@ -159,7 +159,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             AggregateResourceCount aggregateResourceCount = new AggregateResourceCount(resourceCount1, resourceCount2);
 
             // When
-            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 7);
+            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, 7);
 
             // Expect
             // X energy is not available to spend if you have exactly X energy, because you'd die
@@ -197,7 +197,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             AggregateResourceCount aggregateResourceCount = new AggregateResourceCount(resourceCount1, resourceCount2);
 
             // When
-            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 6);
+            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, 6);
 
             // Expect
             Assert.True(result);
@@ -216,7 +216,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             AggregateResourceCount aggregateResourceCount = new AggregateResourceCount(resourceCount1, resourceCount2);
 
             // When
-            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 13);
+            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, 13);
 
             // Expect
             Assert.True(result);
@@ -253,7 +253,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             AggregateResourceCount aggregateResourceCount = new AggregateResourceCount(resourceCount1, resourceCount2);
 
             // When
-            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 8);
+            bool result = aggregateResourceCount.IsResourceAvailable(ConsumableResourceEnum.Energy, 8);
 
             // Expect
             Assert.False(result);

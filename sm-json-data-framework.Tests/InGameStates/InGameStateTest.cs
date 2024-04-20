@@ -139,7 +139,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amount);
+            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amount);
 
             // Expect
             // X energy is not available to spend if you have exactly X energy, because you'd die
@@ -181,7 +181,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest);
+            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
 
             // Expect
             Assert.True(result);
@@ -200,7 +200,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, 5);
+            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, 5);
 
             // Expect
             Assert.True(result);
@@ -241,7 +241,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, amountToRequest);
+            bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
              // Expect
             Assert.False(result);
         }
@@ -382,7 +382,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, removedAmount);
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, removedAmount);
 
             // Expect
             Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -420,7 +420,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, removedAmount);
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, removedAmount);
 
             // Expect
             Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
@@ -455,7 +455,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, reductionAmount);
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, reductionAmount);
 
             // Expect
             Assert.Equal(expectedRegularAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -484,7 +484,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, reductionAmount);
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, reductionAmount);
 
             // Expect
             Assert.Equal(expectedRegularAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -513,7 +513,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, reductionAmount);
+            inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, reductionAmount);
 
             // Expect
             Assert.Equal(expectedRegularAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -590,7 +590,7 @@ namespace sm_json_data_framework.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyRefillResource(ConsumableResourceEnum.ENERGY);
+            inGameState.ApplyRefillResource(ConsumableResourceEnum.Energy);
 
             // Expect
             Assert.Equal(maxAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
@@ -701,8 +701,8 @@ namespace sm_json_data_framework.InGameStates
 
             // Expect
             Assert.Equal(2, result.Count());
-            Assert.Contains(ConsumableResourceEnum.SUPER, result);
-            Assert.Contains(ConsumableResourceEnum.ENERGY, result);
+            Assert.Contains(ConsumableResourceEnum.Super, result);
+            Assert.Contains(ConsumableResourceEnum.Energy, result);
         }
 
         [Fact]
@@ -727,7 +727,7 @@ namespace sm_json_data_framework.InGameStates
 
             // Expect
             Assert.Single(result);
-            Assert.Contains(ConsumableResourceEnum.SUPER, result);
+            Assert.Contains(ConsumableResourceEnum.Super, result);
         }
         #endregion
 
@@ -742,7 +742,7 @@ namespace sm_json_data_framework.InGameStates
             IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
 
             // Expect
-            IEnumerable<EnemyDropEnum> expected = Enum.GetValues<EnemyDropEnum>().Except(new EnemyDropEnum[] { EnemyDropEnum.NO_DROP });
+            IEnumerable<EnemyDropEnum> expected = Enum.GetValues<EnemyDropEnum>().Except(new EnemyDropEnum[] { EnemyDropEnum.NoDrop });
             Assert.Equal(expected.Count(), result.Count());
             foreach (EnemyDropEnum drop in expected)
             {
@@ -807,8 +807,8 @@ namespace sm_json_data_framework.InGameStates
 
             // Expect
             // Although one type of energy is full, the other isn't, so energy drops are needed and should NOT be returned
-            Assert.DoesNotContain(EnemyDropEnum.SMALL_ENERGY, result);
-            Assert.DoesNotContain(EnemyDropEnum.BIG_ENERGY, result);
+            Assert.DoesNotContain(EnemyDropEnum.SmallEnergy, result);
+            Assert.DoesNotContain(EnemyDropEnum.BigEnergy, result);
         }
         #endregion
 

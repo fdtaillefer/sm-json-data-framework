@@ -78,13 +78,13 @@ namespace sm_json_data_framework.Rules
             EnemyDrops baseHexDropRates = new EnemyDrops();
             // Tier 1 drops
             baseHexDropRates.NoDrop = enemyDrops.NoDrop * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.SmallEnergy = unneededDrops.Contains(EnemyDropEnum.SMALL_ENERGY) ? 0M : enemyDrops.SmallEnergy * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.BigEnergy = unneededDrops.Contains(EnemyDropEnum.BIG_ENERGY) ? 0M : enemyDrops.BigEnergy * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.Missile = unneededDrops.Contains(EnemyDropEnum.MISSILE) ? 0M : enemyDrops.Missile * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.SmallEnergy = unneededDrops.Contains(EnemyDropEnum.SmallEnergy) ? 0M : enemyDrops.SmallEnergy * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.BigEnergy = unneededDrops.Contains(EnemyDropEnum.BigEnergy) ? 0M : enemyDrops.BigEnergy * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.Missile = unneededDrops.Contains(EnemyDropEnum.Missile) ? 0M : enemyDrops.Missile * 255 / DROP_RATE_DIVIDER;
 
             // Tier 2 drops
-            baseHexDropRates.Super = unneededDrops.Contains(EnemyDropEnum.SUPER) ? 0M : enemyDrops.Super * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.PowerBomb = unneededDrops.Contains(EnemyDropEnum.POWER_BOMB) ? 0M : enemyDrops.PowerBomb * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.Super = unneededDrops.Contains(EnemyDropEnum.Super) ? 0M : enemyDrops.Super * 255 / DROP_RATE_DIVIDER;
+            baseHexDropRates.PowerBomb = unneededDrops.Contains(EnemyDropEnum.PowerBomb) ? 0M : enemyDrops.PowerBomb * 255 / DROP_RATE_DIVIDER;
 
             // Create functions for calculating effective drop rates. One for tier 1 drops and one for tier 2 drops.
 
@@ -174,12 +174,12 @@ namespace sm_json_data_framework.Rules
         {
             return enemyDrop switch
             {
-                EnemyDropEnum.NO_DROP => 0,
-                EnemyDropEnum.SMALL_ENERGY => 5,
-                EnemyDropEnum.BIG_ENERGY => 20,
-                EnemyDropEnum.MISSILE => 2,
-                EnemyDropEnum.SUPER => 1,
-                EnemyDropEnum.POWER_BOMB => 1,
+                EnemyDropEnum.NoDrop => 0,
+                EnemyDropEnum.SmallEnergy => 5,
+                EnemyDropEnum.BigEnergy => 20,
+                EnemyDropEnum.Missile => 2,
+                EnemyDropEnum.Super => 1,
+                EnemyDropEnum.PowerBomb => 1,
                 _ => throw new Exception($"Unrecognized enemy drop {enemyDrop}")
             };
         }

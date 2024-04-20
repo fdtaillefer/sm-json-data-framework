@@ -51,8 +51,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             var energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
             var shinesparkEnergyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
-            Predicate<ReadOnlyInGameState> hasEnergyForShinespark = state => state.Resources.GetAmount(ConsumableResourceEnum.ENERGY)>= energyNeededForShinespark;
-            Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, shinesparkEnergyCost);
+            Predicate<ReadOnlyInGameState> hasEnergyForShinespark = state => state.Resources.GetAmount(ConsumableResourceEnum.Energy)>= energyNeededForShinespark;
+            Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, shinesparkEnergyCost);
 
             // Check simple preconditions before looking at anything
             if (!inGameState.Inventory.HasSpeedBooster() || (mustShinespark && !model.CanShinespark()))

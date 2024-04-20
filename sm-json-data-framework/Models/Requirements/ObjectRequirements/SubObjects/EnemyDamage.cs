@@ -63,10 +63,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
 
-            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.ENERGY, damage))
+            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))
             {
                 InGameState resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, damage);
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
                 ExecutionResult result = new ExecutionResult(resultingState);
                 result.AddDamageReducingItemsInvolved(model.Rules.GetEnemyDamageReducingItems(model, inGameState, Attack));
                 return result;

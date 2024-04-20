@@ -19,11 +19,11 @@ namespace sm_json_data_framework.Options
                 // The rate for energy off 5 Gamets, after heat loss, is roughly 13.7 assuming missiles and supers (but not PBs) are full.
                 // With a 10% safety reduction in drops, that goes down to just about 10.8.
                 // We surely want a minimum rate that allows for energy refills at Gamet spawners in heated rooms, so we have a value of 10
-                { ConsumableResourceEnum.ENERGY, 10},
-                { ConsumableResourceEnum.MISSILE, 0.175M},
+                { ConsumableResourceEnum.Energy, 10},
+                { ConsumableResourceEnum.Missile, 0.175M},
                 // The rate for supers off one Zebbo is roughly 0.196 (with a 2-second cycle)
-                { ConsumableResourceEnum.SUPER, 0.175M},
-                { ConsumableResourceEnum.POWER_BOMB, 0.175M}
+                { ConsumableResourceEnum.Super, 0.175M},
+                { ConsumableResourceEnum.PowerBomb, 0.175M}
             };
         }
 

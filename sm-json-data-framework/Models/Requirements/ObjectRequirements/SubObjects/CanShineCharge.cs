@@ -70,11 +70,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
 
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
-            if (inGameState.Resources.GetAmount(ConsumableResourceEnum.ENERGY) >= energyNeeded)
+            if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
             {
                 int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
                 InGameState resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(ConsumableResourceEnum.ENERGY, energyCost);
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, energyCost);
                 ExecutionResult result = new ExecutionResult(resultingState);
                 result.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return result;

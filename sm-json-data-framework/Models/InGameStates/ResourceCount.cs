@@ -93,7 +93,7 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             switch (resource)
             {
-                case ConsumableResourceEnum.ENERGY:
+                case ConsumableResourceEnum.Energy:
                     // Consume regular energy first, down to 1
                     int regularEnergy = GetAmount(RechargeableResourceEnum.RegularEnergy);
                     int regularEnergyToConsume = Math.Max(0, regularEnergy > quantity ? quantity : regularEnergy - 1);
@@ -114,13 +114,13 @@ namespace sm_json_data_framework.Models.InGameStates
                         Amounts[RechargeableResourceEnum.RegularEnergy] -= quantity;
                     }
                     break;
-                case ConsumableResourceEnum.MISSILE:
+                case ConsumableResourceEnum.Missile:
                     Amounts[RechargeableResourceEnum.Missile] -= quantity;
                     break;
-                case ConsumableResourceEnum.SUPER:
+                case ConsumableResourceEnum.Super:
                     Amounts[RechargeableResourceEnum.Super] -= quantity;
                     break;
-                case ConsumableResourceEnum.POWER_BOMB:
+                case ConsumableResourceEnum.PowerBomb:
                     Amounts[RechargeableResourceEnum.PowerBomb] -= quantity;
                     break;
             }
@@ -195,7 +195,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // The other resources can be fully spent, but for energy we don't want to go below 1
-            if (resource == ConsumableResourceEnum.ENERGY)
+            if (resource == ConsumableResourceEnum.Energy)
             {
                 return actualAmount > quantity;
             }

@@ -41,11 +41,11 @@ namespace sm_json_data_framework.Models.Items
         {
             return resource switch
             {
-                RechargeableResourceEnum.RegularEnergy => ConsumableResourceEnum.ENERGY,
-                RechargeableResourceEnum.ReserveEnergy => ConsumableResourceEnum.ENERGY,
-                RechargeableResourceEnum.Missile => ConsumableResourceEnum.MISSILE,
-                RechargeableResourceEnum.Super => ConsumableResourceEnum.SUPER,
-                RechargeableResourceEnum.PowerBomb => ConsumableResourceEnum.POWER_BOMB,
+                RechargeableResourceEnum.RegularEnergy => ConsumableResourceEnum.Energy,
+                RechargeableResourceEnum.ReserveEnergy => ConsumableResourceEnum.Energy,
+                RechargeableResourceEnum.Missile => ConsumableResourceEnum.Missile,
+                RechargeableResourceEnum.Super => ConsumableResourceEnum.Super,
+                RechargeableResourceEnum.PowerBomb => ConsumableResourceEnum.PowerBomb,
                 _ => throw new Exception($"Unrecognized rechargeable resource {resource}")
             };
         }

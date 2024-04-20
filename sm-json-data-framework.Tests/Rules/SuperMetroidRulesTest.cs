@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Rules
         public void CalculateEffectiveDropRates_FullMissiles_DistributesProportionalToTier1()
         {
             // When
-            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.MISSILE } );
+            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.Missile } );
 
             // Expect
             EnemyDrops expected = new EnemyDrops
@@ -67,7 +67,7 @@ namespace sm_json_data_framework.Rules
         public void CalculateEffectiveDropRates_FullHealth_DistributesProportionalToTier1()
         {
             // When
-            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.SMALL_ENERGY, EnemyDropEnum.BIG_ENERGY });
+            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.SmallEnergy, EnemyDropEnum.BigEnergy });
 
             // Expect
             EnemyDrops expected = new EnemyDrops
@@ -86,7 +86,7 @@ namespace sm_json_data_framework.Rules
         public void CalculateEffectiveDropRates_FullSupers_DistributesProportionalToTier1()
         {
             // When
-            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.SUPER });
+            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.Super });
 
             // Expect
             // Note: As of 2024-03-19, an example in the wiki contradicts these expected values, but the example appears to be incorrect
@@ -106,7 +106,7 @@ namespace sm_json_data_framework.Rules
         public void CalculateEffectiveDropRates_FullPowerBombs_DistributesProportionalToTier1()
         {
             // When
-            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.POWER_BOMB });
+            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.PowerBomb });
 
             // Expect
             EnemyDrops expected = new EnemyDrops
@@ -125,7 +125,7 @@ namespace sm_json_data_framework.Rules
         public void CalculateEffectiveDropRates_MissingOnlySupers_DistributesToNoDrop()
         {
             // When
-            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.SMALL_ENERGY, EnemyDropEnum.BIG_ENERGY, EnemyDropEnum.MISSILE, EnemyDropEnum.POWER_BOMB });
+            EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, new EnemyDropEnum[] { EnemyDropEnum.SmallEnergy, EnemyDropEnum.BigEnergy, EnemyDropEnum.Missile, EnemyDropEnum.PowerBomb });
 
             // Expect
             EnemyDrops expected = new EnemyDrops
@@ -145,7 +145,7 @@ namespace sm_json_data_framework.Rules
         {
             // When
             EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, 
-                new EnemyDropEnum[] { EnemyDropEnum.SMALL_ENERGY, EnemyDropEnum.BIG_ENERGY, EnemyDropEnum.MISSILE, EnemyDropEnum.SUPER });
+                new EnemyDropEnum[] { EnemyDropEnum.SmallEnergy, EnemyDropEnum.BigEnergy, EnemyDropEnum.Missile, EnemyDropEnum.Super });
 
             // Expect
             EnemyDrops expected = new EnemyDrops
@@ -165,7 +165,7 @@ namespace sm_json_data_framework.Rules
         {
             // When
             EnemyDrops result = Rules.CalculateEffectiveDropRates(WaverDrops, 
-                new EnemyDropEnum[] { EnemyDropEnum.SMALL_ENERGY, EnemyDropEnum.BIG_ENERGY, EnemyDropEnum.MISSILE, EnemyDropEnum.SUPER, EnemyDropEnum.POWER_BOMB });
+                new EnemyDropEnum[] { EnemyDropEnum.SmallEnergy, EnemyDropEnum.BigEnergy, EnemyDropEnum.Missile, EnemyDropEnum.Super, EnemyDropEnum.PowerBomb });
 
             // Expect
             EnemyDrops expected = new EnemyDrops
