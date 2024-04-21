@@ -30,30 +30,25 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
-            List<Action> initializedRoomCallbacks = new List<Action>();
-
             Room = room;
 
             // Initialize list of EntranceNodes. This also serves as a sanity check and will throw if an ID is invalid.
-            // Depending on initialization order, this could be done without being a callback
             if(EntranceNodeIds != null)
             {
-                initializedRoomCallbacks.Add(() => {
-                    List<RoomNode> entranceNodes = new List<RoomNode>();
-                    foreach (int nodeId in EntranceNodeIds)
+                List<RoomNode> entranceNodes = new List<RoomNode>();
+                foreach (int nodeId in EntranceNodeIds)
+                {
+                    room.Nodes.TryGetValue(nodeId, out RoomNode node);
+                    if(node == null)
                     {
-                        room.Nodes.TryGetValue(nodeId, out RoomNode node);
-                        if(node == null)
-                        {
-                            throw new Exception($"A RoomEnvironment's entranceNode ID {nodeId} not found in room '{room.Name}'.");
-                        }
-                        entranceNodes.Add(node);
+                        throw new Exception($"A RoomEnvironment's entranceNode ID {nodeId} not found in room '{room.Name}'.");
                     }
-                    EntranceNodes = entranceNodes;
-                });
+                    entranceNodes.Add(node);
+                }
+                EntranceNodes = entranceNodes;
             }
 
-            return initializedRoomCallbacks;
+            return Enumerable.Empty<Action>();
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

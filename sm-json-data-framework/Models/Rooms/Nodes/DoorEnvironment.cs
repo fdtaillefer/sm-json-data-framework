@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IEnumerable<RoomNode> EntranceNodes { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
         /// <para>The RoomNode on which this environment is.</para>
         /// </summary>
         [JsonIgnore]
@@ -33,10 +33,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Node = node;
 
             // Initialize list of EntranceNodes. This also serves as a sanity check and will throw if an ID is invalid.
-            // Depending on initialization order, this could be done without being a callback
             if (EntranceNodeIds != null)
             {
-                
                 List<RoomNode> entranceNodes = new List<RoomNode>();
                 foreach (int entranceNodeId in EntranceNodeIds)
                 {
