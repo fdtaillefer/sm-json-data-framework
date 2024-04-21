@@ -21,29 +21,13 @@ namespace sm_json_data_framework.Models.Rooms
 
         public string RoomAddress { get; set; }
 
-        /// <summary>
-        /// The raw sequence of nodes in this room
-        /// </summary>
-        [JsonPropertyName("nodes")]
-        public IEnumerable<RoomNode> NodesSequence { get; set; }
-
         public IEnumerable<RoomEnvironment> RoomEnvironments { get; set; } = Enumerable.Empty<RoomEnvironment>();
 
         private IDictionary<int, RoomNode> _nodesDictionary;
         /// <summary>
-        /// The nodes in this room, mapped by id
+        /// The nodes in this room, mapped by in-room numerical id
         /// </summary>
-        [JsonIgnore]
-        public IDictionary<int, RoomNode> Nodes {
-            get 
-            {
-                if (_nodesDictionary == null)
-                {
-                    _nodesDictionary = NodesSequence.ToDictionary(n => n.Id);
-                }
-                return _nodesDictionary;
-            }
-        }
+        public IDictionary<int, RoomNode> Nodes { get; set; } = new Dictionary<int, RoomNode>();
 
         public IEnumerable<Link> Links { get; set; } = Enumerable.Empty<Link>();
 

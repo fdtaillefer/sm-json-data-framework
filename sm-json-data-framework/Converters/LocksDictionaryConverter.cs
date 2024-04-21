@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace sm_json_data_framework.Converters
 {
     /// <summary>
-    /// A json convert that can interpert a json array of NodeLocks into a Dictionary of NodeLocks mapped by name
+    /// A json converter that can interpert a json array of NodeLocks into a Dictionary of NodeLocks mapped by name
     /// </summary>
     public class LocksDictionaryConverter : JsonConverter<IDictionary<string, NodeLock>>
     {

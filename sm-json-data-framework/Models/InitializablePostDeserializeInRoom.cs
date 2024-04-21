@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// <para>Initializes additional properties in this model, which wouldn't be initialized by simply parsing the relevant json file.
         /// All such properties are expected to be identified in their own documentation and should not be read if this method isn't called.</para>
-        /// <para>Returns an enumeration of callbacks that should be executed only after the rest of the room has been initialized</para>
+        /// <para>Returns an enumeration of callbacks that should be executed only after the rest of the room has been initialized.</para>
         /// </summary>
         /// <param name="model">The model to use to initialize the additional properties</param>
         /// <param name="room">The room in which this model is located</param>
