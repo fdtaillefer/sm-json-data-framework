@@ -11,6 +11,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class PreviousNode : AbstractObjectLogicalElementWithNodeId
     {
+        public override bool IsNever()
+        {
+            return false;
+        }
+
         /// <summary>
         /// Returns whether the provided InGameState fulfills this PreviousNode element.
         /// </summary>

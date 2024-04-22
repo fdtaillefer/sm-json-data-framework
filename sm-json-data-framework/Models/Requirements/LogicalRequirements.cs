@@ -38,6 +38,18 @@ namespace sm_json_data_framework.Models.Requirements
         public IEnumerable<AbstractLogicalElement> LogicalElements { get; private set; } = Enumerable.Empty<AbstractLogicalElement>();
 
         /// <summary>
+        /// Returns whether this set of logical requirements in its current state is logically impossible to fully complete
+        /// (due to having a mandatory <see cref="NeverLogicalElement"/>).
+        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
+        /// which are not available here.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsNever()
+        {
+            return LogicalElements.Where(element => element.IsNever()).Any();
+        }
+
+        /// <summary>
         /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),
         /// attempting to replace any RawStringLogicalElement by a more appropriate logical element, using the provided StringLogicalElementConverter.
         /// </summary>

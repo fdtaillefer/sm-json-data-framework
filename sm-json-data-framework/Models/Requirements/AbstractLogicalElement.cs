@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,15 @@ namespace sm_json_data_framework.Models.Requirements
         // Inherited from IExecutable.
         public abstract ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
-        // STITCHME could be nice to ask for always and never? As in isAlwaysFree() and isNever()
+        /// <summary>
+        /// Returns whether this logical element in its current state is one that can never get fulfilled because it is a (or depends on a mandatory)
+        /// <see cref="NeverLogicalElement"/>.
+        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
+        /// which are not available here.
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool IsNever();
+
+        // STITCHME could be nice to ask for always? As in isAlwaysFree()
     }
 }

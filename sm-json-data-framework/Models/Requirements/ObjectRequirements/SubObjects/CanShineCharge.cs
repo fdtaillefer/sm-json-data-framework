@@ -38,6 +38,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public int ShinesparkFrames { get; set; }
 
+        public override bool IsNever()
+        {
+            return false;
+        }
+
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             // No properties need to be handled here

@@ -12,6 +12,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
     /// </summary>
     public class PreviousStratProperty : AbstractObjectLogicalElementWithString
     {
+        public override bool IsNever()
+        {
+            return false;
+        }
+
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             // A strat property is a free-form string so we have nothing to initialize

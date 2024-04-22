@@ -37,6 +37,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public int Hits { get; set; }
 
+        public override bool IsNever()
+        {
+            return false;
+        }
+
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             if(model.Enemies.TryGetValue(EnemyName, out Enemy enemy))

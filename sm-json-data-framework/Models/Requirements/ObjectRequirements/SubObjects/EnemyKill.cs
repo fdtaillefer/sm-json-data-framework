@@ -58,6 +58,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public IEnumerable<AmmoEnum> FarmableAmmo { get; set; } = Enumerable.Empty<AmmoEnum>();
 
+        public override bool IsNever()
+        {
+            return false;
+        }
+
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

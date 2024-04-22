@@ -6,6 +6,7 @@ using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects {
@@ -31,6 +32,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public int FramesRemaining { get; set; }
 
         public int ShinesparkFrames { get; set; }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
