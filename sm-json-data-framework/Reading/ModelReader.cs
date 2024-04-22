@@ -265,6 +265,7 @@ namespace sm_json_data_framework.Reading
             options.Converters.Add(new LocksDictionaryConverter());
             options.Converters.Add(new RoomNodesDictionaryConverter());
             options.Converters.Add(new EnemyAttackDictionaryConverter());
+            options.Converters.Add(new RoomEnemyDictionaryConverter());
 
             return options;
         }
