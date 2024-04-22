@@ -23,7 +23,6 @@ namespace sm_json_data_framework.Models.Rooms
 
         public IEnumerable<RoomEnvironment> RoomEnvironments { get; set; } = Enumerable.Empty<RoomEnvironment>();
 
-        private IDictionary<int, RoomNode> _nodesDictionary;
         /// <summary>
         /// The nodes in this room, mapped by in-room numerical id
         /// </summary>

@@ -17,25 +17,10 @@ namespace sm_json_data_framework.Models.Enemies
 
         public string Name { get; set; }
 
-        [JsonPropertyName("attacks")]
-        public IEnumerable<EnemyAttack> AttacksSequence { get; set; } = Enumerable.Empty<EnemyAttack>();
-
-        private IDictionary<string, EnemyAttack> _attacksDictionary;
         /// <summary>
         /// The attacks of this enemy, mapped by name
         /// </summary>
-        [JsonIgnore]
-        public IDictionary<string, EnemyAttack> Attacks
-        {
-            get
-            {
-                if (_attacksDictionary == null)
-                {
-                    _attacksDictionary = AttacksSequence.ToDictionary(a => a.Name);
-                }
-                return _attacksDictionary;
-            }
-        }
+        public IDictionary<string, EnemyAttack> Attacks { get; set; } = new Dictionary<string, EnemyAttack>();
 
         public int Hp { get; set; }
 
