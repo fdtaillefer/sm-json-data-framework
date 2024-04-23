@@ -28,7 +28,10 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IDictionary<int, RoomNode> Nodes { get; set; } = new Dictionary<int, RoomNode>();
 
-        public IEnumerable<Link> Links { get; set; } = Enumerable.Empty<Link>();
+        /// <summary>
+        /// The links in this room mapped by their origin node ID.
+        /// </summary>
+        public IDictionary<int, Link> Links { get; set; } = new Dictionary<int, Link>();
 
         public IDictionary<string, RoomObstacle> Obstacles { get; set; } = new Dictionary<string, RoomObstacle>();
 
@@ -66,7 +69,7 @@ namespace sm_json_data_framework.Models.Rooms
                 postInitializationCallbacks.AddRange(obstacle.Initialize(model, this));
             }
 
-            foreach (Link link in Links)
+            foreach (Link link in Links.Values)
             {
                 postInitializationCallbacks.AddRange(link.Initialize(model, this));
             }
@@ -99,7 +102,7 @@ namespace sm_json_data_framework.Models.Rooms
                 obstacle.InitializeForeignProperties(model, this);
             }
 
-            foreach (Link link in Links)
+            foreach (Link link in Links.Values)
             {
                 link.InitializeForeignProperties(model, this);
             }
@@ -127,7 +130,7 @@ namespace sm_json_data_framework.Models.Rooms
                 obstacle.InitializeOtherProperties(model, this);
             }
 
-            foreach (Link link in Links)
+            foreach (Link link in Links.Values)
             {
                 link.InitializeOtherProperties(model, this);
             }
@@ -146,7 +149,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             Obstacles = Obstacles.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            Links = Links.Where(roomEnvironment => roomEnvironment.CleanUpUselessValues(model, this));
+            Links = Links.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             Enemies = Enemies.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
@@ -168,7 +171,7 @@ namespace sm_json_data_framework.Models.Rooms
                 unhandled.AddRange(node.InitializeReferencedLogicalElementProperties(model, this));
             }
 
-            foreach(Link link in Links)
+            foreach(Link link in Links.Values)
             {
                 unhandled.AddRange(link.InitializeReferencedLogicalElementProperties(model, this));
             }
