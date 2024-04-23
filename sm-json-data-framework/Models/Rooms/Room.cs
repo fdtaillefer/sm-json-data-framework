@@ -37,6 +37,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IDictionary<string, RoomEnemy> Enemies { get; set; } = new Dictionary<string, RoomEnemy>();
 
+        // Is this really needed? Should probably remove this later
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
         /// <para>The SuperMetroidModel that this room is a part of.</para>
@@ -77,6 +78,80 @@ namespace sm_json_data_framework.Models.Rooms
 
             // If we received any callbacks to execute after the room is done, execute them now
             postInitializationCallbacks.ForEach(action => action.Invoke());
+        }
+
+        public void InitializeForeignProperties(SuperMetroidModel model)
+        {
+            SuperMetroidModel = model;
+
+            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            {
+                roomEnvironment.InitializeForeignProperties(model, this);
+            }
+
+            foreach (RoomNode node in Nodes.Values)
+            {
+                node.InitializeForeignProperties(model, this);
+            }
+
+            foreach (RoomObstacle obstacle in Obstacles.Values)
+            {
+                obstacle.InitializeForeignProperties(model, this);
+            }
+
+            foreach (Link link in Links)
+            {
+                link.InitializeForeignProperties(model, this);
+            }
+
+            foreach (RoomEnemy enemy in Enemies.Values)
+            {
+                enemy.InitializeForeignProperties(model, this);
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model)
+        {
+            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            {
+                roomEnvironment.InitializeOtherProperties(model, this);
+            }
+
+            foreach (RoomNode node in Nodes.Values)
+            {
+                node.InitializeOtherProperties(model, this);
+            }
+
+            foreach (RoomObstacle obstacle in Obstacles.Values)
+            {
+                obstacle.InitializeOtherProperties(model, this);
+            }
+
+            foreach (Link link in Links)
+            {
+                link.InitializeOtherProperties(model, this);
+            }
+
+            foreach (RoomEnemy enemy in Enemies.Values)
+            {
+                enemy.InitializeOtherProperties(model, this);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model)
+        {
+            RoomEnvironments = RoomEnvironments.Where(roomEnvironment => roomEnvironment.CleanUpUselessValues(model, this));
+
+            Nodes = Nodes.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            Obstacles = Obstacles.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            Links = Links.Where(roomEnvironment => roomEnvironment.CleanUpUselessValues(model, this));
+
+            Enemies = Enemies.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // A room is never useless
+            return true;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)

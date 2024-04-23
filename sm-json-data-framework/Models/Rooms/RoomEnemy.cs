@@ -89,6 +89,37 @@ namespace sm_json_data_framework.Models.Rooms
             return postInitializeActions;
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            Room = room;
+            Enemy = model.Enemies[EnemyName];
+            HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
+            BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
+
+            foreach (var farmCycle in FarmCycles)
+            {
+                farmCycle.InitializeForeignProperties(model, room, this);
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            model.RoomEnemies.Add(GroupName, this);
+
+            foreach (var farmCycle in FarmCycles)
+            {
+                farmCycle.InitializeOtherProperties(model, room, this);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            FarmCycles = FarmCycles.Where(farmCycle => farmCycle.CleanUpUselessValues(model, room, this));
+
+            // A room enemy is never useless
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

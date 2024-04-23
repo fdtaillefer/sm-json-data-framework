@@ -66,6 +66,51 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Yields = YieldsStrings.Select(s => model.GameFlags[s]);
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
+        {
+            Node = node;
+
+            // Initialize unlock strats
+            foreach (Strat strat in UnlockStrats.Values)
+            {
+                strat.InitializeForeignProperties(model, room);
+            }
+
+            // Initialize bypass strats
+            foreach (Strat strat in BypassStrats.Values)
+            {
+                strat.InitializeForeignProperties(model, room);
+            }
+
+            // Initialize Yielded game flags
+            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
+        {
+            // Initialize unlock strats
+            foreach (Strat strat in UnlockStrats.Values)
+            {
+                strat.InitializeOtherProperties(model, room);
+            }
+
+            // Initialize bypass strats
+            foreach (Strat strat in BypassStrats.Values)
+            {
+                strat.InitializeOtherProperties(model, room);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)
+        {
+            UnlockStrats = UnlockStrats.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            BypassStrats = BypassStrats.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // Even if a lock has no usable bypass or open strats, the lock is still useful as it still locks the door
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             List<string> unhandled = new List<string>();

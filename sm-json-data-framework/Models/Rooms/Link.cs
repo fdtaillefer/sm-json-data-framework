@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sm_json_data_framework.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,29 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             return postRoomInitializeCallbacks;
+        }
+
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            foreach (LinkTo linkTo in To)
+            {
+                linkTo.InitializeForeignProperties(model, room);
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            foreach (LinkTo linkTo in To)
+            {
+                linkTo.InitializeOtherProperties(model, room);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            To = To.Where(linkTo => linkTo.CleanUpUselessValues(model, room));
+            // A link with no destinations is useless
+            return To.Any();
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

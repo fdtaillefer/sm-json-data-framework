@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,7 +40,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<(LinkTo link, IEnumerable<Strat> strats)> PathToDoor { get; set; } = Enumerable.Empty<(LinkTo link, IEnumerable<Strat> strats)>();
+        public IList<(LinkTo link, IEnumerable<Strat> strats)> PathToDoor { get; set; } = new List<(LinkTo link, IEnumerable<Strat> strats)>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode, CanLeaveCharged)"/> has been called.</para>
@@ -104,6 +105,82 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
                 PathToDoor = pathToDoor;
             }
+        }
+
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
+        {
+            // Initialize the start and end nodes of the remote canLeaveCharged
+            InitiateAtNode = room.Nodes[InitiateAtNodeId];
+            ExitNode = canLeaveCharged.Node;
+
+            // Initialize the path to follow
+            List<(LinkTo link, IEnumerable<Strat> strats)> pathToDoor = new ();
+            RoomNode currentNodeFrom = InitiateAtNode;
+            foreach (var pathNode in PathToDoorNodes)
+            {
+                if(room.Nodes.TryGetValue(pathNode.DestinationNodeId, out RoomNode destination))
+                {
+                    if (currentNodeFrom.Links.TryGetValue(pathNode.DestinationNodeId, out LinkTo link))
+                    {
+                        List<Strat> strats = new ();
+                        foreach (string stratName in pathNode.StratNames)
+                        {
+                            Strat strat = link.Strats.Values.SingleOrDefault(strat => strat.Name == stratName);
+                            if (strat == null)
+                            {
+                                throw new Exception($"Strat {stratName} not found on link from node {currentNodeFrom.Id} to node {pathNode.DestinationNodeId}" +
+                                    $"in room '{room.Name}'");
+                            }
+                            else
+                            {
+                                strats.Add(strat);
+                            }
+                        }
+                        // Next node will start at current node's destination
+                        currentNodeFrom = destination;
+                        pathToDoor.Add((link, strats));
+                    }
+                    else
+                    {
+                        // Link doesn't exist, throw an exception with a helpful message.
+                        // Links can be removed by clean-up, but not before all model properties have been initialized.
+                        throw new LinkNotFoundException(room, currentNodeFrom, destination.Id);
+                    }
+                }
+                else
+                {
+                    // Node doesn't exist, throw an exception with a helpful message
+                    throw new NodeNotInRoomException(room, pathNode.DestinationNodeId);
+                }
+            }
+            // Validate that the path makes sense before we assign PathToDoor
+            // The path must end at the exit node
+            if (pathToDoor.Last().link.TargetNode != node)
+            {
+                throw new Exception($"PathToNode on a CanLeaveCharged of node {node.Name} does not end at that node.");
+            }
+            PathToDoor = pathToDoor;
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
+        {
+            // If this contains strats, they belong to a LinkTo. There's nothing fundamentally wrong with cleaning up those strats anyway though.
+
+            for (int i = 0; i < PathToDoor.Count; i++)
+            {
+                var pathNode = PathToDoor[i];
+                // Remove unusable strats
+                pathNode.strats = pathNode.strats.Where(strat => strat.CleanUpUselessValues(model, room));
+            }
+
+            // If any node in the path has no strats remaining, it means the PathToNode is impossible to follow.
+            // This makes the InitiateRemotely itself impossible to do.
+            return PathToDoor.All(node => !node.strats.Any());
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)

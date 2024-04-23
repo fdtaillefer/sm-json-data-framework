@@ -88,6 +88,39 @@ namespace sm_json_data_framework.Models.Enemies
                 .ToDictionary(ws => ws.Weapon.Name);
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model)
+        {
+            // Convert InvulnerabilityStrings to Weapons
+            InvulnerableWeapons = InvulnerabilityStrings.NamesToWeapons(model);
+
+            // We'll leave WeaponMultipliers to InitializeOtherProperties(), because we create more than just one per RawWeaponMultiplier
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model)
+        {
+            // Get a WeaponMultiplier for all non-immune weapons
+            WeaponMultipliers = RawDamageMultipliers
+                .SelectMany(rdm => rdm.Weapon.NameToWeapons(model).Select(w => new WeaponMultiplier(w, rdm.Value)))
+                .ToDictionary(m => m.Weapon.Name);
+            foreach (Weapon neutralWeapon in model.Weapons.Values
+                .Except(WeaponMultipliers.Values.Select(wm => wm.Weapon), ObjectReferenceEqualityComparer<Weapon>.Default)
+                .Except(InvulnerableWeapons, ObjectReferenceEqualityComparer<Weapon>.Default))
+            {
+                WeaponMultipliers.Add(neutralWeapon.Name, new WeaponMultiplier(neutralWeapon, 1m));
+            }
+
+            // Create a WeaponSusceptibility for each non-immune weapon
+            WeaponSusceptibilities = WeaponMultipliers.Values
+                .Select(wm => new WeaponSusceptibility(wm.NumberOfHits(Hp), wm))
+                .ToDictionary(ws => ws.Weapon.Name);
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model)
+        {
+            // Nothing relevant to clean up
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             // No logical elements in here

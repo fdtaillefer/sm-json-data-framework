@@ -227,6 +227,140 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return initializedRoomCallbacks;
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            Room = room;
+
+            // Initialize OutConnection and OutNode
+            if (NodeType == NodeTypeEnum.Exit || NodeType == NodeTypeEnum.Door)
+            {
+                if (model.Connections.TryGetValue(IdentifyingString, out Connection connection))
+                {
+                    OutConnection = connection;
+                    ConnectionNode otherNode = connection.ToNode;
+                    OutNode = model.Rooms[otherNode.RoomName].Nodes[otherNode.Nodeid];
+
+                    // Sanity check for node names and IDs. Take this out if nodeIds get taken out of connections
+                    if (connection.FromNode.NodeName != null && connection.FromNode.NodeName != Name)
+                    {
+                        throw new Exception($"A connection thought to be going from node {Name} claims to be going from a node named {connection.FromNode.NodeName}");
+                    }
+                    if (connection.ToNode.NodeName != null && connection.ToNode.NodeName != OutNode.Name)
+                    {
+                        throw new Exception($"A connection thought to be going to node {OutNode.Name} claims to be going to a node named {connection.ToNode.NodeName}");
+                    }
+                }
+                // It's probably not worth an exception if there's no connection going from this node? Or maybe it is? The node type does imply there should be one...
+            }
+
+            // Initialize OverrideSpawnAtNode
+            if (OverrideSpawnAtNodeId != null)
+            {
+                OverrideSpawnAtNode = Room.Nodes[(int)OverrideSpawnAtNodeId];
+            }
+
+            // Initialize Yielded game flags
+            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
+
+            // Initialize item
+            if (NodeItemName != null)
+            {
+                NodeItem = model.Items[NodeItemName];
+            }
+
+            // Initialize Links dictionary. We don't trigger initialization on any links because they belong to their room
+            IEnumerable<Link> linksFromHere = room.Links.Where(l => l.FromNodeId == Id);
+            // One Link object contains all links from a given node. It's possible not to find one for this node, but there should never be more than one.
+            if (linksFromHere.Any())
+            {
+                Links = linksFromHere.Single().To.ToDictionary(l => l.TargetNodeId);
+            }
+
+            // Initialize CanLeaveChargeds
+            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+            {
+                canLeaveCharged.InitializeForeignProperties(model, room, this);
+            }
+
+            // Initialize DoorEnvironments
+            foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
+            {
+                doorEnvironment.InitializeForeignProperties(model, room, this);
+            }
+
+            // Initialize ViewableNodes
+            foreach (ViewableNode viewableNode in ViewableNodes)
+            {
+                viewableNode.InitializeForeignProperties(model, room, this);
+            }
+
+            // Initialize Locks
+            foreach (NodeLock nodeLock in Locks.Values)
+            {
+                nodeLock.InitializeForeignProperties(model, room, this);
+            }
+
+            // Initialize Runways
+            foreach (Runway runway in Runways)
+            {
+                runway.InitializeForeignProperties(model, room, this);
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            // Initialize CanLeaveChargeds
+            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+            {
+                canLeaveCharged.InitializeOtherProperties(model, room, this);
+            }
+
+            // Initialize DoorEnvironments
+            foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
+            {
+                doorEnvironment.InitializeOtherProperties(model, room, this);
+            }
+
+            // Initialize ViewableNodes
+            foreach (ViewableNode viewableNode in ViewableNodes)
+            {
+                viewableNode.InitializeOtherProperties(model, room, this);
+            }
+
+            // Initialize Locks
+            foreach (NodeLock nodeLock in Locks.Values)
+            {
+                nodeLock.InitializeOtherProperties(model, room, this);
+            }
+
+            // Initialize Runways
+            foreach (Runway runway in Runways)
+            {
+                runway.InitializeOtherProperties(model, room, this);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            // Cleanup CanLeaveChargeds
+            CanLeaveCharged = CanLeaveCharged.Where(clc => clc.CleanUpUselessValues(model, room, this));
+
+            // Cleanup DoorEnvironments
+            DoorEnvironments = DoorEnvironments.Where(environment => environment.CleanUpUselessValues(model, room, this));
+
+            // Cleanup ViewableNodes
+            ViewableNodes = ViewableNodes.Where(viewableNode => viewableNode.CleanUpUselessValues(model, room, this));
+
+            // Cleanup Locks
+            Locks = Locks.Where(kvp => kvp.Value.CleanUpUselessValues(model, room, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // Cleanup Runways
+            Runways = Runways.Where(runway => runway.CleanUpUselessValues(model, room, this));
+
+            // A node never becomes useless
+            return false;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

@@ -40,6 +40,36 @@ namespace sm_json_data_framework.Models.Rooms
             return postRoomInitializeCallbacks;
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            // Initialize TargetNode
+            TargetNode = room.Nodes[TargetNodeId];
+
+            // Initialize strats
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.InitializeForeignProperties(model, room);
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            // Initialize strats
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.InitializeOtherProperties(model, room);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            // Clean up strats
+            Strats = Strats.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // A LinkTo with no strats is useless
+            return Strats.Any();
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

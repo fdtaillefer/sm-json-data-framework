@@ -39,6 +39,26 @@ namespace sm_json_data_framework.Models.Rooms
             return Enumerable.Empty<Action>();
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            // Initialize LeadsToNode
+            if (LeadsToNodeId != null)
+            {
+                LeadsToNode = room.Nodes[(int)LeadsToNodeId];
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            // Nothing relevant to clean up
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

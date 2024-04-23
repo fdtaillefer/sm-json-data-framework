@@ -51,6 +51,39 @@ namespace sm_json_data_framework.Models.Rooms
             return Enumerable.Empty<Action>();
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            Room = room;
+
+            // Initialize list of EntranceNodes. This also serves as a sanity check and will throw if an ID is invalid.
+            if (EntranceNodeIds != null)
+            {
+                List<RoomNode> entranceNodes = new List<RoomNode>();
+                foreach (int nodeId in EntranceNodeIds)
+                {
+                    room.Nodes.TryGetValue(nodeId, out RoomNode node);
+                    if (node == null)
+                    {
+                        throw new Exception($"A RoomEnvironment's entranceNode ID {nodeId} not found in room '{room.Name}'.");
+                    }
+                    entranceNodes.Add(node);
+                }
+                EntranceNodes = entranceNodes;
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            // Nothing relevant to cleanup
+
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             // No logical element in a room environment

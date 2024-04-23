@@ -80,6 +80,45 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             InitiateRemotely?.Initialize(model, room, node, this);
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
+        {
+            Node = node;
+
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.InitializeForeignProperties(model, node.Room);
+            }
+
+            InitiateRemotely?.InitializeForeignProperties(model, room, node, this);
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
+        {
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.InitializeOtherProperties(model, node.Room);
+            }
+
+            EffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter);
+
+            InitiateRemotely?.InitializeOtherProperties(model, room, node, this);
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)
+        {
+            // Cleanup Strats
+            Strats = Strats.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // A CanLeaveCharged doesn't need an InitiateRemotely, but if it has one it must remain useful.
+            // Otherwise the CanLeaveCharged cannot be done and becomes useless.
+            bool remoteInitiateUntouched = true;
+            if(InitiateRemotely != null)
+            {
+                remoteInitiateUntouched = InitiateRemotely.CleanUpUselessValues(model, room, node, this);
+            }
+            return Strats.Any() && remoteInitiateUntouched;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             List<string> unhandled = new List<string>();

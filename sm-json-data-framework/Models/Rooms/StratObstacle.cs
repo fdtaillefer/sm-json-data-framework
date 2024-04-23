@@ -48,6 +48,29 @@ namespace sm_json_data_framework.Models.Rooms
             return Enumerable.Empty<Action>();
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            // Initialize Obstacle
+            Obstacle = room.Obstacles[ObstacleId];
+
+            // Initialize AdditionalObstacles
+            AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]);
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            // Nothing relevant to clean up
+
+            // Even though a StratObstacle could have requirements that are equivalent to never, it would still not be useless
+            // because it indicates that the strat needs the obstacle to have been destroyed previously.
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

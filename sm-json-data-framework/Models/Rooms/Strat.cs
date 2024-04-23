@@ -74,6 +74,43 @@ namespace sm_json_data_framework.Models.Rooms
             return postRoomInitializeCallbacks;
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        {
+            foreach (StratFailure failure in Failures)
+            {
+                failure.InitializeForeignProperties(model, room);
+            }
+
+            foreach (StratObstacle obstacle in Obstacles)
+            {
+                obstacle.InitializeForeignProperties(model, room);
+            }
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
+        {
+            foreach (StratFailure failure in Failures)
+            {
+                failure.InitializeOtherProperties(model, room);
+            }
+
+            foreach (StratObstacle obstacle in Obstacles)
+            {
+                obstacle.InitializeOtherProperties(model, room);
+            }
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
+        {
+            Failures = Failures.Where(failure => failure.CleanUpUselessValues(model, room));
+
+            Obstacles = Obstacles.Where(obstacle => obstacle.CleanUpUselessValues(model, room));
+
+            // There's nothing being cleaned up here that can make a strat useless by disappearing.
+            // However, a strat that is disabled or has requirements that can never be fulfilled is useless
+            return model.LogicalOptions.IsStratEnabled(this) && !Requires.IsNever();
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

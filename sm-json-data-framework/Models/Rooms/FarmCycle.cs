@@ -35,6 +35,25 @@ namespace sm_json_data_framework.Models.Rooms
             return Enumerable.Empty<Action>();
         }
 
+
+        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
+        {
+            RoomEnemy = roomEnemy;
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
+        {
+            // Nothing relevant to clean up
+
+            // However, a farm cycle that can never be executed is useless
+            return !Requires.IsNever();
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, room);

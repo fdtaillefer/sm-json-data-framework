@@ -28,6 +28,24 @@ namespace sm_json_data_framework.Models.Techs
             // Nothing relevant to initialize
         }
 
+        public void InitializeForeignProperties(SuperMetroidModel model)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public void InitializeOtherProperties(SuperMetroidModel model)
+        {
+            // Nothing relevant to initialize
+        }
+
+        public bool CleanUpUselessValues(SuperMetroidModel model)
+        {
+            // Nothing relevant to cleanup
+
+            // It's possible that a tech could be impossible to execute, but the Tech itself is still useful to validate that the tech exists
+            return true;
+        }
+
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, null);
