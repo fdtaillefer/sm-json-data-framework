@@ -20,19 +20,11 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IDictionary<int, LinkTo> To {get;set;} = new Dictionary<int, LinkTo>();
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, Room room)
         {
             foreach (LinkTo linkTo in To.Values)
             {
-                linkTo.InitializeForeignProperties(model, room);
-            }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
-        {
-            foreach (LinkTo linkTo in To.Values)
-            {
-                linkTo.InitializeOtherProperties(model, room);
+                linkTo.InitializeProperties(model, room);
             }
         }
 

@@ -58,29 +58,16 @@ namespace sm_json_data_framework.Models.Rooms
             return result;
         }
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, Room room)
         {
             foreach (StratFailure failure in Failures)
             {
-                failure.InitializeForeignProperties(model, room);
+                failure.InitializeProperties(model, room);
             }
 
             foreach (StratObstacle obstacle in Obstacles)
             {
-                obstacle.InitializeForeignProperties(model, room);
-            }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
-        {
-            foreach (StratFailure failure in Failures)
-            {
-                failure.InitializeOtherProperties(model, room);
-            }
-
-            foreach (StratObstacle obstacle in Obstacles)
-            {
-                obstacle.InitializeOtherProperties(model, room);
+                obstacle.InitializeProperties(model, room);
             }
         }
 

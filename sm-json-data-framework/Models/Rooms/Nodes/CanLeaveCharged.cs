@@ -63,28 +63,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode Node { get; set; }
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;
 
             foreach (Strat strat in Strats.Values)
             {
-                strat.InitializeForeignProperties(model, node.Room);
+                strat.InitializeProperties(model, node.Room);
             }
 
-            InitiateRemotely?.InitializeForeignProperties(model, room, node, this);
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            foreach (Strat strat in Strats.Values)
-            {
-                strat.InitializeOtherProperties(model, node.Room);
-            }
+            InitiateRemotely?.InitializeProperties(model, room, node, this);
 
             EffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter);
-
-            InitiateRemotely?.InitializeOtherProperties(model, room, node, this);
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)

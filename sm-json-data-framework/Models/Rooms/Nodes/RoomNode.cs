@@ -150,7 +150,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 .ToList();
         }
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, Room room)
         {
             Room = room;
 
@@ -194,64 +194,31 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Initialize CanLeaveChargeds
             foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
             {
-                canLeaveCharged.InitializeForeignProperties(model, room, this);
+                canLeaveCharged.InitializeProperties(model, room, this);
             }
 
             // Initialize DoorEnvironments
             foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
             {
-                doorEnvironment.InitializeForeignProperties(model, room, this);
+                doorEnvironment.InitializeProperties(model, room, this);
             }
 
             // Initialize ViewableNodes
             foreach (ViewableNode viewableNode in ViewableNodes)
             {
-                viewableNode.InitializeForeignProperties(model, room, this);
+                viewableNode.InitializeProperties(model, room, this);
             }
 
             // Initialize Locks
             foreach (NodeLock nodeLock in Locks.Values)
             {
-                nodeLock.InitializeForeignProperties(model, room, this);
+                nodeLock.InitializeProperties(model, room, this);
             }
 
             // Initialize Runways
             foreach (Runway runway in Runways)
             {
-                runway.InitializeForeignProperties(model, room, this);
-            }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
-        {
-            // Initialize CanLeaveChargeds
-            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
-            {
-                canLeaveCharged.InitializeOtherProperties(model, room, this);
-            }
-
-            // Initialize DoorEnvironments
-            foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
-            {
-                doorEnvironment.InitializeOtherProperties(model, room, this);
-            }
-
-            // Initialize ViewableNodes
-            foreach (ViewableNode viewableNode in ViewableNodes)
-            {
-                viewableNode.InitializeOtherProperties(model, room, this);
-            }
-
-            // Initialize Locks
-            foreach (NodeLock nodeLock in Locks.Values)
-            {
-                nodeLock.InitializeOtherProperties(model, room, this);
-            }
-
-            // Initialize Runways
-            foreach (Runway runway in Runways)
-            {
-                runway.InitializeOtherProperties(model, room, this);
+                runway.InitializeProperties(model, room, this);
             }
         }
 

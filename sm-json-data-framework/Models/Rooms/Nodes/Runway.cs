@@ -43,21 +43,13 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;
 
             foreach (Strat strat in Strats.Values)
             {
-                strat.InitializeForeignProperties(model, room);
-            }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            foreach (Strat strat in Strats.Values)
-            {
-                strat.InitializeOtherProperties(model, room);
+                strat.InitializeProperties(model, room);
             }
         }
 

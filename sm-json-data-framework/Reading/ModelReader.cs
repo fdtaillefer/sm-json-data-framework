@@ -182,28 +182,18 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
-            // Now that we've created all models in a basic state, initialize foreign properties and additional properties,
+            // Now that we've created all models in a basic state, initialize foreign/additional properties,
             // and cleanup whatever is found to be useless based on logical options
             if (initialize)
             {
-                // Initialize foreign properties
+                // Initialize properties
                 foreach (Enemy enemy in model.Enemies.Values)
                 {
-                    enemy.InitializeForeignProperties(model);
+                    enemy.InitializeProperties(model);
                 }
                 foreach (Room room in model.Rooms.Values)
                 {
-                    room.InitializeForeignProperties(model);
-                }
-
-                // Initialize other properties
-                foreach (Enemy enemy in model.Enemies.Values)
-                {
-                    enemy.InitializeOtherProperties(model);
-                }
-                foreach (Room room in model.Rooms.Values)
-                {
-                    room.InitializeOtherProperties(model);
+                    room.InitializeProperties(model);
                 }
 
                 // Cleanup

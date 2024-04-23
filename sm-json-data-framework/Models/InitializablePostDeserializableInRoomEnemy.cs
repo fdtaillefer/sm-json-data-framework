@@ -12,22 +12,12 @@ namespace sm_json_data_framework.Models
     public interface InitializablePostDeserializableInRoomEnemy
     {
         /// <summary>
-        /// Initializes properties in this model, which wouldn't be initialized by simply parsing the relevant json file and are simple references to
-        /// other objects of the model.
+        /// Initializes properties in this model, which wouldn't be initialized by simply parsing the relevant json file.
         /// </summary>
         /// <param name="model">The model to use to initialize the foreign properties</param>
         /// <param name="room">The room in which this model is located</param>
         /// <param name="roomEnemy">The roomEnemy in which this model is located</param>
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy);
-
-        /// <summary>
-        /// Initializes properties in this model, which wouldn't be initialized by simply parsing the relevant json file and are not simple references to
-        /// other objects of the model. This should be called after foreign properties have been initialized.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the properties</param>
-        /// <param name="room">The room in which this model is located</param>
-        /// <param name="roomEnemy">The roomEnemy in which this model is located</param>
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy);
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy);
 
         /// <summary>
         /// Eliminates values from this model, which are made useless by the logical options of the provided model.

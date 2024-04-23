@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             // Initialize Node
             Node = room.Nodes[NodeId];
@@ -29,16 +29,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Initialize Strats
             foreach (Strat strat in Strats.Values)
             {
-                strat.InitializeForeignProperties(model, room);
-            }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            // Initialize Strats
-            foreach (Strat strat in Strats.Values)
-            {
-                strat.InitializeOtherProperties(model, room);
+                strat.InitializeProperties(model, room);
             }
         }
 

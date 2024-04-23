@@ -66,61 +66,33 @@ namespace sm_json_data_framework.Models.Rooms
             return null;
         }
 
-        public void InitializeForeignProperties(SuperMetroidModel model)
+        public void InitializeProperties(SuperMetroidModel model)
         {
             SuperMetroidModel = model;
 
             foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
             {
-                roomEnvironment.InitializeForeignProperties(model, this);
+                roomEnvironment.InitializeProperties(model, this);
             }
 
             foreach (RoomNode node in Nodes.Values)
             {
-                node.InitializeForeignProperties(model, this);
+                node.InitializeProperties(model, this);
             }
 
             foreach (RoomObstacle obstacle in Obstacles.Values)
             {
-                obstacle.InitializeForeignProperties(model, this);
+                obstacle.InitializeProperties(model, this);
             }
 
             foreach (Link link in Links.Values)
             {
-                link.InitializeForeignProperties(model, this);
+                link.InitializeProperties(model, this);
             }
 
             foreach (RoomEnemy enemy in Enemies.Values)
             {
-                enemy.InitializeForeignProperties(model, this);
-            }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model)
-        {
-            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
-            {
-                roomEnvironment.InitializeOtherProperties(model, this);
-            }
-
-            foreach (RoomNode node in Nodes.Values)
-            {
-                node.InitializeOtherProperties(model, this);
-            }
-
-            foreach (RoomObstacle obstacle in Obstacles.Values)
-            {
-                obstacle.InitializeOtherProperties(model, this);
-            }
-
-            foreach (Link link in Links.Values)
-            {
-                link.InitializeOtherProperties(model, this);
-            }
-
-            foreach (RoomEnemy enemy in Enemies.Values)
-            {
-                enemy.InitializeOtherProperties(model, this);
+                enemy.InitializeProperties(model, this);
             }
         }
 

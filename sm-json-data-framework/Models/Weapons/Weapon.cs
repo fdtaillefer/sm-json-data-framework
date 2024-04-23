@@ -26,12 +26,7 @@ namespace sm_json_data_framework.Models.Weapons
 
         public IEnumerable<WeaponCategoryEnum> Categories { get; set; } = Enumerable.Empty<WeaponCategoryEnum>();
 
-        public void InitializeForeignProperties(SuperMetroidModel model)
-        {
-            // Nothing relevant to initialize
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model)
+        public void InitializeProperties(SuperMetroidModel model)
         {
             // Nothing relevant to initialize
         }

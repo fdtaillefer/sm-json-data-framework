@@ -101,5 +101,10 @@ namespace sm_json_data_framework.Models.Enemies
                    Super == drops.Super &&
                    PowerBomb == drops.PowerBomb;
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(NoDrop, SmallEnergy, BigEnergy, Missile, Super, PowerBomb);
+        }
     }
 }

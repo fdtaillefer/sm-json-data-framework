@@ -28,7 +28,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode Node { get; set; }
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;
 
@@ -47,11 +47,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 }
                 EntranceNodes = entranceNodes;
             }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            // Nothing relevant to initialize
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)

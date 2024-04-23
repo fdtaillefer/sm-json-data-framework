@@ -37,18 +37,13 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public IEnumerable<RoomObstacle> AdditionalObstacles { get; set; }
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, Room room)
         {
             // Initialize Obstacle
             Obstacle = room.Obstacles[ObstacleId];
 
             // Initialize AdditionalObstacles
             AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]);
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
-        {
-            // Nothing relevant to initialize
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)

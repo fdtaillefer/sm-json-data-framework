@@ -28,18 +28,13 @@ namespace sm_json_data_framework.Models.Rooms
 
         public bool ClearsPreviousNode { get; set; } = false;
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, Room room)
         {
             // Initialize LeadsToNode
             if (LeadsToNodeId != null)
             {
                 LeadsToNode = room.Nodes[(int)LeadsToNodeId];
             }
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room)
-        {
-            // Nothing relevant to initialize
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)

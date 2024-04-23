@@ -11,12 +11,7 @@ namespace sm_json_data_framework.Models.Helpers
 
         public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
 
-        public void InitializeForeignProperties(SuperMetroidModel model)
-        {
-            // Nothing relevant to initialize
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model)
+        public void InitializeProperties(SuperMetroidModel model)
         {
             // Nothing relevant to initialize
         }

@@ -29,14 +29,9 @@ namespace sm_json_data_framework.Models.Rooms
         public RoomEnemy RoomEnemy { get; set; }
 
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
         {
             RoomEnemy = roomEnemy;
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
-        {
-            // Nothing relevant to initialize
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)

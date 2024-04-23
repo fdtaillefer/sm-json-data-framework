@@ -49,7 +49,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode ExitNode { get; set; }
 
-        public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
+        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
         {
             // Initialize the start and end nodes of the remote canLeaveCharged
             InitiateAtNode = room.Nodes[InitiateAtNodeId];
@@ -105,11 +105,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                     $"The nodes in the path are {{{nodesPath}}}");
             }
             PathToDoor = pathToDoor;
-        }
-
-        public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
-        {
-            // Nothing relevant to initialize
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
