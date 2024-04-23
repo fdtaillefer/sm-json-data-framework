@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Converters
         public override IDictionary<string, NodeLock> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             List<NodeLock> locks = JsonSerializer.Deserialize<List<NodeLock>>(ref reader, options);
-            return locks.ToDictionary(locks => locks.Name, locks => locks);
+            return locks.ToDictionary(nodeLock => nodeLock.Name, nodeLock => nodeLock);
         }
 
         public override void Write(Utf8JsonWriter writer, IDictionary<string, NodeLock> value, JsonSerializerOptions options)

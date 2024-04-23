@@ -6,6 +6,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -114,12 +115,25 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public RoomNode OutNode { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
-        /// <para>Contains all in-room links from this node to another, mapped by the destination node ID</para>
+        /// Contains all in-room links from this node to another, mapped by the destination node ID.
         /// </summary>
         [JsonIgnore]
-        public Dictionary<int, LinkTo> Links { get; set; } = new Dictionary<int, LinkTo>();
-
+        public IDictionary<int, LinkTo> Links { 
+            get 
+            {
+                if (Room.Links.TryGetValue(Id, out Link link))
+                {
+                    return link.To;
+                }
+                // There are nodes with no links from them at all, for example some sandpit exits.
+                // So returning an empty dictionary is perfectly fine.
+                else
+                {
+                    return ImmutableDictionary<int, LinkTo>.Empty;
+                }
+            } 
+        }
+        
         public IEnumerable<TwinDoorAddress> TwinDoorAddresses { get; set; } = Enumerable.Empty<TwinDoorAddress>();
 
         /// <summary>
@@ -176,13 +190,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 NodeItem = model.Items[NodeItemName];
             }
-
-            // Initialize Links
-            if (room.Links.TryGetValue(Id, out Link link)) {
-                Links = link.To.ToDictionary(l => l.TargetNodeId);
-            }
-            // No else: There are nodes with no links from them at all, for example some sandpit exits.
-            // So it's ok to leave Links as its default empty value.
 
             // We can't initialize CanLeaveChargeds now because they need the entire room to be loaded first.
             // So we'll do it in a callback that we'll return, to be executed after the rest of the room is initialized.
@@ -266,14 +273,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 NodeItem = model.Items[NodeItemName];
             }
-
-            // Initialize Links dictionary. We don't trigger initialization on any links because they belong to their room
-            if (room.Links.TryGetValue(Id, out Link link))
-            {
-                Links = link.To.ToDictionary(l => l.TargetNodeId);
-            }
-            // No else: There are nodes with no links from them at all, for example some sandpit exits.
-            // So it's ok to leave Links as its default empty value.
 
             // Initialize CanLeaveChargeds
             foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)

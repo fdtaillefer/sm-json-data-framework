@@ -15,12 +15,15 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonPropertyName("from")]
         public int FromNodeId { get; set; }
 
-        public IEnumerable<LinkTo> To { get; set; } = Enumerable.Empty<LinkTo>();
+        /// <summary>
+        /// The details of how this Link links to different nodes, mapped by target node ID.
+        /// </summary>
+        public IDictionary<int, LinkTo> To {get;set;} = new Dictionary<int, LinkTo>();
 
         public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
         {
             List<Action> postRoomInitializeCallbacks = new List<Action>();
-            foreach (LinkTo linkTo in To)
+            foreach (LinkTo linkTo in To.Values)
             {
                 postRoomInitializeCallbacks.AddRange(linkTo.Initialize(model, room));
             }
@@ -30,7 +33,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public void InitializeForeignProperties(SuperMetroidModel model, Room room)
         {
-            foreach (LinkTo linkTo in To)
+            foreach (LinkTo linkTo in To.Values)
             {
                 linkTo.InitializeForeignProperties(model, room);
             }
@@ -38,7 +41,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public void InitializeOtherProperties(SuperMetroidModel model, Room room)
         {
-            foreach (LinkTo linkTo in To)
+            foreach (LinkTo linkTo in To.Values)
             {
                 linkTo.InitializeOtherProperties(model, room);
             }
@@ -46,7 +49,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
         {
-            To = To.Where(linkTo => linkTo.CleanUpUselessValues(model, room));
+            To = To.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             // A link with no destinations is useless
             return To.Any();
         }
@@ -55,7 +58,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             List<string> unhandled = new List<string>();
 
-            foreach(LinkTo linkTo in To)
+            foreach(LinkTo linkTo in To.Values)
             {
                 unhandled.AddRange(linkTo.InitializeReferencedLogicalElementProperties(model, room));
             }
