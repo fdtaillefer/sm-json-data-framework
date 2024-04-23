@@ -48,6 +48,24 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public SuperMetroidModel SuperMetroidModel { get; set; }
 
+        /// <summary>
+        /// Returns the LinkTo that describes navigation from fromNodeId to toNodeId, if it exists.
+        /// </summary>
+        /// <param name="fromNodeId">ID of the origin node</param>
+        /// <param name="toNodeId">ID of the destination node</param>
+        /// <returns>The LinkTo, or null if not found.</returns>
+        public LinkTo GetLinkBetween(int fromNodeId, int toNodeId)
+        {
+            if (Links.TryGetValue(fromNodeId, out Link link))
+            {
+                if (link.To.TryGetValue(toNodeId, out LinkTo linkTo))
+                {
+                    return linkTo;
+                }
+            }
+            return null;
+        }
+
         public void Initialize(SuperMetroidModel model)
         {
             SuperMetroidModel = model;

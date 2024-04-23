@@ -115,7 +115,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public RoomNode OutNode { get; set; }
 
         /// <summary>
-        /// Contains all in-room links from this node to another, mapped by the destination node ID.
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Contains all in-room links from this node to another, mapped by the destination node ID.</para>
         /// </summary>
         [JsonIgnore]
         public IDictionary<int, LinkTo> Links { 
