@@ -11,13 +11,6 @@ namespace sm_json_data_framework.Models
     public interface InitializablePostDeserializeOutOfRoom
     {
         /// <summary>
-        /// Initializes additional properties in this model, which wouldn't be initialized by simply parsing the relevant json file.
-        /// All such properties are expected to be identified in their own documentation and should not be read if this method isn't called.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the additional properties</param>
-        public void Initialize(SuperMetroidModel model);
-
-        /// <summary>
         /// Initializes properties in this model, which wouldn't be initialized by simply parsing the relevant json file and are simple references to
         /// other objects of the model.
         /// </summary>

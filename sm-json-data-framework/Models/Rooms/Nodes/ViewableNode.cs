@@ -21,21 +21,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
-        public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            // Initialize Node
-            Node = room.Nodes[NodeId];
-
-            // Eliminate disabled strats
-            Strats = Strats.WhereEnabled(model);
-
-            // Initialize Strats
-            foreach (Strat strat in Strats.Values)
-            {
-                strat.Initialize(model, room);
-            }
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             // Initialize Node

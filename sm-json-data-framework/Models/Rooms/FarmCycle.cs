@@ -28,13 +28,6 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public RoomEnemy RoomEnemy { get; set; }
 
-        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
-        {
-            RoomEnemy = roomEnemy;
-
-            return Enumerable.Empty<Action>();
-        }
-
 
         public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
         {

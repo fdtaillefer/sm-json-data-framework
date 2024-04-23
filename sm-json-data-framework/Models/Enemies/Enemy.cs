@@ -66,28 +66,6 @@ namespace sm_json_data_framework.Models.Enemies
         [JsonIgnore]
         public IDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; set; }
 
-        public void Initialize(SuperMetroidModel model)
-        {
-            // convert InvulnerabilityStrings to Weapons
-            InvulnerableWeapons = InvulnerabilityStrings.NamesToWeapons(model);
-
-            // Get a WeaponMultiplier for all non-immune weapons
-            WeaponMultipliers = RawDamageMultipliers
-                .SelectMany(rdm => rdm.Weapon.NameToWeapons(model).Select(w => new WeaponMultiplier(w, rdm.Value)))
-                .ToDictionary(m => m.Weapon.Name);
-            foreach(Weapon neutralWeapon in model.Weapons.Values
-                .Except(WeaponMultipliers.Values.Select(wm => wm.Weapon), ObjectReferenceEqualityComparer<Weapon>.Default)
-                .Except(InvulnerableWeapons, ObjectReferenceEqualityComparer<Weapon>.Default))
-            {
-                WeaponMultipliers.Add(neutralWeapon.Name, new WeaponMultiplier(neutralWeapon, 1m));
-            }
-
-            // Create a WeaponSusceptibility for each non-immune weapon
-            WeaponSusceptibilities = WeaponMultipliers.Values
-                .Select(wm => new WeaponSusceptibility(wm.NumberOfHits(Hp), wm))
-                .ToDictionary(ws => ws.Weapon.Name);
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model)
         {
             // Convert InvulnerabilityStrings to Weapons

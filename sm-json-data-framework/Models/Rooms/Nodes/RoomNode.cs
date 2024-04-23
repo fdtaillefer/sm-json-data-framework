@@ -150,90 +150,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 .ToList();
         }
 
-        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
-        {
-            Room = room;
-            List<Action> initializedRoomCallbacks = new List<Action>();
-
-            // Initialize OutConnection and OutNode
-            if(NodeType == NodeTypeEnum.Exit || NodeType == NodeTypeEnum.Door)
-            {
-                if (model.Connections.TryGetValue(IdentifyingString, out Connection connection))
-                {
-                    OutConnection = connection;
-                    ConnectionNode otherNode = connection.ToNode;
-                    OutNode = model.Rooms[otherNode.RoomName].Nodes[otherNode.Nodeid];
-
-                    // Sanity check for node names and IDs. Take this out if nodeIds get taken out of connections
-                    if (connection.FromNode.NodeName != null && connection.FromNode.NodeName != Name)
-                    {
-                        throw new Exception($"A connection thought to be going from node {Name} claims to be going from a node named {connection.FromNode.NodeName}");
-                    }
-                    if (connection.ToNode.NodeName != null && connection.ToNode.NodeName != OutNode.Name)
-                    {
-                        throw new Exception($"A connection thought to be going from node {OutNode.Name} claims to be going from a node named {connection.ToNode.NodeName}");
-                    }
-
-                }
-            }
-
-            // Initialize OverrideSpawnAtNode
-            if (OverrideSpawnAtNodeId != null)
-            {
-                OverrideSpawnAtNode = Room.Nodes[(int)OverrideSpawnAtNodeId];
-            }
-
-            // Initialize Yielded game flags
-            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
-
-            // Initialize item
-            if (NodeItemName != null)
-            {
-                NodeItem = model.Items[NodeItemName];
-            }
-
-            // We can't initialize CanLeaveChargeds now because they need the entire room to be loaded first.
-            // So we'll do it in a callback that we'll return, to be executed after the rest of the room is initialized.
-            initializedRoomCallbacks.Add(() => {
-                foreach(CanLeaveCharged canLeaveCharged in CanLeaveCharged)
-                {
-                    canLeaveCharged.Initialize(model, room, this);
-                }
-                // We are now able to eliminate any CanLeaveCharged that is initiated remotely and whose path is impossible to follow.
-                // (The PathToDoor is expected to be left empty if it's impossible to follow due to strats not being possible given the applied settings)
-                CanLeaveCharged = CanLeaveCharged.Where(clc => clc.InitiateRemotely == null || clc.InitiateRemotely.PathToDoor.Any());
-            });
-
-            // We can't initialize DoorEnvironments now because they reference other nodes.
-            // So we'll do it in a callback that we'll return, to be executed after the rest of the room is initialized.
-            initializedRoomCallbacks.Add(() => {
-                foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
-                {
-                    doorEnvironment.Initialize(model, room, this);
-                }
-            });
-
-            // Initialize ViewableNodes
-            foreach (ViewableNode viewableNode in ViewableNodes)
-            {
-                viewableNode.Initialize(model, room, this);
-            }
-
-            // Initialize Locks
-            foreach(NodeLock nodeLock in Locks.Values)
-            {
-                nodeLock.Initialize(model, room, this);
-            }
-
-            // Initialize Runways
-            foreach(Runway runway in Runways)
-            {
-                runway.Initialize(model, room, this);
-            }
-
-            return initializedRoomCallbacks;
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room)
         {
             Room = room;
@@ -357,7 +273,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Runways = Runways.Where(runway => runway.CleanUpUselessValues(model, room, this));
 
             // A node never becomes useless
-            return false;
+            return true;
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

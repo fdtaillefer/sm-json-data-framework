@@ -58,22 +58,6 @@ namespace sm_json_data_framework.Models.Rooms
             return result;
         }
 
-        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
-        {
-            List<Action> postRoomInitializeCallbacks = new List<Action>();
-            foreach (StratFailure failure in Failures)
-            {
-                postRoomInitializeCallbacks.AddRange(failure.Initialize(model, room));
-            }
-
-            foreach(StratObstacle obstacle in Obstacles)
-            {
-                postRoomInitializeCallbacks.AddRange(obstacle.Initialize(model, room));
-            }
-
-            return postRoomInitializeCallbacks;
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room)
         {
             foreach (StratFailure failure in Failures)

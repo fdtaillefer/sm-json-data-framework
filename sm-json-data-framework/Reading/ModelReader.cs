@@ -121,14 +121,6 @@ namespace sm_json_data_framework.Reading
             EnemyContainer enemyContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(enemyPath), options);
             EnemyContainer bossContainer = JsonSerializer.Deserialize<EnemyContainer>(File.ReadAllText(bossPath), options);
             model.Enemies = enemyContainer.Enemies.Concat(bossContainer.Enemies).ToDictionary(e => e.Name);
-            // Initialize calculated data in enemies if requested
-            if(initialize)
-            {
-                foreach(Enemy enemy in model.Enemies.Values)
-                {
-                    enemy.Initialize(model);
-                }
-            }
 
             // Find and read all connection files
             string[] allConnectionFiles = Directory.GetFiles(connectionBaseDirectory, "*.json", SearchOption.AllDirectories);
@@ -189,14 +181,39 @@ namespace sm_json_data_framework.Reading
                     }
                 }
             }
-            // The initialization of rooms initializes the nodes' connection destination node.
-            // That requires this node (and, logically, its room beforehand) to have been created already.
-            // This means we can't initialize a room safely until we've created all rooms, so iterate a second time on rooms to initialize.
+
+            // Now that we've created all models in a basic state, initialize foreign properties and additional properties,
+            // and cleanup whatever is found to be useless based on logical options
             if (initialize)
             {
+                // Initialize foreign properties
+                foreach (Enemy enemy in model.Enemies.Values)
+                {
+                    enemy.InitializeForeignProperties(model);
+                }
                 foreach (Room room in model.Rooms.Values)
                 {
-                    room.Initialize(model);
+                    room.InitializeForeignProperties(model);
+                }
+
+                // Initialize other properties
+                foreach (Enemy enemy in model.Enemies.Values)
+                {
+                    enemy.InitializeOtherProperties(model);
+                }
+                foreach (Room room in model.Rooms.Values)
+                {
+                    room.InitializeOtherProperties(model);
+                }
+
+                // Cleanup
+                foreach (Enemy enemy in model.Enemies.Values)
+                {
+                    enemy.CleanUpUselessValues(model);
+                }
+                foreach (Room room in model.Rooms.Values)
+                {
+                    room.CleanUpUselessValues(model);
                 }
             }
 

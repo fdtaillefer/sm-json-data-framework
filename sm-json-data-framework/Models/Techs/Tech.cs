@@ -23,11 +23,6 @@ namespace sm_json_data_framework.Models.Techs
             return ExtensionTechs.SelectMany(tech => tech.SelectWithExtensions()).Prepend(this).ToList();
         }
 
-        public void Initialize(SuperMetroidModel model)
-        {
-            // Nothing relevant to initialize
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model)
         {
             // Nothing relevant to initialize

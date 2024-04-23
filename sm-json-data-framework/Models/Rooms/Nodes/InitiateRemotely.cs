@@ -49,64 +49,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode ExitNode { get; set; }
 
-        public void Initialize(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
-        {
-            // Initialize the start and end nodes of the remote canLeaveCharged
-            InitiateAtNode = room.Nodes[InitiateAtNodeId];
-            ExitNode = canLeaveCharged.Node;
-
-            // Initialize the path to follow
-            List<(LinkTo link, IEnumerable<Strat> strats)> pathToDoor = new List<(LinkTo, IEnumerable<Strat>)>();
-            RoomNode currentNodeFrom = InitiateAtNode;
-            bool pathPossible = true;
-            foreach(var pathNode in PathToDoorNodes.TakeWhile(_ => pathPossible))
-            {
-                RoomNode destination = room.Nodes[pathNode.DestinationNodeId];
-                
-                if (currentNodeFrom.Links.TryGetValue(pathNode.DestinationNodeId, out LinkTo link))
-                {
-
-                    List<Strat> strats = new List<Strat>();
-                    foreach(string stratName in pathNode.StratNames)
-                    {
-                        Strat strat = link.Strats.Values.SingleOrDefault(strat => strat.Name == stratName);
-                        if (strat == null)
-                        {
-                            pathPossible = false;
-                        }
-                        else
-                        {
-                            strats.Add(strat);
-                        }
-                    }
-                    // Next node will start at current node's destination
-                    currentNodeFrom = destination;
-                    pathToDoor.Add((link, strats));
-                }
-                else
-                {
-                    pathPossible = false;
-                }
-            }
-
-            // If the path had a node with no link or no strat, leave the path empty to represent that this cannot be done.
-            // Strats can be removed if they're declared out of logic, and a link with no strat would make sense to remove,
-            // so we won't just crash on this.
-            // The CanLeaveCharged should probably just be taken out itself later by higher-level checks
-            if(pathPossible)
-            {
-                // Validate that the path makes sense before we return
-
-                // The path must end at the exit node
-                if(pathToDoor.Last().link.TargetNode != node)
-                {
-                    throw new Exception($"PathToNode on a CanLeaveCharged of node {node.Name} does not end at that node.");
-                }
-
-                PathToDoor = pathToDoor;
-            }
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
         {
             // Initialize the start and end nodes of the remote canLeaveCharged
@@ -120,7 +62,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 if(room.Nodes.TryGetValue(pathNode.DestinationNodeId, out RoomNode destination))
                 {
-                    if (currentNodeFrom.Links.TryGetValue(pathNode.DestinationNodeId, out LinkTo link))
+                    LinkTo link = room.GetLinkBetween(currentNodeFrom.Id, pathNode.DestinationNodeId);
+                    if (link != null)
                     {
                         List<Strat> strats = new ();
                         foreach (string stratName in pathNode.StratNames)
@@ -155,9 +98,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
             // Validate that the path makes sense before we assign PathToDoor
             // The path must end at the exit node
-            if (pathToDoor.Last().link.TargetNode != node)
+            if (pathToDoor.Last().link.TargetNodeId != node.Id)
             {
-                throw new Exception($"PathToNode on a CanLeaveCharged of node {node.Name} does not end at that node.");
+                string nodesPath = String.Join(", ", PathToDoorNodes.Select(node => node.DestinationNodeId.ToString()));
+                throw new Exception($"PathToNode on a CanLeaveCharged of node {node.Id} in room '{node.Room.Name}' does not end at that node.\n" +
+                    $"The nodes in the path are {{{nodesPath}}}");
             }
             PathToDoor = pathToDoor;
         }
@@ -180,7 +125,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // If any node in the path has no strats remaining, it means the PathToNode is impossible to follow.
             // This makes the InitiateRemotely itself impossible to do.
-            return PathToDoor.All(node => !node.strats.Any());
+            return PathToDoor.All(node => node.strats.Any());
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)

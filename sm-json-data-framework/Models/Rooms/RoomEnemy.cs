@@ -67,28 +67,6 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public bool IsSpawner { get => FarmCycles.Any(); }
 
-        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
-        {
-            List<Action> postInitializeActions = new List<Action>();
-
-            Room = room;
-
-            Enemy = model.Enemies[EnemyName];
-
-            HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
-
-            BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
-
-            model.RoomEnemies.Add(GroupName, this);
-
-            foreach (var farmCycle in FarmCycles)
-            {
-                postInitializeActions.AddRange(farmCycle.Initialize(model, room, this));
-            }
-
-            return postInitializeActions;
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room)
         {
             Room = room;

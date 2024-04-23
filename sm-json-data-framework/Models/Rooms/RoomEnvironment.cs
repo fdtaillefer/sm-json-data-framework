@@ -28,29 +28,6 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public Room Room { get; set; }
 
-        public IEnumerable<Action> Initialize(SuperMetroidModel model, Room room)
-        {
-            Room = room;
-
-            // Initialize list of EntranceNodes. This also serves as a sanity check and will throw if an ID is invalid.
-            if(EntranceNodeIds != null)
-            {
-                List<RoomNode> entranceNodes = new List<RoomNode>();
-                foreach (int nodeId in EntranceNodeIds)
-                {
-                    room.Nodes.TryGetValue(nodeId, out RoomNode node);
-                    if(node == null)
-                    {
-                        throw new Exception($"A RoomEnvironment's entranceNode ID {nodeId} not found in room '{room.Name}'.");
-                    }
-                    entranceNodes.Add(node);
-                }
-                EntranceNodes = entranceNodes;
-            }
-
-            return Enumerable.Empty<Action>();
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room)
         {
             Room = room;

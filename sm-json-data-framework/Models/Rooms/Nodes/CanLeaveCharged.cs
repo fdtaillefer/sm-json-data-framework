@@ -63,23 +63,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode Node { get; set; }
 
-        public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            Node = node;
-
-            // Eliminate disabled strats
-            Strats = Strats.WhereEnabled(model);
-
-            foreach (Strat strat in Strats.Values)
-            {
-                strat.Initialize(model, node.Room);
-            }
-
-            EffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter);
-
-            InitiateRemotely?.Initialize(model, room, node, this);
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;

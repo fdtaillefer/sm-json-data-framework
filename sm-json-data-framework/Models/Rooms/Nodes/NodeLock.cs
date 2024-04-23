@@ -42,30 +42,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode Node { get; set; }
 
-        public void Initialize(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            Node = node;
-
-            model.Locks.Add(Name, this);
-
-            // Eliminate disabled unlock strats
-            UnlockStrats = UnlockStrats.WhereEnabled(model);
-            foreach (Strat strat in UnlockStrats.Values)
-            {
-                strat.Initialize(model, room);
-            }
-
-            // Eliminate disabled bypass strats
-            BypassStrats = BypassStrats.WhereEnabled(model);
-            foreach (Strat strat in BypassStrats.Values)
-            {
-                strat.Initialize(model, room);
-            }
-
-            // Initialize Yielded game flags
-            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;
@@ -88,6 +64,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public void InitializeOtherProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
+            model.Locks.Add(Name, this);
+
             // Initialize unlock strats
             foreach (Strat strat in UnlockStrats.Values)
             {

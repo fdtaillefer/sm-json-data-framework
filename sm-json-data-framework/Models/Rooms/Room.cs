@@ -66,41 +66,6 @@ namespace sm_json_data_framework.Models.Rooms
             return null;
         }
 
-        public void Initialize(SuperMetroidModel model)
-        {
-            SuperMetroidModel = model;
-
-            List<Action> postInitializationCallbacks = new List<Action>();
-
-            foreach( RoomEnvironment roomEnvironment in RoomEnvironments)
-            {
-                postInitializationCallbacks.AddRange(roomEnvironment.Initialize(model, this));
-            }
-
-            foreach(RoomNode node in Nodes.Values)
-            {
-                postInitializationCallbacks.AddRange(node.Initialize(model, this));
-            }
-
-            foreach(RoomObstacle obstacle in Obstacles.Values)
-            {
-                postInitializationCallbacks.AddRange(obstacle.Initialize(model, this));
-            }
-
-            foreach (Link link in Links.Values)
-            {
-                postInitializationCallbacks.AddRange(link.Initialize(model, this));
-            }
-
-            foreach(RoomEnemy enemy in Enemies.Values)
-            {
-                postInitializationCallbacks.AddRange(enemy.Initialize(model, this));
-            }
-
-            // If we received any callbacks to execute after the room is done, execute them now
-            postInitializationCallbacks.ForEach(action => action.Invoke());
-        }
-
         public void InitializeForeignProperties(SuperMetroidModel model)
         {
             SuperMetroidModel = model;
