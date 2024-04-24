@@ -78,8 +78,6 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 farmCycle.InitializeProperties(model, room, this);
             }
-
-            model.RoomEnemies.Add(GroupName, this);
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)

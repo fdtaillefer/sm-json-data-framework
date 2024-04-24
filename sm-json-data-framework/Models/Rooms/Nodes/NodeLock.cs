@@ -60,8 +60,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Initialize Yielded game flags
             Yields = YieldsStrings.Select(s => model.GameFlags[s]);
-
-            model.Locks.Add(Name, this);
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)

@@ -61,6 +61,12 @@ namespace sm_json_data_framework.Reading
 
             Assert.Equal(91, model.Techs.Count);
 
+            // Not getting an exact lock count, but make sure there are some
+            Assert.NotEmpty(model.Locks);
+
+            // Not getting an exact room enemy count, but make sure there are some
+            Assert.NotEmpty(model.RoomEnemies);
+
             // Starting max resources
             Assert.Equal(99, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(0, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.ReserveEnergy));

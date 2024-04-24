@@ -182,8 +182,30 @@ namespace sm_json_data_framework.Reading
                 }
             }
 
-            // Now that we've created all models in a basic state, initialize foreign/additional properties,
-            // and cleanup whatever is found to be useless based on logical options
+            // Now we've created all models in a basic state...
+
+            // Initialize a few top-level convenience maps
+            foreach (Room room in model.Rooms.Values)
+            {
+                Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
+                foreach (RoomEnemy roomEnemy in room.Enemies.Values)
+                {
+                    roomEnemies.Add(roomEnemy.GroupName, roomEnemy);
+                }
+                model.RoomEnemies = roomEnemies;
+
+                Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
+                foreach (RoomNode node in model.Nodes.Values)
+                {
+                    foreach (KeyValuePair<string, NodeLock> kvp in node.Locks)
+                    {
+                        locks.Add(kvp.Key, kvp.Value);
+                    }
+                    model.Locks = locks;
+                }
+            }
+
+            // Initialize foreign/additional properties, and cleanup whatever is found to be useless based on logical options
             if (initialize)
             {
                 // Initialize properties
@@ -243,7 +265,7 @@ namespace sm_json_data_framework.Reading
                 if (unhandledLogicalElementProperties.Any())
                 {
                     throw new JsonException($"The following logical element property values could not be resolved " +
-                        $"to to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
+                        $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
                 }
             }
 
