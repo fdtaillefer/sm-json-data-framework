@@ -16,9 +16,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public HeatFrames(int frames)
+        public HeatFrames(int frames): base(frames)
         {
-            Value = frames;
+            
         }
 
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

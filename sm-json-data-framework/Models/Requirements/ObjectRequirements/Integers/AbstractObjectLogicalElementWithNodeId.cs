@@ -10,6 +10,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     public abstract class AbstractObjectLogicalElementWithNodeId : AbstractObjectLogicalElementWithInteger
     {
+        public AbstractObjectLogicalElementWithNodeId()
+        {
+
+        }
+
+        public AbstractObjectLogicalElementWithNodeId(int id) : base(id)
+        {
+
+        }
+
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
         /// <para>The node that this element's value references. </para>

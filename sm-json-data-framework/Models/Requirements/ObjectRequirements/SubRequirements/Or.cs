@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     /// </summary>
     public class Or : AbstractObjectLogicalElementWithSubRequirements
     {
+        public Or()
+        {
+
+        }
+
+        public Or(LogicalRequirements logicalRequirements) : base(logicalRequirements)
+        {
+
+        }
+
         public override bool IsNever()
         {
             // This is only never if all inner logical elements are never, since fulfilling this requires only one of the inner logical elements

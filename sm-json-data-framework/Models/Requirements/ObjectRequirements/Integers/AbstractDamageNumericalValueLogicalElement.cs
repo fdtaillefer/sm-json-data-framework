@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public abstract class AbstractDamageNumericalValueLogicalElement: AbstractObjectLogicalElementWithNumericalIntegerValue
     {
+        public AbstractDamageNumericalValueLogicalElement()
+        {
+
+        }
+
+        public AbstractDamageNumericalValueLogicalElement(int value) : base(value)
+        {
+
+        }
+
         public override bool IsNever()
         {
             return false;

@@ -16,9 +16,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public AcidFrames(int frames)
+        public AcidFrames(int frames) : base(frames)
         {
-            Value = frames;
+            
         }
 
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

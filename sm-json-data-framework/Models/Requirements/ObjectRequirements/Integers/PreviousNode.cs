@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class PreviousNode : AbstractObjectLogicalElementWithNodeId
     {
+        public PreviousNode()
+        {
+
+        }
+
+        public PreviousNode(int nodeId) : base(nodeId)
+        {
+
+        }
+
         public override bool IsNever()
         {
             return false;

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements
@@ -11,6 +12,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     /// </summary>
     public class And : AbstractObjectLogicalElementWithSubRequirements
     {
+        public And()
+        {
+
+        }
+
+        public And(LogicalRequirements logicalRequirements): base(logicalRequirements)
+        {
+            
+        }
+
         public override bool IsNever()
         {
             return LogicalRequirements.IsNever();

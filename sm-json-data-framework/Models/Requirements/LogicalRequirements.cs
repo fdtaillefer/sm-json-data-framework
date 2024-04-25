@@ -57,30 +57,30 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns>All strings that couldn't be resolved to a more specific logical element</returns>
         public IEnumerable<string> ReplaceRawStringElements(StringLogicalElementConverter stringElementConverter)
         {
-            List<string> unresolvedRawStrings = new List<string>();
+            List<string> unresolvedStrings = new List<string>();
 
             // For any logical element in this LogicalRequirements that has sub-LogicalRequirements, do a recursive call
             foreach(AbstractObjectLogicalElementWithSubRequirements logicalElement in LogicalElements.OfType<AbstractObjectLogicalElementWithSubRequirements>())
             {
                 IEnumerable<string> unresolvedSubRawStrings = logicalElement.LogicalRequirements.ReplaceRawStringElements(stringElementConverter);
-                unresolvedRawStrings.AddRange(unresolvedSubRawStrings);
+                unresolvedStrings.AddRange(unresolvedSubRawStrings);
             }
 
             // Build a new list of resolved logical elements to replace the current one
             List<AbstractLogicalElement> newElements = new List<AbstractLogicalElement>();
 
-            // For any raw string logical element we contain directly, attempt to resolve it and substitute the new logical element
+            // For any uninterpreted string logical element we contain directly, attempt to resolve it and substitute the new logical element
             // Anything else just stays the same
             foreach(AbstractLogicalElement logicalElement in LogicalElements)
             {
-                // If this is a raw string, get the converter to convert it to hopefully something better
-                if (logicalElement is RawStringLogicalElement rawStringElement)
+                // If this is an uninterpreted string, get the converter to convert it to hopefully something better
+                if (logicalElement is UninterpretedStringLogicalElement uninterpretedStringElement)
                 {
-                    AbstractLogicalElement newLogicalElement = stringElementConverter.CreateLogicalElement(rawStringElement.StringValue);
-                    // if we still have a raw string, add the string to the list of unresolved strings we'll return
-                    if (newLogicalElement is RawStringLogicalElement)
+                    AbstractLogicalElement newLogicalElement = stringElementConverter.CreateLogicalElement(uninterpretedStringElement.StringValue);
+                    // if we still have an uninterpreted string, add the string to the list of unresolved strings we'll return
+                    if (newLogicalElement is UninterpretedStringLogicalElement)
                     {
-                        unresolvedRawStrings.Add(rawStringElement.StringValue);
+                        unresolvedStrings.Add(uninterpretedStringElement.StringValue);
                         newElements.Add(logicalElement);
                     }
                     // If we successfully resolved the string, substitute the new element
@@ -96,7 +96,7 @@ namespace sm_json_data_framework.Models.Requirements
             }
             LogicalElements = newElements;
 
-            return unresolvedRawStrings.Distinct();
+            return unresolvedStrings.Distinct();
         }
 
         /// <summary>

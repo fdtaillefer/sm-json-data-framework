@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class SpikeHits : AbstractDamageNumericalValueLogicalElement
     {
+        public SpikeHits()
+        {
+
+        }
+
+        public SpikeHits(int hits) : base(hits)
+        {
+
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.SpikeDamage) * Value * times;

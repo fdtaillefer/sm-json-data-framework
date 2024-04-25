@@ -89,10 +89,10 @@ namespace sm_json_data_framework.Converters
             }
             // If the string matched nothing that's in the model maybe it's referencing something that's
             // not been read and put in the model yet.
-            // Return a raw string logical element. This will need to be replaced before initialization is done.
+            // Return an uninterpreted string logical element. This will need to be replaced before initialization is done.
             else if (AllowRawStringElements)
             {
-                return new RawStringLogicalElement(stringValue);
+                return new UninterpretedStringLogicalElement(stringValue);
             }
             else
             {

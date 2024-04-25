@@ -11,7 +11,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     public abstract class AbstractObjectLogicalElementWithSubRequirements : AbstractObjectLogicalElement
     {
         public LogicalRequirements LogicalRequirements { get; set; }
-        
+
+        public AbstractObjectLogicalElementWithSubRequirements()
+        {
+
+        }
+
+        public AbstractObjectLogicalElementWithSubRequirements(LogicalRequirements logicalRequirements)
+        {
+            LogicalRequirements = logicalRequirements;
+        }
+
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             return LogicalRequirements.InitializeReferencedLogicalElementProperties(model, room);

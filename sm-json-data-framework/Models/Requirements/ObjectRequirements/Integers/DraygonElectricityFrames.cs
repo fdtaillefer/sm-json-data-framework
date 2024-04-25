@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class DraygonElectricityFrames : AbstractDamageNumericalValueLogicalElement
     {
+        public DraygonElectricityFrames()
+        {
+
+        }
+
+        public DraygonElectricityFrames(int frames) : base(frames)
+        {
+
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return model.Rules.CalculateElectricityGrappleDamage(inGameState, Value) * times;

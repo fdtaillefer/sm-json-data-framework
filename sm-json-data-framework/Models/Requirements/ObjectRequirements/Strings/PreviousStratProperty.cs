@@ -12,6 +12,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
     /// </summary>
     public class PreviousStratProperty : AbstractObjectLogicalElementWithString
     {
+        public PreviousStratProperty()
+        {
+
+        }
+
+        public PreviousStratProperty(string previousStrat): base(previousStrat)
+        {
+            
+        }
+
         public override bool IsNever()
         {
             return false;

@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class LavaPhysicsFrames: AbstractDamageNumericalValueLogicalElement
     {
+        public LavaPhysicsFrames()
+        {
+
+        }
+
+        public LavaPhysicsFrames(int frames) : base(frames)
+        {
+
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Value) * times;

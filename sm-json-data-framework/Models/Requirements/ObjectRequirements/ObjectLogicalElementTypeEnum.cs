@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_framework.Converters
+namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
 {
     /// <summary>
-    /// An enum identifying the a of object logical element.
+    /// An enum identifying the possible types of object logical elements.
     /// </summary>
     public enum ObjectLogicalElementTypeEnum
     {

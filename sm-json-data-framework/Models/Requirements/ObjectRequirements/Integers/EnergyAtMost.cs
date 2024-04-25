@@ -11,6 +11,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class EnergyAtMost : AbstractDamageNumericalValueLogicalElement
     {
+        public EnergyAtMost()
+        {
+
+        }
+
+        public EnergyAtMost(int energy) : base(energy)
+        {
+
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int currentRegularEnergy = inGameState.Resources.GetAmount(Items.RechargeableResourceEnum.RegularEnergy);

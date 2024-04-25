@@ -8,9 +8,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// <summary>
     /// A logical element that is just a raw, uninterpreted string, directly from a json file.
     /// </summary>
-    public class RawStringLogicalElement: AbstractStringLogicalElement
+    public class UninterpretedStringLogicalElement: AbstractStringLogicalElement
     {
-        public RawStringLogicalElement(string stringValue)
+        public UninterpretedStringLogicalElement(string stringValue)
         {
             StringValue = stringValue;
         }
