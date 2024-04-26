@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Raw.Items;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,5 +11,15 @@ namespace sm_json_data_framework.Models.Items
     public class InGameItem : Item
     {
         public string Data { get; set; }
+
+        public InGameItem()
+        {
+
+        }
+
+        public InGameItem(RawInGameItem item): base(item.Name)
+        {
+            Data = item.Data;
+        }
     }
 }
