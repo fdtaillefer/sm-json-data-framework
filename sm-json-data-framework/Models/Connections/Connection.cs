@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms.Nodes;
+﻿using sm_json_data_framework.Models.Raw.Connections;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,5 +17,16 @@ namespace sm_json_data_framework.Models.Connections
         public ConnectionNode FromNode { get; set; }
 
         public ConnectionNode ToNode { get; set; }
+
+        public Connection() { 
+
+        }
+
+        public Connection(RawConnection rawConnection, RawConnectionNode fromNode, RawConnectionNode toNode)
+        {
+            ConnectionType = rawConnection.ConnectionType;
+            FromNode = new ConnectionNode(fromNode);
+            ToNode = new ConnectionNode(toNode);
+        }
     }
 }

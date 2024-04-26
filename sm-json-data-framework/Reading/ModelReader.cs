@@ -6,6 +6,7 @@ using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Raw.Connections;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
@@ -127,37 +128,25 @@ namespace sm_json_data_framework.Reading
             string[] allConnectionFiles = Directory.GetFiles(connectionBaseDirectory, "*.json", SearchOption.AllDirectories);
             foreach(string connectionFile in allConnectionFiles)
             {
-                ConnectionContainer connectionContainer = JsonSerializer.Deserialize<ConnectionContainer>(File.ReadAllText(connectionFile), options);
-                foreach(JsonConnection connection in connectionContainer.Connections)
+                RawConnectionContainer connectionContainer = JsonSerializer.Deserialize<RawConnectionContainer>(File.ReadAllText(connectionFile), options);
+                foreach(RawConnection rawConnection in connectionContainer.Connections)
                 {
-                    ConnectionNode node1 = connection.Nodes.ElementAt(0);
-                    ConnectionNode node2 = connection.Nodes.ElementAt(1);
+                    RawConnectionNode rawNode1 = rawConnection.Nodes.ElementAt(0);
+                    RawConnectionNode rawNode2 = rawConnection.Nodes.ElementAt(1);
 
                     // If the forward direction is applicable for this json connection, create and add a corresponding forward one-way connection
-                    if(connection.Direction == ConnectionDirectionEnum.Forward 
-                        || connection.Direction == ConnectionDirectionEnum.Bidirectional)
+                    if(rawConnection.Direction == ConnectionDirectionEnum.Forward 
+                        || rawConnection.Direction == ConnectionDirectionEnum.Bidirectional)
                     {
-                        Connection forwardConnection = new Connection
-                        {
-                            ConnectionType = connection.ConnectionType,
-                            FromNode = connection.Nodes.First(),
-                            ToNode = connection.Nodes.ElementAt(1)
-                        };
-
+                        Connection forwardConnection = new Connection(rawConnection, rawNode1, rawNode2);
                         model.Connections.Add(forwardConnection.FromNode.IdentifyingString, forwardConnection);
                     }
 
                     // If the backward direction is applicable for this json connection, create and add a corresponding backward one-way connection
-                    if (connection.Direction == ConnectionDirectionEnum.Backward
-                        || connection.Direction == ConnectionDirectionEnum.Bidirectional)
+                    if (rawConnection.Direction == ConnectionDirectionEnum.Backward
+                        || rawConnection.Direction == ConnectionDirectionEnum.Bidirectional)
                     {
-                        Connection backwardConnection = new Connection
-                        {
-                            ConnectionType = connection.ConnectionType,
-                            FromNode = connection.Nodes.ElementAt(1),
-                            ToNode = connection.Nodes.First()
-                        };
-
+                        Connection backwardConnection = new Connection(rawConnection, rawNode2, rawNode1);
                         model.Connections.Add(backwardConnection.FromNode.IdentifyingString, backwardConnection);
                     }
                 }
