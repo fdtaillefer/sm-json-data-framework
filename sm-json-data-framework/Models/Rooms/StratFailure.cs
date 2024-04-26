@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Requirements;
+﻿using sm_json_data_framework.Models.Raw.Rooms;
+using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,20 @@ namespace sm_json_data_framework.Models.Rooms
         public bool Softlock { get; set; } = false;
 
         public bool ClearsPreviousNode { get; set; } = false;
+
+        public StratFailure()
+        {
+
+        }
+
+        public StratFailure(RawStratFailure failure, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Name = failure.Name;
+            LeadsToNodeId = failure.LeadsToNode;
+            Cost = failure.Cost.ToLogicalRequirements(knowledgeBase);
+            Softlock = failure.Softlock;
+            ClearsPreviousNode = failure.ClearsPreviousNode;
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
         {

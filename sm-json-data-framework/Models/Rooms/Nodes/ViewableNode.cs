@@ -1,4 +1,6 @@
-﻿using sm_json_data_framework.Utils;
+﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +21,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public RoomNode Node { get; set; }
 
+        /// <summary>
+        /// The strats that can be executed to view the node, mapped by name.
+        /// </summary>
         public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
+
+        public ViewableNode()
+        {
+
+        }
+
+        public ViewableNode(RawViewableNode viewableNode, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            NodeId = viewableNode.Id;
+            Strats = viewableNode.Strats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {

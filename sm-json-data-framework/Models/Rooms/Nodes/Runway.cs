@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules;
@@ -29,6 +30,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public int EndingUpTiles { get; set; } = 0;
 
+        /// <summary>
+        /// The strats that can be executed to use this Runway, mapped by name.
+        /// </summary>
         public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
         public bool UsableComingIn = true;
@@ -42,6 +46,26 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
+
+        public Runway()
+        {
+
+        }
+
+        public Runway(RawRunway runway, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Name = runway.Name;
+            Length = runway.Length;
+            GentleUpTiles = runway.GentleUpTiles;
+            GentleDownTiles = runway.GentleDownTiles;
+            SteepUpTiles = runway.SteepUpTiles;
+            SteepDownTiles = runway.SteepDownTiles;
+            StartingDownTiles = runway.StartingDownTiles;
+            EndingUpTiles = runway.EndingUpTiles;
+            Strats = runway.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            UsableComingIn = runway.UsableComingIn;
+            OpenEnds = runway.OpenEnd;
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {

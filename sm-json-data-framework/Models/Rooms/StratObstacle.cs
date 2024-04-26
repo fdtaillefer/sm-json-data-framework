@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,22 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         [JsonIgnore]
         public IEnumerable<RoomObstacle> AdditionalObstacles { get; set; }
+
+        public StratObstacle()
+        {
+
+        }
+
+        public StratObstacle(RawStratObstacle stratObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            ObstacleId = stratObstacle.Id;
+            Requires = stratObstacle.Requires.ToLogicalRequirements(knowledgeBase);
+            if(stratObstacle.Bypass != null)
+            {
+                Bypass = stratObstacle.Bypass.ToLogicalRequirements(knowledgeBase);
+            }
+            AdditionalObstacleIds = new HashSet<string>(stratObstacle.AdditionalObstacles);
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
         {

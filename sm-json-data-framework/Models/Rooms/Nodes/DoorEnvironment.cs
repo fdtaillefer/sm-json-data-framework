@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Rules;
+﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,20 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         [JsonIgnore]
         public RoomNode Node { get; set; }
+
+        public DoorEnvironment()
+        {
+            
+        }
+
+        public DoorEnvironment(RawDoorEnvironment environment)
+        {
+            Physics = environment.Physics;
+            if(environment.EntranceNodes != null)
+            {
+                EntranceNodeIds = new HashSet<int>(environment.EntranceNodes);
+            }
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {

@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms.Nodes;
+﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         [JsonIgnore]
         public RoomNode ExitNode { get; set; }
+
+        public InitiateRemotely()
+        {
+
+        }
+
+        public InitiateRemotely(RawInitiateRemotely initiateRemotely)
+        {
+            InitiateAtNodeId = initiateRemotely.InitiateAt;
+            MustOpenDoorFirst = initiateRemotely.MustOpenDoorFirst;
+            PathToDoorNodes = initiateRemotely.PathToDoor.Select(pathNode => new InitiateRemotelyPathToDoorNode(pathNode));
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
         {

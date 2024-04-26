@@ -2,6 +2,8 @@
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Raw.Requirements;
+using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Utils;
 using System;
@@ -72,8 +74,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Whether entering a room at this node effectively spawns Samus at a different node.
         /// </summary>
+        [JsonIgnore]
         public bool SpawnsAtDifferentNode { get { return SpawnAtNode != this; } }
 
+        /// <summary>
+        /// The locks that may prevent interaction with this node, mapped by name.
+        /// </summary>
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
 
         public IEnumerable<UtilityEnum> Utility { get; set; } = Enumerable.Empty<UtilityEnum>();
@@ -136,6 +142,31 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         }
         
         public IEnumerable<TwinDoorAddress> TwinDoorAddresses { get; set; } = Enumerable.Empty<TwinDoorAddress>();
+
+        public RoomNode()
+        {
+
+        }
+
+        public RoomNode(RawRoomNode node, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Id = node.Id;
+            Name = node.Name;
+            NodeType = node.NodeType;
+            NodeSubType = node.NodeSubType;
+            NodeItemName = node.NodeItem;
+            NodeAddress = node.NodeAddress;
+            DoorEnvironments = node.DoorEnvironments.Select(environment => new DoorEnvironment(environment));
+            InteractionRequires = node.InteractionRequires.ToLogicalRequirements(knowledgeBase);
+            Runways = node.Runways.Select(runway => new Runway(runway, knowledgeBase));
+            CanLeaveCharged = node.CanLeaveCharged.Select(clc => new Nodes.CanLeaveCharged(clc, knowledgeBase));
+            OverrideSpawnAtNodeId = node.SpawnAt;
+            Locks = node.Locks.Select(nodeLock => new NodeLock(nodeLock, knowledgeBase)).ToDictionary(nodeLock => nodeLock.Name, nodeLock => nodeLock);
+            Utility = new HashSet<UtilityEnum>(node.Utility);
+            ViewableNodes = node.ViewableNodes.Select(viewableNode => new ViewableNode(viewableNode, knowledgeBase));
+            YieldsStrings = new HashSet<string>(node.Yields);
+            TwinDoorAddresses = node.TwinDoorAddresses.Select(twinAddress => new TwinDoorAddress(twinAddress));
+        }
 
         /// <summary>
         /// Returns the enumeration of locks on this node that are active and locked, according to the provided inGameState.

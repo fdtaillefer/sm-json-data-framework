@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,20 @@ namespace sm_json_data_framework.Models.Rooms
         public IEnumerable<StratFailure> Failures { get; set; } = Enumerable.Empty<StratFailure>();
 
         public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
+
+        public Strat() { 
+
+        }
+
+        public Strat (RawStrat strat, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Name = strat.Name;
+            Notable = strat.Notable;
+            Requires = strat.Requires.ToLogicalRequirements(knowledgeBase);
+            Obstacles = strat.Obstacles.Select(obstacle => new StratObstacle(obstacle, knowledgeBase));
+            Failures = strat.Failures.Select(failure => new StratFailure(failure, knowledgeBase));
+            StratProperties = new HashSet<string>(strat.StratProperties);
+        }
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {

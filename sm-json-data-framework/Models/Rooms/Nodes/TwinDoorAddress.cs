@@ -1,13 +1,21 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class TwinDoorAddress
+    public class TwinDoorAddress: RawTwinDoorAddress
     {
-        public string RoomAddress { get; set; }
+        public TwinDoorAddress()
+        {
 
-        public string DoorAddress { get; set; }
+        }
+
+        public TwinDoorAddress(RawTwinDoorAddress twinAddress)
+        {
+            DoorAddress = twinAddress.DoorAddress;
+            RoomAddress = twinAddress.RoomAddress;
+        }
     }
 }

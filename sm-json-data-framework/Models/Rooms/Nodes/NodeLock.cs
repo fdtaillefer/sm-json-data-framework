@@ -1,9 +1,11 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -21,8 +23,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public string Name { get; set; }
 
+        /// <summary>
+        /// Strats that can be executed to unlock this lock, mapped by name.
+        /// </summary>
         public IDictionary<string, Strat> UnlockStrats { get; set; } = new Dictionary<string, Strat>();
 
+        /// <summary>
+        /// Strats that can be executed to bypass this lock, mapped by name.
+        /// </summary>
         public IDictionary<string, Strat> BypassStrats { get; set; } = new Dictionary<string, Strat>();
 
         [JsonPropertyName("yields")]
@@ -41,6 +49,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         [JsonIgnore]
         public RoomNode Node { get; set; }
+
+        public NodeLock()
+        {
+
+        }
+
+        public NodeLock(RawNodeLock nodeLock, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            LockType = nodeLock.LockType;
+            Lock = nodeLock.Lock.ToLogicalRequirements(knowledgeBase);
+            Name = nodeLock.Name;
+            UnlockStrats = nodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            BypassStrats = nodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            YieldsStrings = new HashSet<string>(nodeLock.Yields);
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {

@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules;
@@ -33,6 +34,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         [JsonIgnore]
         public bool IsInitiatedRemotely { get { return InitiateRemotely != null; } }
 
+        /// <summary>
+        /// The strats that can be used to execute this CanLeaveCharged, mapped by name.
+        /// </summary>
         public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
 
         [JsonPropertyName("openEnd")]
@@ -62,6 +66,29 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         [JsonIgnore]
         public RoomNode Node { get; set; }
+
+        public CanLeaveCharged()
+        {
+
+        }
+
+        public CanLeaveCharged(RawCanLeaveCharged canLeaveCharged, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            UsedTiles = canLeaveCharged.UsedTiles;
+            FramesRemaining = canLeaveCharged.FramesRemaining;
+            ShinesparkFrames = canLeaveCharged.ShinesparkFrames;
+            if (canLeaveCharged.InitiateRemotely != null)
+            {
+                InitiateRemotely = new InitiateRemotely(canLeaveCharged.InitiateRemotely);
+            }
+            Strats = canLeaveCharged.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            OpenEnds = canLeaveCharged.OpenEnd;
+            GentleUpTiles = canLeaveCharged.GentleUpTiles;
+            GentleDownTiles = canLeaveCharged.GentleDownTiles;
+            SteepUpTiles = canLeaveCharged.SteepUpTiles;
+            SteepDownTiles = canLeaveCharged.SteepDownTiles;
+            StartingDownTiles = canLeaveCharged.StartingDownTiles;
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {

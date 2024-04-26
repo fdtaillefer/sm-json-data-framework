@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,5 +21,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         [JsonPropertyName("strats")]
         public IEnumerable<string> StratNames { get; set; } = Enumerable.Empty<string>();
+
+        public InitiateRemotelyPathToDoorNode()
+        {
+
+        }
+
+        public InitiateRemotelyPathToDoorNode(RawInitiateRemotelyPathToDoorNode pathNode)
+        {
+            DestinationNodeId = pathNode.DestinationNode;
+            StratNames = new List<string>(pathNode.Strats);
+        }
     }
 }
