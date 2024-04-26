@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Requirements;
+﻿using sm_json_data_framework.Models.Raw.Weapons;
+using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,24 @@ namespace sm_json_data_framework.Models.Weapons
         public bool HitsGroup { get; set; }
 
         public IEnumerable<WeaponCategoryEnum> Categories { get; set; } = Enumerable.Empty<WeaponCategoryEnum>();
+
+        public Weapon()
+        {
+
+        }
+
+        public Weapon(RawWeapon weapon, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Id = weapon.Id;
+            Name = weapon.Name;
+            Damage = weapon.Damage;
+            CooldownFrames = weapon.CooldownFrames;
+            UseRequires = weapon.UseRequires.ToLogicalRequirements(knowledgeBase);
+            ShotRequires = weapon.ShotRequires.ToLogicalRequirements(knowledgeBase);
+            Situational = weapon.Situational;
+            HitsGroup = weapon.HitsGroup;
+            Categories = new HashSet<WeaponCategoryEnum>(weapon.Categories);
+        }
 
         public void InitializeProperties(SuperMetroidModel model)
         {

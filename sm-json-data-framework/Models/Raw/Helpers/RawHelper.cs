@@ -12,6 +12,6 @@ namespace sm_json_data_framework.Models.Raw.Helpers
     {
         public string Name { get; set; }
 
-        public RawLogicalRequirements Requires { get; set; }
+        public RawLogicalRequirements Requires { get; set; } = new RawLogicalRequirements();
     }
 }

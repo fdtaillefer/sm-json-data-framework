@@ -9,6 +9,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements
 {
     public class RawLogicalRequirements
     {
+        public RawLogicalRequirements()
+        {
+
+        }
+
         public RawLogicalRequirements(IEnumerable<AbstractRawLogicalElement> logicalElements)
         {
             LogicalElements = LogicalElements.Concat(logicalElements);
