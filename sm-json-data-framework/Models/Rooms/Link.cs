@@ -1,4 +1,6 @@
-﻿using sm_json_data_framework.Utils;
+﻿using sm_json_data_framework.Models.Raw.Rooms;
+using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,17 @@ namespace sm_json_data_framework.Models.Rooms
         /// The details of how this Link links to different nodes, mapped by target node ID.
         /// </summary>
         public IDictionary<int, LinkTo> To {get;set;} = new Dictionary<int, LinkTo>();
+
+        public Link()
+        {
+
+        }
+
+        public Link(RawLink link, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            FromNodeId = link.From;
+            To = link.To.Select(linkTo => new LinkTo(linkTo, knowledgeBase)).ToDictionary(linkTo => linkTo.TargetNodeId, linkTo => linkTo);
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
         {

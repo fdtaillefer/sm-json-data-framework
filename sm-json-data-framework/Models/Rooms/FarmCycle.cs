@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class FarmCycle: InitializablePostDeserializableInRoomEnemy
     {
-        public string name { get; set; }
+        public string Name { get; set; }
 
         public int CycleFrames { get; set; }
 
@@ -28,6 +29,20 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public RoomEnemy RoomEnemy { get; set; }
 
+        public FarmCycle()
+        {
+
+        }
+
+        public FarmCycle(RawFarmCycle cycle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Name = cycle.Name;
+            CycleFrames = cycle.CycleFrames;
+            if(Requires != null)
+            {
+                Requires = cycle.Requires.ToLogicalRequirements(knowledgeBase);
+            }
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
         {

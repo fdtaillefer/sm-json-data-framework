@@ -1,4 +1,7 @@
-﻿using sm_json_data_framework.Models.Rooms.Nodes;
+﻿using sm_json_data_framework.Models.Raw.Rooms;
+using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +36,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IDictionary<int, Link> Links { get; set; } = new Dictionary<int, Link>();
 
+        /// <summary>
+        /// The obstacles that are in this room, mapped by Id.
+        /// </summary>
         public IDictionary<string, RoomObstacle> Obstacles { get; set; } = new Dictionary<string, RoomObstacle>();
 
         /// <summary>
@@ -48,22 +54,24 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public SuperMetroidModel SuperMetroidModel { get; set; }
 
-        /// <summary>
-        /// Returns the LinkTo that describes navigation from fromNodeId to toNodeId, if it exists.
-        /// </summary>
-        /// <param name="fromNodeId">ID of the origin node</param>
-        /// <param name="toNodeId">ID of the destination node</param>
-        /// <returns>The LinkTo, or null if not found.</returns>
-        public LinkTo GetLinkBetween(int fromNodeId, int toNodeId)
+        public Room()
         {
-            if (Links.TryGetValue(fromNodeId, out Link link))
-            {
-                if (link.To.TryGetValue(toNodeId, out LinkTo linkTo))
-                {
-                    return linkTo;
-                }
-            }
-            return null;
+
+        }
+
+        public Room(RawRoom room, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Id = room.Id;
+            Name = room.Name;
+            Area = room.Area;
+            Subarea = room.Subarea;
+            Playable = room.Playable;
+            RoomAddress = room.RoomAddress;
+            RoomEnvironments = room.RoomEnvironments.Select(rawEnvironment => new RoomEnvironment(rawEnvironment));
+            Nodes = room.Nodes.Select(rawNode => new RoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id, node => node);
+            Links = room.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId, link => link);
+            Obstacles = room.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id, obstacle => obstacle);
+            Enemies = room.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id, roomEnemy => roomEnemy);
         }
 
         public void InitializeProperties(SuperMetroidModel model)
@@ -94,6 +102,24 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 enemy.InitializeProperties(model, this);
             }
+        }
+
+        /// <summary>
+        /// Returns the LinkTo that describes navigation from fromNodeId to toNodeId, if it exists.
+        /// </summary>
+        /// <param name="fromNodeId">ID of the origin node</param>
+        /// <param name="toNodeId">ID of the destination node</param>
+        /// <returns>The LinkTo, or null if not found.</returns>
+        public LinkTo GetLinkBetween(int fromNodeId, int toNodeId)
+        {
+            if (Links.TryGetValue(fromNodeId, out Link link))
+            {
+                if (link.To.TryGetValue(toNodeId, out LinkTo linkTo))
+                {
+                    return linkTo;
+                }
+            }
+            return null;
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model)

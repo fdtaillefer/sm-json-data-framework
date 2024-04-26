@@ -1,4 +1,6 @@
-﻿using sm_json_data_framework.Models.Rooms.Nodes;
+﻿using sm_json_data_framework.Models.Raw.Rooms;
+using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,7 +22,21 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public RoomNode TargetNode { get; set; }
 
+        /// <summary>
+        /// The strats that can be executed to follow this LinkTo, mapped by name.
+        /// </summary>
         public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
+
+        public LinkTo()
+        {
+
+        }
+
+        public LinkTo(RawLinkTo linkTo, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            TargetNodeId = linkTo.Id;
+            Strats = linkTo.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
         {

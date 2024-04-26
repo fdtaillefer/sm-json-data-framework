@@ -1,5 +1,7 @@
 ﻿using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Raw.Requirements;
+using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
@@ -66,6 +68,28 @@ namespace sm_json_data_framework.Models.Rooms
 
         [JsonIgnore]
         public bool IsSpawner { get => FarmCycles.Any(); }
+
+        public RoomEnemy()
+        {
+
+        }
+
+        public RoomEnemy(RawRoomEnemy roomEnemy, LogicalElementCreationKnowledgeBase knowledgeBase)
+        {
+            Id = roomEnemy.Id;
+            GroupName = roomEnemy.GroupName;
+            EnemyName = roomEnemy.EnemyName;
+            Quantity = roomEnemy.Quantity;
+            HomeNodeIds = new HashSet<int>(roomEnemy.HomeNodes);
+            BetweenNodeIds = new HashSet<int>(roomEnemy.BetweenNodes);
+            Spawn = roomEnemy.Spawn.ToLogicalRequirements(knowledgeBase);
+            if (roomEnemy.StopSpawn != null)
+            {
+                StopSpawn = roomEnemy.StopSpawn.ToLogicalRequirements(knowledgeBase);
+            }
+            DropRequires = roomEnemy.DropRequires.ToLogicalRequirements(knowledgeBase);
+            FarmCycles = roomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase));
+        }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
         {
