@@ -61,11 +61,17 @@ namespace sm_json_data_framework.Reading
 
             Assert.Equal(91, model.Techs.Count);
 
-            // Not getting an exact lock count, but make sure there are some
-            Assert.NotEmpty(model.Locks);
+            // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
+            Assert.True(model.Nodes.Count > 20);
 
-            // Not getting an exact room enemy count, but make sure there are some
-            Assert.NotEmpty(model.RoomEnemies);
+            // Not getting an exact lock count, but make sure there are many in the top-level dictionary
+            Assert.True(model.Locks.Count > 20);
+
+            // Not getting an exact runway count, but make sure there are many in the top-level dictionary
+            Assert.True(model.Runways.Count > 20);
+
+            // Not getting an exact room enemy count, but make sure there are many in the top-level dictionary
+            Assert.True(model.RoomEnemies.Count > 20);
 
             // Starting max resources
             Assert.Equal(99, model.StartConditions.BaseResourceMaximums.GetAmount(Models.Items.RechargeableResourceEnum.RegularEnergy));

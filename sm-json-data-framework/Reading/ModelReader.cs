@@ -160,40 +160,40 @@ namespace sm_json_data_framework.Reading
                 foreach(Room room in roomContainer.Rooms)
                 {
                     model.Rooms.Add(room.Name, room);
-
-                    foreach(RoomNode node in room.Nodes.Values)
-                    {
-                        model.Nodes.Add(node.Name, node);
-                        foreach(Runway runway in node.Runways)
-                        {
-                            model.Runways.Add(runway.Name, runway);
-                        }
-                    }
                 }
             }
 
             // Now we've created all models in a basic state...
 
             // Initialize a few top-level convenience maps
+            Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
+            Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
+            Dictionary<string, RoomNode> nodes = new Dictionary<string, RoomNode>();
+            Dictionary<string, Runway> runways = new Dictionary<string, Runway>();
             foreach (Room room in model.Rooms.Values)
             {
-                Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
                 foreach (RoomEnemy roomEnemy in room.Enemies.Values)
                 {
                     roomEnemies.Add(roomEnemy.GroupName, roomEnemy);
                 }
-                model.RoomEnemies = roomEnemies;
 
-                Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
-                foreach (RoomNode node in model.Nodes.Values)
+                foreach (RoomNode node in room.Nodes.Values)
                 {
+                    nodes.Add(node.Name, node);
+                    foreach (Runway runway in node.Runways)
+                    {
+                        runways.Add(runway.Name, runway);
+                    }
                     foreach (KeyValuePair<string, NodeLock> kvp in node.Locks)
                     {
                         locks.Add(kvp.Key, kvp.Value);
                     }
-                    model.Locks = locks;
                 }
             }
+            model.Locks = locks;
+            model.Nodes = nodes;
+            model.Runways = runways;
+            model.RoomEnemies = roomEnemies;
 
             // Initialize foreign/additional properties, and cleanup whatever is found to be useless based on logical options
             if (initialize)
