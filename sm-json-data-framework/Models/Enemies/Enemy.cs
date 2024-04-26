@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Raw.Enemies;
 
 namespace sm_json_data_framework.Models.Enemies
 {
@@ -65,6 +66,31 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         [JsonIgnore]
         public IDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; set; }
+
+        public Enemy()
+        {
+
+        }
+
+        public Enemy(RawEnemy enemy)
+        {
+            Id = enemy.Id;
+            Name = enemy.Name;
+            Attacks = enemy.Attacks.ToDictionary(attack => attack.Name, attack => attack);
+            Hp = enemy.Hp;
+            AmountOfDrops = enemy.AmountOfDrops;
+            Drops = new EnemyDrops(enemy.Drops);
+            if (enemy.FarmableDrops != null)
+            {
+                FarmableDrops = new EnemyDrops(enemy.FarmableDrops);
+            }
+            Dimensions = new EnemyDimensions(enemy.Dims);
+            Freezable = enemy.Freezable;
+            Grapplable = enemy.Grapplable;
+            InvulnerabilityStrings = new List<string>(enemy.Invul);
+            RawDamageMultipliers = enemy.DamageMultipliers.Select(multiplier => multiplier.CLone());
+            Areas = new HashSet<string>(enemy.Areas);
+        }
 
         public void InitializeProperties(SuperMetroidModel model)
         {

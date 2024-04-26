@@ -1,17 +1,23 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Raw.Enemies;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Enemies
 {
-    public class EnemyAttack
+    public class EnemyAttack: RawEnemyAttack
     {
-        public string Name { get; set; }
+        public EnemyAttack()
+        {
 
-        public int BaseDamage { get; set; }
+        }
 
-        public bool AffectedByVaria { get; set; } = true;
-
-        public bool AffectedByGravity { get; set; } = true;
+        public EnemyAttack(RawEnemyAttack rawAttack)
+        {
+            Name = rawAttack.Name;
+            BaseDamage = rawAttack.BaseDamage;
+            AffectedByVaria = rawAttack.AffectedByVaria;
+            AffectedByGravity = rawAttack.AffectedByGravity;
+        }
     }
 }

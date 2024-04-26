@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Raw.Enemies;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,20 +9,8 @@ namespace sm_json_data_framework.Models.Enemies
     /// Contains drop rates for all enemy drop types.
     /// This class makes no assumption about whether those rates are out of 100 or 102 or 255 or any other value.
     /// </summary>
-    public class EnemyDrops
+    public class EnemyDrops : RawEnemyDrops
     {
-        public decimal NoDrop { get; set; }
-
-        public decimal SmallEnergy { get; set; }
-
-        public decimal BigEnergy { get; set; }
-
-        public decimal Missile { get; set; }
-
-        public decimal Super { get; set; }
-
-        public decimal PowerBomb { get; set; }
-
         public EnemyDrops()
         {
 
@@ -35,6 +24,16 @@ namespace sm_json_data_framework.Models.Enemies
             Missile = other.Missile;
             Super = other.Super;
             PowerBomb = other.PowerBomb;
+        }
+
+        public EnemyDrops(RawEnemyDrops drops)
+        {
+            NoDrop = drops.NoDrop;
+            SmallEnergy = drops.SmallEnergy;
+            BigEnergy = drops.BigEnergy;
+            Missile = drops.Missile;
+            Super = drops.Super;
+            PowerBomb = drops.PowerBomb;
         }
 
         public EnemyDrops Clone()
