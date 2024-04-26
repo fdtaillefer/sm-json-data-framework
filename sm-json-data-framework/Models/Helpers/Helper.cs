@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Helpers
         /// so if a Helper is being created, the knowledge needed to convert logical requirements is still being built.
         /// Logical requirements should be assigned in a second pass.
         /// </summary>
-        /// <param name="helper"></param>
+        /// <param name="helper">RawHelper to use as a base</param>
         public Helper (RawHelper helper)
         {
             Name = helper.Name;
