@@ -1,8 +1,10 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Raw.Techs;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using System;
 using System.Collections.Generic;
@@ -51,6 +53,16 @@ namespace sm_json_data_framework.Utils
                     return null;
                 }
             }
+        }
+
+        // We put this as an extension rather than in RawTech because we want RawTech to stay a basic model with no logic as much as possible
+        /// <summary>
+        /// Returns a list containing this RawTech and all its extension raw techs (and all their own extension raw techs, and so on).
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<RawTech> SelectWithExtensions(this RawTech rawTech)
+        {
+            return rawTech.ExtensionTechs.SelectMany(tech => tech.SelectWithExtensions()).Prepend(rawTech).ToList();
         }
 
         /// <summary>

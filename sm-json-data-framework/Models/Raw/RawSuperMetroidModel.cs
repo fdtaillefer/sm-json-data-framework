@@ -30,20 +30,20 @@ namespace sm_json_data_framework.Models.Raw
     /// </summary>
     public class RawSuperMetroidModel
     {
-        RawItemContainer ItemContainer { get; set; }
+        public RawItemContainer ItemContainer { get; set; }
 
-        RawHelperContainer HelperContainer { get; set; }
+        public RawHelperContainer HelperContainer { get; set; }
 
-        RawTechContainer TechContainer { get; set; }
+        public RawTechContainer TechContainer { get; set; }
 
-        RawRoomContainer RoomContainer { get; set; }
+        public RawRoomContainer RoomContainer { get; set; }
 
-        RawConnectionContainer ConnectionContainer { get; set; }
+        public RawConnectionContainer ConnectionContainer { get; set; }
 
-        RawWeaponContainer WeaponContainer { get; set; }
+        public RawWeaponContainer WeaponContainer { get; set; }
 
-        RawEnemyContainer EnemyContainer { get; set; }
+        public RawEnemyContainer EnemyContainer { get; set; }
 
-        RawEnemyContainer BossContainer { get; set; }
+        public RawEnemyContainer BossContainer { get; set; }
     }
 }
