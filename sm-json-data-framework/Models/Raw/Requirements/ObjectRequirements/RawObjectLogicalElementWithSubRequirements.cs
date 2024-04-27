@@ -11,9 +11,15 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements
 {
     public class RawObjectLogicalElementWithSubRequirements: AbstractRawObjectLogicalElement
     {
-        public string PropertyName { get; set; }
+        public string PropertyName { get; }
 
-        public RawLogicalRequirements LogicalRequirements { get; set; }
+        public RawLogicalRequirements LogicalRequirements { get; }
+
+        public RawObjectLogicalElementWithSubRequirements(string propertyName, RawLogicalRequirements logicalRequirements)
+        {
+            PropertyName = propertyName;
+            LogicalRequirements = logicalRequirements;
+        }
 
         public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {

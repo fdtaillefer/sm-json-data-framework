@@ -131,6 +131,7 @@ namespace sm_json_data_framework.Converters
 
         public override void Write(Utf8JsonWriter writer, AbstractObjectLogicalElement value, JsonSerializerOptions options)
         {
+            // We're focusing on reading json files for now.
             throw new NotImplementedException();
         }
 

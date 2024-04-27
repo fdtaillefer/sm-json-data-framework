@@ -7,6 +7,7 @@ using sm_json_data_framework.Models.Techs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,7 +16,12 @@ namespace sm_json_data_framework.Models.Raw.Requirements
 {
     public class RawStringLogicalElement : AbstractRawLogicalElement
     {
-        public string Value { get; set; }
+        public string Value { get; }
+
+        public RawStringLogicalElement(string value)
+        {
+            Value = value;
+        }
 
         public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
