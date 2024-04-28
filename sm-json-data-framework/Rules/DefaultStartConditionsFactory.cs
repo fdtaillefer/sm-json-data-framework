@@ -17,10 +17,10 @@ namespace sm_json_data_framework.Rules
     /// </summary>
     public class DefaultStartConditionsFactory: IStartConditionsFactory
     {
-        public virtual StartConditions CreateStartConditions(SuperMetroidModel model, ItemContainer itemContainer)
+        public virtual StartConditions CreateStartConditions(SuperMetroidModel model, BasicStartConditions basicStartConditions)
         {
             List<GameFlag> startingFlags = new List<GameFlag>();
-            foreach (string flagName in itemContainer.StartingGameFlagNames)
+            foreach (string flagName in basicStartConditions.StartingFlagNames)
             {
                 if (!model.GameFlags.TryGetValue(flagName, out GameFlag flag))
                 {
@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Rules
             }
 
             List<NodeLock> startingLocks = new List<NodeLock>();
-            foreach (string lockName in itemContainer.StartingNodeLockNames)
+            foreach (string lockName in basicStartConditions.StartingLockNames)
             {
                 if (!model.Locks.TryGetValue(lockName, out NodeLock nodeLock))
                 {
@@ -40,13 +40,13 @@ namespace sm_json_data_framework.Rules
             }
 
             ResourceCount startingResources = new ResourceCount();
-            foreach (ResourceCapacity capacity in itemContainer.StartingResources)
+            foreach (RawResourceCapacity capacity in basicStartConditions.StartingResources)
             {
                 startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
             }
 
             ItemInventory startingInventory = new ItemInventory(startingResources);
-            foreach (string itemName in itemContainer.StartingItemNames)
+            foreach (string itemName in basicStartConditions.StartingItemNames)
             {
                 if (!model.Items.TryGetValue(itemName, out Item item))
                 {
@@ -57,58 +57,7 @@ namespace sm_json_data_framework.Rules
 
             StartConditions startConditions = new StartConditions
             {
-                StartingNode = model.GetNodeInRoom(itemContainer.StartingRoomName, itemContainer.StartingNodeId),
-                StartingGameFlags = startingFlags,
-                StartingOpenLocks = startingLocks,
-                // Default starting resource counts to the starting maximum
-                StartingResources = startingResources.Clone(),
-                StartingInventory = startingInventory
-            };
-
-            return startConditions;
-        }
-
-        public virtual StartConditions CreateStartConditions(SuperMetroidModel model, RawItemContainer rawItemContainer)
-        {
-            List<GameFlag> startingFlags = new List<GameFlag>();
-            foreach (string flagName in rawItemContainer.StartingFlags)
-            {
-                if (!model.GameFlags.TryGetValue(flagName, out GameFlag flag))
-                {
-                    throw new Exception($"Starting game flag {flagName} not found.");
-                }
-                startingFlags.Add(flag);
-            }
-
-            List<NodeLock> startingLocks = new List<NodeLock>();
-            foreach (string lockName in rawItemContainer.StartingLocks)
-            {
-                if (!model.Locks.TryGetValue(lockName, out NodeLock nodeLock))
-                {
-                    throw new Exception($"Starting node lock {lockName} not found.");
-                }
-                startingLocks.Add(nodeLock);
-            }
-
-            ResourceCount startingResources = new ResourceCount();
-            foreach (RawResourceCapacity capacity in rawItemContainer.StartingResources)
-            {
-                startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
-            }
-
-            ItemInventory startingInventory = new ItemInventory(startingResources);
-            foreach (string itemName in rawItemContainer.StartingItems)
-            {
-                if (!model.Items.TryGetValue(itemName, out Item item))
-                {
-                    throw new Exception($"Starting item {itemName} not found.");
-                }
-                startingInventory.ApplyAddItem(item);
-            }
-
-            StartConditions startConditions = new StartConditions
-            {
-                StartingNode = model.GetNodeInRoom(rawItemContainer.StartingRoom, rawItemContainer.StartingNode),
+                StartingNode = model.GetNodeInRoom(basicStartConditions.StartingRoomName, basicStartConditions.StartingNodeId),
                 StartingGameFlags = startingFlags,
                 StartingOpenLocks = startingLocks,
                 // Default starting resource counts to the starting maximum

@@ -14,21 +14,12 @@ namespace sm_json_data_framework.Rules
     public interface IStartConditionsFactory
     {
         /// <summary>
-        /// Creates and returns start conditions using the provided ItemContainer.
+        /// Creates and returns start conditions using the provided model and BasicStartConditions.
         /// </summary>
         /// <param name="model">A SuperMetroidModel in the process of being created. Its rooms (and nodes), items, and game flags
         /// are already assigned and available to be referenced.</param>
-        /// <param name="itemContainer">The result of reading items.json.</param>
+        /// <param name="basicStartConditions">A model describing the start conditions using no complex objects.</param>
         /// <returns>The created start conditions</returns>
-        StartConditions CreateStartConditions(SuperMetroidModel model, ItemContainer itemContainer);
-
-        /// <summary>
-        /// Creates and returns start conditions using the provided RawItemContainer.
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel in the process of being created. Its rooms (and nodes), items, and game flags
-        /// are already assigned and available to be referenced.</param>
-        /// <param name="rawItemContainer">The raw result of reading items.json.</param>
-        /// <returns>The created start conditions</returns>
-        StartConditions CreateStartConditions(SuperMetroidModel model, RawItemContainer rawItemContainer);
+        StartConditions CreateStartConditions(SuperMetroidModel model, BasicStartConditions basicStartConditions);
     }
 }

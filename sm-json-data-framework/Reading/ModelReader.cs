@@ -94,6 +94,9 @@ namespace sm_json_data_framework.Reading
                 .Select(n => new GameFlag(n))
                 .ToDictionary(f => f.Name);
 
+            // Put basic starting conditions in model
+            model.BasicStartConditions = new BasicStartConditions(itemContainer);
+
             // Read helpers and techs
             HelperContainer helperContainer = JsonSerializer.Deserialize<HelperContainer>(File.ReadAllText(helpersPath), options);
             model.Helpers = helperContainer.Helpers.ToDictionary(h => h.Name);
@@ -230,7 +233,7 @@ namespace sm_json_data_framework.Reading
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
             startConditionsFactory ??= new DefaultStartConditionsFactory();
-            model.StartConditions = startConditionsFactory.CreateStartConditions(model, itemContainer);
+            model.StartConditions = startConditionsFactory.CreateStartConditions(model, model.BasicStartConditions);
 
             if (initialize)
             {

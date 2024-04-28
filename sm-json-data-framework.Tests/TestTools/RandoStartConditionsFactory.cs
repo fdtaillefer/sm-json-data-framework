@@ -23,20 +23,10 @@ namespace sm_json_data_framework.Tests.TestTools
     /// </summary>
     public class RandoStartConditionsFactory: DefaultStartConditionsFactory
     {
-        public override StartConditions CreateStartConditions(SuperMetroidModel model, ItemContainer itemContainer)
+        public override StartConditions CreateStartConditions(SuperMetroidModel model, BasicStartConditions basicStartConditions)
         {
             // Create standard start conditions, we'll adjust them after
-            StartConditions startConditions = base.CreateStartConditions(model, itemContainer);
-
-            ApplyStartConditionAlterations(model, startConditions);
-
-            return startConditions;
-        }
-
-        public override StartConditions CreateStartConditions(SuperMetroidModel model, RawItemContainer rawItemContainer)
-        {
-            // Create standard start conditions, we'll adjust them after
-            StartConditions startConditions = base.CreateStartConditions(model, rawItemContainer);
+            StartConditions startConditions = base.CreateStartConditions(model, basicStartConditions);
 
             ApplyStartConditionAlterations(model, startConditions);
 

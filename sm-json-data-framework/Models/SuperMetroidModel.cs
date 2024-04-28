@@ -124,6 +124,9 @@ namespace sm_json_data_framework.Models
                 .Select(n => new GameFlag(n))
                 .ToDictionary(f => f.Name);
 
+            // Put basic starting conditions in model
+            BasicStartConditions = new BasicStartConditions(rawModel.ItemContainer);
+
             // Put helpers in model
             Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new Helper(rawHelper)).ToDictionary(h => h.Name);
 
@@ -237,7 +240,7 @@ namespace sm_json_data_framework.Models
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
             startConditionsFactory ??= new DefaultStartConditionsFactory();
-            StartConditions = startConditionsFactory.CreateStartConditions(this, rawModel.ItemContainer);
+            StartConditions = startConditionsFactory.CreateStartConditions(this, BasicStartConditions);
 
             if (initialize)
             {
@@ -295,7 +298,12 @@ namespace sm_json_data_framework.Models
         public SuperMetroidRules Rules { get; set; }
 
         /// <summary>
-        /// Describes the start condition for the game.
+        /// Describes the start condition for the game, with basic int and string foreign keys.
+        /// </summary>
+        public BasicStartConditions BasicStartConditions { get; set; }
+
+        /// <summary>
+        /// Describes the start condition for the game, complete with relevant objects within this model.
         /// </summary>
         public StartConditions StartConditions { get; set; }
 
