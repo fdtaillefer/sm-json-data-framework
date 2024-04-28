@@ -1,6 +1,8 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Reading;
 using sm_json_data_framework.Tests.TestTools;
@@ -116,12 +118,17 @@ namespace sm_json_data_framework.Tests.Models
 
             // When
             SuperMetroidModel model = new SuperMetroidModel(rawModel, rules: new RandoSuperMetroidRules(), logicalOptions: options,
-                startConditionsFactory: new RandoStartConditionsFactory());
+                startConditionsFactory: new RandoStartConditionsFactory(),
+                overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) },
+                overrideStringTypes: new List<(StringLogicalElementTypeEnum typeEnum, Type type)> { (StringLogicalElementTypeEnum.Item, typeof(ExtendedItemLogicalElement)) });
+                
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
             Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
             Assert.Equal(20, model.LogicalOptions.TilesToShineCharge);
+            Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].Links[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
+            Assert.NotEmpty(model.Rooms["Parlor and Alcatraz"].Nodes[5].Links[8].Strats["Alcatraz Escape"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedItemLogicalElement)));
         }
         #endregion
     }

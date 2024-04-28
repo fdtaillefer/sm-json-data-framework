@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
@@ -116,12 +117,14 @@ namespace sm_json_data_framework.Reading
 
             // When
             SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
-                startConditionsFactory: new RandoStartConditionsFactory());
+                startConditionsFactory: new RandoStartConditionsFactory(), 
+                overrideTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
             Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
             Assert.Equal(20, model.LogicalOptions.TilesToShineCharge);
+            Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].Links[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
         }
         #endregion
 

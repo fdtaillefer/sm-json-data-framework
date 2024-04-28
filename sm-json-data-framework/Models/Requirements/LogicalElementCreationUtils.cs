@@ -85,7 +85,7 @@ namespace sm_json_data_framework.Models.Requirements
                     throw new ArgumentException($"The C# type {type.Name} cannot be used to represent logical element '{typeEnum}' " +
                         $"Because type {defaultType} is not assignable from it");
                 }
-                logicalElementTypes.Add(typeEnum, type);
+                logicalElementTypes[typeEnum] = type;
             }
 
             return logicalElementTypes;
@@ -113,7 +113,7 @@ namespace sm_json_data_framework.Models.Requirements
                     throw new ArgumentException($"The C# type {type.Name} cannot be used to represent logical element '{typeEnum}' " +
                         $"Because type {defaultType} is not assignable from it");
                 }
-                logicalElementTypes.Add(typeEnum, type);
+                logicalElementTypes[typeEnum] = type;
             }
 
             return logicalElementTypes;
