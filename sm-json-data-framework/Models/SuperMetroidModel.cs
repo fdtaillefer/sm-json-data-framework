@@ -1,19 +1,28 @@
-﻿using sm_json_data_framework.Models.Connections;
+﻿using sm_json_data_framework.Converters;
+using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Navigation;
+using sm_json_data_framework.Models.Raw;
+using sm_json_data_framework.Models.Raw.Connections;
+using sm_json_data_framework.Models.Raw.Helpers;
+using sm_json_data_framework.Models.Raw.Techs;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -70,6 +79,202 @@ namespace sm_json_data_framework.Models
         {
             // Weapons can't have an initializer directly on itself because of the custom setter
             Weapons = new Dictionary<string, Weapon>();
+        }
+
+        /// <summary>
+        /// Creates a SuperMetroidModel using the data in the provided RawSuperMetroidModel, as well as other parameters
+        /// </summary>
+        /// <param name="rawModel">Raw model containing raw data presumably obtained from json model</param>
+        /// <param name="rules">A repository of game rules to operate by.
+        /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
+        /// <param name="logicalOptions">A container of logical options to go with the representation of the world.
+        /// If null, will use the default constructor of LogicalOptions (giving an arbitrary option set).</param>
+        /// <param name="startConditionsFactory">An object that can create the player's starting conditions for this representation of the world.
+        /// If null, will use a <see cref="DefaultStartConditionsFactory"/>.</param>
+        /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
+        /// If false, the objects in the returned model will contain mostly just raw data.</param>
+        /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
+        /// to represent that ObjectLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
+        /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
+        /// <param name="overrideStringTypes">A sequence of tuples, pairing together a StringLogicalElementTypeEnum and the C# type that should be used to 
+        /// to represent that StringLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
+        /// The provided C# types must extend the default type that is normally used for any given StringLogicalElementTypeEnum.</param>
+        /// <exception cref="Exception">If this method fails to interpret any logical element</exception>
+        public SuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, 
+            IStartConditionsFactory startConditionsFactory = null, bool initialize = true,
+            IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
+            IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
+        {
+            rules ??= new SuperMetroidRules();
+            logicalOptions ??= new LogicalOptions();
+            startConditionsFactory ??= new DefaultStartConditionsFactory();
+
+            Rules = rules;
+            LogicalOptions = logicalOptions;
+
+            // Put items in model
+            Items = rawModel.ItemContainer.ImplicitItems
+                    .Select(n => new Item(n))
+                    .Concat(rawModel.ItemContainer.UpgradeItems.Select(rawItem => new InGameItem(rawItem)))
+                    .Concat(rawModel.ItemContainer.ExpansionItems.Select(rawItem => new ExpansionItem(rawItem)))
+                    .ToDictionary(i => i.Name);
+
+            // Put game flags in model
+            GameFlags = rawModel.ItemContainer.GameFlags
+                .Select(n => new GameFlag(n))
+                .ToDictionary(f => f.Name);
+
+            // Put helpers in model
+            Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new Helper(rawHelper)).ToDictionary(h => h.Name);
+
+            // Put techs in model
+            IEnumerable<RawTech> rawTechs = rawModel.TechContainer.SelectAllTechs();
+            Techs = rawTechs.Select(rawTech => new Tech(rawTech)).ToDictionary(t => t.Name);
+
+            // At this point, Techs and Helpers don't contain their LogicalRequirements, we skipped them because
+            // they could reference Techs and Helpers that didn't exist yet. Go back and assign them.
+            LogicalElementCreationKnowledgeBase knowledgeBase = LogicalElementCreationUtils.CreateLogicalElementCreationKnowledgeBase(this,
+                overrideObjectTypes: overrideObjectTypes, overrideStringTypes: overrideStringTypes);
+            foreach (RawHelper rawHelper in rawModel.HelperContainer.Helpers)
+            {
+                Helpers[rawHelper.Name].Requires = rawHelper.Requires.ToLogicalRequirements(knowledgeBase);
+            }
+
+            foreach (RawTech rawTech in rawTechs)
+            {
+                Techs[rawTech.Name].Requires = rawTech.Requires.ToLogicalRequirements(knowledgeBase);
+            }
+
+            // Put weapons in model
+            Weapons = rawModel.WeaponContainer.Weapons.Select(rawWeapon => new Weapon(rawWeapon, knowledgeBase))
+                .ToDictionary(weapon => weapon.Name);
+
+            // Put regular enemies and bosses in model
+            Enemies = rawModel.EnemyContainer.Enemies.Concat(rawModel.BossContainer.Enemies).Select(rawEnemy => new Enemy(rawEnemy))
+                .ToDictionary(enemye => enemye.Name);
+
+            // Put connections in model
+            foreach (RawConnection rawConnection in rawModel.ConnectionContainer.Connections)
+            {
+                RawConnectionNode rawNode1 = rawConnection.Nodes.ElementAt(0);
+                RawConnectionNode rawNode2 = rawConnection.Nodes.ElementAt(1);
+
+                // If the forward direction is applicable for this json connection, create and add a corresponding forward one-way connection
+                if (rawConnection.Direction == ConnectionDirectionEnum.Forward
+                    || rawConnection.Direction == ConnectionDirectionEnum.Bidirectional)
+                {
+                    Connection forwardConnection = new Connection(rawConnection, rawNode1, rawNode2);
+                    Connections.Add(forwardConnection.FromNode.IdentifyingString, forwardConnection);
+                }
+
+                // If the backward direction is applicable for this json connection, create and add a corresponding backward one-way connection
+                if (rawConnection.Direction == ConnectionDirectionEnum.Backward
+                    || rawConnection.Direction == ConnectionDirectionEnum.Bidirectional)
+                {
+                    Connection backwardConnection = new Connection(rawConnection, rawNode2, rawNode1);
+                    Connections.Add(backwardConnection.FromNode.IdentifyingString, backwardConnection);
+                }
+            }
+
+            // Put rooms in model
+            Rooms = rawModel.RoomContainer.Rooms.Select(rawRoom => new Room(rawRoom, knowledgeBase)).ToDictionary(room => room.Name);
+
+            // Now we've created all models in a basic state...
+            // Initialize a few top-level convenience maps
+            Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
+            Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
+            Dictionary<string, RoomNode> nodes = new Dictionary<string, RoomNode>();
+            Dictionary<string, Runway> runways = new Dictionary<string, Runway>();
+            foreach (Room room in Rooms.Values)
+            {
+                foreach (RoomEnemy roomEnemy in room.Enemies.Values)
+                {
+                    roomEnemies.Add(roomEnemy.GroupName, roomEnemy);
+                }
+
+                foreach (RoomNode node in room.Nodes.Values)
+                {
+                    nodes.Add(node.Name, node);
+                    foreach (Runway runway in node.Runways)
+                    {
+                        runways.Add(runway.Name, runway);
+                    }
+                    foreach (KeyValuePair<string, NodeLock> kvp in node.Locks)
+                    {
+                        locks.Add(kvp.Key, kvp.Value);
+                    }
+                }
+            }
+            Locks = locks;
+            Nodes = nodes;
+            Runways = runways;
+            RoomEnemies = roomEnemies;
+
+
+            // Initialize foreign/additional properties, and cleanup whatever is found to be useless based on logical options
+            if (initialize)
+            {
+                // Initialize properties
+                foreach (Enemy enemy in Enemies.Values)
+                {
+                    enemy.InitializeProperties(this);
+                }
+                foreach (Room room in Rooms.Values)
+                {
+                    room.InitializeProperties(this);
+                }
+
+                // Cleanup
+                foreach (Enemy enemy in Enemies.Values)
+                {
+                    enemy.CleanUpUselessValues(this);
+                }
+                foreach (Room room in Rooms.Values)
+                {
+                    room.CleanUpUselessValues(this);
+                }
+            }
+
+            // Now that rooms, flags, and items are in the model, create and assign start conditions
+            startConditionsFactory ??= new DefaultStartConditionsFactory();
+            StartConditions = startConditionsFactory.CreateStartConditions(this, rawModel.ItemContainer);
+
+            if (initialize)
+            {
+                // Create and assign initial game state
+                InitialGameState = new InGameState(StartConditions);
+
+                // Initialize all references within logical elements
+                List<string> unhandledLogicalElementProperties = new List<string>();
+
+                foreach (Helper helper in Helpers.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(this));
+                }
+
+                foreach (Tech tech in Techs.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(this));
+                }
+
+                foreach (Weapon weapon in Weapons.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(this));
+                }
+
+                foreach (Room room in Rooms.Values)
+                {
+                    unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(this));
+                }
+
+                // If there was any logical element property we failed to resolve, consider that an error
+                if (unhandledLogicalElementProperties.Any())
+                {
+                    throw new Exception($"The following logical element property values could not be resolved " +
+                        $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
+                }
+                Initialized = initialize;
+            }
         }
 
         /// <summary>

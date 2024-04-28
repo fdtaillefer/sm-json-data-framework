@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Converters
         public override IDictionary<string, EnemyAttack> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             List<EnemyAttack> attacks = JsonSerializer.Deserialize<List<EnemyAttack>>(ref reader, options);
-            return attacks.ToDictionary(attack => attack.Name, attack => attack);
+            return attacks.ToDictionary(attack => attack.Name);
         }
 
         public override void Write(Utf8JsonWriter writer, IDictionary<string, EnemyAttack> value, JsonSerializerOptions options)

@@ -37,7 +37,10 @@ namespace sm_json_data_framework.Models.Rooms
         public RoomEnvironment(RawRoomEnvironment environment)
         {
             Heated = environment.Heated;
-            EntranceNodeIds = new HashSet<int>(environment.EntranceNodes);
+            if (environment.EntranceNodes != null)
+            {
+                EntranceNodeIds = new HashSet<int>(environment.EntranceNodes);
+            }
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

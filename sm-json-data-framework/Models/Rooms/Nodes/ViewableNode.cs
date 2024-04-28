@@ -34,7 +34,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public ViewableNode(RawViewableNode viewableNode, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             NodeId = viewableNode.Id;
-            Strats = viewableNode.Strats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            Strats = viewableNode.Strats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)

@@ -62,7 +62,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             SteepDownTiles = runway.SteepDownTiles;
             StartingDownTiles = runway.StartingDownTiles;
             EndingUpTiles = runway.EndingUpTiles;
-            Strats = runway.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            Strats = runway.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
             UsableComingIn = runway.UsableComingIn;
             OpenEnds = runway.OpenEnd;
         }

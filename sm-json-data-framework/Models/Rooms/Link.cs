@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.Rooms
         public Link(RawLink link, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             FromNodeId = link.From;
-            To = link.To.Select(linkTo => new LinkTo(linkTo, knowledgeBase)).ToDictionary(linkTo => linkTo.TargetNodeId, linkTo => linkTo);
+            To = link.To.Select(linkTo => new LinkTo(linkTo, knowledgeBase)).ToDictionary(linkTo => linkTo.TargetNodeId);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

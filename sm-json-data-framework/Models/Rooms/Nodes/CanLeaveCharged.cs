@@ -81,7 +81,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 InitiateRemotely = new InitiateRemotely(canLeaveCharged.InitiateRemotely);
             }
-            Strats = canLeaveCharged.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            Strats = canLeaveCharged.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
             OpenEnds = canLeaveCharged.OpenEnd;
             GentleUpTiles = canLeaveCharged.GentleUpTiles;
             GentleDownTiles = canLeaveCharged.GentleDownTiles;

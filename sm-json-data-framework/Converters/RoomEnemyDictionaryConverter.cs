@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Converters
         public override IDictionary<string, RoomEnemy> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             List<RoomEnemy> roomEnemies = JsonSerializer.Deserialize<List<RoomEnemy>>(ref reader, options);
-            return roomEnemies.ToDictionary(roomEnemy => roomEnemy.Id, roomEnemy => roomEnemy);
+            return roomEnemies.ToDictionary(roomEnemy => roomEnemy.Id);
         }
 
         public override void Write(Utf8JsonWriter writer, IDictionary<string, RoomEnemy> value, JsonSerializerOptions options)

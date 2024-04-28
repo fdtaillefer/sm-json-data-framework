@@ -68,10 +68,10 @@ namespace sm_json_data_framework.Models.Rooms
             Playable = room.Playable;
             RoomAddress = room.RoomAddress;
             RoomEnvironments = room.RoomEnvironments.Select(rawEnvironment => new RoomEnvironment(rawEnvironment));
-            Nodes = room.Nodes.Select(rawNode => new RoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id, node => node);
-            Links = room.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId, link => link);
-            Obstacles = room.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id, obstacle => obstacle);
-            Enemies = room.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id, roomEnemy => roomEnemy);
+            Nodes = room.Nodes.Select(rawNode => new RoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id);
+            Links = room.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId);
+            Obstacles = room.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id);
+            Enemies = room.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id);
         }
 
         public void InitializeProperties(SuperMetroidModel model)

@@ -51,7 +51,7 @@ namespace sm_json_data_framework.Models.Navigation
         {
             if(strats is IDictionary<string, Strat> dictionary && Keys != null)
             {
-                return Keys.Select(key => dictionary[key]).ToDictionary(strat => strat.Name, strat => strat);
+                return Keys.Select(key => dictionary[key]).ToDictionary(strat => strat.Name);
             }
             return strats.Where(kvp => Predicate.Invoke(kvp.Value));
         }

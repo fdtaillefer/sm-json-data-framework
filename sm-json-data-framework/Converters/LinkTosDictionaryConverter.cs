@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Converters
         public override IDictionary<int, LinkTo> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             List<LinkTo> linkTos = JsonSerializer.Deserialize<List<LinkTo>>(ref reader, options);
-            return linkTos.ToDictionary(linkTo => linkTo.TargetNodeId, linkTo => linkTo);
+            return linkTos.ToDictionary(linkTo => linkTo.TargetNodeId);
         }
 
         public override void Write(Utf8JsonWriter writer, IDictionary<int, LinkTo> value, JsonSerializerOptions options)

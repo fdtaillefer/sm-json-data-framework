@@ -76,7 +76,7 @@ namespace sm_json_data_framework.Models.Enemies
         {
             Id = enemy.Id;
             Name = enemy.Name;
-            Attacks = enemy.Attacks.ToDictionary(attack => attack.Name, attack => attack);
+            Attacks = enemy.Attacks.ToDictionary(attack => attack.Name);
             Hp = enemy.Hp;
             AmountOfDrops = enemy.AmountOfDrops;
             Drops = new EnemyDrops(enemy.Drops);

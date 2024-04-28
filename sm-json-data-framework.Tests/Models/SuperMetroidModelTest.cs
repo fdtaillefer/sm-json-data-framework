@@ -1,30 +1,29 @@
 ﻿using sm_json_data_framework.Models;
-using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw;
 using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
+using sm_json_data_framework.Reading;
 using sm_json_data_framework.Tests.TestTools;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-namespace sm_json_data_framework.Reading
+namespace sm_json_data_framework.Tests.Models
 {
-    public class ModelReaderTest
+    public class SuperMetroidModelTest
     {
-        #region Tests for ReadModel()
+        #region Tests for Ctor(RawSuperMetroidModel, [...])
         [Fact]
-        public void ReadModel_ReadsAllData()
+        public void ConstructorFromRawModel_ReadsAllData()
         {
+            // Given
+            RawSuperMetroidModel rawModel = ModelReader.ReadRawModel();
+
             // When
-            SuperMetroidModel model = ModelReader.ReadModel();
+            SuperMetroidModel model = new SuperMetroidModel(rawModel);
 
             // Expect
             // Room counts
@@ -106,16 +105,17 @@ namespace sm_json_data_framework.Reading
         }
 
         [Fact]
-        public void ReadModel_UsesOptionalParameters()
+        public void ConstructorFromRawModel_UsesOptionalParameters()
         {
             // Given
             LogicalOptions options = new LogicalOptions
             {
                 TilesToShineCharge = 20
             };
+            RawSuperMetroidModel rawModel = ModelReader.ReadRawModel();
 
             // When
-            SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
+            SuperMetroidModel model = new SuperMetroidModel(rawModel, rules: new RandoSuperMetroidRules(), logicalOptions: options,
                 startConditionsFactory: new RandoStartConditionsFactory());
 
             // Expect
@@ -123,65 +123,6 @@ namespace sm_json_data_framework.Reading
             Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
             Assert.Equal(20, model.LogicalOptions.TilesToShineCharge);
         }
-        #endregion
-
-        #region Tests for ReadRawModel()
-
-        [Fact]
-        public void ReadRawModel_ReadsAllData()
-        {
-            // When
-            RawSuperMetroidModel model = ModelReader.ReadRawModel();
-
-            // Expect
-            // Room counts
-            Assert.Equal(54, model.RoomContainer.Rooms.Where(room => room.Area == "Brinstar").Count());
-            Assert.Equal(6, model.RoomContainer.Rooms.Where(room => room.Area == "Ceres Station").Count());
-            Assert.Equal(34, model.RoomContainer.Rooms.Where(room => room.Area == "Crateria").Count());
-            Assert.Equal(23, model.RoomContainer.Rooms.Where(room => room.Area == "Lower Norfair").Count());
-            Assert.Equal(56, model.RoomContainer.Rooms.Where(room => room.Area == "Maridia").Count());
-            Assert.Equal(53, model.RoomContainer.Rooms.Where(room => room.Area == "Norfair").Count());
-            Assert.Equal(19, model.RoomContainer.Rooms.Where(room => room.Area == "Tourian").Count());
-            Assert.Equal(16, model.RoomContainer.Rooms.Where(room => room.Area == "Wrecked Ship").Count());
-
-            // Connection counts
-            Assert.Equal(298, model.ConnectionContainer.Connections.Count());
-
-            // Item counts
-            Assert.Equal(2, model.ItemContainer.ImplicitItems.Count());
-            Assert.Equal(16, model.ItemContainer.UpgradeItems.Count());
-            Assert.Equal(5, model.ItemContainer.ExpansionItems.Count());
-
-            Assert.Equal(27, model.ItemContainer.GameFlags.Count());
-
-            Assert.Equal(5, model.ItemContainer.StartingResources.Count());
-
-            Assert.Equal(39, model.WeaponContainer.Weapons.Count());
-
-            // Normal enemies and 14 bosses
-            Assert.Equal(81, model.EnemyContainer.Enemies.Count());
-            Assert.Equal(14, model.BossContainer.Enemies.Count());
-
-            // Helpers
-            Assert.Equal(25, model.HelperContainer.Helpers.Count());
-
-            // Techs
-            Assert.Equal(91, model.TechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList().Count());
-
-            // Starting items
-            Assert.Equal(2, model.ItemContainer.StartingItems.Count());
-            Assert.Contains("PowerBeam", model.ItemContainer.StartingItems);
-            Assert.Contains("PowerSuit", model.ItemContainer.StartingItems);
-
-            // Starting game state
-            Assert.Empty(model.ItemContainer.StartingFlags);
-            Assert.Empty(model.ItemContainer.StartingLocks);
-
-            // Starting location
-            Assert.Equal("Ceres Elevator Room", model.ItemContainer.StartingRoom);
-            Assert.Equal(1, model.ItemContainer.StartingNode);
-        }
-
         #endregion
     }
 }

@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 using System.Runtime.ConstrainedExecution;
+using sm_json_data_framework.Models.Raw.Items;
+using System.Reflection;
 
 namespace sm_json_data_framework.Tests.TestTools
 {
@@ -26,8 +28,25 @@ namespace sm_json_data_framework.Tests.TestTools
             // Create standard start conditions, we'll adjust them after
             StartConditions startConditions = base.CreateStartConditions(model, itemContainer);
 
+            ApplyStartConditionAlterations(model, startConditions);
+
+            return startConditions;
+        }
+
+        public override StartConditions CreateStartConditions(SuperMetroidModel model, RawItemContainer rawItemContainer)
+        {
+            // Create standard start conditions, we'll adjust them after
+            StartConditions startConditions = base.CreateStartConditions(model, rawItemContainer);
+
+            ApplyStartConditionAlterations(model, startConditions);
+
+            return startConditions;
+        }
+
+        private void ApplyStartConditionAlterations(SuperMetroidModel model, StartConditions startConditions)
+        {
             // Enable game flags from Ceres and start with Zebes awake
-            startConditions.StartingGameFlags = new List<GameFlag> { 
+            startConditions.StartingGameFlags = new List<GameFlag> {
                 model.GameFlags["f_DefeatedCeresRidley"],
                 model.GameFlags["f_ZebesAwake"]
             };
@@ -52,8 +71,6 @@ namespace sm_json_data_framework.Tests.TestTools
 
             // Start at Ship
             startConditions.StartingNode = model.GetNodeInRoom("Landing Site", 5);
-
-            return startConditions;
         }
     }
 }

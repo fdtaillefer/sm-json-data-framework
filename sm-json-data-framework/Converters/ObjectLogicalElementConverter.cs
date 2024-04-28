@@ -15,49 +15,12 @@ namespace sm_json_data_framework.Converters
 {
     public class ObjectLogicalElementConverter : JsonConverter<AbstractObjectLogicalElement>
     {
-        private IDictionary<ObjectLogicalElementTypeEnum, Type> defaultLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>();
         private IDictionary<ObjectLogicalElementTypeEnum, Type> overrideLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>();
 
         public ObjectLogicalElementConverter(IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
-            // Initialize default logical element types
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.And, typeof(And));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.Or, typeof(Or));
-            
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.AcidFrames, typeof(AcidFrames));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.DraygonElectricityFrames, typeof(DraygonElectricityFrames));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnergyAtMost, typeof(EnergyAtMost));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.HeatFrames, typeof(HeatFrames));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.HibashiHits, typeof(HibashiHits));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.LavaFrames, typeof(LavaFrames));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.LavaPhysicsFrames, typeof(LavaPhysicsFrames));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.PreviousNode, typeof(PreviousNode));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.SpikeHits, typeof(SpikeHits));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.ThornHits, typeof(ThornHits));
-
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.PreviousStratProperty, typeof(PreviousStratProperty));
-
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.AdjacentRunway, typeof(AdjacentRunway));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.Ammo, typeof(Ammo));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.AmmoDrain, typeof(AmmoDrain));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.CanComeInCharged, typeof(CanComeInCharged));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.CanShineCharge, typeof(CanShineCharge));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnemyDamage, typeof(EnemyDamage));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.EnemyKill, typeof(EnemyKill));
-            defaultLogicalElementTypes.Add(ObjectLogicalElementTypeEnum.ResetRoom, typeof(ResetRoom));
-
             // Validate and initialize override types
-            overrideTypes = overrideTypes ?? new (ObjectLogicalElementTypeEnum typeEnum, Type type)[] { };
-            foreach(var overrideTuple in overrideTypes)
-            {
-                Type defaultType = defaultLogicalElementTypes[overrideTuple.typeEnum];
-                if (!defaultType.IsAssignableFrom(overrideTuple.type))
-                {
-                    throw new ArgumentException($"The C# type {overrideTuple.type.Name} cannot be used to represent logical element '{overrideTuple.typeEnum}' " +
-                        $"Because type {defaultType} is not assignable from it");
-                }
-                overrideLogicalElementTypes.Add(overrideTuple.typeEnum, overrideTuple.type);
-            }
+            overrideLogicalElementTypes = LogicalElementCreationUtils.CreateObjectLogicalElementTypeEnumMapping(overrideTypes);
         }
 
         /// <summary>
@@ -73,7 +36,7 @@ namespace sm_json_data_framework.Converters
             }
             else
             {
-                return defaultLogicalElementTypes[elementTypeEnum];
+                return LogicalElementCreationUtils.DefaultObjectLogicalElementTypes[elementTypeEnum];
             }
 
         }

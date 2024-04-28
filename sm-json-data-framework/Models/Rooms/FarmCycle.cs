@@ -38,7 +38,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             Name = cycle.Name;
             CycleFrames = cycle.CycleFrames;
-            if(Requires != null)
+            if(cycle.Requires != null)
             {
                 Requires = cycle.Requires.ToLogicalRequirements(knowledgeBase);
             }

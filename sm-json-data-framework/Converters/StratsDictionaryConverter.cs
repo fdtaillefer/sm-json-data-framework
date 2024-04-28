@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Converters
         public override IDictionary<string, Strat> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             List<Strat> strats = JsonSerializer.Deserialize<List<Strat>>(ref reader, options);
-            return strats.ToDictionary(strat => strat.Name, strat => strat);
+            return strats.ToDictionary(strat => strat.Name);
         }
 
         public override void Write(Utf8JsonWriter writer, IDictionary<string, Strat> value, JsonSerializerOptions options)

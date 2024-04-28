@@ -35,7 +35,7 @@ namespace sm_json_data_framework.Models.Rooms
         public LinkTo(RawLinkTo linkTo, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             TargetNodeId = linkTo.Id;
-            Strats = linkTo.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            Strats = linkTo.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

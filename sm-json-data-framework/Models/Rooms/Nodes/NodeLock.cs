@@ -60,8 +60,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             LockType = nodeLock.LockType;
             Lock = nodeLock.Lock.ToLogicalRequirements(knowledgeBase);
             Name = nodeLock.Name;
-            UnlockStrats = nodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
-            BypassStrats = nodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name, strat => strat);
+            UnlockStrats = nodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            BypassStrats = nodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
             YieldsStrings = new HashSet<string>(nodeLock.Yields);
         }
 

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace sm_json_data_framework.Utils
@@ -53,6 +54,16 @@ namespace sm_json_data_framework.Utils
                     return null;
                 }
             }
+        }
+
+        // We put this as an extension rather than in RawTechContainer because we want RawTechContainer to stay a basic model with no logic as much as possible
+        /// <summary>
+        /// Builds and returns a list of all techs found inside this RawTechContainer (at any level).
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<RawTech> SelectAllTechs(this RawTechContainer rawTechContainer)
+        {
+            return rawTechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList();
         }
 
         // We put this as an extension rather than in RawTech because we want RawTech to stay a basic model with no logic as much as possible

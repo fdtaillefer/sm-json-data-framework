@@ -161,7 +161,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Runways = node.Runways.Select(runway => new Runway(runway, knowledgeBase));
             CanLeaveCharged = node.CanLeaveCharged.Select(clc => new Nodes.CanLeaveCharged(clc, knowledgeBase));
             OverrideSpawnAtNodeId = node.SpawnAt;
-            Locks = node.Locks.Select(nodeLock => new NodeLock(nodeLock, knowledgeBase)).ToDictionary(nodeLock => nodeLock.Name, nodeLock => nodeLock);
+            Locks = node.Locks.Select(nodeLock => new NodeLock(nodeLock, knowledgeBase)).ToDictionary(nodeLock => nodeLock.Name);
             Utility = new HashSet<UtilityEnum>(node.Utility);
             ViewableNodes = node.ViewableNodes.Select(viewableNode => new ViewableNode(viewableNode, knowledgeBase));
             YieldsStrings = new HashSet<string>(node.Yields);
