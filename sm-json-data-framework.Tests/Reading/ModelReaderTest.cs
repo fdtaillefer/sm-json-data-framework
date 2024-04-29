@@ -117,7 +117,7 @@ namespace sm_json_data_framework.Reading
 
             // When
             SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
-                startConditionsFactory: new RandoStartConditionsFactory(), 
+                basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(), 
                 overrideTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 
             // Expect

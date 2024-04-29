@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Tests.Models
 
             // When
             SuperMetroidModel model = new SuperMetroidModel(rawModel, rules: new RandoSuperMetroidRules(), logicalOptions: options,
-                startConditionsFactory: new RandoStartConditionsFactory(),
+                basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(),
                 overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) },
                 overrideStringTypes: new List<(StringLogicalElementTypeEnum typeEnum, Type type)> { (StringLogicalElementTypeEnum.Item, typeof(ExtendedItemLogicalElement)) });
                 

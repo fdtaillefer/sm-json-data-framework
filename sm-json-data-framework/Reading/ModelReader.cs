@@ -46,20 +46,20 @@ namespace sm_json_data_framework.Reading
         /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
         /// <param name="logicalOptions">A container of logical options to go with the representation of the world.
         /// If null, will use the default constructor of LogicalOptions (giving an arbitrary option set).</param>
-        /// <param name="startConditionsFactory">An object that can create the player's starting conditions for this representation of the world.
-        /// If null, will use a <see cref="DefaultStartConditionsFactory"/>.</param>
+        /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
+        /// be created and assigned to the model.</param>
         /// <param name="baseDirectory">An override of the path to the base directory of the data model to read.
         /// If left null, this method will use the path of the model included with this project.</param>
         /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, IStartConditionsFactory startConditionsFactory = null,
+        public static SuperMetroidModel ReadModel(SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, 
+            IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             string baseDirectory = null, IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             rules ??= new SuperMetroidRules();
             logicalOptions ??= new LogicalOptions();
-            startConditionsFactory ??= new DefaultStartConditionsFactory();
             baseDirectory ??= Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sm-json-data");
 
             SuperMetroidModel model = new SuperMetroidModel();
@@ -93,7 +93,9 @@ namespace sm_json_data_framework.Reading
                 .ToDictionary(f => f.Name);
 
             // Put basic starting conditions in model
-            model.BasicStartConditions = new BasicStartConditions(itemContainer);
+            BasicStartConditions basicStartConditions = new BasicStartConditions(itemContainer);
+            basicStartConditionsCustomizer?.Customize(basicStartConditions);
+            model.BasicStartConditions = basicStartConditions;
 
             // Read helpers and techs
             HelperContainer helperContainer = JsonSerializer.Deserialize<HelperContainer>(File.ReadAllText(helpersPath), options);
@@ -174,93 +176,7 @@ namespace sm_json_data_framework.Reading
             }
 
             // Now we've created all models in a basic state...
-
-            // Initialize a few top-level convenience maps
-            Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
-            Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
-            Dictionary<string, RoomNode> nodes = new Dictionary<string, RoomNode>();
-            Dictionary<string, Runway> runways = new Dictionary<string, Runway>();
-            foreach (Room room in model.Rooms.Values)
-            {
-                foreach (RoomEnemy roomEnemy in room.Enemies.Values)
-                {
-                    roomEnemies.Add(roomEnemy.GroupName, roomEnemy);
-                }
-
-                foreach (RoomNode node in room.Nodes.Values)
-                {
-                    nodes.Add(node.Name, node);
-                    foreach (Runway runway in node.Runways)
-                    {
-                        runways.Add(runway.Name, runway);
-                    }
-                    foreach (KeyValuePair<string, NodeLock> kvp in node.Locks)
-                    {
-                        locks.Add(kvp.Key, kvp.Value);
-                    }
-                }
-            }
-            model.Locks = locks;
-            model.Nodes = nodes;
-            model.Runways = runways;
-            model.RoomEnemies = roomEnemies;
-
-            // Initialize properties of objects within the model
-            foreach (Enemy enemy in model.Enemies.Values)
-            {
-                enemy.InitializeProperties(model);
-            }
-            foreach (Room room in model.Rooms.Values)
-            {
-                room.InitializeProperties(model);
-            }
-
-            // Cleanup whatever is found to be useless based on logical options
-            foreach (Enemy enemy in model.Enemies.Values)
-            {
-                enemy.CleanUpUselessValues(model);
-            }
-            foreach (Room room in model.Rooms.Values)
-            {
-                room.CleanUpUselessValues(model);
-            }
-
-            // Now that rooms, flags, and items are in the model, create and assign start conditions
-            startConditionsFactory ??= new DefaultStartConditionsFactory();
-            model.StartConditions = startConditionsFactory.CreateStartConditions(model, model.BasicStartConditions);
-
-            // Create and assign initial game state
-            model.InitialGameState = new InGameState(model, itemContainer);
-
-            // Initialize all references within logical elements
-            List<string> unhandledLogicalElementProperties = new List<string>();
-
-            foreach (Helper helper in model.Helpers.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(model));
-            }
-
-            foreach(Tech tech in model.Techs.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(model));
-            }
-
-            foreach(Weapon weapon in model.Weapons.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(model));
-            }
-
-            foreach(Room room in model.Rooms.Values)
-            {
-                unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(model));
-            }
-
-            // If there was any logical element property we failed to resolve, consider that an error
-            if (unhandledLogicalElementProperties.Any())
-            {
-                throw new JsonException($"The following logical element property values could not be resolved " +
-                    $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
-            }
+            model.InitializeBaseModel();
 
             return model;
         }

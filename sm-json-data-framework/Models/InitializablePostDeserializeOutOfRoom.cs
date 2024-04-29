@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models
 
         /// <summary>
         /// Eliminates values from this model, which are made useless by the logical options of the provided model.
-        /// This should be called after foreign properties have been initialized.
+        /// This should not be called before <see cref="InitializeProperties(SuperMetroidModel)"/>.
         /// </summary>
         /// <param name="model">The model to use to initialize the properties</param>
         /// <returns>Whether this object is still useful itself after the cleanup</returns>

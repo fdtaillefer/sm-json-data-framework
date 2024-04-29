@@ -9,6 +9,7 @@ using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw;
 using sm_json_data_framework.Models.Raw.Connections;
 using sm_json_data_framework.Models.Raw.Helpers;
+using sm_json_data_framework.Models.Raw.Items;
 using sm_json_data_framework.Models.Raw.Techs;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements;
@@ -89,9 +90,9 @@ namespace sm_json_data_framework.Models
         /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
         /// <param name="logicalOptions">A container of logical options to go with the representation of the world.
         /// If null, will use the default constructor of LogicalOptions (giving an arbitrary option set).</param>
-        /// <param name="startConditionsFactory">An object that can create the player's starting conditions for this representation of the world.
-        /// If null, will use a <see cref="DefaultStartConditionsFactory"/>.</param>
-        /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
+        /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
+        /// be created and assigned to this model.</param>
+        /// <param name="overrideObjectTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <param name="overrideStringTypes">A sequence of tuples, pairing together a StringLogicalElementTypeEnum and the C# type that should be used to 
@@ -99,13 +100,12 @@ namespace sm_json_data_framework.Models
         /// The provided C# types must extend the default type that is normally used for any given StringLogicalElementTypeEnum.</param>
         /// <exception cref="Exception">If this method fails to interpret any logical element</exception>
         public SuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, 
-            IStartConditionsFactory startConditionsFactory = null,
+            IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
             rules ??= new SuperMetroidRules();
             logicalOptions ??= new LogicalOptions();
-            startConditionsFactory ??= new DefaultStartConditionsFactory();
 
             Rules = rules;
             LogicalOptions = logicalOptions;
@@ -123,7 +123,9 @@ namespace sm_json_data_framework.Models
                 .ToDictionary(f => f.Name);
 
             // Put basic starting conditions in model
-            BasicStartConditions = new BasicStartConditions(rawModel.ItemContainer);
+            BasicStartConditions basicStartConditions = new BasicStartConditions(rawModel.ItemContainer);
+            basicStartConditionsCustomizer?.Customize(basicStartConditions);
+            BasicStartConditions = basicStartConditions;
 
             // Put helpers in model
             Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new Helper(rawHelper)).ToDictionary(h => h.Name);
@@ -181,6 +183,25 @@ namespace sm_json_data_framework.Models
             Rooms = rawModel.RoomContainer.Rooms.Select(rawRoom => new Room(rawRoom, knowledgeBase)).ToDictionary(room => room.Name);
 
             // Now we've created all models in a basic state...
+            InitializeBaseModel();
+        }
+
+        // Make this private once we get rid of the ModelReader code?
+        /// <summary>
+        /// <para>
+        /// Initializes all data in this model that isn't part of the "base" model.
+        /// This will initialize FK references and calculated values in sub-models as well as some top-level convenience properties.
+        /// It may also clean up some sub-models that are found to contribute nothing useful.
+        /// </para>
+        /// <para>
+        /// Calling this on an instance that has already has this called previously has no adverse effect, but will accomplish nothing
+        /// and waste processing.
+        /// </para>
+        /// </summary>
+        /// <exception cref="Exception">If a logical element references an object that isn't found in this model - attempting to initialize it
+        /// will result in an exception.</exception>
+        public void InitializeBaseModel()
+        {
             // Initialize a few top-level convenience maps
             Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
             Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
@@ -233,8 +254,7 @@ namespace sm_json_data_framework.Models
             }
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
-            startConditionsFactory ??= new DefaultStartConditionsFactory();
-            StartConditions = startConditionsFactory.CreateStartConditions(this, BasicStartConditions);
+            InitializeStartConditions();
 
             // Create and assign initial game state
             InitialGameState = new InGameState(StartConditions);
@@ -268,6 +288,60 @@ namespace sm_json_data_framework.Models
                 throw new Exception($"The following logical element property values could not be resolved " +
                     $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
             }
+        }
+
+        /// <summary>
+        /// Initialize the internal StartConditions of this model, based on its internal BasicStartConditions
+        /// </summary>
+        private void InitializeStartConditions()
+        {
+            List<GameFlag> startingFlags = new List<GameFlag>();
+            foreach (string flagName in BasicStartConditions.StartingFlagNames)
+            {
+                if (!GameFlags.TryGetValue(flagName, out GameFlag flag))
+                {
+                    throw new Exception($"Starting game flag {flagName} not found.");
+                }
+                startingFlags.Add(flag);
+            }
+
+            List<NodeLock> startingLocks = new List<NodeLock>();
+            foreach (string lockName in BasicStartConditions.StartingLockNames)
+            {
+                if (!Locks.TryGetValue(lockName, out NodeLock nodeLock))
+                {
+                    throw new Exception($"Starting node lock {lockName} not found.");
+                }
+                startingLocks.Add(nodeLock);
+            }
+
+            ResourceCount startingResources = new ResourceCount();
+            foreach (RawResourceCapacity capacity in BasicStartConditions.StartingResources)
+            {
+                startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
+            }
+
+            ItemInventory startingInventory = new ItemInventory(startingResources);
+            foreach (string itemName in BasicStartConditions.StartingItemNames)
+            {
+                if (!Items.TryGetValue(itemName, out Item item))
+                {
+                    throw new Exception($"Starting item {itemName} not found.");
+                }
+                startingInventory.ApplyAddItem(item);
+            }
+
+            StartConditions startConditions = new StartConditions
+            {
+                StartingNode = GetNodeInRoom(BasicStartConditions.StartingRoomName, BasicStartConditions.StartingNodeId),
+                StartingGameFlags = startingFlags,
+                StartingOpenLocks = startingLocks,
+                // Default starting resource counts to the starting maximum
+                StartingResources = startingResources.Clone(),
+                StartingInventory = startingInventory
+            };
+
+            StartConditions = startConditions;
         }
 
         /// <summary>
