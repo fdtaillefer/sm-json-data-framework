@@ -50,14 +50,12 @@ namespace sm_json_data_framework.Reading
         /// If null, will use a <see cref="DefaultStartConditionsFactory"/>.</param>
         /// <param name="baseDirectory">An override of the path to the base directory of the data model to read.
         /// If left null, this method will use the path of the model included with this project.</param>
-        /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
-        /// If false, the objects in the returned model will contain mostly just raw data.</param>
         /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
         public static SuperMetroidModel ReadModel(SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, IStartConditionsFactory startConditionsFactory = null,
-            string baseDirectory = null, bool initialize = true, IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
+            string baseDirectory = null, IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
         {
             rules ??= new SuperMetroidRules();
             logicalOptions ??= new LogicalOptions();
@@ -207,71 +205,63 @@ namespace sm_json_data_framework.Reading
             model.Runways = runways;
             model.RoomEnemies = roomEnemies;
 
-            // Initialize foreign/additional properties, and cleanup whatever is found to be useless based on logical options
-            if (initialize)
+            // Initialize properties of objects within the model
+            foreach (Enemy enemy in model.Enemies.Values)
             {
-                // Initialize properties
-                foreach (Enemy enemy in model.Enemies.Values)
-                {
-                    enemy.InitializeProperties(model);
-                }
-                foreach (Room room in model.Rooms.Values)
-                {
-                    room.InitializeProperties(model);
-                }
+                enemy.InitializeProperties(model);
+            }
+            foreach (Room room in model.Rooms.Values)
+            {
+                room.InitializeProperties(model);
+            }
 
-                // Cleanup
-                foreach (Enemy enemy in model.Enemies.Values)
-                {
-                    enemy.CleanUpUselessValues(model);
-                }
-                foreach (Room room in model.Rooms.Values)
-                {
-                    room.CleanUpUselessValues(model);
-                }
+            // Cleanup whatever is found to be useless based on logical options
+            foreach (Enemy enemy in model.Enemies.Values)
+            {
+                enemy.CleanUpUselessValues(model);
+            }
+            foreach (Room room in model.Rooms.Values)
+            {
+                room.CleanUpUselessValues(model);
             }
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
             startConditionsFactory ??= new DefaultStartConditionsFactory();
             model.StartConditions = startConditionsFactory.CreateStartConditions(model, model.BasicStartConditions);
 
-            if (initialize)
+            // Create and assign initial game state
+            model.InitialGameState = new InGameState(model, itemContainer);
+
+            // Initialize all references within logical elements
+            List<string> unhandledLogicalElementProperties = new List<string>();
+
+            foreach (Helper helper in model.Helpers.Values)
             {
-                // Create and assign initial game state
-                model.InitialGameState = new InGameState(model, itemContainer);
-
-                // Initialize all references within logical elements
-                List<string> unhandledLogicalElementProperties = new List<string>();
-
-                foreach (Helper helper in model.Helpers.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(model));
-                }
-
-                foreach(Tech tech in model.Techs.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(model));
-                }
-
-                foreach(Weapon weapon in model.Weapons.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(model));
-                }
-
-                foreach(Room room in model.Rooms.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(model));
-                }
-
-                // If there was any logical element property we failed to resolve, consider that an error
-                if (unhandledLogicalElementProperties.Any())
-                {
-                    throw new JsonException($"The following logical element property values could not be resolved " +
-                        $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
-                }
+                unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(model));
             }
 
-            model.Initialized = initialize;
+            foreach(Tech tech in model.Techs.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            foreach(Weapon weapon in model.Weapons.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            foreach(Room room in model.Rooms.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(model));
+            }
+
+            // If there was any logical element property we failed to resolve, consider that an error
+            if (unhandledLogicalElementProperties.Any())
+            {
+                throw new JsonException($"The following logical element property values could not be resolved " +
+                    $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
+            }
+
             return model;
         }
 

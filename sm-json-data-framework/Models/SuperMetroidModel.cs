@@ -91,8 +91,6 @@ namespace sm_json_data_framework.Models
         /// If null, will use the default constructor of LogicalOptions (giving an arbitrary option set).</param>
         /// <param name="startConditionsFactory">An object that can create the player's starting conditions for this representation of the world.
         /// If null, will use a <see cref="DefaultStartConditionsFactory"/>.</param>
-        /// <param name="initialize">If true, pre-processes a lot of data to initialize additional properties in many objects within the returned model.
-        /// If false, the objects in the returned model will contain mostly just raw data.</param>
         /// <param name="overrideTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
@@ -101,7 +99,7 @@ namespace sm_json_data_framework.Models
         /// The provided C# types must extend the default type that is normally used for any given StringLogicalElementTypeEnum.</param>
         /// <exception cref="Exception">If this method fails to interpret any logical element</exception>
         public SuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, 
-            IStartConditionsFactory startConditionsFactory = null, bool initialize = true,
+            IStartConditionsFactory startConditionsFactory = null,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
@@ -214,78 +212,63 @@ namespace sm_json_data_framework.Models
             RoomEnemies = roomEnemies;
 
 
-            // Initialize foreign/additional properties, and cleanup whatever is found to be useless based on logical options
-            if (initialize)
+            // Initialize properties of objects within the model
+            foreach (Enemy enemy in Enemies.Values)
             {
-                // Initialize properties
-                foreach (Enemy enemy in Enemies.Values)
-                {
-                    enemy.InitializeProperties(this);
-                }
-                foreach (Room room in Rooms.Values)
-                {
-                    room.InitializeProperties(this);
-                }
+                enemy.InitializeProperties(this);
+            }
+            foreach (Room room in Rooms.Values)
+            {
+                room.InitializeProperties(this);
+            }
 
-                // Cleanup
-                foreach (Enemy enemy in Enemies.Values)
-                {
-                    enemy.CleanUpUselessValues(this);
-                }
-                foreach (Room room in Rooms.Values)
-                {
-                    room.CleanUpUselessValues(this);
-                }
+            // Cleanup whatever is found to be useless based on logical options
+            foreach (Enemy enemy in Enemies.Values)
+            {
+                enemy.CleanUpUselessValues(this);
+            }
+            foreach (Room room in Rooms.Values)
+            {
+                room.CleanUpUselessValues(this);
             }
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
             startConditionsFactory ??= new DefaultStartConditionsFactory();
             StartConditions = startConditionsFactory.CreateStartConditions(this, BasicStartConditions);
 
-            if (initialize)
+            // Create and assign initial game state
+            InitialGameState = new InGameState(StartConditions);
+
+            // Initialize all references within logical elements
+            List<string> unhandledLogicalElementProperties = new List<string>();
+
+            foreach (Helper helper in Helpers.Values)
             {
-                // Create and assign initial game state
-                InitialGameState = new InGameState(StartConditions);
+                unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(this));
+            }
 
-                // Initialize all references within logical elements
-                List<string> unhandledLogicalElementProperties = new List<string>();
+            foreach (Tech tech in Techs.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(this));
+            }
 
-                foreach (Helper helper in Helpers.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(this));
-                }
+            foreach (Weapon weapon in Weapons.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(this));
+            }
 
-                foreach (Tech tech in Techs.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(this));
-                }
+            foreach (Room room in Rooms.Values)
+            {
+                unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(this));
+            }
 
-                foreach (Weapon weapon in Weapons.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(this));
-                }
-
-                foreach (Room room in Rooms.Values)
-                {
-                    unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(this));
-                }
-
-                // If there was any logical element property we failed to resolve, consider that an error
-                if (unhandledLogicalElementProperties.Any())
-                {
-                    throw new Exception($"The following logical element property values could not be resolved " +
-                        $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
-                }
-                Initialized = initialize;
+            // If there was any logical element property we failed to resolve, consider that an error
+            if (unhandledLogicalElementProperties.Any())
+            {
+                throw new Exception($"The following logical element property values could not be resolved " +
+                    $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
             }
         }
-
-        /// <summary>
-        /// Indicates whether this model's contents has been "initialized".
-        /// If true, a lot of pre-processing was done to initialize additional properties in many objects within the returned model.
-        /// If false, the objects in the returned model contain mostly just raw data.
-        /// </summary>
-        public bool Initialized { get; set; }
 
         /// <summary>
         /// Options that describe what the player is expected to be able or unable to do.
@@ -545,10 +528,6 @@ namespace sm_json_data_framework.Models
         /// <returns></returns>
         public InGameState CreateInitialGameStateCopy()
         {
-            if (!Initialized)
-            {
-                throw new Exception("InGameState is not available for a model that's not initialized.");
-            }
             return InitialGameState.Clone();
         }
 
@@ -561,10 +540,6 @@ namespace sm_json_data_framework.Models
         /// <returns></returns>
         public GameNavigator CreateInitialGameNavigator(int maxPreviousStatesSize)
         {
-            if (!Initialized)
-            {
-                throw new Exception("GameNavigator is not available for a model that's not initialized.");
-            }
             return new GameNavigator(this, CreateInitialGameStateCopy(), maxPreviousStatesSize);
         }
     }
