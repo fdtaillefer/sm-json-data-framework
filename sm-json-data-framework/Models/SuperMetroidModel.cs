@@ -243,16 +243,6 @@ namespace sm_json_data_framework.Models
                 room.InitializeProperties(this);
             }
 
-            // Cleanup whatever is found to be useless based on logical options
-            foreach (Enemy enemy in Enemies.Values)
-            {
-                enemy.CleanUpUselessValues(this);
-            }
-            foreach (Room room in Rooms.Values)
-            {
-                room.CleanUpUselessValues(this);
-            }
-
             // Now that rooms, flags, and items are in the model, create and assign start conditions
             StartConditions = new StartConditions(this);
 
