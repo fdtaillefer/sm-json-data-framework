@@ -28,16 +28,6 @@ namespace sm_json_data_framework.Rules
 
         public IEnumerable<RawResourceCapacity> StartingResources { get; set; }
 
-        public BasicStartConditions(ItemContainer itemContainer)
-        {
-            StartingRoomName = itemContainer.StartingRoomName;
-            StartingNodeId = itemContainer.StartingNodeId;
-            StartingFlagNames = new List<string>(itemContainer.StartingGameFlagNames);
-            StartingLockNames = new List<string>(itemContainer.StartingNodeLockNames);
-            StartingItemNames = new List<string>(itemContainer.StartingItemNames);
-            StartingResources = new List<RawResourceCapacity>(itemContainer.StartingResources);
-        }
-
         public BasicStartConditions(RawItemContainer rawItemContainer)
         {
             StartingRoomName = rawItemContainer.StartingRoom;

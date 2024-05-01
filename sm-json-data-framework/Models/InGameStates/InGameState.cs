@@ -33,17 +33,6 @@ namespace sm_json_data_framework.Models.InGameStates
         // We'll see when we get to the step of reducing logical elements *shrug*
 
         /// <summary>
-        /// Creates a new InGameState based on the provided ItemContainer. The provided SuperMetroidModel's StartingConditions are not used.
-        /// </summary>
-        /// <param name="model">A SuperMetroidModel. Its rooms must have both been set and initialized. 
-        /// Its items and game flags must also have been set.</param>
-        /// <param name="itemContainer">The result of reading the items.json file.</param>
-        public InGameState(SuperMetroidModel model, ItemContainer itemContainer) : this(new StartConditions(itemContainer, model))
-        {
-            
-        }
-
-        /// <summary>
         /// Creates a new InGameState based on the provided StartConditions. 
         /// Note that an InGameState created in this way should only be used with the <see cref="SuperMetroidModel"/> that contains
         /// the node instance found in the StartConditions.

@@ -51,56 +51,6 @@ namespace sm_json_data_framework.Models.Requirements
 
         /// <summary>
         /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),
-        /// attempting to replace any RawStringLogicalElement by a more appropriate logical element, using the provided StringLogicalElementConverter.
-        /// </summary>
-        /// <param name="stringElementConverter">A StringLogicalElementConverter that can attempt to convert a raw string into a more specific logical element</param>
-        /// <returns>All strings that couldn't be resolved to a more specific logical element</returns>
-        public IEnumerable<string> ReplaceRawStringElements(StringLogicalElementConverter stringElementConverter)
-        {
-            List<string> unresolvedStrings = new List<string>();
-
-            // For any logical element in this LogicalRequirements that has sub-LogicalRequirements, do a recursive call
-            foreach(AbstractObjectLogicalElementWithSubRequirements logicalElement in LogicalElements.OfType<AbstractObjectLogicalElementWithSubRequirements>())
-            {
-                IEnumerable<string> unresolvedSubRawStrings = logicalElement.LogicalRequirements.ReplaceRawStringElements(stringElementConverter);
-                unresolvedStrings.AddRange(unresolvedSubRawStrings);
-            }
-
-            // Build a new list of resolved logical elements to replace the current one
-            List<AbstractLogicalElement> newElements = new List<AbstractLogicalElement>();
-
-            // For any uninterpreted string logical element we contain directly, attempt to resolve it and substitute the new logical element
-            // Anything else just stays the same
-            foreach(AbstractLogicalElement logicalElement in LogicalElements)
-            {
-                // If this is an uninterpreted string, get the converter to convert it to hopefully something better
-                if (logicalElement is UninterpretedStringLogicalElement uninterpretedStringElement)
-                {
-                    AbstractLogicalElement newLogicalElement = stringElementConverter.CreateLogicalElement(uninterpretedStringElement.StringValue);
-                    // if we still have an uninterpreted string, add the string to the list of unresolved strings we'll return
-                    if (newLogicalElement is UninterpretedStringLogicalElement)
-                    {
-                        unresolvedStrings.Add(uninterpretedStringElement.StringValue);
-                        newElements.Add(logicalElement);
-                    }
-                    // If we successfully resolved the string, substitute the new element
-                    else
-                    {
-                        newElements.Add(newLogicalElement);
-                    }
-                }
-                else
-                {
-                    newElements.Add(logicalElement);
-                }
-            }
-            LogicalElements = newElements;
-
-            return unresolvedStrings.Distinct();
-        }
-
-        /// <summary>
-        /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),
         /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
         /// </summary>
         /// <param name="model">A SuperMetroidModel that contains global data</param>

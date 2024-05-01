@@ -254,7 +254,7 @@ namespace sm_json_data_framework.Models
             }
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
-            InitializeStartConditions();
+            StartConditions = new StartConditions(this);
 
             // Create and assign initial game state
             InitialGameState = new InGameState(StartConditions);
@@ -288,60 +288,6 @@ namespace sm_json_data_framework.Models
                 throw new Exception($"The following logical element property values could not be resolved " +
                     $"to an object of their expected type: {string.Join(", ", unhandledLogicalElementProperties.Distinct().Select(s => $"'{s}'"))}");
             }
-        }
-
-        /// <summary>
-        /// Initialize the internal StartConditions of this model, based on its internal BasicStartConditions
-        /// </summary>
-        private void InitializeStartConditions()
-        {
-            List<GameFlag> startingFlags = new List<GameFlag>();
-            foreach (string flagName in BasicStartConditions.StartingFlagNames)
-            {
-                if (!GameFlags.TryGetValue(flagName, out GameFlag flag))
-                {
-                    throw new Exception($"Starting game flag {flagName} not found.");
-                }
-                startingFlags.Add(flag);
-            }
-
-            List<NodeLock> startingLocks = new List<NodeLock>();
-            foreach (string lockName in BasicStartConditions.StartingLockNames)
-            {
-                if (!Locks.TryGetValue(lockName, out NodeLock nodeLock))
-                {
-                    throw new Exception($"Starting node lock {lockName} not found.");
-                }
-                startingLocks.Add(nodeLock);
-            }
-
-            ResourceCount startingResources = new ResourceCount();
-            foreach (RawResourceCapacity capacity in BasicStartConditions.StartingResources)
-            {
-                startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
-            }
-
-            ItemInventory startingInventory = new ItemInventory(startingResources);
-            foreach (string itemName in BasicStartConditions.StartingItemNames)
-            {
-                if (!Items.TryGetValue(itemName, out Item item))
-                {
-                    throw new Exception($"Starting item {itemName} not found.");
-                }
-                startingInventory.ApplyAddItem(item);
-            }
-
-            StartConditions startConditions = new StartConditions
-            {
-                StartingNode = GetNodeInRoom(BasicStartConditions.StartingRoomName, BasicStartConditions.StartingNodeId),
-                StartingGameFlags = startingFlags,
-                StartingOpenLocks = startingLocks,
-                // Default starting resource counts to the starting maximum
-                StartingResources = startingResources.Clone(),
-                StartingInventory = startingInventory
-            };
-
-            StartConditions = startConditions;
         }
 
         /// <summary>

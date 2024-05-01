@@ -65,23 +65,14 @@ namespace sm_json_data_framework.Reading
             return new SuperMetroidModel(rawModel, rules, logicalOptions, basicStartConditionsCustomizer, overrideObjectTypes, overrideStringTypes);
         }
 
-        private static JsonSerializerOptions CreateJsonSerializerOptionsForModel(SuperMetroidModel superMetroidModel,
-            IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideTypes = null)
+        private static JsonSerializerOptions CreateJsonSerializerOptionsForRawModel()
         {
             JsonSerializerOptions options = CreateBaseJsonSerializerOptions();
 
             // Add custom converters for logical requirements and logical elements
-            options.Converters.Add(new LogicalRequirementsConverter());
-            options.Converters.Add(new StringLogicalElementConverter(superMetroidModel));
-            options.Converters.Add(new ObjectLogicalElementConverter(overrideTypes));
-            options.Converters.Add(new StratsDictionaryConverter());
-            options.Converters.Add(new RoomObstaclesDictionaryConverter());
-            options.Converters.Add(new LocksDictionaryConverter());
-            options.Converters.Add(new RoomNodesDictionaryConverter());
-            options.Converters.Add(new EnemyAttackDictionaryConverter());
-            options.Converters.Add(new RoomEnemyDictionaryConverter());
-            options.Converters.Add(new LinksDictionaryConverter());
-            options.Converters.Add(new LinkTosDictionaryConverter());
+            options.Converters.Add(new RawLogicalRequirementsConverter());
+            options.Converters.Add(new RawObjectLogicalElementConverter());
+            options.Converters.Add(new RawStringLogicalElementConverter());
 
             return options;
         }
@@ -158,18 +149,6 @@ namespace sm_json_data_framework.Reading
             model.RoomContainer = new RawRoomContainer { Rooms = allRooms };
 
             return model;
-        }
-
-        private static JsonSerializerOptions CreateJsonSerializerOptionsForRawModel()
-        {
-            JsonSerializerOptions options = CreateBaseJsonSerializerOptions();
-
-            // Add custom converters for logical requirements and logical elements
-            options.Converters.Add(new RawLogicalRequirementsConverter());
-            options.Converters.Add(new RawObjectLogicalElementConverter());
-            options.Converters.Add(new RawStringLogicalElementConverter());
-
-            return options;
         }
     }
 }

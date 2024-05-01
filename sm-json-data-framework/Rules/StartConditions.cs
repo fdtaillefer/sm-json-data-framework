@@ -2,11 +2,13 @@
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Raw.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 
 namespace sm_json_data_framework.Rules
@@ -38,26 +40,66 @@ namespace sm_json_data_framework.Rules
 
         }
 
-        public StartConditions(ItemContainer itemContainer, SuperMetroidModel model)
+        /// <summary>
+        /// Constructor that constructs StartConditions using the provided model and the <see cref="BasicStartConditions"/> it contains.
+        /// </summary>
+        /// <param name="model">Model from which to construct StartConditions</param>
+        public StartConditions(SuperMetroidModel model): this(model, model.BasicStartConditions)
         {
-            StartingResources = new ResourceCount(itemContainer.StartingResources);
 
-            // Initialize starting inventory. The json file's starting resources are also implicitly the starting maximum.
-            StartingInventory = new ItemInventory(StartingResources);
-            foreach (string itemName in itemContainer.StartingItemNames)
+        }
+
+        /// <summary>
+        /// Constructor that constructs StartConditions using the provided model and basicStartConditions.
+        /// </summary>
+        /// <param name="model">Model from which to reference objects for the start conditions</param>
+        /// <param name="overrideBasicStartConditions">The basic start conditions to use, regardless of whether
+        /// this is the provided model's basicStartConditions or not.</param>
+        public StartConditions(SuperMetroidModel model, BasicStartConditions overrideBasicStartConditions)
+        {
+            List<GameFlag> startingFlags = new List<GameFlag>();
+            foreach (string flagName in overrideBasicStartConditions.StartingFlagNames)
             {
-                StartingInventory.ApplyAddItem(model.Items[itemName]);
+                if (!model.GameFlags.TryGetValue(flagName, out GameFlag flag))
+                {
+                    throw new Exception($"Starting game flag {flagName} not found.");
+                }
+                startingFlags.Add(flag);
             }
 
-            StartingNode = model.Rooms[itemContainer.StartingRoomName].Nodes[itemContainer.StartingNodeId];
+            List<NodeLock> startingLocks = new List<NodeLock>();
+            foreach (string lockName in overrideBasicStartConditions.StartingLockNames)
+            {
+                if (!model.Locks.TryGetValue(lockName, out NodeLock nodeLock))
+                {
+                    throw new Exception($"Starting node lock {lockName} not found.");
+                }
+                startingLocks.Add(nodeLock);
+            }
 
-            // Initialize starting game flags
-            StartingGameFlags = itemContainer.StartingGameFlagNames.Select(flagName => model.GameFlags[flagName]).ToList();
+            ResourceCount startingResources = new ResourceCount();
+            foreach (RawResourceCapacity capacity in overrideBasicStartConditions.StartingResources)
+            {
+                startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
+            }
 
-            // Initialize starting open locks
-            StartingOpenLocks = itemContainer.StartingNodeLockNames.Select(lockName => model.Locks[lockName]).ToList();
+            ItemInventory startingInventory = new ItemInventory(startingResources);
+            foreach (string itemName in overrideBasicStartConditions.StartingItemNames)
+            {
+                if (!model.Items.TryGetValue(itemName, out Item item))
+                {
+                    throw new Exception($"Starting item {itemName} not found.");
+                }
+                startingInventory.ApplyAddItem(item);
+            }
 
-            // items.json doesn't have the ability to express starting taken item locations, so leave it as its default empty list
+
+            StartingNode = model.GetNodeInRoom(overrideBasicStartConditions.StartingRoomName, overrideBasicStartConditions.StartingNodeId);
+            StartingGameFlags = startingFlags;
+            StartingOpenLocks = startingLocks;
+            // Default starting resource counts to the starting maximum
+            StartingResources = startingResources.Clone();
+            StartingInventory = startingInventory;
         }
 
         public StartConditions(StartConditions other)
