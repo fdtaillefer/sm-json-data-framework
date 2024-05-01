@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.Rooms
         public int Quantity { get; set; }
 
         [JsonPropertyName("homeNodes")]
-        public IEnumerable<int> HomeNodeIds { get; set; } = Enumerable.Empty<int>();
+        public ISet<int> HomeNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
@@ -40,7 +40,7 @@ namespace sm_json_data_framework.Models.Rooms
         public Dictionary<int, RoomNode> HomeNodes { get; set; }
 
         [JsonPropertyName("betweenNodes")]
-        public IEnumerable<int> BetweenNodeIds { get; set; } = Enumerable.Empty<int>();
+        public ISet<int> BetweenNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
 
-        public IEnumerable<FarmCycle> FarmCycles { get; set; } = Enumerable.Empty<FarmCycle>();
+        public IList<FarmCycle> FarmCycles { get; set; } = new List<FarmCycle>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
@@ -74,21 +74,21 @@ namespace sm_json_data_framework.Models.Rooms
 
         }
 
-        public RoomEnemy(RawRoomEnemy roomEnemy, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public RoomEnemy(RawRoomEnemy rawRoomEnemy, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Id = roomEnemy.Id;
-            GroupName = roomEnemy.GroupName;
-            EnemyName = roomEnemy.EnemyName;
-            Quantity = roomEnemy.Quantity;
-            HomeNodeIds = new HashSet<int>(roomEnemy.HomeNodes);
-            BetweenNodeIds = new HashSet<int>(roomEnemy.BetweenNodes);
-            Spawn = roomEnemy.Spawn.ToLogicalRequirements(knowledgeBase);
-            if (roomEnemy.StopSpawn != null)
+            Id = rawRoomEnemy.Id;
+            GroupName = rawRoomEnemy.GroupName;
+            EnemyName = rawRoomEnemy.EnemyName;
+            Quantity = rawRoomEnemy.Quantity;
+            HomeNodeIds = new HashSet<int>(rawRoomEnemy.HomeNodes);
+            BetweenNodeIds = new HashSet<int>(rawRoomEnemy.BetweenNodes);
+            Spawn = rawRoomEnemy.Spawn.ToLogicalRequirements(knowledgeBase);
+            if (rawRoomEnemy.StopSpawn != null)
             {
-                StopSpawn = roomEnemy.StopSpawn.ToLogicalRequirements(knowledgeBase);
+                StopSpawn = rawRoomEnemy.StopSpawn.ToLogicalRequirements(knowledgeBase);
             }
-            DropRequires = roomEnemy.DropRequires.ToLogicalRequirements(knowledgeBase);
-            FarmCycles = roomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase));
+            DropRequires = rawRoomEnemy.DropRequires.ToLogicalRequirements(knowledgeBase);
+            FarmCycles = rawRoomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase)).ToList();
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
@@ -106,7 +106,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
         {
-            FarmCycles = FarmCycles.Where(farmCycle => farmCycle.CleanUpUselessValues(model, room, this));
+            FarmCycles = FarmCycles.Where(farmCycle => farmCycle.CleanUpUselessValues(model, room, this)).ToList();
 
             // A room enemy is never useless
             return true;

@@ -12,6 +12,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms
     {
         public int From { get; set; }
 
-        public IEnumerable<RawLinkTo> To { get; set; } = Enumerable.Empty<RawLinkTo>();
+        public IList<RawLinkTo> To { get; set; } = new List<RawLinkTo>();
     }
 }

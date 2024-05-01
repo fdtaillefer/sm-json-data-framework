@@ -20,10 +20,10 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
 
         public string Name { get; set; }
 
-        public IEnumerable<RawStrat> UnlockStrats { get; set; } = Enumerable.Empty<RawStrat>();
+        public IList<RawStrat> UnlockStrats { get; set; } = new List<RawStrat>();
 
-        public IEnumerable<RawStrat> BypassStrats { get; set; } = Enumerable.Empty<RawStrat>();
+        public IList<RawStrat> BypassStrats { get; set; } = new List<RawStrat>();
 
-        public IEnumerable<string> Yields { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> Yields { get; set; } = new HashSet<string>();
     }
 }

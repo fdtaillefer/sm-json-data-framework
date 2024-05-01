@@ -26,7 +26,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         [JsonIgnore]
         public RoomNode FromNode {get;set;}
 
-        public IEnumerable<int> InRoomPath { get; set; } = Enumerable.Empty<int>();
+        public IList<int> InRoomPath { get; set; } = new List<int>();
 
         public decimal UsedTiles { get; set; }
 

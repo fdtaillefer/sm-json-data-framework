@@ -15,34 +15,34 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     public class ResetRoom : AbstractObjectLogicalElement
     {
         [JsonPropertyName("nodes")]
-        public IEnumerable<int> NodeIds { get; set; } = Enumerable.Empty<int>();
+        public IList<int> NodeIds { get; set; } = new List<int>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
         /// <para>The nodes that this element's NodeIds reference. </para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<RoomNode> Nodes { get; set; }
+        public IList<RoomNode> Nodes { get; set; }
 
         [JsonPropertyName("nodesToAvoid")]
-        public IEnumerable<int> NodeIdsToAvoid { get; set; } = Enumerable.Empty<int>();
+        public ISet<int> NodeIdsToAvoid { get; set; } = new HashSet<int>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
         /// <para>The nodes that this element's NodeIdToAvoids reference. </para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<RoomNode> NodesToAvoid { get; set; }
+        public IList<RoomNode> NodesToAvoid { get; set; }
 
         [JsonPropertyName("obstaclesToAvoid")]
-        public IEnumerable<string> ObstaclesIdsToAvoid { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ObstaclesIdsToAvoid { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
         /// <para>The obstacles that this element's ObstaclesIdsToAvoid reference. </para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<RoomObstacle> ObstaclesToAvoid { get; set; }
+        public IList<RoomObstacle> ObstaclesToAvoid { get; set; }
 
         public bool MustStayPut { get; set; } = false;
 

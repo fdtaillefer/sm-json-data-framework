@@ -22,9 +22,9 @@ namespace sm_json_data_framework.Models.Raw.Rooms
 
         public int Quantity { get; set; }
 
-        public IEnumerable<int> HomeNodes { get; set; } = Enumerable.Empty<int>();
+        public ISet<int> HomeNodes { get; set; } = new HashSet<int>();
 
-        public IEnumerable<int> BetweenNodes { get; set; } = Enumerable.Empty<int>();
+        public ISet<int> BetweenNodes { get; set; } = new HashSet<int>();
 
         public RawLogicalRequirements Spawn { get; set; } = new RawLogicalRequirements();
 
@@ -32,6 +32,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms
 
         public RawLogicalRequirements DropRequires { get; set; } = new RawLogicalRequirements();
 
-        public IEnumerable<RawFarmCycle> FarmCycles { get; set; } = Enumerable.Empty<RawFarmCycle>();
+        public IList<RawFarmCycle> FarmCycles { get; set; } = new List<RawFarmCycle>();
     }
 }

@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Reading
             // When
             SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
                 basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(), 
-                overrideTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
+                overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);

@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Techs
 
         public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
 
-        public IEnumerable<Tech> ExtensionTechs { get; set; } = Enumerable.Empty<Tech>();
+        public IList<Tech> ExtensionTechs { get; set; } = new List<Tech>();
 
         public Tech()
         {
@@ -26,11 +26,11 @@ namespace sm_json_data_framework.Models.Techs
         /// so if a Tech is being created, the knowledge needed to convert logical requirements is still being built.
         /// Logical requirements should be assigned in a second pass.
         /// </summary>
-        /// <param name="tech">RawTech to use as a base</param>
-        public Tech(RawTech tech)
+        /// <param name="rawTech">RawTech to use as a base</param>
+        public Tech(RawTech rawTech)
         {
-            Name = tech.Name;
-            ExtensionTechs = tech.ExtensionTechs.Select(subTech => new Tech(subTech));
+            Name = rawTech.Name;
+            ExtensionTechs = rawTech.ExtensionTechs.Select(subTech => new Tech(subTech)).ToList();
         }
 
         /// <summary>

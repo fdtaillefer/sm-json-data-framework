@@ -13,6 +13,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
     {
         public PhysicsEnum Physics { get; set; }
 
-        public IEnumerable<int> EntranceNodes { get; set; }
+        public ISet<int> EntranceNodes { get; set; }
     }
 }

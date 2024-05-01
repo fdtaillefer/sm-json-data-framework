@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Models.Raw.Requirements
             else if (knowledgeBase.GameFlags.TryGetValue(Value, out GameFlag gameFlag))
             {
                 Type gameFlagType = knowledgeBase.StringLogicalElementTypes[StringLogicalElementTypeEnum.Gameflag];
-                GameFlagLogicalElement logicalElement = (GameFlagLogicalElement)Activator.CreateInstance(gameFlagType, item);
+                GameFlagLogicalElement logicalElement = (GameFlagLogicalElement)Activator.CreateInstance(gameFlagType, gameFlag);
                 return logicalElement;
             }
             // If the string matched nothing that's in the model maybe it's referencing something that's

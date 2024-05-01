@@ -39,17 +39,17 @@ namespace sm_json_data_framework.Models.Enemies
         public bool Grapplable { get; set; }
 
         [JsonPropertyName("invul")]
-        public IEnumerable<string> InvulnerabilityStrings { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> InvulnerabilityStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
         /// <para>The sequence of all weapons this enemy is invulnerable to.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<Weapon> InvulnerableWeapons { get; private set; }
+        public IList<Weapon> InvulnerableWeapons { get; private set; }
 
         [JsonPropertyName("damageMultipliers")]
-        public IEnumerable<RawEnemyDamageMultiplier> RawDamageMultipliers { get; set; } = Enumerable.Empty<RawEnemyDamageMultiplier>();
+        public IList<RawEnemyDamageMultiplier> RawDamageMultipliers { get; set; } = new List<RawEnemyDamageMultiplier>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
@@ -58,7 +58,7 @@ namespace sm_json_data_framework.Models.Enemies
         [JsonIgnore]
         public Dictionary<string, WeaponMultiplier> WeaponMultipliers { get; private set; }
 
-        public IEnumerable<string> Areas { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> Areas { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
@@ -72,30 +72,30 @@ namespace sm_json_data_framework.Models.Enemies
 
         }
 
-        public Enemy(RawEnemy enemy)
+        public Enemy(RawEnemy rawEnemy)
         {
-            Id = enemy.Id;
-            Name = enemy.Name;
-            Attacks = enemy.Attacks.ToDictionary(attack => attack.Name);
-            Hp = enemy.Hp;
-            AmountOfDrops = enemy.AmountOfDrops;
-            Drops = new EnemyDrops(enemy.Drops);
-            if (enemy.FarmableDrops != null)
+            Id = rawEnemy.Id;
+            Name = rawEnemy.Name;
+            Attacks = rawEnemy.Attacks.ToDictionary(attack => attack.Name);
+            Hp = rawEnemy.Hp;
+            AmountOfDrops = rawEnemy.AmountOfDrops;
+            Drops = new EnemyDrops(rawEnemy.Drops);
+            if (rawEnemy.FarmableDrops != null)
             {
-                FarmableDrops = new EnemyDrops(enemy.FarmableDrops);
+                FarmableDrops = new EnemyDrops(rawEnemy.FarmableDrops);
             }
-            Dimensions = new EnemyDimensions(enemy.Dims);
-            Freezable = enemy.Freezable;
-            Grapplable = enemy.Grapplable;
-            InvulnerabilityStrings = new List<string>(enemy.Invul);
-            RawDamageMultipliers = enemy.DamageMultipliers.Select(multiplier => multiplier.CLone());
-            Areas = new HashSet<string>(enemy.Areas);
+            Dimensions = new EnemyDimensions(rawEnemy.Dims);
+            Freezable = rawEnemy.Freezable;
+            Grapplable = rawEnemy.Grapplable;
+            InvulnerabilityStrings = new HashSet<string>(rawEnemy.Invul);
+            RawDamageMultipliers = rawEnemy.DamageMultipliers.Select(multiplier => multiplier.CLone()).ToList();
+            Areas = new HashSet<string>(rawEnemy.Areas);
         }
 
         public void InitializeProperties(SuperMetroidModel model)
         {
             // Convert InvulnerabilityStrings to Weapons
-            InvulnerableWeapons = InvulnerabilityStrings.NamesToWeapons(model);
+            InvulnerableWeapons = InvulnerabilityStrings.NamesToWeapons(model).ToList();
 
             // Get a WeaponMultiplier for all non-immune weapons
             WeaponMultipliers = RawDamageMultipliers

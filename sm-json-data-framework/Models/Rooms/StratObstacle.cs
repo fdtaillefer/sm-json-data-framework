@@ -29,29 +29,29 @@ namespace sm_json_data_framework.Models.Rooms
         public LogicalRequirements Bypass { get; set; }
 
         [JsonPropertyName("additionalObstacles")]
-        public IEnumerable<string> AdditionalObstacleIds { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> AdditionalObstacleIds { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>The additional RoomObstacles that are destroyed alongside this StratObstacle</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<RoomObstacle> AdditionalObstacles { get; set; }
+        public IList<RoomObstacle> AdditionalObstacles { get; set; }
 
         public StratObstacle()
         {
 
         }
 
-        public StratObstacle(RawStratObstacle stratObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public StratObstacle(RawStratObstacle rawStratObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            ObstacleId = stratObstacle.Id;
-            Requires = stratObstacle.Requires.ToLogicalRequirements(knowledgeBase);
-            if(stratObstacle.Bypass != null)
+            ObstacleId = rawStratObstacle.Id;
+            Requires = rawStratObstacle.Requires.ToLogicalRequirements(knowledgeBase);
+            if(rawStratObstacle.Bypass != null)
             {
-                Bypass = stratObstacle.Bypass.ToLogicalRequirements(knowledgeBase);
+                Bypass = rawStratObstacle.Bypass.ToLogicalRequirements(knowledgeBase);
             }
-            AdditionalObstacleIds = new HashSet<string>(stratObstacle.AdditionalObstacles);
+            AdditionalObstacleIds = new HashSet<string>(rawStratObstacle.AdditionalObstacles);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
@@ -60,7 +60,7 @@ namespace sm_json_data_framework.Models.Rooms
             Obstacle = room.Obstacles[ObstacleId];
 
             // Initialize AdditionalObstacles
-            AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]);
+            AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]).ToList();
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)

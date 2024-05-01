@@ -18,6 +18,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms
 
         public RawLogicalRequirements Bypass { get; set; }
 
-        public IEnumerable<string> AdditionalObstacles { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> AdditionalObstacles { get; set; } = new HashSet<string>();
     }
 }

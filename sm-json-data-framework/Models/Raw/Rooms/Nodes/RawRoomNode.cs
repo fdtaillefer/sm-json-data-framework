@@ -30,24 +30,24 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
 
         public string NodeAddress { get; set; }
 
-        public IEnumerable<RawDoorEnvironment> DoorEnvironments { get; set; } = Enumerable.Empty<RawDoorEnvironment>();
+        public IList<RawDoorEnvironment> DoorEnvironments { get; set; } = new List<RawDoorEnvironment>();
 
         public RawLogicalRequirements InteractionRequires { get; set; } = new RawLogicalRequirements();
 
-        public IEnumerable<RawRunway> Runways { get; set; } = Enumerable.Empty<RawRunway>();
+        public IList<RawRunway> Runways { get; set; } = new List<RawRunway>();
 
-        public IEnumerable<RawCanLeaveCharged> CanLeaveCharged { get; set; } = Enumerable.Empty<RawCanLeaveCharged>();
+        public IList<RawCanLeaveCharged> CanLeaveCharged { get; set; } = new List<RawCanLeaveCharged>();
 
         public int? SpawnAt { get; set; }
 
-        public IEnumerable<RawNodeLock> Locks { get; set; } = Enumerable.Empty<RawNodeLock>();
+        public IList<RawNodeLock> Locks { get; set; } = new List<RawNodeLock>();
 
-        public IEnumerable<UtilityEnum> Utility { get; set; } = Enumerable.Empty<UtilityEnum>();
+        public ISet<UtilityEnum> Utility { get; set; } = new HashSet<UtilityEnum>();
 
-        public IEnumerable<RawViewableNode> ViewableNodes { get; set; } = Enumerable.Empty<RawViewableNode>();
+        public IList<RawViewableNode> ViewableNodes { get; set; } = new List<RawViewableNode>();
 
-        public IEnumerable<string> Yields { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> Yields { get; set; } = new HashSet<string>();
 
-        public IEnumerable<RawTwinDoorAddress> TwinDoorAddresses { get; set; } = Enumerable.Empty<RawTwinDoorAddress>();
+        public IList<RawTwinDoorAddress> TwinDoorAddresses { get; set; } = new List<RawTwinDoorAddress>();
     }
 }

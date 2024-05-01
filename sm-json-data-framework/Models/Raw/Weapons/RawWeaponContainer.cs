@@ -9,6 +9,6 @@ namespace sm_json_data_framework.Models.Raw.Weapons
 {
     public class RawWeaponContainer
     {
-        public IEnumerable<RawWeapon> Weapons { get; set; } = Enumerable.Empty<RawWeapon>();
+        public IList<RawWeapon> Weapons { get; set; } = new List<RawWeapon>();
     }
 }

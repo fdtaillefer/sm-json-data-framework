@@ -17,10 +17,10 @@ namespace sm_json_data_framework.Models.Raw.Rooms
 
         public RawLogicalRequirements Requires { get; set; }
 
-        public IEnumerable<RawStratObstacle> Obstacles { get; set; } = Enumerable.Empty<RawStratObstacle>();
+        public IList<RawStratObstacle> Obstacles { get; set; } = new List<RawStratObstacle>();
 
-        public IEnumerable<RawStratFailure> Failures { get; set; } = Enumerable.Empty<RawStratFailure>();
+        public IList<RawStratFailure> Failures { get; set; } = new List<RawStratFailure>();
 
-        public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StratProperties { get; set; } = new HashSet<string>();
     }
 }

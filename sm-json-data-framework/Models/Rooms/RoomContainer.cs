@@ -6,6 +6,6 @@ namespace sm_json_data_framework.Models.Rooms
 {
     public class RoomContainer
     {
-        public IEnumerable<Room> Rooms { get; set; }
+        public IList<Room> Rooms { get; set; }
     }
 }

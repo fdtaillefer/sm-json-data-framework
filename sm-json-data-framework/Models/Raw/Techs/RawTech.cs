@@ -15,6 +15,6 @@ namespace sm_json_data_framework.Models.Raw.Techs
 
         public RawLogicalRequirements Requires { get; set; } = new RawLogicalRequirements();
 
-        public IEnumerable<RawTech> ExtensionTechs { get; set; } = Enumerable.Empty<RawTech>();
+        public IList<RawTech> ExtensionTechs { get; set; } = new List<RawTech>();
     }
 }

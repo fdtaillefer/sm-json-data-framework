@@ -14,20 +14,20 @@ namespace sm_json_data_framework.Models.Raw.Items
 
         public int StartingNode { get; set; }
 
-        public IEnumerable<string> StartingItems { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StartingItems { get; set; } = new HashSet<string>();
 
-        public IEnumerable<string> StartingFlags { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StartingFlags { get; set; } = new HashSet<string>();
 
-        public IEnumerable<string> StartingLocks { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StartingLocks { get; set; } = new HashSet<string>();
 
-        public IEnumerable<RawResourceCapacity> StartingResources { get; set; } = Enumerable.Empty<RawResourceCapacity>();
+        public IList<RawResourceCapacity> StartingResources { get; set; } = new List<RawResourceCapacity>();
 
-        public IEnumerable<string> ImplicitItems { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ImplicitItems { get; set; } = new HashSet<string>();
 
-        public IEnumerable<RawInGameItem> UpgradeItems { get; set; } = Enumerable.Empty<RawInGameItem>();
+        public IList<RawInGameItem> UpgradeItems { get; set; } = new List<RawInGameItem>();
 
-        public IEnumerable<RawExpansionItem> ExpansionItems { get; set; } = Enumerable.Empty<RawExpansionItem>();
+        public IList<RawExpansionItem> ExpansionItems { get; set; } = new List<RawExpansionItem>();
 
-        public IEnumerable<string> GameFlags { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> GameFlags { get; set; } = new HashSet<string>();
     }
 }

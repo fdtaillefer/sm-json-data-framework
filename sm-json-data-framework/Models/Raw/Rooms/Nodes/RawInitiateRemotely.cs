@@ -16,6 +16,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
         public bool MustOpenDoorFirst { get; set; }
 
         [JsonPropertyName("pathToDoor")]
-        public IEnumerable<RawInitiateRemotelyPathToDoorNode> PathToDoor { get; set; } = Enumerable.Empty<RawInitiateRemotelyPathToDoorNode>();
+        public IList<RawInitiateRemotelyPathToDoorNode> PathToDoor { get; set; } = new List<RawInitiateRemotelyPathToDoorNode>();
     }
 }

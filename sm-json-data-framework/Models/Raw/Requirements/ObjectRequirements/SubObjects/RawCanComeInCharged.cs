@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
     {
         public int FromNode { get; set; }
 
-        public IEnumerable<int> InRoomPath { get; set; } = Enumerable.Empty<int>();
+        public IList<int> InRoomPath { get; set; } = new List<int>();
 
         public int FramesRemaining { get; set; }
 

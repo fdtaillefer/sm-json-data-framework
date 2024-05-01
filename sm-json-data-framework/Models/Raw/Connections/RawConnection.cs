@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Raw.Connections
 
         public string Description { get; set; }
 
-        public IEnumerable<RawConnectionNode> Nodes { get; set; } = Enumerable.Empty<RawConnectionNode>();
+        public IList<RawConnectionNode> Nodes { get; set; } = new List<RawConnectionNode>();
 
         public ConnectionDirectionEnum Direction { get; set; } = ConnectionDirectionEnum.Bidirectional;
     }

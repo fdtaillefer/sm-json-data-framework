@@ -45,13 +45,13 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public string NodeAddress { get; set; }
 
-        public IEnumerable<DoorEnvironment> DoorEnvironments { get; set; } = Enumerable.Empty<DoorEnvironment>();
+        public IList<DoorEnvironment> DoorEnvironments { get; set; } = new List<DoorEnvironment>();
 
         public LogicalRequirements InteractionRequires { get; set; } = new LogicalRequirements();
 
-        public IEnumerable<Runway> Runways { get; set; } = Enumerable.Empty<Runway>();
+        public IList<Runway> Runways { get; set; } = new List<Runway>();
 
-        public IEnumerable<CanLeaveCharged> CanLeaveCharged { get; set; } = Enumerable.Empty<CanLeaveCharged>();
+        public IList<CanLeaveCharged> CanLeaveCharged { get; set; } = new List<CanLeaveCharged>();
 
         // Decide who should handle null here
         [JsonPropertyName("spawnAt")]
@@ -82,22 +82,22 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
 
-        public IEnumerable<UtilityEnum> Utility { get; set; } = Enumerable.Empty<UtilityEnum>();
+        public ISet<UtilityEnum> Utility { get; set; } = new HashSet<UtilityEnum>();
 
-        public IEnumerable<ViewableNode> ViewableNodes { get; set; } = Enumerable.Empty<ViewableNode>();
+        public IList<ViewableNode> ViewableNodes { get; set; } = new List<ViewableNode>();
 
         [JsonPropertyName("yields")]
-        public IEnumerable<string> YieldsStrings { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
         /// <para>The game flags that are activated by interacting with this node.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<GameFlag> Yields { get; set; }
+        public IList<GameFlag> Yields { get; set; }
 
         [JsonIgnore]
-        public IEnumerable<string> Note { get; set; }
+        public IList<string> Note { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
@@ -141,31 +141,31 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             } 
         }
         
-        public IEnumerable<TwinDoorAddress> TwinDoorAddresses { get; set; } = Enumerable.Empty<TwinDoorAddress>();
+        public IList<TwinDoorAddress> TwinDoorAddresses { get; set; } = new List<TwinDoorAddress>();
 
         public RoomNode()
         {
 
         }
 
-        public RoomNode(RawRoomNode node, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public RoomNode(RawRoomNode rawNode, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Id = node.Id;
-            Name = node.Name;
-            NodeType = node.NodeType;
-            NodeSubType = node.NodeSubType;
-            NodeItemName = node.NodeItem;
-            NodeAddress = node.NodeAddress;
-            DoorEnvironments = node.DoorEnvironments.Select(environment => new DoorEnvironment(environment));
-            InteractionRequires = node.InteractionRequires.ToLogicalRequirements(knowledgeBase);
-            Runways = node.Runways.Select(runway => new Runway(runway, knowledgeBase));
-            CanLeaveCharged = node.CanLeaveCharged.Select(clc => new Nodes.CanLeaveCharged(clc, knowledgeBase));
-            OverrideSpawnAtNodeId = node.SpawnAt;
-            Locks = node.Locks.Select(nodeLock => new NodeLock(nodeLock, knowledgeBase)).ToDictionary(nodeLock => nodeLock.Name);
-            Utility = new HashSet<UtilityEnum>(node.Utility);
-            ViewableNodes = node.ViewableNodes.Select(viewableNode => new ViewableNode(viewableNode, knowledgeBase));
-            YieldsStrings = new HashSet<string>(node.Yields);
-            TwinDoorAddresses = node.TwinDoorAddresses.Select(twinAddress => new TwinDoorAddress(twinAddress));
+            Id = rawNode.Id;
+            Name = rawNode.Name;
+            NodeType = rawNode.NodeType;
+            NodeSubType = rawNode.NodeSubType;
+            NodeItemName = rawNode.NodeItem;
+            NodeAddress = rawNode.NodeAddress;
+            DoorEnvironments = rawNode.DoorEnvironments.Select(environment => new DoorEnvironment(environment)).ToList();
+            InteractionRequires = rawNode.InteractionRequires.ToLogicalRequirements(knowledgeBase);
+            Runways = rawNode.Runways.Select(runway => new Runway(runway, knowledgeBase)).ToList();
+            CanLeaveCharged = rawNode.CanLeaveCharged.Select(clc => new Nodes.CanLeaveCharged(clc, knowledgeBase)).ToList();
+            OverrideSpawnAtNodeId = rawNode.SpawnAt;
+            Locks = rawNode.Locks.Select(nodeLock => new NodeLock(nodeLock, knowledgeBase)).ToDictionary(nodeLock => nodeLock.Name);
+            Utility = new HashSet<UtilityEnum>(rawNode.Utility);
+            ViewableNodes = rawNode.ViewableNodes.Select(viewableNode => new ViewableNode(viewableNode, knowledgeBase)).ToList();
+            YieldsStrings = new HashSet<string>(rawNode.Yields);
+            TwinDoorAddresses = rawNode.TwinDoorAddresses.Select(twinAddress => new TwinDoorAddress(twinAddress)).ToList();
         }
 
         /// <summary>
@@ -177,8 +177,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
             return Locks.Values.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
-                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock))
-                .ToList();
+                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock));
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
@@ -214,7 +213,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Initialize Yielded game flags
-            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
+            Yields = YieldsStrings.Select(s => model.GameFlags[s]).ToList();
 
             // Initialize item
             if (NodeItemName != null)
@@ -256,19 +255,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
         {
             // Cleanup CanLeaveChargeds
-            CanLeaveCharged = CanLeaveCharged.Where(clc => clc.CleanUpUselessValues(model, room, this));
+            CanLeaveCharged = CanLeaveCharged.Where(clc => clc.CleanUpUselessValues(model, room, this)).ToList();
 
             // Cleanup DoorEnvironments
-            DoorEnvironments = DoorEnvironments.Where(environment => environment.CleanUpUselessValues(model, room, this));
+            DoorEnvironments = DoorEnvironments.Where(environment => environment.CleanUpUselessValues(model, room, this)).ToList();
 
             // Cleanup ViewableNodes
-            ViewableNodes = ViewableNodes.Where(viewableNode => viewableNode.CleanUpUselessValues(model, room, this));
+            ViewableNodes = ViewableNodes.Where(viewableNode => viewableNode.CleanUpUselessValues(model, room, this)).ToList();
 
             // Cleanup Locks
             Locks = Locks.Where(kvp => kvp.Value.CleanUpUselessValues(model, room, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             // Cleanup Runways
-            Runways = Runways.Where(runway => runway.CleanUpUselessValues(model, room, this));
+            Runways = Runways.Where(runway => runway.CleanUpUselessValues(model, room, this)).ToList();
 
             // A node never becomes useless
             return true;

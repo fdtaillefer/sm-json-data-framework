@@ -7,6 +7,6 @@ namespace sm_json_data_framework.Models.Enemies
 {
     public class EnemyContainer
     {
-        public IEnumerable<Enemy> Enemies { get; set; } = Enumerable.Empty<Enemy>();
+        public IList<Enemy> Enemies { get; set; } = new List<Enemy>();
     }
 }

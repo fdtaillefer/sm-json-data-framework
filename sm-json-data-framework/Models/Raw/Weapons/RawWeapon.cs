@@ -27,6 +27,6 @@ namespace sm_json_data_framework.Models.Raw.Weapons
 
         public bool HitsGroup { get; set; }
 
-        public IEnumerable<WeaponCategoryEnum> Categories { get; set; } = Enumerable.Empty<WeaponCategoryEnum>();
+        public ISet<WeaponCategoryEnum> Categories { get; set; } = new HashSet<WeaponCategoryEnum>();
     }
 }

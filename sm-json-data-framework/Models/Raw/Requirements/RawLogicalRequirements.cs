@@ -16,10 +16,10 @@ namespace sm_json_data_framework.Models.Raw.Requirements
 
         public RawLogicalRequirements(IEnumerable<AbstractRawLogicalElement> logicalElements)
         {
-            LogicalElements = LogicalElements.Concat(logicalElements);
+            LogicalElements = LogicalElements.Concat(logicalElements).ToList();
         }
 
-        public IEnumerable<AbstractRawLogicalElement> LogicalElements { get; private set; } = Enumerable.Empty<AbstractRawLogicalElement>();
+        public IList<AbstractRawLogicalElement> LogicalElements { get; private set; } = new List<AbstractRawLogicalElement>();
 
         public LogicalRequirements ToLogicalRequirements(LogicalElementCreationKnowledgeBase knowledgeBase)
         {

@@ -14,11 +14,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 {
     public class RawResetRoom: AbstractRawObjectLogicalElement
     {
-        public IEnumerable<int> Nodes { get; set; } = Enumerable.Empty<int>();
+        public IList<int> Nodes { get; set; } = new List<int>();
 
-        public IEnumerable<int> NodesToAvoid { get; set; } = Enumerable.Empty<int>();
+        public ISet<int> NodesToAvoid { get; set; } = new HashSet<int>();
 
-        public IEnumerable<string> ObstaclesToAvoid { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ObstaclesToAvoid { get; set; } = new HashSet<string>();
 
         public bool MustStayPut { get; set; } = false;
 
@@ -28,8 +28,8 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
             {
                 ResetRoom resetRoom = (ResetRoom)Activator.CreateInstance(type);
                 resetRoom.NodeIds = new List<int>(Nodes);
-                resetRoom.NodeIdsToAvoid = new List<int>(NodesToAvoid);
-                resetRoom.ObstaclesIdsToAvoid = new List<string>(ObstaclesToAvoid);
+                resetRoom.NodeIdsToAvoid = new HashSet<int>(NodesToAvoid);
+                resetRoom.ObstaclesIdsToAvoid = new HashSet<string>(ObstaclesToAvoid);
                 resetRoom.MustStayPut = MustStayPut;
                 return resetRoom;
             }

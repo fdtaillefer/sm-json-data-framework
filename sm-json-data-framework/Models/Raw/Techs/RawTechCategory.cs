@@ -11,6 +11,6 @@ namespace sm_json_data_framework.Models.Raw.Techs
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public IEnumerable<RawTech> Techs { get; set; } = Enumerable.Empty<RawTech>();
+        public IList<RawTech> Techs { get; set; } = new List<RawTech>();
     }
 }

@@ -9,6 +9,6 @@ namespace sm_json_data_framework.Models.Techs
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public IEnumerable<Tech> Techs { get; set; } = Enumerable.Empty<Tech>();
+        public IList<Tech> Techs { get; set; } = new List<Tech>();
     }
 }

@@ -21,24 +21,24 @@ namespace sm_json_data_framework.Models.Items
         public int StartingNodeId { get; set; }
 
         [JsonPropertyName("startingItems")]
-        public IEnumerable<string> StartingItemNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StartingItemNames { get; set; } = new HashSet<string>();
 
         [JsonPropertyName("startingFlags")]
-        public IEnumerable<string> StartingGameFlagNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StartingGameFlagNames { get; set; } = new HashSet<string>();
 
         [JsonPropertyName("startingLocks")]
-        public IEnumerable<string> StartingNodeLockNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StartingNodeLockNames { get; set; } = new HashSet<string>();
 
-        public IEnumerable<ResourceCapacity> StartingResources { get; set; } = Enumerable.Empty<ResourceCapacity>();
+        public IList<ResourceCapacity> StartingResources { get; set; } = new List<ResourceCapacity>();
 
         [JsonPropertyName("implicitItems")]
-        public IEnumerable<string> ImplicitItemNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ImplicitItemNames { get; set; } = new HashSet<string>();
 
-        public IEnumerable<InGameItem> UpgradeItems { get; set; } = Enumerable.Empty<InGameItem>();
+        public IList<InGameItem> UpgradeItems { get; set; } = new List<InGameItem>();
 
-        public IEnumerable<ExpansionItem> ExpansionItems { get; set; } = Enumerable.Empty<ExpansionItem>();
+        public IList<ExpansionItem> ExpansionItems { get; set; } = new List<ExpansionItem>();
 
         [JsonPropertyName("gameFlags")]
-        public IEnumerable<string> GameFlagNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> GameFlagNames { get; set; } = new HashSet<string>();
     }
 }

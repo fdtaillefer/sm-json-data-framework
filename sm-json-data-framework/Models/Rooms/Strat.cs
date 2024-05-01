@@ -16,24 +16,24 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements Requires { get; set; }
 
-        public IEnumerable<StratObstacle> Obstacles { get; set; } = Enumerable.Empty<StratObstacle>();
+        public IList<StratObstacle> Obstacles { get; set; } = new List<StratObstacle>();
 
-        public IEnumerable<StratFailure> Failures { get; set; } = Enumerable.Empty<StratFailure>();
+        public IList<StratFailure> Failures { get; set; } = new List<StratFailure>();
 
-        public IEnumerable<string> StratProperties { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StratProperties { get; set; } = new HashSet<string>();
 
         public Strat() { 
 
         }
 
-        public Strat (RawStrat strat, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public Strat (RawStrat rawStrat, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Name = strat.Name;
-            Notable = strat.Notable;
-            Requires = strat.Requires.ToLogicalRequirements(knowledgeBase);
-            Obstacles = strat.Obstacles.Select(obstacle => new StratObstacle(obstacle, knowledgeBase));
-            Failures = strat.Failures.Select(failure => new StratFailure(failure, knowledgeBase));
-            StratProperties = new HashSet<string>(strat.StratProperties);
+            Name = rawStrat.Name;
+            Notable = rawStrat.Notable;
+            Requires = rawStrat.Requires.ToLogicalRequirements(knowledgeBase);
+            Obstacles = rawStrat.Obstacles.Select(obstacle => new StratObstacle(obstacle, knowledgeBase)).ToList();
+            Failures = rawStrat.Failures.Select(failure => new StratFailure(failure, knowledgeBase)).ToList();
+            StratProperties = new HashSet<string>(rawStrat.StratProperties);
         }
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
@@ -88,9 +88,9 @@ namespace sm_json_data_framework.Models.Rooms
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
         {
-            Failures = Failures.Where(failure => failure.CleanUpUselessValues(model, room));
+            Failures = Failures.Where(failure => failure.CleanUpUselessValues(model, room)).ToList();
 
-            Obstacles = Obstacles.Where(obstacle => obstacle.CleanUpUselessValues(model, room));
+            Obstacles = Obstacles.Where(obstacle => obstacle.CleanUpUselessValues(model, room)).ToList();
 
             // There's nothing being cleaned up here that can make a strat useless by disappearing.
             // However, a strat that is disabled or has requirements that can never be fulfilled is useless

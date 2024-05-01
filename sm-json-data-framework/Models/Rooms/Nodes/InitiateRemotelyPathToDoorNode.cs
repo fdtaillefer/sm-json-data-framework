@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int DestinationNodeId { get; set; }
 
         [JsonPropertyName("strats")]
-        public IEnumerable<string> StratNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> StratNames { get; set; } = new HashSet<string>();
 
         public InitiateRemotelyPathToDoorNode()
         {
@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public InitiateRemotelyPathToDoorNode(RawInitiateRemotelyPathToDoorNode pathNode)
         {
             DestinationNodeId = pathNode.DestinationNode;
-            StratNames = new List<string>(pathNode.Strats);
+            StratNames = new HashSet<string>(pathNode.Strats);
         }
     }
 }

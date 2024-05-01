@@ -9,6 +9,6 @@ namespace sm_json_data_framework.Models.Raw.Connections
 {
     public class RawConnectionContainer
     {
-        public IEnumerable<RawConnection> Connections { get; set; }
+        public IList<RawConnection> Connections { get; set; }
     }
 }

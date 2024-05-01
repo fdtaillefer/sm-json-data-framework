@@ -9,6 +9,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms
 {
     public class RawRoomContainer
     {
-        public IEnumerable<RawRoom> Rooms { get; set; }
+        public IList<RawRoom> Rooms { get; set; }
     }
 }

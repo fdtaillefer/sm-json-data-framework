@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public string RoomAddress { get; set; }
 
-        public IEnumerable<RoomEnvironment> RoomEnvironments { get; set; } = Enumerable.Empty<RoomEnvironment>();
+        public IList<RoomEnvironment> RoomEnvironments { get; set; } = new List<RoomEnvironment>();
 
         /// <summary>
         /// The nodes in this room, mapped by in-room numerical id
@@ -59,19 +59,19 @@ namespace sm_json_data_framework.Models.Rooms
 
         }
 
-        public Room(RawRoom room, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public Room(RawRoom rawRoom, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Id = room.Id;
-            Name = room.Name;
-            Area = room.Area;
-            Subarea = room.Subarea;
-            Playable = room.Playable;
-            RoomAddress = room.RoomAddress;
-            RoomEnvironments = room.RoomEnvironments.Select(rawEnvironment => new RoomEnvironment(rawEnvironment));
-            Nodes = room.Nodes.Select(rawNode => new RoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id);
-            Links = room.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId);
-            Obstacles = room.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id);
-            Enemies = room.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id);
+            Id = rawRoom.Id;
+            Name = rawRoom.Name;
+            Area = rawRoom.Area;
+            Subarea = rawRoom.Subarea;
+            Playable = rawRoom.Playable;
+            RoomAddress = rawRoom.RoomAddress;
+            RoomEnvironments = rawRoom.RoomEnvironments.Select(rawEnvironment => new RoomEnvironment(rawEnvironment)).ToList();
+            Nodes = rawRoom.Nodes.Select(rawNode => new RoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id);
+            Links = rawRoom.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId);
+            Obstacles = rawRoom.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id);
+            Enemies = rawRoom.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id);
         }
 
         public void InitializeProperties(SuperMetroidModel model)
@@ -124,7 +124,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public bool CleanUpUselessValues(SuperMetroidModel model)
         {
-            RoomEnvironments = RoomEnvironments.Where(roomEnvironment => roomEnvironment.CleanUpUselessValues(model, this));
+            RoomEnvironments = RoomEnvironments.Where(roomEnvironment => roomEnvironment.CleanUpUselessValues(model, this)).ToList();
 
             Nodes = Nodes.Where(kvp => kvp.Value.CleanUpUselessValues(model, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 

@@ -200,7 +200,7 @@ namespace sm_json_data_framework.Models
         /// </summary>
         /// <exception cref="Exception">If a logical element references an object that isn't found in this model - attempting to initialize it
         /// will result in an exception.</exception>
-        public void InitializeBaseModel()
+        private void InitializeBaseModel()
         {
             // Initialize a few top-level convenience maps
             Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();

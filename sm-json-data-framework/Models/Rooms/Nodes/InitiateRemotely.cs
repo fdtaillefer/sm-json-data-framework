@@ -33,7 +33,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public bool MustOpenDoorFirst { get; set; }
 
         [JsonPropertyName("pathToDoor")]
-        public IEnumerable<InitiateRemotelyPathToDoorNode> PathToDoorNodes { get; set; } = Enumerable.Empty<InitiateRemotelyPathToDoorNode>();
+        public IList<InitiateRemotelyPathToDoorNode> PathToDoorNodes { get; set; } = new List<InitiateRemotelyPathToDoorNode>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode, CanLeaveCharged)"/> has been called.</para>
@@ -55,11 +55,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         }
 
-        public InitiateRemotely(RawInitiateRemotely initiateRemotely)
+        public InitiateRemotely(RawInitiateRemotely rawInitiateRemotely)
         {
-            InitiateAtNodeId = initiateRemotely.InitiateAt;
-            MustOpenDoorFirst = initiateRemotely.MustOpenDoorFirst;
-            PathToDoorNodes = initiateRemotely.PathToDoor.Select(pathNode => new InitiateRemotelyPathToDoorNode(pathNode));
+            InitiateAtNodeId = rawInitiateRemotely.InitiateAt;
+            MustOpenDoorFirst = rawInitiateRemotely.MustOpenDoorFirst;
+            PathToDoorNodes = rawInitiateRemotely.PathToDoor.Select(pathNode => new InitiateRemotelyPathToDoorNode(pathNode)).ToList();
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)

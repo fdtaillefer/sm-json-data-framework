@@ -30,12 +30,12 @@ namespace sm_json_data_framework.Models.Rooms
 
         }
 
-        public RoomObstacle(RawRoomObstacle roomObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public RoomObstacle(RawRoomObstacle rawRoomObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Id = roomObstacle.Id;
-            Name = roomObstacle.Name;
-            ObstacleType = roomObstacle.ObstacleType;
-            Requires = roomObstacle.Requires.ToLogicalRequirements(knowledgeBase);
+            Id = rawRoomObstacle.Id;
+            Name = rawRoomObstacle.Name;
+            ObstacleType = rawRoomObstacle.ObstacleType;
+            Requires = rawRoomObstacle.Requires.ToLogicalRequirements(knowledgeBase);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

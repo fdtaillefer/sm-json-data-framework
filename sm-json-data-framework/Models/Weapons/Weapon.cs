@@ -25,24 +25,24 @@ namespace sm_json_data_framework.Models.Weapons
 
         public bool HitsGroup { get; set; }
 
-        public IEnumerable<WeaponCategoryEnum> Categories { get; set; } = Enumerable.Empty<WeaponCategoryEnum>();
+        public ISet<WeaponCategoryEnum> Categories { get; set; } = new HashSet<WeaponCategoryEnum>();
 
         public Weapon()
         {
 
         }
 
-        public Weapon(RawWeapon weapon, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public Weapon(RawWeapon rawWeapon, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Id = weapon.Id;
-            Name = weapon.Name;
-            Damage = weapon.Damage;
-            CooldownFrames = weapon.CooldownFrames;
-            UseRequires = weapon.UseRequires.ToLogicalRequirements(knowledgeBase);
-            ShotRequires = weapon.ShotRequires.ToLogicalRequirements(knowledgeBase);
-            Situational = weapon.Situational;
-            HitsGroup = weapon.HitsGroup;
-            Categories = new HashSet<WeaponCategoryEnum>(weapon.Categories);
+            Id = rawWeapon.Id;
+            Name = rawWeapon.Name;
+            Damage = rawWeapon.Damage;
+            CooldownFrames = rawWeapon.CooldownFrames;
+            UseRequires = rawWeapon.UseRequires.ToLogicalRequirements(knowledgeBase);
+            ShotRequires = rawWeapon.ShotRequires.ToLogicalRequirements(knowledgeBase);
+            Situational = rawWeapon.Situational;
+            HitsGroup = rawWeapon.HitsGroup;
+            Categories = new HashSet<WeaponCategoryEnum>(rawWeapon.Categories);
         }
 
         public void InitializeProperties(SuperMetroidModel model)

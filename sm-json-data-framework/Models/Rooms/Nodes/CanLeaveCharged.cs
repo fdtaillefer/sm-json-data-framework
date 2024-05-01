@@ -72,22 +72,22 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         }
 
-        public CanLeaveCharged(RawCanLeaveCharged canLeaveCharged, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public CanLeaveCharged(RawCanLeaveCharged rawCanLeaveCharged, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            UsedTiles = canLeaveCharged.UsedTiles;
-            FramesRemaining = canLeaveCharged.FramesRemaining;
-            ShinesparkFrames = canLeaveCharged.ShinesparkFrames;
-            if (canLeaveCharged.InitiateRemotely != null)
+            UsedTiles = rawCanLeaveCharged.UsedTiles;
+            FramesRemaining = rawCanLeaveCharged.FramesRemaining;
+            ShinesparkFrames = rawCanLeaveCharged.ShinesparkFrames;
+            if (rawCanLeaveCharged.InitiateRemotely != null)
             {
-                InitiateRemotely = new InitiateRemotely(canLeaveCharged.InitiateRemotely);
+                InitiateRemotely = new InitiateRemotely(rawCanLeaveCharged.InitiateRemotely);
             }
-            Strats = canLeaveCharged.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
-            OpenEnds = canLeaveCharged.OpenEnd;
-            GentleUpTiles = canLeaveCharged.GentleUpTiles;
-            GentleDownTiles = canLeaveCharged.GentleDownTiles;
-            SteepUpTiles = canLeaveCharged.SteepUpTiles;
-            SteepDownTiles = canLeaveCharged.SteepDownTiles;
-            StartingDownTiles = canLeaveCharged.StartingDownTiles;
+            Strats = rawCanLeaveCharged.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            OpenEnds = rawCanLeaveCharged.OpenEnd;
+            GentleUpTiles = rawCanLeaveCharged.GentleUpTiles;
+            GentleDownTiles = rawCanLeaveCharged.GentleDownTiles;
+            SteepUpTiles = rawCanLeaveCharged.SteepUpTiles;
+            SteepDownTiles = rawCanLeaveCharged.SteepDownTiles;
+            StartingDownTiles = rawCanLeaveCharged.StartingDownTiles;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)

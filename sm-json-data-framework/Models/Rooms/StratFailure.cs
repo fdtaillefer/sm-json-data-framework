@@ -34,13 +34,13 @@ namespace sm_json_data_framework.Models.Rooms
 
         }
 
-        public StratFailure(RawStratFailure failure, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public StratFailure(RawStratFailure rawFailure, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Name = failure.Name;
-            LeadsToNodeId = failure.LeadsToNode;
-            Cost = failure.Cost.ToLogicalRequirements(knowledgeBase);
-            Softlock = failure.Softlock;
-            ClearsPreviousNode = failure.ClearsPreviousNode;
+            Name = rawFailure.Name;
+            LeadsToNodeId = rawFailure.LeadsToNode;
+            Cost = rawFailure.Cost.ToLogicalRequirements(knowledgeBase);
+            Softlock = rawFailure.Softlock;
+            ClearsPreviousNode = rawFailure.ClearsPreviousNode;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

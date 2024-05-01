@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Requirements.ObjectRequirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,21 +12,21 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 {
     public class RawEnemyKill: AbstractRawObjectLogicalElement
     {
-        public IEnumerable<IEnumerable<string>> Enemies { get; set; } = Enumerable.Empty<IEnumerable<string>>();
+        public IList<IList<string>> Enemies { get; set; } = new List<IList<string>>();
 
-        public IEnumerable<string> ExplicitWeapons { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ExplicitWeapons { get; set; } = new HashSet<string>();
 
-        public IEnumerable<string> ExcludedWeapons { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ExcludedWeapons { get; set; } = new HashSet<string>();
 
-        public IEnumerable<AmmoEnum> FarmableAmmo { get; set; } = Enumerable.Empty<AmmoEnum>();
+        public ISet<AmmoEnum> FarmableAmmo { get; set; } = new HashSet<AmmoEnum>();
 
         public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.EnemyKill, out Type type))
             {
                 EnemyKill enemyKill = (EnemyKill)Activator.CreateInstance(type);
-                enemyKill.GroupedEnemyNames = Enemies.Select(subGroup => new List<string>(subGroup));
-                enemyKill.ExplicitWeaponNames = new List<string>(ExplicitWeapons);
+                enemyKill.GroupedEnemyNames = Enemies.Select(subGroup => (IList<string>) new List<string>(subGroup)).ToList();
+                enemyKill.ExplicitWeaponNames = new HashSet<string>(ExplicitWeapons);
                 enemyKill.ExcludedWeaponNames = new List<string>(ExcludedWeapons);
                 enemyKill.FarmableAmmo = new HashSet<AmmoEnum>(FarmableAmmo);
                 return enemyKill;

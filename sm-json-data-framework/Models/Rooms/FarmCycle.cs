@@ -34,13 +34,13 @@ namespace sm_json_data_framework.Models.Rooms
 
         }
 
-        public FarmCycle(RawFarmCycle cycle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public FarmCycle(RawFarmCycle rawCycle, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Name = cycle.Name;
-            CycleFrames = cycle.CycleFrames;
-            if(cycle.Requires != null)
+            Name = rawCycle.Name;
+            CycleFrames = rawCycle.CycleFrames;
+            if(rawCycle.Requires != null)
             {
-                Requires = cycle.Requires.ToLogicalRequirements(knowledgeBase);
+                Requires = rawCycle.Requires.ToLogicalRequirements(knowledgeBase);
             }
         }
 

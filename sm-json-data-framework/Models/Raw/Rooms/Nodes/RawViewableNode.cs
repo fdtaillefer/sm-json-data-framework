@@ -13,6 +13,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
     {
         public int Id { get; set; }
 
-        public IEnumerable<RawStrat> Strats { get; set; } = Enumerable.Empty<RawStrat>();
+        public IList<RawStrat> Strats { get; set; } = new List<RawStrat>();
     }
 }

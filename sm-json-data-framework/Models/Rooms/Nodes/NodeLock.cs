@@ -34,14 +34,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IDictionary<string, Strat> BypassStrats { get; set; } = new Dictionary<string, Strat>();
 
         [JsonPropertyName("yields")]
-        public IEnumerable<string> YieldsStrings { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
         /// <para>The game flags that are activated by unlocking this lock.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<GameFlag> Yields { get; set; }
+        public IList<GameFlag> Yields { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
@@ -55,14 +55,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         }
 
-        public NodeLock(RawNodeLock nodeLock, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public NodeLock(RawNodeLock rawNodeLock, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            LockType = nodeLock.LockType;
-            Lock = nodeLock.Lock.ToLogicalRequirements(knowledgeBase);
-            Name = nodeLock.Name;
-            UnlockStrats = nodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
-            BypassStrats = nodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
-            YieldsStrings = new HashSet<string>(nodeLock.Yields);
+            LockType = rawNodeLock.LockType;
+            Lock = rawNodeLock.Lock.ToLogicalRequirements(knowledgeBase);
+            Name = rawNodeLock.Name;
+            UnlockStrats = rawNodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            BypassStrats = rawNodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            YieldsStrings = new HashSet<string>(rawNodeLock.Yields);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
@@ -82,7 +82,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Initialize Yielded game flags
-            Yields = YieldsStrings.Select(s => model.GameFlags[s]);
+            Yields = YieldsStrings.Select(s => model.GameFlags[s]).ToList();
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)

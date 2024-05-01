@@ -7,6 +7,6 @@ namespace sm_json_data_framework.Models.Helpers
 {
     public class HelperContainer
     {
-        public IEnumerable<Helper> Helpers { get; set; } = Enumerable.Empty<Helper>();
+        public IList<Helper> Helpers { get; set; } = new List<Helper>();
     }
 }

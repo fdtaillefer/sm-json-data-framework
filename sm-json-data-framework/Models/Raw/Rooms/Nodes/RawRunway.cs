@@ -27,7 +27,7 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
 
         public int EndingUpTiles { get; set; } = 0;
 
-        public IEnumerable<RawStrat> Strats { get; set; } = Enumerable.Empty<RawStrat>();
+        public IList<RawStrat> Strats { get; set; } = new List<RawStrat>();
 
         public bool UsableComingIn = true;
 

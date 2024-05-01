@@ -9,6 +9,6 @@ namespace sm_json_data_framework.Models.Raw.Techs
 {
     public class RawTechContainer
     {
-        public IEnumerable<RawTechCategory> TechCategories { get; set; } = Enumerable.Empty<RawTechCategory>();
+        public IList<RawTechCategory> TechCategories { get; set; } = new List<RawTechCategory>();
     }
 }

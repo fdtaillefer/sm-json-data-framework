@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Raw.Enemies
 
         public string Name { get; set; }
 
-        public IEnumerable<EnemyAttack> Attacks { get; set; } = Enumerable.Empty<EnemyAttack>();
+        public IList<EnemyAttack> Attacks { get; set; } = new List<EnemyAttack>();
 
         public int Hp { get; set; }
 
@@ -31,10 +31,10 @@ namespace sm_json_data_framework.Models.Raw.Enemies
 
         public bool Grapplable { get; set; }
 
-        public IEnumerable<string> Invul { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> Invul { get; set; } = new HashSet<string>();
 
-        public IEnumerable<RawEnemyDamageMultiplier> DamageMultipliers { get; set; } = Enumerable.Empty<RawEnemyDamageMultiplier>();
+        public IList<RawEnemyDamageMultiplier> DamageMultipliers { get; set; } = new List<RawEnemyDamageMultiplier>();
 
-        public IEnumerable<string> Areas { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> Areas { get; set; } = new HashSet<string>();
     }
 }

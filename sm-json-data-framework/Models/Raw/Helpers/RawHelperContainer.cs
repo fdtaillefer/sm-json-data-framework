@@ -9,6 +9,6 @@ namespace sm_json_data_framework.Models.Raw.Helpers
 {
     public class RawHelperContainer
     {
-        public IEnumerable<RawHelper> Helpers { get; set; } = Enumerable.Empty<RawHelper>();
+        public IList<RawHelper> Helpers { get; set; } = new List<RawHelper>();
     }
 }

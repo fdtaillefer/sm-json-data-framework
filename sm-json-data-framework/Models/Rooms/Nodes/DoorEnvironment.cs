@@ -13,14 +13,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public PhysicsEnum Physics { get; set; }
 
         [JsonPropertyName("entranceNodes")]
-        public IEnumerable<int> EntranceNodeIds { get; set; }
+        public ISet<int> EntranceNodeIds { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
         /// <para>The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<RoomNode> EntranceNodes { get; set; }
+        public IList<RoomNode> EntranceNodes { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
@@ -34,12 +34,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             
         }
 
-        public DoorEnvironment(RawDoorEnvironment environment)
+        public DoorEnvironment(RawDoorEnvironment rawEnvironment)
         {
-            Physics = environment.Physics;
-            if(environment.EntranceNodes != null)
+            Physics = rawEnvironment.Physics;
+            if(rawEnvironment.EntranceNodes != null)
             {
-                EntranceNodeIds = new HashSet<int>(environment.EntranceNodes);
+                EntranceNodeIds = new HashSet<int>(rawEnvironment.EntranceNodes);
             }
         }
 

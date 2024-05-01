@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     public class EnemyKill : AbstractObjectLogicalElement
     {
         [JsonPropertyName("enemies")]
-        public IEnumerable<IEnumerable<string>> GroupedEnemyNames { get; set; } = Enumerable.Empty<IEnumerable<string>>();
+        public IList<IList<string>> GroupedEnemyNames { get; set; } = new List<IList<string>>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
@@ -25,10 +25,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// separated into groups that can be entirely hit by a single shot from a weapon that hits groups.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<IEnumerable<Enemy>> GroupedEnemies { get; set; }
+        public IList<IList<Enemy>> GroupedEnemies { get; set; }
 
         [JsonPropertyName("explicitWeapons")]
-        public IEnumerable<string> ExplicitWeaponNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ExplicitWeaponNames { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
@@ -67,8 +67,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             List<string> unhandled = new List<string>();
 
-            List<IEnumerable<Enemy>> groupedEnemies = new List<IEnumerable<Enemy>>();
-            foreach(IEnumerable<string> enemyNameGroup in GroupedEnemyNames)
+            List<IList<Enemy>> groupedEnemies = new List<IList<Enemy>>();
+            foreach(IList<string> enemyNameGroup in GroupedEnemyNames)
             {
                 List<Enemy> enemyGroup = new List<Enemy>();
                 foreach(string enemyName in enemyNameGroup)

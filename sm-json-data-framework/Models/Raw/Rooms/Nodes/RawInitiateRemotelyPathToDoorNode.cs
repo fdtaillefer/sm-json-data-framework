@@ -11,6 +11,6 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
     {
         public int DestinationNode { get; set; }
 
-        public IEnumerable<string> Strats { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> Strats { get; set; } = new HashSet<string>();
     }
 }

@@ -12,10 +12,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         }
 
-        public TwinDoorAddress(RawTwinDoorAddress twinAddress)
+        public TwinDoorAddress(RawTwinDoorAddress rawTwinAddress)
         {
-            DoorAddress = twinAddress.DoorAddress;
-            RoomAddress = twinAddress.RoomAddress;
+            DoorAddress = rawTwinAddress.DoorAddress;
+            RoomAddress = rawTwinAddress.RoomAddress;
         }
     }
 }

@@ -52,19 +52,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         }
 
-        public Runway(RawRunway runway, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public Runway(RawRunway rawRunway, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            Name = runway.Name;
-            Length = runway.Length;
-            GentleUpTiles = runway.GentleUpTiles;
-            GentleDownTiles = runway.GentleDownTiles;
-            SteepUpTiles = runway.SteepUpTiles;
-            SteepDownTiles = runway.SteepDownTiles;
-            StartingDownTiles = runway.StartingDownTiles;
-            EndingUpTiles = runway.EndingUpTiles;
-            Strats = runway.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
-            UsableComingIn = runway.UsableComingIn;
-            OpenEnds = runway.OpenEnd;
+            Name = rawRunway.Name;
+            Length = rawRunway.Length;
+            GentleUpTiles = rawRunway.GentleUpTiles;
+            GentleDownTiles = rawRunway.GentleDownTiles;
+            SteepUpTiles = rawRunway.SteepUpTiles;
+            SteepDownTiles = rawRunway.SteepDownTiles;
+            StartingDownTiles = rawRunway.StartingDownTiles;
+            EndingUpTiles = rawRunway.EndingUpTiles;
+            Strats = rawRunway.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            UsableComingIn = rawRunway.UsableComingIn;
+            OpenEnds = rawRunway.OpenEnd;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)

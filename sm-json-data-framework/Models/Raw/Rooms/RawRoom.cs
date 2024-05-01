@@ -24,14 +24,14 @@ namespace sm_json_data_framework.Models.Raw.Rooms
 
         public string RoomAddress { get; set; }
 
-        public IEnumerable<RawRoomEnvironment> RoomEnvironments { get; set; } = Enumerable.Empty<RawRoomEnvironment>();
+        public IList<RawRoomEnvironment> RoomEnvironments { get; set; } = new List<RawRoomEnvironment>();
 
-        public IEnumerable<RawRoomNode> Nodes { get; set; } = Enumerable.Empty<RawRoomNode>();
+        public IList<RawRoomNode> Nodes { get; set; } = new List<RawRoomNode>();
 
-        public IEnumerable<RawLink> Links { get; set; } = Enumerable.Empty<RawLink>();
+        public IList<RawLink> Links { get; set; } = new List<RawLink>();
 
-        public IEnumerable<RawRoomObstacle> Obstacles { get; set; } = Enumerable.Empty<RawRoomObstacle>();
+        public IList<RawRoomObstacle> Obstacles { get; set; } = new List<RawRoomObstacle>();
 
-        public IEnumerable<RawRoomEnemy> Enemies { get; set; } = Enumerable.Empty<RawRoomEnemy>();
+        public IList<RawRoomEnemy> Enemies { get; set; } = new List<RawRoomEnemy>();
     }
 }

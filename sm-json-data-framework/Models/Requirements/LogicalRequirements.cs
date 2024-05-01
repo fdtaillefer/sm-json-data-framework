@@ -32,10 +32,10 @@ namespace sm_json_data_framework.Models.Requirements
 
         public LogicalRequirements(IEnumerable<AbstractLogicalElement> logicalElements)
         {
-            LogicalElements = LogicalElements.Concat(logicalElements);
+            LogicalElements = LogicalElements.Concat(logicalElements).ToList();
         }
 
-        public IEnumerable<AbstractLogicalElement> LogicalElements { get; private set; } = Enumerable.Empty<AbstractLogicalElement>();
+        public IList<AbstractLogicalElement> LogicalElements { get; private set; } = new List<AbstractLogicalElement>();
 
         /// <summary>
         /// Returns whether this set of logical requirements in its current state is logically impossible to fully complete

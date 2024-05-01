@@ -31,10 +31,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         }
 
-        public ViewableNode(RawViewableNode viewableNode, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public ViewableNode(RawViewableNode rawViewableNode, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            NodeId = viewableNode.Id;
-            Strats = viewableNode.Strats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            NodeId = rawViewableNode.Id;
+            Strats = rawViewableNode.Strats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
