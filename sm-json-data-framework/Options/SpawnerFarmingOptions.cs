@@ -2,19 +2,21 @@
 using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
+using static sm_json_data_framework.Options.SpawnerFarmingOptions;
 
 namespace sm_json_data_framework.Options
 {
     /// <summary>
     /// Logical options to configure when farming from enemy spawners should be possible according to logic or not.
     /// </summary>
-    public class SpawnerFarmingOptions
+    public class SpawnerFarmingOptions : ReadOnlySpawnerFarmingOptions
     {
         public SpawnerFarmingOptions()
         {
             // Set the minimum viable farming rates per second to default values
-            MinimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal>
+            InternalMinimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal>
             {
                 // The rate for energy off 5 Gamets, after heat loss, is roughly 13.7 assuming missiles and supers (but not PBs) are full.
                 // With a 10% safety reduction in drops, that goes down to just about 10.8.
@@ -27,18 +29,55 @@ namespace sm_json_data_framework.Options
             };
         }
 
-        public SpawnerFarmingOptions(IDictionary<ConsumableResourceEnum, decimal> minimumRatesPerSecond)
+        public SpawnerFarmingOptions(SpawnerFarmingOptions other)
         {
-            MinimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal>(minimumRatesPerSecond);
+            InternalMinimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal>(other.InternalMinimumRatesPerSecond);
+            SafetyMarginPercent = other.SafetyMarginPercent;
         }
 
-        public IDictionary<ConsumableResourceEnum, decimal> MinimumRatesPerSecond { get; private set; }
+        public SpawnerFarmingOptions Clone()
+        {
+            return new SpawnerFarmingOptions(this);
+        }
+
+        public ReadOnlySpawnerFarmingOptions AsReadOnly()
+        {
+            return this;
+        }
+
+        public SpawnerFarmingOptions(IDictionary<ConsumableResourceEnum, decimal> minimumRatesPerSecond)
+        {
+            InternalMinimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal>(minimumRatesPerSecond);
+        }
+
+        public IDictionary<ConsumableResourceEnum, decimal> InternalMinimumRatesPerSecond { get; set; }
+        public IReadOnlyDictionary<ConsumableResourceEnum, decimal> MinimumRatesPerSecond { get { return InternalMinimumRatesPerSecond.AsReadOnly(); } }
+
+        public decimal SafetyMarginPercent { get; set; } = 10;
+    }
+
+    /// <summary>
+    /// Exposes the read-only portion of a <see cref="SpawnerFarmingOptions"/>.
+    /// </summary>
+    public interface ReadOnlySpawnerFarmingOptions
+    {
+        /// <summary>
+        /// Creates and returns a full-fledges copy of this SpawnerFarmingOptions.
+        /// </summary>
+        /// <returns></returns>
+        public SpawnerFarmingOptions Clone();
+
+        /// <summary>
+        /// A dictionary containing, per conumsable resource, the minimum amount per second that farming should yield 
+        /// in order for farming to be logically required.
+        /// </summary>
+        public IReadOnlyDictionary<ConsumableResourceEnum, decimal> MinimumRatesPerSecond { get; }
 
         /// <summary>
         /// <para>A percent value that will be used to adjust expected drops to account for bad luck
         /// when farming while trying to offset an ongoing loss of the farmed resource.</para>
         /// <para>When using this, the drop rate will be decreased by this percent.</para>
         /// </summary>
-        public decimal SafetyMarginPercent { get; set; } = 10;
+        public decimal SafetyMarginPercent { get; }
     }
 }

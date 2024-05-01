@@ -21,11 +21,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ConstructorFromRawModel_ReadsAllData()
         {
-            // Given
-            RawSuperMetroidModel rawModel = ModelReader.ReadRawModel();
-
             // When
-            SuperMetroidModel model = new SuperMetroidModel(rawModel);
+            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
 
             // Expect
             // Room counts

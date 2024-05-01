@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Reading;
+using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,8 @@ namespace sm_json_data_framework.Tests.InGameStates
 {
     public class InNodeStateTest
     {
-        // Use a static model to read it only once.
-        private static SuperMetroidModel Model { get; set; } = ModelReader.ReadModel();
+        // Use a static model to build it only once.
+        private static SuperMetroidModel Model { get; set; } = new SuperMetroidModel(StaticTestObjects.RawModel);
 
         #region Tests for ApplyOpenLock()
         [Fact]

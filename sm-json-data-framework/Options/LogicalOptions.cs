@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options.ResourceValues;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace sm_json_data_framework.Options
     /// <summary>
     /// Options that describe what the player is expected to be able or unable to do.
     /// </summary>
-    public class LogicalOptions
+    public class LogicalOptions : ReadOnlyLogicalOptions
     {
         public LogicalOptions()
         {
@@ -30,46 +31,63 @@ namespace sm_json_data_framework.Options
                 }
             );
 
-            SpawnerFarmingOptions = new SpawnerFarmingOptions();
+            InternalSpawnerFarmingOptions = new SpawnerFarmingOptions();
         }
 
-        /// <summary>
-        /// <para>If true, all techs are enabled unless their name is found in <see cref="DisabledTechs"/>.</para>
-        /// <para>If false, all techs are disabled unless their name is found in <see cref="EnabledTechs"/>.</para>
-        /// </summary>
+        public LogicalOptions(LogicalOptions other)
+        {
+            InGameResourceEvaluator = other.InGameResourceEvaluator;
+            TechsEnabledByDefault = other.TechsEnabledByDefault;
+            InternalDisabledTechs = new HashSet<string>(other.InternalDisabledTechs);
+            InternalEnabledTechs = new HashSet<string>(other.InternalEnabledTechs);
+            InternalDisabledStrats = new HashSet<string>(other.InternalDisabledStrats);
+            InternalRemovedGameFlags = new HashSet<string>(other.InternalRemovedGameFlags);
+            TilesToShineCharge = other.TilesToShineCharge;
+            TilesSavedWithStutter = other.TilesSavedWithStutter;
+            InGameResourceEvaluator = other.InGameResourceEvaluator; // This also assigns InGameStateComparer
+            TriesByTech = new Dictionary<string, int>(other.TriesByTech);
+            TriesByHelper = new Dictionary<string, int>(other.TriesByHelper);
+            TriesByStrat = new Dictionary<string, int>(other.TriesByStrat);
+            ShineChargesWithStutter = other.ShineChargesWithStutter;
+            HeatLeniencyMultiplier = other.HeatLeniencyMultiplier;
+            LavaLeniencyMultiplier = other.LavaLeniencyMultiplier;
+            AcidLeniencyMultiplier = other.AcidLeniencyMultiplier;
+            InternalSpawnerFarmingOptions = other.InternalSpawnerFarmingOptions.Clone();
+        }
+
+        public LogicalOptions Clone()
+        {
+            return new LogicalOptions(this);
+        }
+
         public bool TechsEnabledByDefault { get; set; } = true;
 
         /// <summary>
         /// A sequence of tech names that are disabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is false.
         /// </summary>
-        public IEnumerable<string> DisabledTechs { get; set; } = Enumerable.Empty<string>();
+        private ISet<string> InternalDisabledTechs { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> DisabledTechs { get { return InternalDisabledTechs.AsReadOnly(); } }
 
         /// <summary>
         /// A sequence of tech names that are enabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is true.
         /// </summary>
-        public IEnumerable<string> EnabledTechs { get; set; } = Enumerable.Empty<string>();
+        private ISet<string> InternalEnabledTechs { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> EnabledTechs { get { return InternalEnabledTechs.AsReadOnly(); } }
 
         /// <summary>
         /// A sequence of strat names that are disabled, regardless of their requirements. Only notable strats can be disabled.
         /// </summary>
-        public IEnumerable<string> DisabledStrats { get; set; } = Enumerable.Empty<string>();
+        private ISet<string> InternalDisabledStrats { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> DisabledStrats { get { return InternalDisabledStrats.AsReadOnly(); } }
 
-        public IEnumerable<string> RemovedGameFlags { get; set; } = Enumerable.Empty<string>();
+        private ISet<string> InternalRemovedGameFlags { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> RemovedGameFlags { get { return InternalRemovedGameFlags.AsReadOnly(); } }
 
-        /// <summary>
-        /// The number of tiles needed for the charging of a shinespark to be expected.
-        /// </summary>
         public decimal TilesToShineCharge { get; set; } = 32.5M;
 
-        /// <summary>
-        /// The number of tiles that are saved by doing a stutter-step to reach the value of <see cref="TilesToShineCharge"/>
-        /// </summary>
         public decimal TilesSavedWithStutter { get; set; } = 0M;
 
         private IInGameResourceEvaluator _inGameResourceEvaluator;
-        /// <summary>
-        /// A comparer that can comparer snapshots of in-game resources to decide which is more valuable.
-        /// </summary>
         public IInGameResourceEvaluator InGameResourceEvaluator
         {
             get
@@ -103,11 +121,6 @@ namespace sm_json_data_framework.Options
             TriesByTech.Add(techName, numberOfTries);
         }
 
-        /// <summary>
-        /// Returns the number of tries that are logically expected to be attempted before a success for the provided tech.
-        /// </summary>
-        /// <param name="tech"></param>
-        /// <returns></returns>
         public int NumberOfTries(Tech tech)
         {
             if (TriesByTech.TryGetValue(tech.Name, out int tries))
@@ -139,11 +152,6 @@ namespace sm_json_data_framework.Options
             TriesByHelper.Add(helperName, numberOfTries);
         }
 
-        /// <summary>
-        /// Returns the number of tries that are logically expected to be attempted before a success for the provided helper.
-        /// </summary>
-        /// <param name="helper"></param>
-        /// <returns></returns>
         public int NumberOfTries(Helper helper)
         {
             if (TriesByHelper.TryGetValue(helper.Name, out int tries))
@@ -174,11 +182,6 @@ namespace sm_json_data_framework.Options
             TriesByStrat.Add(stratName, numberOfTries);
         }
 
-        /// <summary>
-        /// Returns the number of tries that are logically expected to be attempted before a success for the provided strat.
-        /// </summary>
-        /// <param name="strat"></param>
-        /// <returns></returns>
         public int NumberOfTries(Strat strat)
         {
             if (strat.Notable && TriesByStrat.TryGetValue(strat.Name, out int tries))
@@ -191,61 +194,245 @@ namespace sm_json_data_framework.Options
             }
         }
 
+        public InGameStateComparer InGameStateComparer { get; private set; }
+
+        public bool ShineChargesWithStutter { get; set; } = false;
+
+        public decimal HeatLeniencyMultiplier { get; set; } = 1;
+
+        public decimal LavaLeniencyMultiplier { get; set; } = 1;
+
+        public decimal AcidLeniencyMultiplier { get; set; } = 1;
+
+        /// <summary>
+        /// Registers the provided tech name as a disabled tech.
+        /// </summary>
+        /// <param name="techName">Name of the tech to disable</param>
+        public void RegisterDisabledTech(string techName)
+        {
+            InternalDisabledTechs.Add(techName);
+        }
+
+        /// <summary>
+        /// Unregisters the provided tech name as a disabled tech.
+        /// </summary>
+        /// <param name="techName">Name of the tech to un-disable</param>
+        public void UnregisterDisabledTech(string techName)
+        {
+            InternalDisabledTechs.Remove(techName);
+        }
+
+        /// <summary>
+        /// Registers the provided tech name as an enabled tech (used when techs <see cref="TechsEnabledByDefault"/> is false).
+        /// </summary>
+        /// <param name="techName">Name of the tech to enable</param>
+        public void RegisterEnabledTech(string techName)
+        {
+            InternalEnabledTechs.Add(techName);
+        }
+
+        /// <summary>
+        /// Unregisters the provided tech name as an enabled tech (used when techs <see cref="TechsEnabledByDefault"/> is false).
+        /// </summary>
+        /// <param name="techName">Name of the tech to un-enable</param>
+        public void UnregisterEnabledTech(string techName)
+        {
+            InternalEnabledTechs.Remove(techName);
+        }
+
+
+        public bool IsTechEnabled(Tech tech)
+        {
+            if (TechsEnabledByDefault)
+            {
+                return !InternalDisabledTechs.Contains(tech.Name);
+            }
+            else
+            {
+                return InternalEnabledTechs.Contains(tech.Name);
+            }
+        }
+
+        /// <summary>
+        /// Registers the provided strat name as a disabled strat.
+        /// </summary>
+        /// <param name="stratName">Name of the strat to disable</param>
+        public void RegisterDisabledStrat(string stratName)
+        {
+            InternalDisabledStrats.Add(stratName);
+        }
+
+        /// <summary>
+        /// Unregisters the provided strat name as a disabled strat.
+        /// </summary>
+        /// <param name="stratName">Name of the strat to un-disable</param>
+        public void UnregisterDisabledStrat(string stratName)
+        {
+            InternalDisabledStrats.Remove(stratName);
+        }
+
+        public bool IsStratEnabled(Strat strat)
+        {
+            // Non-notable strats are always enabled. Beyond that, strats are enabled by default unless disabled
+            return (!strat.Notable || !InternalDisabledStrats.Contains(strat.Name));
+        }
+
+        /// <summary>
+        /// Registers the provided game flag name as a disabled flag.
+        /// </summary>
+        /// <param name="flagName">Name of the flag to disable</param>
+        public void RegisterDisabledGameFlag(string flagName)
+        {
+            InternalRemovedGameFlags.Add(flagName);
+        }
+
+        /// <summary>
+        /// Unregisters the provided game flag name as a disabled flag.
+        /// </summary>
+        /// <param name="flagName">Name of the flag to un-disable</param>
+        public void UnregisterDisabledGameFlag(string flagName)
+        {
+            InternalRemovedGameFlags.Remove(flagName);
+        }
+
+        public bool IsGameFlagEnabled(GameFlag gameFlag)
+        {
+            return !InternalRemovedGameFlags.Contains(gameFlag.Name);
+        }
+
+        public SpawnerFarmingOptions InternalSpawnerFarmingOptions { get; set; }
+        public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions  { get{return InternalSpawnerFarmingOptions.AsReadOnly(); } }
+    }
+
+    /// <summary>
+    /// Exposes the read-only portion of a <see cref="LogicalOptions"/>.
+    /// </summary>
+    public interface ReadOnlyLogicalOptions
+    {
+        /// <summary>
+        /// Creates and returns a full-fledged copy of this LohicalOptions.
+        /// </summary>
+        /// <returns></returns>
+        public LogicalOptions Clone();
+
+        /// <summary>
+        /// <para>If true, all techs are enabled unless their name is found in <see cref="DisabledTechs"/>.</para>
+        /// <para>If false, all techs are disabled unless their name is found in <see cref="EnabledTechs"/>.</para>
+        /// </summary>
+        public bool TechsEnabledByDefault { get; }
+
+        /// <summary>
+        /// A set of tech names that are disabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is false.
+        /// </summary>
+        public IReadOnlySet<string> DisabledTechs { get; }
+
+        /// <summary>
+        /// A set of tech names that are enabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is true.
+        /// </summary>
+        public IReadOnlySet<string> EnabledTechs { get; }
+
+        /// <summary>
+        /// A set of strat names that are disabled, regardless of their requirements. Only notable strats can be disabled.
+        /// </summary>
+        public IReadOnlySet<string> DisabledStrats { get; }
+
+        /// <summary>
+        /// A set of strat names that are considered to be unattainable.
+        /// </summary>
+        public IReadOnlySet<string> RemovedGameFlags { get; }
+
+        /// <summary>
+        /// The number of tiles needed for the charging of a shinespark to be expected.
+        /// </summary>
+        public decimal TilesToShineCharge { get; }
+
+        /// <summary>
+        /// The number of tiles that are saved by doing a stutter-step to reach the value of <see cref="TilesToShineCharge"/>
+        /// </summary>
+        public decimal TilesSavedWithStutter { get; }
+
+        /// <summary>
+        /// A comparer that can comparer snapshots of in-game resources to decide which is more valuable.
+        /// </summary>
+        public IInGameResourceEvaluator InGameResourceEvaluator { get; }
+
+        /// <summary>
+        /// Returns the number of tries that are logically expected to be attempted before a success for the provided tech.
+        /// </summary>
+        /// <param name="tech"></param>
+        /// <returns></returns>
+        public int NumberOfTries(Tech tech);
+
+        /// <summary>
+        /// Returns the number of tries that are logically expected to be attempted before a success for the provided helper.
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <returns></returns>
+        public int NumberOfTries(Helper helper);
+
+        /// <summary>
+        /// Returns the number of tries that are logically expected to be attempted before a success for the provided strat.
+        /// </summary>
+        /// <param name="strat"></param>
+        /// <returns></returns>
+        public int NumberOfTries(Strat strat);
+
         /// <summary>
         /// An instance of <see cref="InGameStateComparer"/>, initialized with the current relative resource values.
         /// </summary>
-        public InGameStateComparer InGameStateComparer { get; private set; }
+        public InGameStateComparer InGameStateComparer { get; }
 
         /// <summary>
         /// Indicates whether the value in <see cref="TilesToShineCharge"/> assumes that a stutter-step is being performed.
         /// This is relevant when trying to shine charge on a runway where you can't stutter.
         /// </summary>
-        public bool ShineChargesWithStutter { get; set; } = false;
+        public bool ShineChargesWithStutter { get; }
 
         /// <summary>
         /// A multiplier applied to all logical heat frame requirements.
         /// Larger values make strats logically require more energy, making them more lenient.
         /// Values below 1 are not recommended.
         /// </summary>
-        public decimal HeatLeniencyMultiplier { get; set; } = 1;
+        public decimal HeatLeniencyMultiplier { get; }
 
         /// <summary>
         /// A multiplier applied to all logical lava frame requirements.
         /// Larger values make strats logically require more energy, making them more lenient.
         /// Values below 1 are not recommended.
         /// </summary>
-        public decimal LavaLeniencyMultiplier { get; set; } = 1;
+        public decimal LavaLeniencyMultiplier { get; }
 
         /// <summary>
         /// A multiplier applied to all logical acid frame requirements.
         /// Larger values make strats logically require more energy, making them more lenient.
         /// Values below 1 are not recommended.
         /// </summary>
-        public decimal AcidLeniencyMultiplier { get; set; } = 1;
+        public decimal AcidLeniencyMultiplier { get; }
 
-        public bool IsTechEnabled(Tech tech)
-        {
-            if (TechsEnabledByDefault)
-            {
-                return !DisabledTechs.Contains(tech.Name);
-            }
-            else
-            {
-                return EnabledTechs.Contains(tech.Name);
-            }
-        }
+        /// <summary>
+        /// Indicates whether the player is expected to be able to execute the provided Tech according to this LogicalOptions.
+        /// </summary>
+        /// <param name="tech">Tech to check for</param>
+        /// <returns></returns>
+        public bool IsTechEnabled(Tech tech);
 
-        public bool IsStratEnabled (Strat strat)
-        {
-            // Non-notable strats are always enabled. Beyond that, strats are enabled by default unless disabled
-            return (!strat.Notable || !DisabledStrats.Contains(strat.Name));
-        }
+        /// <summary>
+        /// Indicates whether the player is expected to be able to execute the provided Strat according to this LogicalOptions.
+        /// </summary>
+        /// <param name="strat">Strat to check for</param>
+        /// <returns></returns>
+        public bool IsStratEnabled(Strat strat);
 
-        public bool IsGameFlagEnabled(GameFlag gameFlag)
-        {
-            return !RemovedGameFlags.Contains(gameFlag.Name);
-        }
+        /// <summary>
+        /// Indicates whether the player is expected to be able to enable the provided GameFlag according to this LogicalOptions.
+        /// </summary>
+        /// <param name="gameFlag">GameFlag to check for</param>
+        /// <returns></returns>
+        public bool IsGameFlagEnabled(GameFlag gameFlag);
 
-        public SpawnerFarmingOptions SpawnerFarmingOptions { get; set; }
+        /// <summary>
+        /// A sub-model containing the logical options with regards to using enemy spawners for farming resources.
+        /// </summary>
+        public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions { get; }
     }
 }
