@@ -18,10 +18,12 @@ namespace sm_json_data_framework.Options
     /// </summary>
     public class LogicalOptions : ReadOnlyLogicalOptions
     {
-        public LogicalOptions()
-        {
-            // Default resource comparer
-            InGameResourceEvaluator = new ResourceEvaluatorByFixedValues(
+        public static readonly int DefaultNumberOfTries = 1;
+        public static readonly decimal DefaultTilesSavedWithStutter = 0;
+        public static readonly decimal DefaultTilesToShineCharge = 32.5M;
+        public static readonly decimal DefaultFrameLeniencyMultiplier = 1;
+
+        private static IInGameResourceEvaluator DefaultInGameResourceEvaluator { get; } = new ResourceEvaluatorByFixedValues(
                 new Dictionary<ConsumableResourceEnum, int> {
                     {ConsumableResourceEnum.Energy,  1},
                     // Missile drops are super plentiful, AND each drop gives twice as much as Supers.
@@ -30,6 +32,13 @@ namespace sm_json_data_framework.Options
                     {ConsumableResourceEnum.PowerBomb,  60}
                 }
             );
+
+        public static InGameStateComparer DefaultInGameStateComparer = new InGameStateComparer(DefaultInGameResourceEvaluator);
+
+        public LogicalOptions()
+        {
+            // Default resource comparer
+            InGameResourceEvaluator = DefaultInGameResourceEvaluator;
 
             InternalSpawnerFarmingOptions = new SpawnerFarmingOptions();
         }
@@ -60,6 +69,11 @@ namespace sm_json_data_framework.Options
             return new LogicalOptions(this);
         }
 
+        public ReadOnlyLogicalOptions AsReadOnly()
+        {
+            return this;
+        }
+
         public bool TechsEnabledByDefault { get; set; } = true;
 
         /// <summary>
@@ -83,9 +97,9 @@ namespace sm_json_data_framework.Options
         private ISet<string> InternalRemovedGameFlags { get; set; } = new HashSet<string>();
         public IReadOnlySet<string> RemovedGameFlags { get { return InternalRemovedGameFlags.AsReadOnly(); } }
 
-        public decimal TilesToShineCharge { get; set; } = 32.5M;
+        public decimal TilesToShineCharge { get; set; } = DefaultTilesToShineCharge;
 
-        public decimal TilesSavedWithStutter { get; set; } = 0M;
+        public decimal TilesSavedWithStutter { get; set; } = DefaultTilesSavedWithStutter;
 
         private IInGameResourceEvaluator _inGameResourceEvaluator;
         public IInGameResourceEvaluator InGameResourceEvaluator
@@ -129,7 +143,7 @@ namespace sm_json_data_framework.Options
             }
             else
             {
-                return 1;
+                return DefaultNumberOfTries;
             }
         }
 
@@ -160,7 +174,7 @@ namespace sm_json_data_framework.Options
             }
             else
             {
-                return 1;
+                return DefaultNumberOfTries;
             }
         }
 
@@ -190,7 +204,7 @@ namespace sm_json_data_framework.Options
             }
             else
             {
-                return 1;
+                return DefaultNumberOfTries;
             }
         }
 
@@ -198,11 +212,11 @@ namespace sm_json_data_framework.Options
 
         public bool ShineChargesWithStutter { get; set; } = false;
 
-        public decimal HeatLeniencyMultiplier { get; set; } = 1;
+        public decimal HeatLeniencyMultiplier { get; set; } = DefaultFrameLeniencyMultiplier;
 
-        public decimal LavaLeniencyMultiplier { get; set; } = 1;
+        public decimal LavaLeniencyMultiplier { get; set; } = DefaultFrameLeniencyMultiplier;
 
-        public decimal AcidLeniencyMultiplier { get; set; } = 1;
+        public decimal AcidLeniencyMultiplier { get; set; } = DefaultFrameLeniencyMultiplier;
 
         /// <summary>
         /// Registers the provided tech name as a disabled tech.
@@ -240,18 +254,24 @@ namespace sm_json_data_framework.Options
             InternalEnabledTechs.Remove(techName);
         }
 
-
         public bool IsTechEnabled(Tech tech)
+        {
+            return IsTechEnabled(tech.Name);
+        }
+
+        public bool IsTechEnabled(string techName)
         {
             if (TechsEnabledByDefault)
             {
-                return !InternalDisabledTechs.Contains(tech.Name);
+                return !InternalDisabledTechs.Contains(techName);
             }
             else
             {
-                return InternalEnabledTechs.Contains(tech.Name);
+                return InternalEnabledTechs.Contains(techName);
             }
         }
+
+        public bool CanShinespark { get { return IsTechEnabled("canShinespark"); } }
 
         /// <summary>
         /// Registers the provided strat name as a disabled strat.
@@ -358,6 +378,8 @@ namespace sm_json_data_framework.Options
 
         /// <summary>
         /// Returns the number of tries that are logically expected to be attempted before a success for the provided tech.
+        /// Note that these values are not automatically applied to extension techs, because those are likely to be more difficult
+        /// and have a higher number of tries - but we don't want those values to multiply each other.
         /// </summary>
         /// <param name="tech"></param>
         /// <returns></returns>
@@ -415,6 +437,12 @@ namespace sm_json_data_framework.Options
         /// <param name="tech">Tech to check for</param>
         /// <returns></returns>
         public bool IsTechEnabled(Tech tech);
+
+        /// <summary>
+        /// Indicates thse logical options expect the player to shinespark.
+        /// </summary>
+        /// <returns></returns>
+        public bool CanShinespark { get; }
 
         /// <summary>
         /// Indicates whether the player is expected to be able to execute the provided Strat according to this LogicalOptions.

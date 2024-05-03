@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class StratFailure : InitializablePostDeserializeInRoom
+    public class StratFailure : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         public string Name { get; set; }
 
@@ -41,6 +42,14 @@ namespace sm_json_data_framework.Models.Rooms
             Cost = rawFailure.Cost.ToLogicalRequirements(knowledgeBase);
             Softlock = rawFailure.Softlock;
             ClearsPreviousNode = rawFailure.ClearsPreviousNode;
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Cost.ApplyLogicalOptions(logicalOptions);
+
+            // A failure object is not useless even if it describes an effective softlock
+            return false;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

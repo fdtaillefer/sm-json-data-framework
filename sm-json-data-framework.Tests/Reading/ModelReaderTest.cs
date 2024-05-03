@@ -109,21 +109,14 @@ namespace sm_json_data_framework.Reading
         [Fact]
         public void ReadModel_UsesOptionalParameters()
         {
-            // Given
-            LogicalOptions options = new LogicalOptions
-            {
-                TilesToShineCharge = 20
-            };
-
             // When
-            SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(), logicalOptions: options, 
+            SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(),
                 basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(), 
                 overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
             Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
-            Assert.Equal(20, model.LogicalOptions.TilesToShineCharge);
             Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].Links[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
         }
         #endregion

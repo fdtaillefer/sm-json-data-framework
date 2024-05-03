@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Weapons;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Weapons
 {
-    public class Weapon : InitializablePostDeserializeOutOfRoom
+    public class Weapon : AbstractModelElement, InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -43,6 +44,15 @@ namespace sm_json_data_framework.Models.Weapons
             Situational = rawWeapon.Situational;
             HitsGroup = rawWeapon.HitsGroup;
             Categories = new HashSet<WeaponCategoryEnum>(rawWeapon.Categories);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            UseRequires.ApplyLogicalOptions(logicalOptions);
+            ShotRequires.ApplyLogicalOptions(logicalOptions);
+
+            // This weapon is rendered useless if either using it altogether, or doing an individual shot, becomes impossible
+            return UseRequires.UselessByLogicalOptions || ShotRequires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(SuperMetroidModel model)

@@ -77,14 +77,13 @@ namespace sm_json_data_framework.Utils
         }
 
         /// <summary>
-        /// Returns a dictionary containing the strats in this dictionary that are enabled.
+        /// Returns an enumeration of the provided abstarct model elements, except those rendered useless by logical options.
         /// </summary>
-        /// <param name="strats">This dictionary of strats</param>
-        /// <param name="model">A model which can be used to figure out whether a strat is enabled</param>
+        /// <param name="elements"></param>
         /// <returns></returns>
-        public static IDictionary<string, Strat> WhereEnabled(this IDictionary<string, Strat> strats, SuperMetroidModel model)
+        public static IEnumerable<T> WhereUseful<T>(this IEnumerable<T> elements) where T: AbstractModelElement
         {
-            return strats.Where(kvp => model.LogicalOptions.IsStratEnabled(kvp.Value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            return elements.Where(clc => !clc.UselessByLogicalOptions);
         }
 
         public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, string gameFlagName)

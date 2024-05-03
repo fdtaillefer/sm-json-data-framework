@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,6 +20,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         public ThornHits(int hits) : base(hits)
         {
 
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
         }
 
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

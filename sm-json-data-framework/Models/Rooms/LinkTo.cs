@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class LinkTo : InitializablePostDeserializeInRoom
+    public class LinkTo : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         [JsonPropertyName("id")]
         public int TargetNodeId { get; set; }
@@ -36,6 +37,22 @@ namespace sm_json_data_framework.Models.Rooms
         {
             TargetNodeId = rawLinkTo.Id;
             Strats = rawLinkTo.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool noPossibleStrat = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if(!strat.UselessByLogicalOptions)
+                {
+                    noPossibleStrat = false;
+                }
+            }
+
+            // This LinkTo is unusable if all strats are unusable
+            return noPossibleStrat;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

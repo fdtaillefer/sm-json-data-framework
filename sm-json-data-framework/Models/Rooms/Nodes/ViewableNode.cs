@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class ViewableNode: InitializablePostDeserializeInNode
+    public class ViewableNode: AbstractModelElement, InitializablePostDeserializeInNode
     {
         [JsonPropertyName("id")]
         public int NodeId { get; set; }
@@ -35,6 +36,22 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             NodeId = rawViewableNode.Id;
             Strats = rawViewableNode.Strats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool noUsefulStrat = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if (!strat.UselessByLogicalOptions)
+                {
+                    noUsefulStrat = false;
+                }
+            }
+
+            // A runway becomes useless if its strats are impossible
+            return noUsefulStrat;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)

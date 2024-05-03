@@ -1,6 +1,9 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +11,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class Strat : InitializablePostDeserializeInRoom, IExecutable
+    public class Strat : AbstractModelElement, InitializablePostDeserializeInRoom, IExecutable
     {
         public string Name { get; set; }
 
@@ -21,6 +24,8 @@ namespace sm_json_data_framework.Models.Rooms
         public IList<StratFailure> Failures { get; set; } = new List<StratFailure>();
 
         public ISet<string> StratProperties { get; set; } = new HashSet<string>();
+
+        private int Tries { get; set; } = LogicalOptions.DefaultNumberOfTries;
 
         public Strat() { 
 
@@ -36,9 +41,41 @@ namespace sm_json_data_framework.Models.Rooms
             StratProperties = new HashSet<string>(rawStrat.StratProperties);
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Tries = logicalOptions?.NumberOfTries(this) ?? LogicalOptions.DefaultNumberOfTries;
+
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            foreach (StratFailure failure in Failures)
+            {
+                failure.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // Note that StratObstacles becoming impossible doesn't make this strat impossible,
+            // as maybe there's other places where those obstacles can be destroyed.
+            // If the obstacle has absolute requirements that become impossible though, then so do we
+            bool impossibleObstacle = false;
+            foreach (StratObstacle obstacle in Obstacles)
+            {
+                obstacle.ApplyLogicalOptions(logicalOptions);
+                obstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
+                if (obstacle.Obstacle.UselessByLogicalOptions)
+                {
+                    impossibleObstacle = true;
+                }
+            }
+            return logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
+        }
+
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            times = times * model.LogicalOptions.NumberOfTries(this);
+            if(UselessByLogicalOptions)
+            {
+                return null;
+            }
+
+            times = times * Tries;
 
             ExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
 
@@ -47,7 +84,7 @@ namespace sm_json_data_framework.Models.Rooms
                 return null;
             }
 
-            // Iterate over intact obstacles that need to be dealt with
+            // Iterate over intact obstacles that need to be dealt with (so ignore obstacles that are already destroyed)
             foreach (StratObstacle obstacle in Obstacles.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.ObstacleId)))
             {
                 // Try destroying the obstacle first
@@ -94,7 +131,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             // There's nothing being cleaned up here that can make a strat useless by disappearing.
             // However, a strat that is disabled or has requirements that can never be fulfilled is useless
-            return model.LogicalOptions.IsStratEnabled(this) && !Requires.IsNever();
+            return !UselessByLogicalOptions && !Requires.IsNever();
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)

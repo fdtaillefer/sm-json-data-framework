@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class RoomEnvironment : InitializablePostDeserializeInRoom
+    public class RoomEnvironment : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         public bool Heated { get; set; }
 
@@ -32,6 +33,12 @@ namespace sm_json_data_framework.Models.Rooms
         public RoomEnvironment()
         {
 
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here
+            return false;
         }
 
         public RoomEnvironment(RawRoomEnvironment rawEnvironment)

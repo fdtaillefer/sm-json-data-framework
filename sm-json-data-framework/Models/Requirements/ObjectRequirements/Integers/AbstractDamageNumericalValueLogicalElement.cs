@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -46,7 +47,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <returns></returns>
         public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState);
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int damage = CalculateDamage(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))

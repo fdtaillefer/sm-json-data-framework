@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
@@ -12,7 +13,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class Runway : InitializablePostDeserializeInNode, IRunway
+    public class Runway : AbstractModelElement, InitializablePostDeserializeInNode, IRunway
     {
         public string Name { get; set; }
 
@@ -67,6 +68,24 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             OpenEnds = rawRunway.OpenEnd;
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool noUsefulStrat = true;
+            foreach(Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if(!strat.UselessByLogicalOptions)
+                {
+                    noUsefulStrat = false;
+                }
+            }
+
+            // We could pre-calculate an effective runway length here if we had the rules.
+
+            // A runway becomes useless if its strats are impossible
+            return noUsefulStrat;
+        }
+
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;
@@ -112,6 +131,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
         {
+            if(UselessByLogicalOptions)
+            {
+                return null;
+            }
+
             // If we're coming in, this must be usable coming in
             if (!UsableComingIn && comingIn)
             {

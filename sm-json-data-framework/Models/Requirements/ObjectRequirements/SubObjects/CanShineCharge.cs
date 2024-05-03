@@ -1,6 +1,8 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Models.Techs;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
@@ -38,6 +40,36 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public int ShinesparkFrames { get; set; }
 
+        /// <summary>
+        /// Indicates whether this CanShineCharge involves executing a shinespark.
+        /// </summary>
+        public bool MustShinespark { get { return ShinesparkFrames > 0; } }
+
+        private decimal TilesSavedWithStutter { get; set; } = LogicalOptions.DefaultTilesSavedWithStutter;
+
+        private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            TilesSavedWithStutter = logicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+            TilesToShineCharge = logicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+
+            bool useless = false;
+            if(MustShinespark && !logicalOptions.CanShinespark)
+            {
+                useless = true;
+            }
+
+            // Since this is an in-room shine charge, its required nunmber of tiles is constant.
+            // As such, we could check here whether the logical options make the shine too short to be possible.
+            // However, this requires access to the game rules, which we don't have here.
+            // Improve this if we decide to pass the rules here.
+
+            // We could also pre-calculate an effective runway length if we had the rules
+
+            return useless;
+        }
+
         public override bool IsNever()
         {
             return false;
@@ -49,24 +81,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            bool mustShinespark = ShinesparkFrames > 0;
-
             // Always need the SpeedBooster to charge a bluesuit
             if (!inGameState.Inventory.HasSpeedBooster())
             {
                 return null;
             }
 
-            // If a shinespark is needed, the tech must be allowed
-            if (mustShinespark && !model.CanShinespark())
-            {
-                return null;
-            }
-
             // The runway must be long enough to charge
-            if (model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter) < model.LogicalOptions.TilesToShineCharge)
+            if (model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter) < TilesToShineCharge)
             {
                 return null;
             }

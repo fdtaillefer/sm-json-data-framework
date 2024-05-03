@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public bool OverrideRunwayRequirements { get; set; } = false;
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
+
         public override bool IsNever()
         {
             return false;
@@ -54,7 +61,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If no in-room path is specified, then player will be required to have entered at fromNode and not moved
             IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;

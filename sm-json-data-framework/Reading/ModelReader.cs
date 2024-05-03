@@ -45,8 +45,6 @@ namespace sm_json_data_framework.Reading
         /// </summary>
         /// <param name="rules">A repository of game rules to operate by.
         /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
-        /// <param name="logicalOptions">A container of logical options to go with the representation of the world.
-        /// If null, will use the default constructor of LogicalOptions (giving an arbitrary option set).</param>
         /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
         /// be created and assigned to the model.</param>
         /// <param name="baseDirectory">An override of the path to the base directory of the data model to read.
@@ -55,14 +53,14 @@ namespace sm_json_data_framework.Reading
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, 
+        public static SuperMetroidModel ReadModel(SuperMetroidRules rules = null,
             IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             string baseDirectory = null, 
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
             RawSuperMetroidModel rawModel = ReadRawModel(baseDirectory);
-            return new SuperMetroidModel(rawModel, rules, logicalOptions, basicStartConditionsCustomizer, overrideObjectTypes, overrideStringTypes);
+            return new SuperMetroidModel(rawModel, rules, basicStartConditionsCustomizer, overrideObjectTypes, overrideStringTypes);
         }
 
         private static JsonSerializerOptions CreateJsonSerializerOptionsForRawModel()

@@ -9,10 +9,11 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Raw.Enemies;
+using sm_json_data_framework.Options;
 
 namespace sm_json_data_framework.Models.Enemies
 {
-    public class Enemy : InitializablePostDeserializeOutOfRoom
+    public class Enemy : AbstractModelElement, InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -90,6 +91,17 @@ namespace sm_json_data_framework.Models.Enemies
             InvulnerabilityStrings = new HashSet<string>(rawEnemy.Invul);
             RawDamageMultipliers = rawEnemy.DamageMultipliers.Select(multiplier => multiplier.CLone()).ToList();
             Areas = new HashSet<string>(rawEnemy.Areas);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here, but we can still delegate to the attacks.
+            // The other sub-models are too abstract to be considered elements
+            foreach (EnemyAttack attack in Attacks.Values)
+            {
+                attack.ApplyLogicalOptions(logicalOptions);
+            }
+            return false;
         }
 
         public void InitializeProperties(SuperMetroidModel model)

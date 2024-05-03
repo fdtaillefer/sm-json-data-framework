@@ -2,7 +2,9 @@
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +35,31 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public int ShinesparkFrames { get; set; }
 
+        /// <summary>
+        /// Indicates whether this CanComeInCharged involves executing a shinespark.
+        /// </summary>
+        public bool MustShinespark { get { return ShinesparkFrames > 0; } }
+
+        private decimal TilesSavedWithStutter { get; set; } = LogicalOptions.DefaultTilesSavedWithStutter;
+
+        private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            TilesSavedWithStutter = logicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+            TilesToShineCharge = logicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+
+            bool useless = false;
+            if (MustShinespark && !logicalOptions.CanShinespark)
+            {
+                useless = true;
+            }
+
+            // We might have a chance to preprocess some runway scenarios, possibly, but not unless we receive the Rules here.
+
+            return useless;
+        }
+
         public override bool IsNever()
         {
             return false;
@@ -51,9 +78,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            var mustShinespark = ShinesparkFrames > 0;
             var energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
             var shinesparkEnergyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
@@ -61,10 +87,34 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, shinesparkEnergyCost);
 
             // Check simple preconditions before looking at anything
-            if (!inGameState.Inventory.HasSpeedBooster() || (mustShinespark && !model.CanShinespark()))
+            if (!inGameState.Inventory.HasSpeedBooster())
             {
                 return null;
             }
+
+            // Another precondition to check is if we respect the in-room path
+            // If no in-room path is specified, then implicit in-room path is to have entered at fromNode and not moved
+            IList<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
+
+            // While the required path must be followed exactly for cross-room execution, we are more lenient for in-room execution.
+            // In that case, we only need a shineCharge to be obtained at fromNode and carried along the path.
+            // So the requirement in that case is that the current InRoomPath must end with the required InRoomPath.
+            // If it doesn't, there is no way we can fulfill this in any way.
+            
+            IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> currentPath = inGameState.GetVisitedPath();
+            // If we haven't even visited as many nodes as necessary, there's no way we've carried a charge along the path
+            if(currentPath.Count < requiredInRoomPath.Count)
+            {
+                return null;
+            }
+            // Extract the last n nodes of the current path and check if it matches required path
+            List<int> currentInRoomPathEnd = currentPath.Skip(currentPath.Count - requiredInRoomPath.Count).Select(node => node.nodeState.Node.Id).ToList();
+            if (!currentInRoomPathEnd.SequenceEqual(requiredInRoomPath))
+            {
+                return null;
+            }
+            // Stricter checks can be done later to further restrict for cross-room execution
+
 
             ExecutionResult bestOverallResult = null;
 
@@ -78,9 +128,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // For all in-room runways we are able to use while still doing the shinespark after,
             // figure out the resulting state, effective length, and the overall best resulting state
             var (usableInRoomRunwayEvaluations, bestInRoomResult) =
-                EvaluateRunways(model, inGameState, FromNode.Runways, times, previousRoomCount, hasEnergyForShinespark, runwaysReversible: true);
+                EvaluateRunways(model, inGameState, FromNode.Runways.WhereUseful(), times, previousRoomCount, hasEnergyForShinespark, runwaysReversible: true);
 
-            // If using this in-room runway cost nothing, spend the shinespark and return
+            // If using this in-room runway cost nothing, spend the shinespark and return. We won't find a better option.
             if (model.CompareInGameStates(inGameState, bestInRoomResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestInRoomResult);
@@ -96,8 +146,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             // Next Step: all adjacent runways with their resulting state.
 
-            // If no in-room path is specified, then player is expected to have entered at fromNode and not moved
-            var requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
             // For all adjacent runways that can be used retroactively while still doing the shinespark after,
             // figure out the resulting state, effective length, and the overall best resulting state
             var (usableAdjacentRunwayEvaluations, bestAdjacentRunwayResult) =
@@ -147,7 +195,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // runway that is usable coming in and combines for a long enough runway
             foreach (var (_, currentAdjacentRunwayResult, currentLength) in usableAdjacentRunwayEvaluations.Where(runway => runway.length > model.Rules.RoomTransitionTilesLost))
             {
-                var requiredInRoomLength = model.LogicalOptions.TilesToShineCharge + model.Rules.RoomTransitionTilesLost - currentLength;
+                var requiredInRoomLength = TilesToShineCharge + model.Rules.RoomTransitionTilesLost - currentLength;
 
                 // Determine which runways we may attempt to use. Limit to the ones we evaluated
                 // earlier because there's no point re-evaluating those we couldn't execute then,
@@ -211,27 +259,27 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <param name="hasEnergyForShinespark">A predicate that checks whether a resulting InGameState has enough energy for the subsequent shinespark</param>
         /// <param name="runwaysReversible">If true, runways can be used in either direction. If false, they can only be used in their normal direction.</param>
         /// <returns></returns>
-        (IEnumerable<(Runway runway, ExecutionResult executionResult, decimal length)> runwayEvaluations, ExecutionResult bestResults) EvaluateRunways(
+        private (IEnumerable<(Runway runway, ExecutionResult executionResult, decimal length)> runwayEvaluations, ExecutionResult bestResults) EvaluateRunways(
             SuperMetroidModel model, ReadOnlyInGameState inGameState,
             IEnumerable<Runway> runways, int times, int previousRoomCount,
             Predicate<ReadOnlyInGameState> hasEnergyForShinespark, bool runwaysReversible
         ) {
             Func<IRunway, decimal, decimal> calculateRunwayLength = runwaysReversible? model.Rules.CalculateEffectiveReversibleRunwayLength :
-                (Func<IRunway, decimal, decimal>) model.Rules.CalculateEffectiveRunwayLength;
+                 model.Rules.CalculateEffectiveRunwayLength;
 
             // Obtain info about all runways that can be used without dropping below the energy needed to shinespark
             var usableRunways =
                 from runway in runways
                 let executionResult = runway.Execute(model, inGameState, comingIn: false, times, previousRoomCount)
                 where executionResult != null && hasEnergyForShinespark(executionResult.ResultingState)
-                select (runway, executionResult, length: calculateRunwayLength(runway, model.LogicalOptions.TilesSavedWithStutter));
+                select (runway, executionResult, length: calculateRunwayLength(runway, TilesSavedWithStutter));
 
             // Find the best resulting state among all provided runways whose length is enough to fulfill this CanComeInCharged
             var bestResult = (
                     from runway in usableRunways
-                    where runway.length >= model.LogicalOptions.TilesToShineCharge
+                    where runway.length >= TilesToShineCharge
                     select runway.executionResult
-                ).OrderByDescending(result => result.ResultingState, model.GetInGameStateComparer())
+                ).OrderByDescending(result => result.ResultingState, model.InGameStateComparer)
                 .FirstOrDefault();
 
             return (usableRunways, bestResult);

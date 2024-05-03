@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
 
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            LogicalRequirements.ApplyLogicalOptions(logicalOptions);
+
+            // Since this is an Or, it only becomes impossible to fulfill if all of the inner logical elements is
+            return LogicalRequirements.LogicalElements.All(element => element.UselessByLogicalOptions);
+        }
+
         public Or(LogicalRequirements logicalRequirements) : base(logicalRequirements)
         {
 
@@ -27,7 +36,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             return LogicalRequirements.LogicalElements.All(element => element.IsNever());
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return LogicalRequirements.ExecuteOne(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }

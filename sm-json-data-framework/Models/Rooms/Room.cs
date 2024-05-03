@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class Room : InitializablePostDeserializeOutOfRoom
+    public class Room : AbstractModelElement, InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -72,6 +73,37 @@ namespace sm_json_data_framework.Models.Rooms
             Links = rawRoom.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId);
             Obstacles = rawRoom.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id);
             Enemies = rawRoom.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            {
+                roomEnvironment.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (RoomNode node in Nodes.Values)
+            {
+                node.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (RoomObstacle obstacle in Obstacles.Values)
+            {
+                obstacle.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (Link link in Links.Values)
+            {
+                link.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (RoomEnemy enemy in Enemies.Values)
+            {
+                enemy.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // A room never becomes useless
+            return false;
         }
 
         public void InitializeProperties(SuperMetroidModel model)

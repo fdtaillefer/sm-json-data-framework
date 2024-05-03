@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// Represents a method to farm one cycle of a respawning group of enemies, with the approximate duration.
     /// </summary>
-    public class FarmCycle: InitializablePostDeserializableInRoomEnemy
+    public class FarmCycle : AbstractModelElement, InitializablePostDeserializableInRoomEnemy
     {
         public string Name { get; set; }
 
         public int CycleFrames { get; set; }
+
+        public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions { get; set; } = new SpawnerFarmingOptions().AsReadOnly();
 
         public LogicalRequirements Requires { get; set; }
 
@@ -42,6 +45,22 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 Requires = rawCycle.Requires.ToLogicalRequirements(knowledgeBase);
             }
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            if(logicalOptions == null)
+            {
+                AppliedFarmingLogicalOptions = new SpawnerFarmingOptions();
+            } else
+            {
+                AppliedFarmingLogicalOptions = logicalOptions.SpawnerFarmingOptions;
+            }
+
+            // A farm cycle becomes useless if its requirements are impossible
+            return Requires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
@@ -330,7 +349,7 @@ namespace sm_json_data_framework.Models.Rooms
                     .Where(resource =>
                     {
                         return CalculateResourceVariationPerSecond(model, resource, effectiveDropRates, costingResources)
-                            >= model.LogicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[resource];
+                            >= FarmCycle.AppliedFarmingLogicalOptions.MinimumRatesPerSecond[resource];
                     })
                     // Actualize this to calculate it only once
                     .ToArray();
@@ -381,7 +400,7 @@ namespace sm_json_data_framework.Models.Rooms
             int costPerCycle;
             if (costingResources.TryGetValue(resource, out costPerCycle))
             {
-                dropRateMultiplier = (100 - model.LogicalOptions.SpawnerFarmingOptions.SafetyMarginPercent) / 100;
+                dropRateMultiplier = (100 - FarmCycle.AppliedFarmingLogicalOptions.SafetyMarginPercent) / 100;
             }
             else
             {

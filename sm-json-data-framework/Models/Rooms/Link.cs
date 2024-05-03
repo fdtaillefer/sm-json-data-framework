@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// Represents all ways to navigate directly from a specific node to any other node in the same room.
     /// </summary>
-    public class Link : InitializablePostDeserializeInRoom
+    public class Link : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         [JsonPropertyName("from")]
         public int FromNodeId { get; set; }
@@ -31,6 +32,22 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FromNodeId = rawLink.From;
             To = rawLink.To.Select(linkTo => new LinkTo(linkTo, knowledgeBase)).ToDictionary(linkTo => linkTo.TargetNodeId);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool allDestinationsImpossible = true;
+            foreach (LinkTo linkTo in To.Values)
+            {
+                linkTo.ApplyLogicalOptions(logicalOptions);
+                if(!linkTo.UselessByLogicalOptions)
+                {
+                    allDestinationsImpossible = false;
+                }
+            }
+
+            // A link is useless if there's no destination that's possible to reach
+            return allDestinationsImpossible;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         public PreviousStratProperty(string previousStrat): base(previousStrat)
         {
             
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
         }
 
         public override bool IsNever()
@@ -45,7 +52,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (IsFulfilled(inGameState, previousRoomCount))
             {

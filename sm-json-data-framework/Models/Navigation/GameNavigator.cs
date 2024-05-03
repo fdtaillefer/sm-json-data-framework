@@ -177,7 +177,7 @@ namespace sm_json_data_framework.Models.Navigation
                 failureFiltersSuffix = " matching the filters";
             }
 
-            string intent = $"Move to node {nodeId}{intentFiltersSuffix}";
+            string intent = $"Move from node {CurrentInGameState.CurrentNode.Id} to node {nodeId}{intentFiltersSuffix} in room '{CurrentInGameState.CurrentRoom.Name}'";
 
             // Does that node exist?
             if (!InternalInGameState.CurrentRoom.Nodes.TryGetValue(nodeId, out RoomNode destinationNode))

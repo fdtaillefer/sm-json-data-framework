@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Weapons;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,22 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public IEnumerable<Weapon> ValidWeapons { get; set; }
 
         public IEnumerable<AmmoEnum> FarmableAmmo { get; set; } = Enumerable.Empty<AmmoEnum>();
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Propagate to all valid weapons, so we can tell if any of them is still usable
+            bool usableWeapon = false;
+            foreach(Weapon weapon in ValidWeapons)
+            {
+                weapon.ApplyLogicalOptions(logicalOptions);
+                if (!weapon.UselessByLogicalOptions)
+                {
+                    usableWeapon = true;
+                }
+            }
+            // We are rendered useless if there's no remaining usable weapons
+            return !usableWeapon;
+        }
 
         public override bool IsNever()
         {
@@ -133,13 +150,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Create an ExecutionResult immediately so we can record free kills in it
             ExecutionResult result = new ExecutionResult(inGameState.Clone());
 
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null);
+            IEnumerable<Weapon> usableWeapons = ValidWeapons.WhereUseful().Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null);
 
             // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
             // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),

@@ -22,7 +22,12 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
                 IEnumerable<LinkTo> links = navigator.CurrentInGameState.CurrentNode.Links.Values;
                 foreach (LinkTo link in navigator.CurrentInGameState.CurrentNode.Links.Values)
                 {
-                    Console.WriteLine($"Adjacent node {link.TargetNodeId}: {link.TargetNode.Name}");
+                    string output = $"Adjacent node {link.TargetNodeId}: {link.TargetNode.Name}";
+                    if(link.UselessByLogicalOptions)
+                    {
+                        output += " (logically impossible)";
+                    }
+                    Console.WriteLine(output);
                 }
                 if(!links.Any())
                 {

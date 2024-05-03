@@ -1,12 +1,14 @@
 ﻿using sm_json_data_framework.Models.Raw.Helpers;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Techs;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Helpers
 {
-    public class Helper : InitializablePostDeserializeOutOfRoom
+    public class Helper : AbstractModelElement, InitializablePostDeserializeOutOfRoom
     {
         public string Name { get; set; }
 
@@ -27,6 +29,15 @@ namespace sm_json_data_framework.Models.Helpers
         public Helper (RawHelper helper)
         {
             Name = helper.Name;
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Propagate to requirements
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            // This helper becomes useless if it becomes impossible
+            return Requires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(SuperMetroidModel model)

@@ -5,18 +5,20 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw.Requirements;
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class RoomNode : InitializablePostDeserializeInRoom
+    public class RoomNode : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         public int Id { get; set; }
 
@@ -168,6 +170,41 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             TwinDoorAddresses = rawNode.TwinDoorAddresses.Select(twinAddress => new TwinDoorAddress(twinAddress)).ToList();
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            InteractionRequires.ApplyLogicalOptions(logicalOptions);
+
+            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+            {
+                canLeaveCharged.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
+            {
+                doorEnvironment.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (ViewableNode viewableNode in ViewableNodes)
+            {
+                viewableNode.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (NodeLock nodeLock in Locks.Values)
+            {
+                nodeLock.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (Runway runway in Runways)
+            {
+                runway.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't the information.
+
+            // A node never becomes useless
+            return false;
+        }
+
         /// <summary>
         /// Returns the enumeration of locks on this node that are active and locked, according to the provided inGameState.
         /// </summary>
@@ -176,7 +213,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
-            return Locks.Values.Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
+            return Locks.Values.WhereUseful().Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
                 .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock));
         }
 

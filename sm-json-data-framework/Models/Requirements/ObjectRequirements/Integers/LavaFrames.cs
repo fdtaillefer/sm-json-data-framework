@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class LavaFrames : AbstractDamageNumericalValueLogicalElement
     {
+        private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+
         public LavaFrames()
         {
 
@@ -21,10 +24,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            LavaLeniencyMultiplier = logicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
+
+            return false;
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateLavaDamage(inGameState, Value) * times;
-            return (int)(baseDamage * model.LogicalOptions.LavaLeniencyMultiplier);
+            return (int)(baseDamage * LavaLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

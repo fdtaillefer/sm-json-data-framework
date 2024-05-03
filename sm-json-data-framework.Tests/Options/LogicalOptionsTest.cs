@@ -36,7 +36,7 @@ namespace sm_json_data_framework.Tests.Options
         }
 
         [Fact]
-        public void NumberOfTries_UnalteredTech_Returns1()
+        public void NumberOfTries_UnalteredTech_ReturnsDefaultNumber()
         {
             // Given
             Tech tech = Model.Techs["canIBJ"];
@@ -46,7 +46,7 @@ namespace sm_json_data_framework.Tests.Options
             int result = logicalOptions.NumberOfTries(tech);
 
             // Expect
-            Assert.Equal(1, result);
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace sm_json_data_framework.Tests.Options
         }
 
         [Fact]
-        public void NumberOfTries_UnalteredHelper_Returns1()
+        public void NumberOfTries_UnalteredHelper_ReturnsDefaultNumber()
         {
             // Given
             Helper helper = Model.Helpers["h_canBombThings"];
@@ -76,7 +76,7 @@ namespace sm_json_data_framework.Tests.Options
             int result = logicalOptions.NumberOfTries(helper);
 
             // Expect
-            Assert.Equal(1, result);
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace sm_json_data_framework.Tests.Options
         }
 
         [Fact]
-        public void NumberOfTries_NonNotableStrat_Returns1()
+        public void NumberOfTries_NonNotableStrat_ReturnsDefaultNumber()
         {
             // Given
             Strat strat = Model.GetNodeInRoom("Landing Site", 5).Links[2].Strats["Base"];
@@ -107,11 +107,11 @@ namespace sm_json_data_framework.Tests.Options
             int result = logicalOptions.NumberOfTries(strat);
 
             // Expect
-            Assert.Equal(1, result);
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
 
         [Fact]
-        public void NumberOfTries_UnalteredStrat_Returns1()
+        public void NumberOfTries_UnalteredStrat_ReturnsDefaultNumber()
         {
             // Given
             Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
@@ -121,7 +121,7 @@ namespace sm_json_data_framework.Tests.Options
             int result = logicalOptions.NumberOfTries(strat);
 
             // Expect
-            Assert.Equal(1, result);
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
 
         [Fact]
@@ -446,14 +446,14 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Empty(logicalOptions.DisabledTechs);
             Assert.Empty(logicalOptions.RemovedGameFlags);
 
-            Assert.Equal(1, logicalOptions.NumberOfTries(helper));
-            Assert.Equal(1, logicalOptions.NumberOfTries(strat));
-            Assert.Equal(1, logicalOptions.NumberOfTries(enabledTech));
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, logicalOptions.NumberOfTries(helper));
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, logicalOptions.NumberOfTries(strat));
+            Assert.Equal(LogicalOptions.DefaultNumberOfTries, logicalOptions.NumberOfTries(enabledTech));
 
             Assert.False(logicalOptions.ShineChargesWithStutter);
             Assert.True(logicalOptions.TechsEnabledByDefault);
-            Assert.Equal(0, logicalOptions.TilesSavedWithStutter);
-            Assert.Equal(32.5M, logicalOptions.TilesToShineCharge);
+            Assert.Equal(LogicalOptions.DefaultTilesSavedWithStutter, logicalOptions.TilesSavedWithStutter);
+            Assert.Equal(LogicalOptions.DefaultTilesToShineCharge, logicalOptions.TilesToShineCharge);
 
             Assert.Equal(10, logicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[ConsumableResourceEnum.Energy]);
             Assert.Equal(10, logicalOptions.SpawnerFarmingOptions.SafetyMarginPercent);

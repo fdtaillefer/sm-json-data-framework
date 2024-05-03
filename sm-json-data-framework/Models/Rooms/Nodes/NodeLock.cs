@@ -2,17 +2,19 @@
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class NodeLock : InitializablePostDeserializeInNode
+    public class NodeLock : AbstractModelElement, InitializablePostDeserializeInNode
     {
         public LockTypeEnum LockType { get; set; }
 
@@ -63,6 +65,25 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             UnlockStrats = rawNodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
             BypassStrats = rawNodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
             YieldsStrings = new HashSet<string>(rawNodeLock.Yields);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Lock.ApplyLogicalOptions(logicalOptions);
+
+            foreach (Strat strat in UnlockStrats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (Strat strat in BypassStrats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // A lock remains useful even if it's impolssible to unlock or bypass as it plays the role of blocking the way.
+            // It does become useless if its activation conditions become impossible though
+            return Lock.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
@@ -198,7 +219,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best unlock strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
@@ -232,7 +253,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best bypass strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if(result != null)
             {
                 result.ApplyBypassedLock(NodeLock, bestStrat);

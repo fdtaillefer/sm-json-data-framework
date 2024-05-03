@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class HeatFrames : AbstractDamageNumericalValueLogicalElement
     {
+        private decimal HeatLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+
         public HeatFrames()
         {
 
@@ -21,10 +24,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            HeatLeniencyMultiplier = logicalOptions?.HeatLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
+
+            return false;
+        }
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Value) * times;
-            return (int)(baseDamage * model.LogicalOptions.HeatLeniencyMultiplier);
+            return (int)(baseDamage * HeatLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

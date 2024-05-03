@@ -13,19 +13,25 @@ namespace sm_json_data_framework.Options
     /// </summary>
     public class SpawnerFarmingOptions : ReadOnlySpawnerFarmingOptions
     {
+        public static readonly decimal DefaultSafetyMarginPercent = 10;
+        // The rate for energy off 5 Gamets, after heat loss, is roughly 13.7 assuming missiles and supers (but not PBs) are full.
+        // With a 10% safety reduction in drops, that goes down to just about 10.8.
+        // We surely want a minimum rate that allows for energy refills at Gamet spawners in heated rooms, so we have a value of 10
+        public static readonly decimal DefaultEnergyMinimumRatePerSecond = 10;
+        public static readonly decimal DefaultMissileMinimumRatePerSecond = 0.175M;
+        // The rate for supers off one Zebbo is roughly 0.196 (with a 2-second cycle)
+        public static readonly decimal DefaultSuperMinimumRatePerSecond = 0.175M;
+        public static readonly decimal DefaultPowerBombMinimumRatePerSecond = 0.175M;
+
         public SpawnerFarmingOptions()
         {
             // Set the minimum viable farming rates per second to default values
             InternalMinimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal>
             {
-                // The rate for energy off 5 Gamets, after heat loss, is roughly 13.7 assuming missiles and supers (but not PBs) are full.
-                // With a 10% safety reduction in drops, that goes down to just about 10.8.
-                // We surely want a minimum rate that allows for energy refills at Gamet spawners in heated rooms, so we have a value of 10
-                { ConsumableResourceEnum.Energy, 10},
-                { ConsumableResourceEnum.Missile, 0.175M},
-                // The rate for supers off one Zebbo is roughly 0.196 (with a 2-second cycle)
-                { ConsumableResourceEnum.Super, 0.175M},
-                { ConsumableResourceEnum.PowerBomb, 0.175M}
+                { ConsumableResourceEnum.Energy, DefaultEnergyMinimumRatePerSecond},
+                { ConsumableResourceEnum.Missile, DefaultMissileMinimumRatePerSecond},
+                { ConsumableResourceEnum.Super, DefaultSuperMinimumRatePerSecond},
+                { ConsumableResourceEnum.PowerBomb, DefaultPowerBombMinimumRatePerSecond}
             };
         }
 
@@ -53,7 +59,7 @@ namespace sm_json_data_framework.Options
         public IDictionary<ConsumableResourceEnum, decimal> InternalMinimumRatesPerSecond { get; set; }
         public IReadOnlyDictionary<ConsumableResourceEnum, decimal> MinimumRatesPerSecond { get { return InternalMinimumRatesPerSecond.AsReadOnly(); } }
 
-        public decimal SafetyMarginPercent { get; set; } = 10;
+        public decimal SafetyMarginPercent { get; set; } = DefaultSafetyMarginPercent;
     }
 
     /// <summary>

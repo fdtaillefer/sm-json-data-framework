@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Techs;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Techs
 {
-    public class Tech : InitializablePostDeserializeOutOfRoom
+    public class Tech : AbstractModelElement, InitializablePostDeserializeOutOfRoom
     {
         public string Name { get; set; }
 
@@ -31,6 +32,23 @@ namespace sm_json_data_framework.Models.Techs
         {
             Name = rawTech.Name;
             ExtensionTechs = rawTech.ExtensionTechs.Select(subTech => new Tech(subTech)).ToList();
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool explicitlyDisabled = !logicalOptions.IsTechEnabled(this);
+            // Propagate to requirements
+            Requires.ApplyLogicalOptions(logicalOptions);
+            // Assign UselessByLogicalOptions explicitly now, because extension techs requirements will depend on this tech's state.
+            // Tech becomes useless if explicitly disabled or if it becomes impossible to execute
+            UselessByLogicalOptions = explicitlyDisabled || Requires.UselessByLogicalOptions;
+
+            // Propagate to extension techs
+            foreach(Tech tech in ExtensionTechs) {
+                tech.ApplyLogicalOptions(logicalOptions);
+            }
+
+            return UselessByLogicalOptions;
         }
 
         /// <summary>

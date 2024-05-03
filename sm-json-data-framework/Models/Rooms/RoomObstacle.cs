@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class RoomObstacle : InitializablePostDeserializeInRoom
+    public class RoomObstacle : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         public string Id { get; set; }
 
@@ -36,6 +37,15 @@ namespace sm_json_data_framework.Models.Rooms
             Name = rawRoomObstacle.Name;
             ObstacleType = rawRoomObstacle.ObstacleType;
             Requires = rawRoomObstacle.Requires.ToLogicalRequirements(knowledgeBase);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            // This obstacle's flat requirements must be fulfilled regardless of where and how the obstacle is destroyed.
+            // So if it becomes impossible, the obstacle becomes impossible to destroy.
+            return Requires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

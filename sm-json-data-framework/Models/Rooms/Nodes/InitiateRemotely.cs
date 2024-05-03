@@ -1,10 +1,12 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -14,7 +16,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// Contains info relating to a <see cref="CanLeaveCharged"/> being initiated remotely.
     /// This means it is initiated at a different node that the one by which the room will be exited.
     /// </summary>
-    public class InitiateRemotely : InitializablePostDeserializableInCanLeaveCharged
+    public class InitiateRemotely : AbstractModelElement, InitializablePostDeserializableInCanLeaveCharged
     {
         [JsonPropertyName("initiateAt")]
         public int InitiateAtNodeId { get; set; }
@@ -41,7 +43,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
         /// </summary>
         [JsonIgnore]
-        public IList<(LinkTo link, IEnumerable<Strat> strats)> PathToDoor { get; set; } = new List<(LinkTo link, IEnumerable<Strat> strats)>();
+        public IList<(LinkTo link, IList<Strat> strats)> PathToDoor { get; set; } = new List<(LinkTo link, IList<Strat> strats)>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode, CanLeaveCharged)"/> has been called.</para>
@@ -62,6 +64,34 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             PathToDoorNodes = rawInitiateRemotely.PathToDoor.Select(pathNode => new InitiateRemotelyPathToDoorNode(pathNode)).ToList();
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // If this contains strats, they belong to a LinkTo.
+            // However, we need to apply the logical options to them to see if they become impossible
+            bool anyNodeImpossible = false;
+            for (int i = 0; i < PathToDoor.Count; i++)
+            {
+                var (_, strats) = PathToDoor[i];
+                bool anyStratPossible = false;
+                foreach(Strat strat in strats)
+                {
+                    strat.ApplyLogicalOptions(logicalOptions);
+                    if (!strat.UselessByLogicalOptions)
+                    {
+                        anyStratPossible = true;
+                    }
+                }
+                
+                // This node becomes impossible if no possible strat remains
+                if (!anyStratPossible) {
+                    anyNodeImpossible = true;
+                }
+            }
+               
+            // If there is a node in the path that has no possible strats remaining, this InitiateRemotely becomes impossible
+            return anyNodeImpossible;
+        }
+
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
         {
             // Initialize the start and end nodes of the remote canLeaveCharged
@@ -69,7 +99,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             ExitNode = canLeaveCharged.Node;
 
             // Initialize the path to follow
-            List<(LinkTo link, IEnumerable<Strat> strats)> pathToDoor = new ();
+            List<(LinkTo link, IList<Strat> strats)> pathToDoor = new ();
             RoomNode currentNodeFrom = InitiateAtNode;
             foreach (var pathNode in PathToDoorNodes)
             {
@@ -128,7 +158,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 var pathNode = PathToDoor[i];
                 // Remove unusable strats
-                pathNode.strats = pathNode.strats.Where(strat => strat.CleanUpUselessValues(model, room));
+                pathNode.strats = pathNode.strats.Where(strat => strat.CleanUpUselessValues(model, room)).ToList();
             }
 
             // If any node in the path has no strats remaining, it means the PathToNode is impossible to follow.

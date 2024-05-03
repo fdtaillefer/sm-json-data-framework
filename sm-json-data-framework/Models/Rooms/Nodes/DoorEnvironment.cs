@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class DoorEnvironment : InitializablePostDeserializeInNode
+    public class DoorEnvironment : AbstractModelElement, InitializablePostDeserializeInNode
     {
         public PhysicsEnum Physics { get; set; }
 
@@ -41,6 +42,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 EntranceNodeIds = new HashSet<int>(rawEnvironment.EntranceNodes);
             }
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here
+            return false;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)

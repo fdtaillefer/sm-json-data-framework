@@ -88,8 +88,6 @@ namespace sm_json_data_framework.Models
         /// <param name="rawModel">Raw model containing raw data presumably obtained from json model</param>
         /// <param name="rules">A repository of game rules to operate by.
         /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
-        /// <param name="logicalOptions">A container of logical options to go with the representation of the world.
-        /// If null, will use the default constructor of LogicalOptions (giving an arbitrary option set).</param>
         /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
         /// be created and assigned to this model.</param>
         /// <param name="overrideObjectTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
@@ -99,16 +97,14 @@ namespace sm_json_data_framework.Models
         /// to represent that StringLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
         /// The provided C# types must extend the default type that is normally used for any given StringLogicalElementTypeEnum.</param>
         /// <exception cref="Exception">If this method fails to interpret any logical element</exception>
-        public SuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null, LogicalOptions logicalOptions = null, 
+        public SuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null,
             IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
             rules ??= new SuperMetroidRules();
-            logicalOptions ??= new LogicalOptions();
 
             Rules = rules;
-            LogicalOptions = logicalOptions;
 
             // Put items in model
             Items = rawModel.ItemContainer.ImplicitItems
@@ -154,7 +150,7 @@ namespace sm_json_data_framework.Models
 
             // Put regular enemies and bosses in model
             Enemies = rawModel.EnemyContainer.Enemies.Concat(rawModel.BossContainer.Enemies).Select(rawEnemy => new Enemy(rawEnemy))
-                .ToDictionary(enemye => enemye.Name);
+                .ToDictionary(enemy => enemy.Name);
 
             // Put connections in model
             foreach (RawConnection rawConnection in rawModel.ConnectionContainer.Connections)
@@ -281,11 +277,6 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Options that describe what the player is expected to be able or unable to do.
-        /// </summary>
-        public LogicalOptions LogicalOptions { get; set; }
-
-        /// <summary>
         /// A repository of game rules we are operating by.
         /// </summary>
         public SuperMetroidRules Rules { get; set; }
@@ -309,15 +300,6 @@ namespace sm_json_data_framework.Models
         /// The techs in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Tech> Techs { get; set; } = new Dictionary<string, Tech>();
-
-        /// <summary>
-        /// Returns whether the shinespark tech is enabled.
-        /// </summary>
-        /// <returns></returns>
-        public bool CanShinespark()
-        {
-            return LogicalOptions.IsTechEnabled(Techs["canShinespark"]);
-        }
 
         /// <summary>
         /// The items in this model, mapped by name.
@@ -374,7 +356,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// All groups of enemies found in any room, mapped by their group name.
         /// </summary>
-        public IDictionary<string, RoomEnemy> RoomEnemies {get;set;} = new Dictionary<string, RoomEnemy>();
+        public IDictionary<string, RoomEnemy> RoomEnemies { get; set; } = new Dictionary<string, RoomEnemy>();
 
         /// <summary>
         /// A dictionary that maps a node's IdentifyingString to a one-way connection with that node as the origin.
@@ -403,14 +385,76 @@ namespace sm_json_data_framework.Models
         public IDictionary<WeaponCategoryEnum, IEnumerable<Weapon>> WeaponsByCategory { get; private set; }
 
         /// <summary>
-        /// The normal enemies in this model, mapped by name.
+        /// The normal enemies and boss enemies in this model, mapped by name.
         /// </summary>
         public IDictionary<string, Enemy> Enemies { get; set; } = new Dictionary<string, Enemy>();
 
         /// <summary>
-        /// The boss enemies in this model, mapped by name.
+        /// An <see cref="InGameStateComparer"/> which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
         /// </summary>
-        public IDictionary<string, Enemy> Bosses { get; set; } = new Dictionary<string, Enemy>();
+        public InGameStateComparer InGameStateComparer { get; private set; } = LogicalOptions.DefaultInGameStateComparer;
+
+        /// <summary>
+        /// Clones the provided LogicalOptions, and applies then to this model.
+        /// </summary>
+        /// <param name="logicalOptions">The LogicalOptions to apply. If null, this instead removes all alterations from logical options.</param>
+        public void ApplyLogicalOptions(LogicalOptions logicalOptions)
+        {
+            ReadOnlyLogicalOptions logicalOptionsToApply = null;
+
+            if(logicalOptions == null)
+            {
+                InGameStateComparer = LogicalOptions.DefaultInGameStateComparer;
+            }
+            else 
+            {
+                logicalOptionsToApply = logicalOptions.Clone().AsReadOnly();
+                InGameStateComparer = logicalOptionsToApply.InGameStateComparer;
+            }
+
+            foreach(GameFlag gameFlag in GameFlags.Values) {
+                gameFlag.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Helper helper in Helpers.Values)
+            {
+                helper.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Item item in Items.Values)
+            {
+                item.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Tech tech in Techs.Values)
+            {
+                tech.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Weapon weapon in Weapons.Values)
+            {
+                weapon.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Enemy enemy in Enemies.Values)
+            {
+                enemy.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Connection connection in Connections.Values)
+            {
+                connection.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Room room in Rooms.Values)
+            {
+                if(room.Name == "Main Street")
+                {
+                    int sdfsdf = 0;
+                }
+                room.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+        }
 
         private ReadOnlyInGameState _initialGameState;
         public ReadOnlyInGameState InitialGameState {
@@ -419,23 +463,14 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Compares the two provided game states, using the comparer returned by <see cref="GetInGameStateComparer"/>.
+        /// Compares the two provided game states, using the internal comparer.
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
         public int CompareInGameStates(ReadOnlyInGameState x, ReadOnlyInGameState y)
         {
-            return GetInGameStateComparer().Compare(x, y);
-        }
-
-        /// <summary>
-        /// Returns an <see cref="InGameStateComparer"/> obtained from this model's <see cref="LogicalOptions"/>, initialized with the internal relative resource values.
-        /// </summary>
-        /// <returns></returns>
-        public InGameStateComparer GetInGameStateComparer()
-        {
-            return LogicalOptions.InGameStateComparer;
+            return InGameStateComparer.Compare(x, y);
         }
 
         /// <summary>
@@ -456,8 +491,6 @@ namespace sm_json_data_framework.Models
         public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyInGameState initialInGameState, int times = 1,
             int previousRoomCount = 0, Predicate<ReadOnlyInGameState> acceptationCondition = null) where T:IExecutable
         {
-            InGameStateComparer comparer = GetInGameStateComparer();
-
             // Try to execute all executables, returning whichever spends the lowest amount of resources
             (T bestExecutable, ExecutionResult result) bestResult = (default(T), null);
             foreach (T currentExecutable in executables)
@@ -469,14 +502,14 @@ namespace sm_json_data_framework.Models
                 {
 
                     // If the fulfillment did not reduce the amount of resources, return immediately
-                    if (comparer.Compare(currentResult.ResultingState, initialInGameState) == 0)
+                    if (InGameStateComparer.Compare(currentResult.ResultingState, initialInGameState) == 0)
                     {
                         return (currentExecutable, currentResult);
                     }
 
                     // If the resulting state is the best we've found yet, retain it
                     if (bestResult.result == null
-                        || comparer.Compare(currentResult.ResultingState, bestResult.result.ResultingState) > 0)
+                        || InGameStateComparer.Compare(currentResult.ResultingState, bestResult.result.ResultingState) > 0)
                     {
                         bestResult = (currentExecutable, currentResult);
                     }

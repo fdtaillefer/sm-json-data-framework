@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// A container class for a series of logical elements.
     /// </summary>
-    public class LogicalRequirements: IExecutable
+    public class LogicalRequirements : AbstractModelElement, IExecutable
     {
         internal class NeverRequirements
         {
@@ -37,8 +38,26 @@ namespace sm_json_data_framework.Models.Requirements
 
         public IList<AbstractLogicalElement> LogicalElements { get; private set; } = new List<AbstractLogicalElement>();
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            foreach (AbstractLogicalElement logicalElement in LogicalElements)
+            {
+                logicalElement.ApplyLogicalOptions(logicalOptions);
+            }
+
+            if (logicalOptions == null)
+            {
+                return false;
+            }
+            else
+            {
+                // We're implicitly an And, so we become impossible/useless as soon as any sub element is
+                return LogicalElements.Where(logicalElement => logicalElement.UselessByLogicalOptions).Any();
+            }
+        }
+
         /// <summary>
-        /// Returns whether this set of logical requirements in its current state is logically impossible to fully complete
+        /// Returns whether this set of logical requirements in its base state is logically impossible to fully complete
         /// (due to having a mandatory <see cref="NeverLogicalElement"/>).
         /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
         /// which are not available here.
@@ -70,6 +89,11 @@ namespace sm_json_data_framework.Models.Requirements
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
+            // If logical options make these logical requirements impossible, don't bother trying
+            if(UselessByLogicalOptions)
+            {
+                return null;
+            }
             return model.ExecuteAll(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 

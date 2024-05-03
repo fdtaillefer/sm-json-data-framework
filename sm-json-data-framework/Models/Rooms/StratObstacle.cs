@@ -1,6 +1,8 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class StratObstacle : InitializablePostDeserializeInRoom
+    public class StratObstacle : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         [JsonPropertyName("id")]
         public string ObstacleId { get; set; }
@@ -24,7 +26,7 @@ namespace sm_json_data_framework.Models.Rooms
         public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
 
         /// <summary>
-        /// LogicalRequirements to bypass this obstcle without destroying it when doing the associated strat. If this is null, the obstacle cannot be bypassed.
+        /// LogicalRequirements to bypass this obstacle without destroying it when doing the associated strat. If this is null, the obstacle cannot be bypassed.
         /// </summary>
         public LogicalRequirements Bypass { get; set; }
 
@@ -52,6 +54,18 @@ namespace sm_json_data_framework.Models.Rooms
                 Bypass = rawStratObstacle.Bypass.ToLogicalRequirements(knowledgeBase);
             }
             AdditionalObstacleIds = new HashSet<string>(rawStratObstacle.AdditionalObstacles);
+        }
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Requires.ApplyLogicalOptions(logicalOptions);
+            if (Bypass != null)
+            {
+                Bypass.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // A StratObstacle never becomes truly impossible via logical options, as it's still possible to execute it
+            // if the obstacle was destroyed previously from elsehwere
+            return false;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)

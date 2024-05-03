@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
@@ -12,7 +13,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class CanLeaveCharged : InitializablePostDeserializeInNode, IRunway, IExecutable
+    public class CanLeaveCharged : AbstractModelElement, InitializablePostDeserializeInNode, IRunway, IExecutable
     {
         [JsonIgnore]
         public int Length { get => UsedTiles; }
@@ -25,6 +26,15 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int FramesRemaining { get; set; }
 
         public int ShinesparkFrames { get; set; }
+
+        /// <summary>
+        /// Indicates whether this CanLeavecharged involves executing a shinespark.
+        /// </summary>
+        public bool MustShinespark { get { return ShinesparkFrames > 0; } }
+
+        private decimal TilesSavedWithStutter { get; set; } = LogicalOptions.DefaultTilesSavedWithStutter;
+
+        private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
 
         public InitiateRemotely InitiateRemotely {get;set;}
 
@@ -51,14 +61,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int SteepDownTiles { get; set; } = 0;
 
         public int StartingDownTiles { get; set; } = 0;
-
-        /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
-        /// <para>The effective runway length for the runway of this CanLeaveCharged, based on initial rules and logical options.
-        /// Because this is not considered reversible, there is only one value.</para>
-        /// </summary>
-        [JsonIgnore]
-        public decimal EffectiveRunwayLength { get; protected set; } = 0;
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, RoomNode)"/> has been called.</para>
@@ -90,6 +92,53 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             StartingDownTiles = rawCanLeaveCharged.StartingDownTiles;
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            TilesSavedWithStutter = logicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+            TilesToShineCharge = logicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+
+            bool useless = false;
+            if(InitiateRemotely != null)
+            {
+                InitiateRemotely.ApplyLogicalOptions(logicalOptions);
+                if (InitiateRemotely.UselessByLogicalOptions)
+                {
+                // This cannot be executed if it has a remote execution that has been made impossible
+                    useless = true;
+                }
+            }
+
+            // This cannot be executed if all its strats become impossible
+            bool allStratsUseless = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if(!strat.UselessByLogicalOptions)
+                {
+                    allStratsUseless = false;
+                }
+            }
+            if(allStratsUseless)
+            {
+                useless = true;
+            }
+
+            // This cannot be executed if it requires a shinespark and those are disabled
+            if (MustShinespark && !logicalOptions.CanShinespark)
+            {
+                useless = true;
+            }
+
+            // Since this is an in-room shine charge, its required nunmber of tiles is constant.
+            // As such, we could check here whether the logical options make the shine too short to be possible.
+            // However, this requires access to the game rules, which we don't have here.
+            // Improve this if we decide to pass the rules here.
+
+            // We could also pre-calculate an effective runway length if we had the rules
+
+            return useless;
+        }
+
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             Node = node;
@@ -100,8 +149,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             InitiateRemotely?.InitializeProperties(model, room, node, this);
-
-            EffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, model.LogicalOptions.TilesSavedWithStutter);
         }
 
         public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)
@@ -139,6 +186,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There are many things to check...
+            // If logical options have rendered this CanLeaveCharged unusable, it can't be executed
+            if(UselessByLogicalOptions)
+            {
+                return null;
+            }
 
             // If we don't have SpeedBooster, this is not usable
             if (!inGameState.Inventory.HasSpeedBooster())
@@ -146,20 +198,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 return null;
             }
 
-            // If we need a shinespark and the tech is turned off, this is not usable
-            bool mustShinespark = ShinesparkFrames > 0;
-            if (mustShinespark && !model.CanShinespark())
-            {
-                return null;
-            }
-
             // If the player is unable to charge a shinespark with the available runway, this is not usable
-            if (EffectiveRunwayLength < model.LogicalOptions.TilesToShineCharge)
+            if (model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter) < TilesToShineCharge)
             {
                 return null;
             }
 
             // STITCHME Is there any remote initiation check anywhere? If this is remote it should only be executable if the path followed in the room matches the remote config
+            // I think there were checks elsewhere though, I think it's in InGameState.GetRetroactiveCanLeaveChargdes().
 
             // Figure out how much energy we will need to have for the shinespark
             int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);

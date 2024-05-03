@@ -1,5 +1,7 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Techs;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,12 +21,20 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             GameFlag = gameFlag;
         }
 
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            GameFlag.ApplyLogicalOptions(logicalOptions);
+
+            // This becomes impossible if the game flag itself becomes useless
+            return GameFlag.UselessByLogicalOptions;
+        }
+
         public override bool IsNever()
         {
             return false;
         }
 
-        public override ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.ActiveGameFlags.ContainsFlag(GameFlag))
             {

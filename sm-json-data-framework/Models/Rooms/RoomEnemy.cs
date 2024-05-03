@@ -4,6 +4,8 @@ using sm_json_data_framework.Models.Raw.Requirements;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Options;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class RoomEnemy : InitializablePostDeserializeInRoom
+    public class RoomEnemy : AbstractModelElement, InitializablePostDeserializeInRoom
     {
         public string Id { get; set; }
 
@@ -89,6 +91,17 @@ namespace sm_json_data_framework.Models.Rooms
             }
             DropRequires = rawRoomEnemy.DropRequires.ToLogicalRequirements(knowledgeBase);
             FarmCycles = rawRoomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase)).ToList();
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            foreach (FarmCycle farmCycle in FarmCycles)
+            {
+                farmCycle.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // There's no changes here that can make this enemy useless
+            return false;
         }
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
@@ -190,13 +203,13 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             (FarmCycle bestCycle, ExecutionResult result) bestResult = (null, null);
-            InGameStateComparer comparer = model.GetInGameStateComparer();
+            InGameStateComparer comparer = model.InGameStateComparer;
 
             // Order farm cycles, with the shortest execution going first.
             // We'll execute them all in order, remembering the one that refilled the most resources.
             // We'll stop as soon as we find one that we can execute and which costs no resources. 
             // Then we'll return the best result.
-            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.OrderBy(cycle => cycle.CycleFrames);
+            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.WhereUseful().OrderBy(cycle => cycle.CycleFrames);
             foreach(FarmCycle currentFarmCycle in orderedFarmCycles)
             {
                 var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
