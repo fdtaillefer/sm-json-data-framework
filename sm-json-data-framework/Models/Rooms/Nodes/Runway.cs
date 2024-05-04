@@ -96,14 +96,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            Strats = Strats.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-            // A runway with no usable strats may as well not exist, it's useless
-            return Strats.Any();
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             List<string> unhandled = new List<string>();

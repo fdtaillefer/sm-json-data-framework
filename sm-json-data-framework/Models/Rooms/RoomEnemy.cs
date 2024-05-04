@@ -117,14 +117,6 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
-        {
-            FarmCycles = FarmCycles.Where(farmCycle => farmCycle.CleanUpUselessValues(model, room, this)).ToList();
-
-            // A room enemy is never useless
-            return true;
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

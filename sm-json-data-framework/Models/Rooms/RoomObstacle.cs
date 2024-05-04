@@ -53,14 +53,6 @@ namespace sm_json_data_framework.Models.Rooms
             Room = room;
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
-        {
-            // Nothing relevant to cleanup
-
-            // An obstacle that is impossible to destroy is still useful, to know that the obstacle exists and can't be destroyed.
-            return true;
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

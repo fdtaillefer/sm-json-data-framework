@@ -126,12 +126,6 @@ namespace sm_json_data_framework.Models.Enemies
                 .ToDictionary(ws => ws.Weapon.Name);
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model)
-        {
-            // Nothing relevant to clean up
-            return true;
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             // No logical elements in here

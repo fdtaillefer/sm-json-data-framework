@@ -71,13 +71,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node)
-        {
-            // Nothing relevant to cleanup
-
-            return true;
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
         {
             // No logical element in a door environment

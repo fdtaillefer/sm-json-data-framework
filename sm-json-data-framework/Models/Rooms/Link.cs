@@ -58,13 +58,6 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
-        {
-            To = To.Where(kvp => kvp.Value.CleanUpUselessValues(model, room)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            // A link with no destinations is useless
-            return To.Any();
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

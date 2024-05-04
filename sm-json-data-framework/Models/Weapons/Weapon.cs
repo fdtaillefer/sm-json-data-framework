@@ -60,15 +60,6 @@ namespace sm_json_data_framework.Models.Weapons
             // Nothing relevant to initialize
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model)
-        {
-            // Nothing relevant to cleanup
-
-            // Technically the requires to use or shoot the weapon could be never, but in fact that's not expected.
-            // Besides, an unusable weapon is probably still useful to reference that the weapon exists.
-            return true;
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
         {
             List<string> unhandled = new List<string>();

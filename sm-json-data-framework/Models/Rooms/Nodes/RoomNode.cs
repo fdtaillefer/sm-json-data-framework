@@ -289,27 +289,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
-        {
-            // Cleanup CanLeaveChargeds
-            CanLeaveCharged = CanLeaveCharged.Where(clc => clc.CleanUpUselessValues(model, room, this)).ToList();
-
-            // Cleanup DoorEnvironments
-            DoorEnvironments = DoorEnvironments.Where(environment => environment.CleanUpUselessValues(model, room, this)).ToList();
-
-            // Cleanup ViewableNodes
-            ViewableNodes = ViewableNodes.Where(viewableNode => viewableNode.CleanUpUselessValues(model, room, this)).ToList();
-
-            // Cleanup Locks
-            Locks = Locks.Where(kvp => kvp.Value.CleanUpUselessValues(model, room, this)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-            // Cleanup Runways
-            Runways = Runways.Where(runway => runway.CleanUpUselessValues(model, room, this)).ToList();
-
-            // A node never becomes useless
-            return true;
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

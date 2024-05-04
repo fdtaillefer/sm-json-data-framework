@@ -150,22 +150,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             PathToDoor = pathToDoor;
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
-        {
-            // If this contains strats, they belong to a LinkTo. There's nothing fundamentally wrong with cleaning up those strats anyway though.
-
-            for (int i = 0; i < PathToDoor.Count; i++)
-            {
-                var pathNode = PathToDoor[i];
-                // Remove unusable strats
-                pathNode.strats = pathNode.strats.Where(strat => strat.CleanUpUselessValues(model, room)).ToList();
-            }
-
-            // If any node in the path has no strats remaining, it means the PathToNode is impossible to follow.
-            // This makes the InitiateRemotely itself impossible to do.
-            return PathToDoor.All(node => node.strats.Any());
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
         {
             // All referenced nodes and links and strats belong to other objects, so nothing to do here

@@ -123,17 +123,6 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room)
-        {
-            Failures = Failures.Where(failure => failure.CleanUpUselessValues(model, room)).ToList();
-
-            Obstacles = Obstacles.Where(obstacle => obstacle.CleanUpUselessValues(model, room)).ToList();
-
-            // There's nothing being cleaned up here that can make a strat useless by disappearing.
-            // However, a strat that is disabled or has requirements that can never be fulfilled is useless
-            return !UselessByLogicalOptions && !Requires.IsNever();
-        }
-
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
         {
             List<string> unhandled = new List<string>();

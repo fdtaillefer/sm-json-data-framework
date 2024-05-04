@@ -20,16 +20,6 @@ namespace sm_json_data_framework.Models
         public void InitializeProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy);
 
         /// <summary>
-        /// Eliminates values from this model, which are made useless by the logical options of the provided model.
-        /// This should not be called before <see cref="InitializeProperties(SuperMetroidModel, Room, RoomEnemy)"/>.
-        /// </summary>
-        /// <param name="model">The model to use to initialize the properties</param>
-        /// <param name="room">The room in which this model is located</param>
-        /// <param name="roomEnemy">The roomEnemy in which this model is located</param>
-        /// <returns>Whether this object is still useful itself after the cleanup</returns>
-        public bool CleanUpUselessValues(SuperMetroidModel model, Room room, RoomEnemy roomEnemy);
-
-        /// <summary>
         /// <para>Goes through all logical elements within this model and any relevant sub-model,
         /// attempting to resolve all references within logical elements into the object they are referencing.
         /// Those resolved values are then used to initialize corresponding properties.</para>
