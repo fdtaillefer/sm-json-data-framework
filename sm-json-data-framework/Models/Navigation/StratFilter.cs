@@ -87,7 +87,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The StratFilter</returns>
         public static StratFilter BreaksObstacle(string obstacleId)
         {
-            Predicate<Strat> predicate = strat => strat.Obstacles.Any(
+            Predicate<Strat> predicate = strat => strat.Obstacles.Values.Any(
                 obstacle => (obstacle?.ObstacleId?.Equals(obstacleId, StringComparison.InvariantCultureIgnoreCase) is true)
                 || (obstacle?.AdditionalObstacleIds.Any(additionalId => additionalId?.Equals(obstacleId, StringComparison.InvariantCultureIgnoreCase) is true) is true)
                 );

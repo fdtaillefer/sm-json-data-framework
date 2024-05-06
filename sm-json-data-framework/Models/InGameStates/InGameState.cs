@@ -704,7 +704,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // We've confirmed we can use retroactive runways. Return all runways of the previous room's exit node (excluding logically impossible ones)
-            return previousRoomExitNode.Runways.WhereUseful();
+            return previousRoomExitNode.Runways.Values.WhereUseful();
         }
 
         public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)

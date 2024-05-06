@@ -2980,7 +2980,7 @@ namespace sm_json_data_framework.InGameStates
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
             InGameState inGameState = new InGameState(startConditions);
-            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways;
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
 
             // When
@@ -3031,7 +3031,7 @@ namespace sm_json_data_framework.InGameStates
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
             InGameState inGameState = new InGameState(startConditions);
-            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways;
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.Links[2].Strats["Base"]);
 
@@ -3050,7 +3050,7 @@ namespace sm_json_data_framework.InGameStates
             StartConditions startConditions = StartConditions.CreateVanillaStartConditions(Model);
             startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
             InGameState inGameState = new InGameState(startConditions);
-            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways;
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
 
             // When

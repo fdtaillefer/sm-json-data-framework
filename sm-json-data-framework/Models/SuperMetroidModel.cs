@@ -213,7 +213,7 @@ namespace sm_json_data_framework.Models
                 foreach (RoomNode node in room.Nodes.Values)
                 {
                     nodes.Add(node.Name, node);
-                    foreach (Runway runway in node.Runways)
+                    foreach (Runway runway in node.Runways.Values)
                     {
                         runways.Add(runway.Name, runway);
                     }

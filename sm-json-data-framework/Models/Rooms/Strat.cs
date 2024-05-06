@@ -19,9 +19,15 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements Requires { get; set; }
 
-        public IList<StratObstacle> Obstacles { get; set; } = new List<StratObstacle>();
+        /// <summary>
+        /// Obstacles that must be broken before or during the strat execution (or bypassed), mapped by their in-room ID.
+        /// </summary>
+        public IDictionary<string, StratObstacle> Obstacles { get; set; } = new Dictionary<string, StratObstacle>();
 
-        public IList<StratFailure> Failures { get; set; } = new List<StratFailure>();
+        /// <summary>
+        /// Different ways the strat can be failed, mapped by name.
+        /// </summary>
+        public IDictionary<string, StratFailure> Failures { get; set; } = new Dictionary<string, StratFailure>();
 
         public ISet<string> StratProperties { get; set; } = new HashSet<string>();
 
@@ -36,8 +42,8 @@ namespace sm_json_data_framework.Models.Rooms
             Name = rawStrat.Name;
             Notable = rawStrat.Notable;
             Requires = rawStrat.Requires.ToLogicalRequirements(knowledgeBase);
-            Obstacles = rawStrat.Obstacles.Select(obstacle => new StratObstacle(obstacle, knowledgeBase)).ToList();
-            Failures = rawStrat.Failures.Select(failure => new StratFailure(failure, knowledgeBase)).ToList();
+            Obstacles = rawStrat.Obstacles.Select(obstacle => new StratObstacle(obstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.ObstacleId);
+            Failures = rawStrat.Failures.Select(failure => new StratFailure(failure, knowledgeBase)).ToDictionary(failure => failure.Name);
             StratProperties = new HashSet<string>(rawStrat.StratProperties);
         }
 
@@ -47,7 +53,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             Requires.ApplyLogicalOptions(logicalOptions);
 
-            foreach (StratFailure failure in Failures)
+            foreach (StratFailure failure in Failures.Values)
             {
                 failure.ApplyLogicalOptions(logicalOptions);
             }
@@ -56,7 +62,7 @@ namespace sm_json_data_framework.Models.Rooms
             // as maybe there's other places where those obstacles can be destroyed.
             // If the obstacle has absolute requirements that become impossible though, then so do we
             bool impossibleObstacle = false;
-            foreach (StratObstacle obstacle in Obstacles)
+            foreach (StratObstacle obstacle in Obstacles.Values)
             {
                 obstacle.ApplyLogicalOptions(logicalOptions);
                 obstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
@@ -85,7 +91,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             // Iterate over intact obstacles that need to be dealt with (so ignore obstacles that are already destroyed)
-            foreach (StratObstacle obstacle in Obstacles.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.ObstacleId)))
+            foreach (StratObstacle obstacle in Obstacles.Values.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.ObstacleId)))
             {
                 // Try destroying the obstacle first
                 ExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, previousRoomCount: previousRoomCount);
@@ -112,12 +118,12 @@ namespace sm_json_data_framework.Models.Rooms
 
         public void InitializeProperties(SuperMetroidModel model, Room room)
         {
-            foreach (StratFailure failure in Failures)
+            foreach (StratFailure failure in Failures.Values)
             {
                 failure.InitializeProperties(model, room);
             }
 
-            foreach (StratObstacle obstacle in Obstacles)
+            foreach (StratObstacle obstacle in Obstacles.Values)
             {
                 obstacle.InitializeProperties(model, room);
             }
@@ -129,12 +135,12 @@ namespace sm_json_data_framework.Models.Rooms
 
             unhandled.AddRange(Requires.InitializeReferencedLogicalElementProperties(model, room));
 
-            foreach(StratObstacle obstacle in Obstacles)
+            foreach(StratObstacle obstacle in Obstacles.Values)
             {
                 unhandled.AddRange(obstacle.InitializeReferencedLogicalElementProperties(model, room));
             }
 
-            foreach(StratFailure failure in Failures)
+            foreach(StratFailure failure in Failures.Values)
             {
                 unhandled.AddRange(failure.InitializeReferencedLogicalElementProperties(model, room));
             }

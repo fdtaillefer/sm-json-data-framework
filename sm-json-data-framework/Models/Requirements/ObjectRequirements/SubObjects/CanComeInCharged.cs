@@ -128,7 +128,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // For all in-room runways we are able to use while still doing the shinespark after,
             // figure out the resulting state, effective length, and the overall best resulting state
             var (usableInRoomRunwayEvaluations, bestInRoomResult) =
-                EvaluateRunways(model, inGameState, FromNode.Runways.WhereUseful(), times, previousRoomCount, hasEnergyForShinespark, runwaysReversible: true);
+                EvaluateRunways(model, inGameState, FromNode.Runways.Values.WhereUseful(), times, previousRoomCount, hasEnergyForShinespark, runwaysReversible: true);
 
             // If using this in-room runway cost nothing, spend the shinespark and return. We won't find a better option.
             if (model.CompareInGameStates(inGameState, bestInRoomResult?.ResultingState) == 0)

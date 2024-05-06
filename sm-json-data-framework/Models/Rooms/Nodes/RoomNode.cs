@@ -51,7 +51,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public LogicalRequirements InteractionRequires { get; set; } = new LogicalRequirements();
 
-        public IList<Runway> Runways { get; set; } = new List<Runway>();
+        /// <summary>
+        /// Runways that can be used to gain momentum at this node, mapped by name.
+        /// </summary>
+        public IDictionary<string, Runway> Runways { get; set; } = new Dictionary<string, Runway>();
 
         public IList<CanLeaveCharged> CanLeaveCharged { get; set; } = new List<CanLeaveCharged>();
 
@@ -160,7 +163,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             NodeAddress = rawNode.NodeAddress;
             DoorEnvironments = rawNode.DoorEnvironments.Select(environment => new DoorEnvironment(environment)).ToList();
             InteractionRequires = rawNode.InteractionRequires.ToLogicalRequirements(knowledgeBase);
-            Runways = rawNode.Runways.Select(runway => new Runway(runway, knowledgeBase)).ToList();
+            Runways = rawNode.Runways.Select(runway => new Runway(runway, knowledgeBase)).ToDictionary(runway => runway.Name);
             CanLeaveCharged = rawNode.CanLeaveCharged.Select(clc => new Nodes.CanLeaveCharged(clc, knowledgeBase)).ToList();
             OverrideSpawnAtNodeId = rawNode.SpawnAt;
             Locks = rawNode.Locks.Select(nodeLock => new NodeLock(nodeLock, knowledgeBase)).ToDictionary(nodeLock => nodeLock.Name);
@@ -194,7 +197,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 nodeLock.ApplyLogicalOptions(logicalOptions);
             }
 
-            foreach (Runway runway in Runways)
+            foreach (Runway runway in Runways.Values)
             {
                 runway.ApplyLogicalOptions(logicalOptions);
             }
@@ -283,7 +286,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Initialize Runways
-            foreach (Runway runway in Runways)
+            foreach (Runway runway in Runways.Values)
             {
                 runway.InitializeProperties(model, room, this);
             }
@@ -295,7 +298,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             unhandled.AddRange(InteractionRequires.InitializeReferencedLogicalElementProperties(model, room));
 
-            foreach(Runway runway in Runways)
+            foreach(Runway runway in Runways.Values)
             {
                 unhandled.AddRange(runway.InitializeReferencedLogicalElementProperties(model, room, this));
             }

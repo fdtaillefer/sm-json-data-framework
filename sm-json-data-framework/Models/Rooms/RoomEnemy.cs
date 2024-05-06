@@ -59,7 +59,10 @@ namespace sm_json_data_framework.Models.Rooms
 
         public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
 
-        public IList<FarmCycle> FarmCycles { get; set; } = new List<FarmCycle>();
+        /// <summary>
+        /// Different ways this room enemy can be farmed if it's a spawner, mapped by name.
+        /// </summary>
+        public IDictionary<string, FarmCycle> FarmCycles { get; set; } = new Dictionary<string, FarmCycle>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
@@ -90,15 +93,19 @@ namespace sm_json_data_framework.Models.Rooms
                 StopSpawn = rawRoomEnemy.StopSpawn.ToLogicalRequirements(knowledgeBase);
             }
             DropRequires = rawRoomEnemy.DropRequires.ToLogicalRequirements(knowledgeBase);
-            FarmCycles = rawRoomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase)).ToList();
+            FarmCycles = rawRoomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase)).ToDictionary(cycle => cycle.Name);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
-            foreach (FarmCycle farmCycle in FarmCycles)
+            foreach (FarmCycle farmCycle in FarmCycles.Values)
             {
                 farmCycle.ApplyLogicalOptions(logicalOptions);
             }
+
+            Spawn.ApplyLogicalOptions(logicalOptions);
+            StopSpawn.ApplyLogicalOptions(logicalOptions);
+            DropRequires.ApplyLogicalOptions(logicalOptions);
 
             // There's no changes here that can make this enemy useless
             return false;
@@ -111,7 +118,7 @@ namespace sm_json_data_framework.Models.Rooms
             HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
             BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
-            foreach (FarmCycle farmCycle in FarmCycles)
+            foreach (FarmCycle farmCycle in FarmCycles.Values)
             {
                 farmCycle.InitializeProperties(model, room, this);
             }
@@ -127,7 +134,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             unhandled.AddRange(DropRequires.InitializeReferencedLogicalElementProperties(model, room));
 
-            foreach(var farmCycle in FarmCycles)
+            foreach(FarmCycle farmCycle in FarmCycles.Values)
             {
                 unhandled.AddRange(farmCycle.InitializeReferencedLogicalElementProperties(model, room, this));
             }
@@ -201,7 +208,7 @@ namespace sm_json_data_framework.Models.Rooms
             // We'll execute them all in order, remembering the one that refilled the most resources.
             // We'll stop as soon as we find one that we can execute and which costs no resources. 
             // Then we'll return the best result.
-            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.WhereUseful().OrderBy(cycle => cycle.CycleFrames);
+            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.Values.WhereUseful().OrderBy(cycle => cycle.CycleFrames);
             foreach(FarmCycle currentFarmCycle in orderedFarmCycles)
             {
                 var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);

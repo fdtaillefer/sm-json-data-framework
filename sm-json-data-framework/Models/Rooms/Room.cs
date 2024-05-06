@@ -43,7 +43,7 @@ namespace sm_json_data_framework.Models.Rooms
         public IDictionary<string, RoomObstacle> Obstacles { get; set; } = new Dictionary<string, RoomObstacle>();
 
         /// <summary>
-        /// The groups of enemies in this room, mapped by id
+        /// The groups of enemies in this room, mapped their by in-room id
         /// </summary>
         public IDictionary<string, RoomEnemy> Enemies { get; set; } = new Dictionary<string, RoomEnemy>();
 
