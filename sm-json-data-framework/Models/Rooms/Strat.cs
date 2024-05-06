@@ -71,7 +71,7 @@ namespace sm_json_data_framework.Models.Rooms
                     impossibleObstacle = true;
                 }
             }
-            return logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
+            return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
         }
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
