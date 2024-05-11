@@ -9,8 +9,22 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// <summary>
     /// A logical element that is never ever fulfilled.
     /// </summary>
-    public class NeverLogicalElement : AbstractStringLogicalElement
+    public class NeverLogicalElement : AbstractStringLogicalElement<UnfinalizedNeverLogicalElement, NeverLogicalElement>
     {
+        public NeverLogicalElement(UnfinalizedNeverLogicalElement innerElement, Action<NeverLogicalElement> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedNeverLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedNeverLogicalElement, NeverLogicalElement>
+    {
+        protected override NeverLogicalElement CreateFinalizedElement(UnfinalizedNeverLogicalElement sourceElement, Action<NeverLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mapping)
+        {
+            return new NeverLogicalElement(sourceElement, mappingsInsertionCallback);
+        }
+
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             // Nothing in logical options can alter this

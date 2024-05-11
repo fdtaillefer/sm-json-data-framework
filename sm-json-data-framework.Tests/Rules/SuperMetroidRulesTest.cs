@@ -7,24 +7,24 @@ namespace sm_json_data_framework.Rules
         private SuperMetroidRules Rules { get; set; }
 
         private readonly EnemyDrops KagoDrops = new EnemyDrops
-        {
-            NoDrop = 2,
-            SmallEnergy = 20,
-            BigEnergy = 36,
-            Missile = 28,
-            Super = 8,
-            PowerBomb = 8
-        };
+        (
+            noDrop: 2,
+            smallEnergy: 20,
+            bigEnergy: 36,
+            missile: 28,
+            super: 8,
+            powerBomb: 8
+        );
 
         private readonly EnemyDrops WaverDrops = new EnemyDrops
-        {
-            NoDrop = 2,
-            SmallEnergy = 24,
-            BigEnergy = 24,
-            Missile = 24,
-            Super = 24,
-            PowerBomb = 4
-        };
+        (
+            noDrop: 2,
+            smallEnergy: 24,
+            bigEnergy: 24,
+            missile: 24,
+            super: 24,
+            powerBomb: 4
+        );
 
 
         public SuperMetroidRulesTest()
@@ -52,14 +52,14 @@ namespace sm_json_data_framework.Rules
 
             // Expect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 3.6M,
-                SmallEnergy = 35.2M,
-                BigEnergy = 35.2M,
-                Missile = 0,
-                Super = 24,
-                PowerBomb = 4
-            };
+            (
+                noDrop: 3.6M,
+                smallEnergy: 35.2M,
+                bigEnergy: 35.2M,
+                missile: 0,
+                super: 24,
+                powerBomb: 4
+            );
             Assert.Equal(expected, result);
         }
 
@@ -71,14 +71,14 @@ namespace sm_json_data_framework.Rules
 
             // Expect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 6,
-                SmallEnergy = 0,
-                BigEnergy = 0,
-                Missile = 68,
-                Super = 24,
-                PowerBomb = 4
-            };
+            (
+                noDrop: 6,
+                smallEnergy: 0,
+                bigEnergy: 0,
+                missile: 68,
+                super: 24,
+                powerBomb: 4
+            );
             Assert.Equal(expected, result);
         }
 
@@ -91,14 +91,14 @@ namespace sm_json_data_framework.Rules
             // Expect
             // Note: As of 2024-03-19, an example in the wiki contradicts these expected values, but the example appears to be incorrect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 3.2M,
-                SmallEnergy = 31.6M,
-                BigEnergy = 31.6M,
-                Missile = 31.6M,
-                Super = 0,
-                PowerBomb = 4
-            };
+            (
+                noDrop: 3.2M,
+                smallEnergy: 31.6M,
+                bigEnergy: 31.6M,
+                missile: 31.6M,
+                super: 0,
+                powerBomb: 4
+            );
             Assert.Equal(expected, result);
         }
 
@@ -110,14 +110,14 @@ namespace sm_json_data_framework.Rules
 
             // Expect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 2.4M,
-                SmallEnergy = 25.2M,
-                BigEnergy = 25.2M,
-                Missile = 25.2M,
-                Super = 24,
-                PowerBomb = 0
-            };
+            (
+                noDrop: 2.4M,
+                smallEnergy: 25.2M,
+                bigEnergy: 25.2M,
+                missile: 25.2M,
+                super: 24,
+                powerBomb: 0
+            );
             Assert.Equal(expected, result);
         }
 
@@ -129,14 +129,14 @@ namespace sm_json_data_framework.Rules
 
             // Expect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 78,
-                SmallEnergy = 0,
-                BigEnergy = 0,
-                Missile = 0,
-                Super = 24,
-                PowerBomb = 0
-            };
+            (
+                noDrop: 78,
+                smallEnergy: 0,
+                bigEnergy: 0,
+                missile: 0,
+                super: 24,
+                powerBomb: 0
+            );
             Assert.Equal(expected, result);
         }
 
@@ -149,14 +149,14 @@ namespace sm_json_data_framework.Rules
 
             // Expect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 98,
-                SmallEnergy = 0,
-                BigEnergy = 0,
-                Missile = 0,
-                Super = 0,
-                PowerBomb = 4
-            };
+            (
+                noDrop: 98,
+                smallEnergy: 0,
+                bigEnergy: 0,
+                missile: 0,
+                super: 0,
+                powerBomb: 4
+            );
             Assert.Equal(expected, result);
         }
 
@@ -169,14 +169,14 @@ namespace sm_json_data_framework.Rules
 
             // Expect
             EnemyDrops expected = new EnemyDrops
-            {
-                NoDrop = 102,
-                SmallEnergy = 0,
-                BigEnergy = 0,
-                Missile = 0,
-                Super = 0,
-                PowerBomb = 0
-            };
+            (
+                noDrop: 102,
+                smallEnergy: 0,
+                bigEnergy: 0,
+                missile: 0,
+                super: 0,
+                powerBomb: 0
+            );
             Assert.Equal(expected, result);
         }
         #endregion

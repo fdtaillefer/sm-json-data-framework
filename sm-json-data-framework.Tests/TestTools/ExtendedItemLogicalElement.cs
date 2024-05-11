@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace sm_json_data_framework.Tests.TestTools
 {
-    public class ExtendedItemLogicalElement : ItemLogicalElement
+    public class ExtendedItemLogicalElement : UnfinalizedItemLogicalElement
     {
-        public ExtendedItemLogicalElement(Item item): base(item)
+        public ExtendedItemLogicalElement(UnfinalizedItem item): base(item)
         {
             
         }

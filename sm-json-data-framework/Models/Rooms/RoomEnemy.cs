@@ -14,7 +14,105 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class RoomEnemy : AbstractModelElement, InitializablePostDeserializeInRoom
+    /// <summary>
+    /// Represents the presence of a given number of a given enemy somewhere in a room.
+    /// </summary>
+    public class RoomEnemy : AbstractModelElement<UnfinalizedRoomEnemy, RoomEnemy>
+    {
+        private UnfinalizedRoomEnemy InnerElement { get; set; }
+
+        public RoomEnemy(UnfinalizedRoomEnemy innerElement, Action<RoomEnemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Enemy = InnerElement.Enemy.Finalize(mappings);
+            HomeNodes = InnerElement.HomeNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            BetweenNodes = InnerElement.BetweenNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Spawn = InnerElement.Spawn.Finalize(mappings);
+            StopSpawn = InnerElement.StopSpawn.Finalize(mappings);
+            DropRequires = InnerElement.DropRequires.Finalize(mappings);
+            FarmCycles = InnerElement.FarmCycles.Values.Select(farmCycle => farmCycle.Finalize(mappings)).ToDictionary(farmCycle => farmCycle.Name).AsReadOnly();
+            Room = InnerElement.Room.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// A short identifier for this RoomEnemy that is only unique within the room.
+        /// </summary>
+        public string Id { get { return InnerElement.Id; } }
+
+        /// <summary>
+        /// A name for this roomEnemy, that is unique across the entire model.
+        /// </summary>
+        public string GroupName { get { return InnerElement.GroupName; } }
+
+        /// <summary>
+        /// The actual Enemy this RoomEnemy represents a number of.
+        /// </summary>
+        public Enemy Enemy { get; }
+
+        /// <summary>
+        /// The number of enemies repersented by this RoomEnemy.
+        /// </summary>
+        public int Quantity { get { return InnerElement.Quantity; } }
+
+        /// <summary>
+        /// The nodes in which this enemy roams, mapped by their node ID. Mutually-exclusive with <see cref="BetweenNodes"/>.
+        /// </summary>
+        public IReadOnlyDictionary<int, RoomNode> HomeNodes { get; }
+
+        /// <summary>
+        /// Contains two nodes between which this enemy roams (without ever actually being truly in either), mapped by their node ID. Mutually-exclusive with <see cref="HomeNodes"/>.
+        /// </summary>
+        public IReadOnlyDictionary<int, RoomNode> BetweenNodes { get; }
+
+        /// <summary>
+        /// LogicalRequirements that must be fulfilled before this RoomEnemy can spawn when the room is entered.
+        /// </summary>
+        public LogicalRequirements Spawn { get; }
+
+        /// <summary>
+        /// LogicalRequirements that, once fulfilled, prevent this RoomEnemy from spawning.
+        /// </summary>
+        public LogicalRequirements StopSpawn { get; }
+
+        /// <summary>
+        /// LogicalRequirements that must be fulfilled in order to obtain this RoomEnemy's drops without taking damage.
+        /// </summary>
+        public LogicalRequirements DropRequires { get; }
+
+        /// <summary>
+        /// Different ways this room enemy can be farmed if it's a spawner, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, FarmCycle> FarmCycles { get; }
+
+        /// <summary>
+        /// The Room in which this RoomEnemy is.
+        /// </summary>
+        public Room Room { get; }
+
+        /// <summary>
+        /// Whether this RoomEnemy is an enemy spawner, causing new enemies to spawn to replace those that are killed.
+        /// </summary>
+        public bool IsSpawner { get { return InnerElement.IsSpawner; } }
+
+        /// <summary>
+        /// Indicates whether this room enemy will spawn, given the provided model and inGameState.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to use to check. This will NOT be altered by this method.</param>
+        /// <returns></returns>
+        public bool Spawns(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return InnerElement.Spawns(model, inGameState);
+        }
+
+        /// <summary>
+        /// An IExecutable that corresponds to farming this group of enemies, by camping its spawner(s).
+        /// </summary>
+        public IExecutable SpawnerFarmExecution { get { return InnerElement.SpawnerFarmExecution; } }
+    }
+
+    public class UnfinalizedRoomEnemy : AbstractUnfinalizedModelElement<UnfinalizedRoomEnemy, RoomEnemy>, InitializablePostDeserializeInRoom
     {
         public string Id { get; set; }
 
@@ -23,11 +121,11 @@ namespace sm_json_data_framework.Models.Rooms
         public string EnemyName { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The actual Enemy this RoomEnemy represents.</para>
         /// </summary>
         [JsonIgnore]
-        public Enemy Enemy { get; set; }
+        public UnfinalizedEnemy Enemy { get; set; }
 
         public int Quantity { get; set; }
 
@@ -35,51 +133,51 @@ namespace sm_json_data_framework.Models.Rooms
         public ISet<int> HomeNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The nodes in which this enemy roams, mapped by their node ID. Mutually-exclusive with <see cref="BetweenNodes"/>.</para>
         /// </summary>
         [JsonIgnore]
-        public Dictionary<int, RoomNode> HomeNodes { get; set; }
+        public Dictionary<int, UnfinalizedRoomNode> HomeNodes { get; set; }
 
         [JsonPropertyName("betweenNodes")]
         public ISet<int> BetweenNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>Contains two nodes between which this enemy roams (without ever actually being in either), mapped by their node ID. Mutually-exclusive with <see cref="HomeNodes"/>.</para>
         /// </summary>
         [JsonIgnore]
-        public Dictionary<int, RoomNode> BetweenNodes { get; set; }
+        public Dictionary<int, UnfinalizedRoomNode> BetweenNodes { get; set; }
 
-        public LogicalRequirements Spawn { get; set; } = new LogicalRequirements();
+        public UnfinalizedLogicalRequirements Spawn { get; set; } = new UnfinalizedLogicalRequirements();
 
         // Empty requirements default to "always" behavior, but enemies with no StopSpawn behavior never stop spawning.
         // Make the default state never instead.
-        public LogicalRequirements StopSpawn { get; set; } = LogicalRequirements.Never();
+        public UnfinalizedLogicalRequirements StopSpawn { get; set; } = UnfinalizedLogicalRequirements.Never();
 
-        public LogicalRequirements DropRequires { get; set; } = new LogicalRequirements();
+        public UnfinalizedLogicalRequirements DropRequires { get; set; } = new UnfinalizedLogicalRequirements();
 
         /// <summary>
         /// Different ways this room enemy can be farmed if it's a spawner, mapped by name.
         /// </summary>
-        public IDictionary<string, FarmCycle> FarmCycles { get; set; } = new Dictionary<string, FarmCycle>();
+        public IDictionary<string, UnfinalizedFarmCycle> FarmCycles { get; set; } = new Dictionary<string, UnfinalizedFarmCycle>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The Room in which this enemy group is.</para>
         /// </summary>
         [JsonIgnore]
-        public Room Room { get; set; }
+        public UnfinalizedRoom Room { get; set; }
 
         [JsonIgnore]
         public bool IsSpawner { get => FarmCycles.Any(); }
 
-        public RoomEnemy()
+        public UnfinalizedRoomEnemy()
         {
 
         }
 
-        public RoomEnemy(RawRoomEnemy rawRoomEnemy, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedRoomEnemy(RawRoomEnemy rawRoomEnemy, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             Id = rawRoomEnemy.Id;
             GroupName = rawRoomEnemy.GroupName;
@@ -93,12 +191,17 @@ namespace sm_json_data_framework.Models.Rooms
                 StopSpawn = rawRoomEnemy.StopSpawn.ToLogicalRequirements(knowledgeBase);
             }
             DropRequires = rawRoomEnemy.DropRequires.ToLogicalRequirements(knowledgeBase);
-            FarmCycles = rawRoomEnemy.FarmCycles.Select(rawCycle => new FarmCycle(rawCycle, knowledgeBase)).ToDictionary(cycle => cycle.Name);
+            FarmCycles = rawRoomEnemy.FarmCycles.Select(rawCycle => new UnfinalizedFarmCycle(rawCycle, knowledgeBase)).ToDictionary(cycle => cycle.Name);
+        }
+
+        protected override RoomEnemy CreateFinalizedElement(UnfinalizedRoomEnemy sourceElement, Action<RoomEnemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new RoomEnemy(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
-            foreach (FarmCycle farmCycle in FarmCycles.Values)
+            foreach (UnfinalizedFarmCycle farmCycle in FarmCycles.Values)
             {
                 farmCycle.ApplyLogicalOptions(logicalOptions);
             }
@@ -111,20 +214,20 @@ namespace sm_json_data_framework.Models.Rooms
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             Room = room;
             Enemy = model.Enemies[EnemyName];
             HomeNodes = HomeNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
             BetweenNodes = BetweenNodeIds.Select(id => room.Nodes[id]).ToDictionary(n => n.Id);
 
-            foreach (FarmCycle farmCycle in FarmCycles.Values)
+            foreach (UnfinalizedFarmCycle farmCycle in FarmCycles.Values)
             {
                 farmCycle.InitializeProperties(model, room, this);
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -134,7 +237,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             unhandled.AddRange(DropRequires.InitializeReferencedLogicalElementProperties(model, room));
 
-            foreach(FarmCycle farmCycle in FarmCycles.Values)
+            foreach(UnfinalizedFarmCycle farmCycle in FarmCycles.Values)
             {
                 unhandled.AddRange(farmCycle.InitializeReferencedLogicalElementProperties(model, room, this));
             }
@@ -187,9 +290,9 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     internal class SpawnerFarmExecution : IExecutable
     {
-        private RoomEnemy RoomEnemy { get; set; }
+        private UnfinalizedRoomEnemy RoomEnemy { get; set; }
 
-        public SpawnerFarmExecution(RoomEnemy roomEnemy)
+        public SpawnerFarmExecution(UnfinalizedRoomEnemy roomEnemy)
         {
             RoomEnemy = roomEnemy;
         }
@@ -201,15 +304,15 @@ namespace sm_json_data_framework.Models.Rooms
                 return null;
             }
 
-            (FarmCycle bestCycle, ExecutionResult result) bestResult = (null, null);
+            (UnfinalizedFarmCycle bestCycle, ExecutionResult result) bestResult = (null, null);
             InGameStateComparer comparer = model.InGameStateComparer;
 
             // Order farm cycles, with the shortest execution going first.
             // We'll execute them all in order, remembering the one that refilled the most resources.
             // We'll stop as soon as we find one that we can execute and which costs no resources. 
             // Then we'll return the best result.
-            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.Values.WhereUseful().OrderBy(cycle => cycle.CycleFrames);
-            foreach(FarmCycle currentFarmCycle in orderedFarmCycles)
+            IEnumerable<UnfinalizedFarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.Values.WhereUseful().OrderBy(cycle => cycle.CycleFrames);
+            foreach(UnfinalizedFarmCycle currentFarmCycle in orderedFarmCycles)
             {
                 var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
                 

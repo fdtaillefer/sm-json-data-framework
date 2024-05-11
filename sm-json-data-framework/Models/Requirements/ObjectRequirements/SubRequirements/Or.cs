@@ -7,14 +7,29 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements
 {
+    public class Or : AbstractObjectLogicalElementWithSubRequirements<UnfinalizedOr, Or>
+    {
+        public Or(UnfinalizedOr innerElement, Action<Or> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback, mappings)
+        {
+
+        }
+    }
+
+
     /// <summary>
     /// A logical element that is fulfilled by fulfilling any one of its inner logical elements.
     /// </summary>
-    public class Or : AbstractObjectLogicalElementWithSubRequirements
+    public class UnfinalizedOr : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<UnfinalizedOr, Or>
     {
-        public Or()
+        public UnfinalizedOr()
         {
 
+        }
+
+        protected override Or CreateFinalizedElement(UnfinalizedOr sourceElement, Action<Or> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Or(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -25,7 +40,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             return LogicalRequirements.LogicalElements.All(element => element.UselessByLogicalOptions);
         }
 
-        public Or(LogicalRequirements logicalRequirements) : base(logicalRequirements)
+        public UnfinalizedOr(UnfinalizedLogicalRequirements logicalRequirements) : base(logicalRequirements)
         {
 
         }

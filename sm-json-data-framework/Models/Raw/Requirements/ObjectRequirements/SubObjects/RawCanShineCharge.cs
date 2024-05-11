@@ -30,11 +30,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public int ShinesparkFrames { get; set; }
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.CanShineCharge, out Type type))
             {
-                CanShineCharge canShineCharge = (CanShineCharge)Activator.CreateInstance(type);
+                UnfinalizedCanShineCharge canShineCharge = (UnfinalizedCanShineCharge)Activator.CreateInstance(type);
                 canShineCharge.UsedTiles = UsedTiles;
                 canShineCharge.GentleUpTiles = GentleUpTiles;
                 canShineCharge.GentleDownTiles = GentleDownTiles;

@@ -12,7 +12,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class LinkNotFoundException : Exception
     {
-        public LinkNotFoundException(Room room, RoomNode nodeFrom, int targetNodeId)
+        public LinkNotFoundException(UnfinalizedRoom room, UnfinalizedRoomNode nodeFrom, int targetNodeId)
             : base($"Could not find a link from node {nodeFrom.Id} to node {targetNodeId} in room '{room.Name}'")
         {
 

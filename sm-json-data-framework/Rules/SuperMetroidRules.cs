@@ -75,16 +75,16 @@ namespace sm_json_data_framework.Rules
         {
             // Calculate the base drop rates for the formula, replacing unneeded drops by a rate of 0.
             // Our drop rates are out of DROP_RATE_DIVIDER. The formula needs them to be out of 255.
-            EnemyDrops baseHexDropRates = new EnemyDrops();
-            // Tier 1 drops
-            baseHexDropRates.NoDrop = enemyDrops.NoDrop * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.SmallEnergy = unneededDrops.Contains(EnemyDropEnum.SmallEnergy) ? 0M : enemyDrops.SmallEnergy * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.BigEnergy = unneededDrops.Contains(EnemyDropEnum.BigEnergy) ? 0M : enemyDrops.BigEnergy * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.Missile = unneededDrops.Contains(EnemyDropEnum.Missile) ? 0M : enemyDrops.Missile * 255 / DROP_RATE_DIVIDER;
-
-            // Tier 2 drops
-            baseHexDropRates.Super = unneededDrops.Contains(EnemyDropEnum.Super) ? 0M : enemyDrops.Super * 255 / DROP_RATE_DIVIDER;
-            baseHexDropRates.PowerBomb = unneededDrops.Contains(EnemyDropEnum.PowerBomb) ? 0M : enemyDrops.PowerBomb * 255 / DROP_RATE_DIVIDER;
+            EnemyDrops baseHexDropRates = new EnemyDrops(
+                // Tier 1 drops
+                noDrop: enemyDrops.NoDrop * 255 / DROP_RATE_DIVIDER, 
+                smallEnergy: unneededDrops.Contains(EnemyDropEnum.SmallEnergy) ? 0M : enemyDrops.SmallEnergy * 255 / DROP_RATE_DIVIDER, 
+                bigEnergy: unneededDrops.Contains(EnemyDropEnum.BigEnergy) ? 0M : enemyDrops.BigEnergy * 255 / DROP_RATE_DIVIDER, 
+                missile: unneededDrops.Contains(EnemyDropEnum.Missile) ? 0M : enemyDrops.Missile * 255 / DROP_RATE_DIVIDER,
+                // Tier 2 drops
+                super: unneededDrops.Contains(EnemyDropEnum.Super) ? 0M : enemyDrops.Super * 255 / DROP_RATE_DIVIDER, 
+                powerBomb: unneededDrops.Contains(EnemyDropEnum.PowerBomb) ? 0M : enemyDrops.PowerBomb * 255 / DROP_RATE_DIVIDER
+            );
 
             // Create functions for calculating effective drop rates. One for tier 1 drops and one for tier 2 drops.
 
@@ -105,17 +105,20 @@ namespace sm_json_data_framework.Rules
             };
 
             // Calculate new drop rates using the appropriate calculation, except for no drop
-            EnemyDrops returnValue = new EnemyDrops
-            {
-                SmallEnergy = calculateTierOneRate(baseHexDropRates, baseHexDropRates.SmallEnergy),
-                BigEnergy = calculateTierOneRate(baseHexDropRates, baseHexDropRates.BigEnergy),
-                Missile = calculateTierOneRate(baseHexDropRates, baseHexDropRates.Missile),
-                Super = calculateTierTwoRate(baseHexDropRates, baseHexDropRates.Super),
-                PowerBomb = calculateTierTwoRate(baseHexDropRates, baseHexDropRates.PowerBomb)
-            };
-
-            // No drop is just whatever's not another type of drop. It grabs the leftover from truncating on top of its own increase.
-            returnValue.NoDrop = DROP_RATE_DIVIDER - returnValue.SmallEnergy - returnValue.BigEnergy - returnValue.Missile - returnValue.Super - returnValue.PowerBomb;
+            decimal smallEnergy = calculateTierOneRate(baseHexDropRates, baseHexDropRates.SmallEnergy);
+            decimal bigEnergy = calculateTierOneRate(baseHexDropRates, baseHexDropRates.BigEnergy);
+            decimal missile = calculateTierOneRate(baseHexDropRates, baseHexDropRates.Missile);
+            decimal super = calculateTierTwoRate(baseHexDropRates, baseHexDropRates.Super);
+            decimal powerBomb = calculateTierTwoRate(baseHexDropRates, baseHexDropRates.PowerBomb);
+            EnemyDrops returnValue = new EnemyDrops(
+                smallEnergy: smallEnergy,
+                bigEnergy: bigEnergy,
+                missile:missile,
+                super:super,
+                powerBomb:powerBomb,
+                // No drop is just whatever's not another type of drop. It grabs the leftover from truncating on top of its own increase.
+                noDrop: DROP_RATE_DIVIDER - smallEnergy - bigEnergy - missile - super - powerBomb
+            );
 
             return returnValue;
         }
@@ -192,7 +195,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<Item> GetDamageReducingItemsWhenGravitySupersedesVaria(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravitySupersedesVaria(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasGravitySuit())
             {
@@ -204,7 +207,7 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return new Item[] { };
+                return new UnfinalizedItem[] { };
             }
         }
 
@@ -215,7 +218,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<Item> GetDamageReducingItemsWhenGravityTurnedOff(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravityTurnedOff(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasVariaSuit())
             {
@@ -223,7 +226,7 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return new Item[] { };
+                return new UnfinalizedItem[] { };
             }
         }
 
@@ -235,7 +238,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<Item> GetDamageReducingItemsWhenVariaSupersedesGravity(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenVariaSupersedesGravity(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasVariaSuit())
             {
@@ -247,7 +250,7 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return new Item[] { };
+                return new UnfinalizedItem[] { };
             }
         }
 
@@ -284,7 +287,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -318,7 +321,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetHeatDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetHeatDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity and Varia are equivalent. Varia's more iconic for heat reduction, so let's prioritize it.
             return GetDamageReducingItemsWhenVariaSupersedesGravity(model, inGameState);
@@ -376,7 +379,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetLavaDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetLavaDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -390,7 +393,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetLavaPhysicsDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetLavaPhysicsDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity turned off
             return GetDamageReducingItemsWhenGravityTurnedOff(model, inGameState);
@@ -428,7 +431,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetAcidDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetAcidDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -466,7 +469,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetElectricityGrappleDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetElectricityGrappleDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -503,7 +506,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <param name="attack">The enemy attack whose damage to calculate</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateEnemyDamage(ReadOnlyInGameState inGameState, EnemyAttack attack)
+        public virtual int CalculateEnemyDamage(ReadOnlyInGameState inGameState, UnfinalizedEnemyAttack attack)
         {
             bool hasVaria = inGameState.Inventory.HasVariaSuit();
             bool hasGravity = inGameState.Inventory.HasGravitySuit();
@@ -524,13 +527,13 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateEnemyDamage(ReadOnlyInGameState, EnemyAttack)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateEnemyDamage(ReadOnlyInGameState, UnfinalizedEnemyAttack)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetEnemyDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState, EnemyAttack enemyAttack)
+        public virtual IEnumerable<UnfinalizedItem> GetEnemyDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState, UnfinalizedEnemyAttack enemyAttack)
         {
             // What we return depends not only on the suits available, but also on the attack
             if(enemyAttack.AffectedByGravity && enemyAttack.AffectedByVaria)
@@ -540,15 +543,15 @@ namespace sm_json_data_framework.Rules
 
             if (enemyAttack.AffectedByGravity && inGameState.Inventory.HasGravitySuit())
             {
-                return new Item[] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
+                return new UnfinalizedItem[] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
             }
 
             if (enemyAttack.AffectedByVaria && inGameState.Inventory.HasVariaSuit())
             {
-                return new Item[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
+                return new UnfinalizedItem[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
             }
 
-            return new Item[] { };
+            return new UnfinalizedItem[] { };
         }
 
         /// <summary>
@@ -612,7 +615,7 @@ namespace sm_json_data_framework.Rules
         /// <returns></returns>
         public virtual IRunway ReverseRunway(IRunway runway)
         {
-            return new Runway {
+            return new UnfinalizedRunway {
                 Length = runway.Length,
                 EndingUpTiles = runway.StartingDownTiles,
                 GentleDownTiles = runway.GentleUpTiles,

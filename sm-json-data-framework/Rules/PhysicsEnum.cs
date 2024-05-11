@@ -23,10 +23,10 @@ namespace sm_json_data_framework.Rules
         {
             return physics switch
             {
-                PhysicsEnum.Normal => LogicalRequirements.AlwaysRequirements.Instance,
-                PhysicsEnum.Water => LogicalRequirements.AlwaysRequirements.Instance,
-                PhysicsEnum.Lava => new LavaFrames(frames),
-                PhysicsEnum.Acid => new AcidFrames(frames),
+                PhysicsEnum.Normal => UnfinalizedLogicalRequirements.AlwaysRequirements.Instance,
+                PhysicsEnum.Water => UnfinalizedLogicalRequirements.AlwaysRequirements.Instance,
+                PhysicsEnum.Lava => new UnfinalizedLavaFrames(frames),
+                PhysicsEnum.Acid => new UnfinalizedAcidFrames(frames),
                 _ => throw new System.NotImplementedException()
             };
         }

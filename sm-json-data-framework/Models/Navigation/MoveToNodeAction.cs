@@ -16,14 +16,14 @@ namespace sm_json_data_framework.Models.Navigation
         ///  The Strat that was used to navigate a link between two nodes.
         ///  Naturally, if this action is a reversed action, this is the Strat that was "unused".
         /// </summary>
-        public Strat StratUsed { get; set; }
+        public UnfinalizedStrat StratUsed { get; set; }
 
         protected MoveToNodeAction(string intent) : base(intent)
         {
 
         }
 
-        public MoveToNodeAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, Strat stratUsed, ExecutionResult executionResult) :
+        public MoveToNodeAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, UnfinalizedStrat stratUsed, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
             StratUsed = stratUsed;

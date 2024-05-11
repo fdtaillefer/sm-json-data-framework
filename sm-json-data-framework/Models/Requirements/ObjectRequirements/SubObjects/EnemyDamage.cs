@@ -14,29 +14,65 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// <summary>
     /// A logical element which requires Samus to take damage from an enemy.
     /// </summary>
-    public class EnemyDamage : AbstractObjectLogicalElement
+    public class EnemyDamage : AbstractObjectLogicalElement<UnfinalizedEnemyDamage, EnemyDamage>
+    {
+        private UnfinalizedEnemyDamage InnerElement { get; set; }
+        public EnemyDamage(UnfinalizedEnemyDamage innerElement, Action<EnemyDamage> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Enemy = innerElement.Enemy.Finalize(mappings);
+            Attack = innerElement.Attack.Finalize(mappings);
+        }
+
+        public string EnemyName { get { return InnerElement.EnemyName; } }
+
+        /// <summary>
+        /// The enemy that this element's EnemyName references.
+        /// </summary>
+        public Enemy Enemy { get; }
+
+        public string AttackName { get { return InnerElement.AttackName; } }
+
+        /// <summary>
+        /// The enemy attack that this element's AttackName references.
+        /// </summary>
+        public EnemyAttack Attack { get; }
+
+        /// <summary>
+        /// The number of hits if the enemy attack Samus must take.
+        /// </summary>
+        public int Hits { get { return InnerElement.Hits; } }
+    }
+
+    public class UnfinalizedEnemyDamage : AbstractUnfinalizedObjectLogicalElement<UnfinalizedEnemyDamage, EnemyDamage>
     {
         [JsonPropertyName("enemy")]
         public string EnemyName { get; set; }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemy that this element's EnemyName references. </para>
         /// </summary>
         [JsonIgnore]
-        public Enemy Enemy { get; set; }
+        public UnfinalizedEnemy Enemy { get; set; }
 
         [JsonPropertyName("type")]
         public string AttackName { get; set; }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemy attack that this element's AttackName references. </para>
         /// </summary>
         [JsonIgnore]
-        public EnemyAttack Attack { get; set; }
+        public UnfinalizedEnemyAttack Attack { get; set; }
 
         public int Hits { get; set; }
+
+        protected override EnemyDamage CreateFinalizedElement(UnfinalizedEnemyDamage sourceElement, Action<EnemyDamage> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new EnemyDamage(sourceElement, mappingsInsertionCallback, mappings);
+        }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
@@ -49,12 +85,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
-            if(model.Enemies.TryGetValue(EnemyName, out Enemy enemy))
+            if(model.Enemies.TryGetValue(EnemyName, out UnfinalizedEnemy enemy))
             {
                 Enemy = enemy;
-                if(enemy.Attacks.TryGetValue(AttackName, out EnemyAttack attack))
+                if(enemy.Attacks.TryGetValue(AttackName, out UnfinalizedEnemyAttack attack))
                 {
                     Attack = attack;
                 }

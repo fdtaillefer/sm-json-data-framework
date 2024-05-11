@@ -11,23 +11,62 @@ using System.Linq;
 using System.Numerics;
 using System.Text.Json.Serialization;
 
-namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects {
+namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects 
+{
     /// <summary>
     /// A logical element which requires Samus to have been able to come into the room either with
     /// a shinespark charged or, possibly, while doing a shinespark (depending on the required
     /// number of remaining frames in the shinespark charge)
     /// </summary>
-    public class CanComeInCharged : AbstractObjectLogicalElement
+    public class CanComeInCharged : AbstractObjectLogicalElement<UnfinalizedCanComeInCharged, CanComeInCharged>
+    {
+        public UnfinalizedCanComeInCharged InnerElement { get; set; }
+
+        public CanComeInCharged(UnfinalizedCanComeInCharged innerElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            FromNode = innerElement.FromNode.Finalize(mappings);
+            InRoomPath = innerElement.InRoomPath.AsReadOnly();
+        }
+
+        /// <summary>
+        /// The node that this element's FromNodeId references.
+        /// </summary>
+        public RoomNode FromNode { get; }
+
+        /// <summary>
+        /// The precise list of nodes that must be traveled by Samus to execute this CanComeInCharged, from FromNode to the node where it's executed.
+        /// </summary>
+        public IReadOnlyList<int> InRoomPath { get; }
+
+        /// <summary>
+        /// Minimum number of frames that must be remaining in the shine charge when coming in the room in order to satisgy this CanComeInCharged.
+        /// </summary>
+        public int FramesRemaining { get { return InnerElement.FramesRemaining; } }
+
+        /// <summary>
+        /// The duration (in frames) of the shinespark that goes alongside this CanComeInCharged, if any. Can be 0 if no shinespark is involved.
+        /// </summary>
+        public int ShinesparkFrames { get { return InnerElement.ShinesparkFrames; } }
+
+        /// <summary>
+        /// Indicates whether this CanComeInCharged involves executing a shinespark.
+        /// </summary>
+        public bool MustShinespark { get { return InnerElement.MustShinespark; } }
+    }
+
+    public class UnfinalizedCanComeInCharged : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanComeInCharged, CanComeInCharged>
     {
         [JsonPropertyName("fromNode")]
         public int FromNodeId { get; set; }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The node that this element's FromNodeId references.</para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode FromNode { get; set; }
+        public UnfinalizedRoomNode FromNode { get; set; }
 
         public IList<int> InRoomPath { get; set; } = new List<int>();
 
@@ -43,6 +82,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         private decimal TilesSavedWithStutter { get; set; } = LogicalOptions.DefaultTilesSavedWithStutter;
 
         private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
+
+        protected override CanComeInCharged CreateFinalizedElement(UnfinalizedCanComeInCharged sourceElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new CanComeInCharged(sourceElement, mappingsInsertionCallback, mappings);
+        }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
@@ -65,9 +109,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
-            if (room.Nodes.TryGetValue(FromNodeId, out RoomNode node))
+            if (room.Nodes.TryGetValue(FromNodeId, out UnfinalizedRoomNode node))
             {
                 FromNode = node;
                 return Enumerable.Empty<string>();
@@ -101,7 +145,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // So the requirement in that case is that the current InRoomPath must end with the required InRoomPath.
             // If it doesn't, there is no way we can fulfill this in any way.
             
-            IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> currentPath = inGameState.GetVisitedPath();
+            IReadOnlyList<(ReadOnlyInNodeState nodeState, UnfinalizedStrat strat)> currentPath = inGameState.GetVisitedPath();
             // If we haven't even visited as many nodes as necessary, there's no way we've carried a charge along the path
             if(currentPath.Count < requiredInRoomPath.Count)
             {
@@ -134,7 +178,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (model.CompareInGameStates(inGameState, bestInRoomResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestInRoomResult);
-                bestInRoomResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestInRoomResult.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestInRoomResult;
             }
 
@@ -156,7 +200,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (model.CompareInGameStates(inGameState, bestAdjacentRunwayResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestAdjacentRunwayResult);
-                bestAdjacentRunwayResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestAdjacentRunwayResult.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestAdjacentRunwayResult;
             }
 
@@ -177,7 +221,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (model.CompareInGameStates(inGameState, bestLeaveChargedResult?.ResultingState) == 0)
             {
                 consumeShinesparkEnergy(bestLeaveChargedResult);
-                bestLeaveChargedResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestLeaveChargedResult.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestLeaveChargedResult;
             }
 
@@ -215,7 +259,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 if (model.CompareInGameStates(inGameState, bestCombinationResult?.ResultingState) == 0)
                 {
                     consumeShinesparkEnergy(bestCombinationResult);
-                    bestCombinationResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                    bestCombinationResult.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                     return currentAdjacentRunwayResult.Clone().ApplySubsequentResult(bestCombinationResult);
                 }
 
@@ -238,7 +282,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             else
             {
                 consumeShinesparkEnergy(bestOverallResult);
-                bestOverallResult.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                bestOverallResult.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return bestOverallResult;
             }
         }
@@ -259,9 +303,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <param name="hasEnergyForShinespark">A predicate that checks whether a resulting InGameState has enough energy for the subsequent shinespark</param>
         /// <param name="runwaysReversible">If true, runways can be used in either direction. If false, they can only be used in their normal direction.</param>
         /// <returns></returns>
-        private (IEnumerable<(Runway runway, ExecutionResult executionResult, decimal length)> runwayEvaluations, ExecutionResult bestResults) EvaluateRunways(
+        private (IEnumerable<(UnfinalizedRunway runway, ExecutionResult executionResult, decimal length)> runwayEvaluations, ExecutionResult bestResults) EvaluateRunways(
             SuperMetroidModel model, ReadOnlyInGameState inGameState,
-            IEnumerable<Runway> runways, int times, int previousRoomCount,
+            IEnumerable<UnfinalizedRunway> runways, int times, int previousRoomCount,
             Predicate<ReadOnlyInGameState> hasEnergyForShinespark, bool runwaysReversible
         ) {
             Func<IRunway, decimal, decimal> calculateRunwayLength = runwaysReversible? model.Rules.CalculateEffectiveReversibleRunwayLength :

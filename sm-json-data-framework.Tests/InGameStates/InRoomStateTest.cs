@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ConstructorWithNode_NoSpawnAt_InitializesCorrectly()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
 
             // When
             InRoomState state = new InRoomState(initialNode);
@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ConstructorWithNode_NodeHasSpawnAt_InitializesCorrectly()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Crocomire's Room", 2);
 
             // When
             InRoomState state = new InRoomState(initialNode);
@@ -67,12 +67,12 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void GetLinkToNode_LinkExists_ReturnsLink()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            LinkTo expectedLink = initialNode.Links[8];
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedLinkTo expectedLink = initialNode.Links[8];
             InRoomState state = new InRoomState(initialNode);
 
             // When
-            LinkTo result = state.GetLinkToNode(8);
+            UnfinalizedLinkTo result = state.GetLinkToNode(8);
 
             // Expect
             Assert.Same(expectedLink, result);
@@ -82,11 +82,11 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void GetLinkToNode_LinkDoesntExist_ReturnsNull()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When
-            LinkTo result = state.GetLinkToNode(88);
+            UnfinalizedLinkTo result = state.GetLinkToNode(88);
 
             // Expect
             Assert.Null(result);
@@ -98,12 +98,12 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void GetStratToNode_LinkAndStratExist_ReturnsStrat()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            Strat expectedStrat = initialNode.Links[8].Strats["Base"];
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedStrat expectedStrat = initialNode.Links[8].Strats["Base"];
             InRoomState state = new InRoomState(initialNode);
 
             // When
-            Strat result = state.GetStratToNode(8, "Base");
+            UnfinalizedStrat result = state.GetStratToNode(8, "Base");
 
             // Expect
             Assert.Same(expectedStrat, result);
@@ -113,11 +113,11 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void GetStratToNode_LinkExistsButNotStrat_ReturnsNull()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When
-            Strat result = state.GetStratToNode(8, "BLECH");
+            UnfinalizedStrat result = state.GetStratToNode(8, "BLECH");
 
             // Expect
             Assert.Null(result);
@@ -127,11 +127,11 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void GetStratToNode_LinkDoesntExist_ReturnsNull()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When
-            Strat result = state.GetStratToNode(88, "Base");
+            UnfinalizedStrat result = state.GetStratToNode(88, "Base");
 
             // Expect
             Assert.Null(result);
@@ -143,7 +143,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When
@@ -170,7 +170,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_NotSpawningInRoom_RejectsNullStrat()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
@@ -181,7 +181,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_LinkDoesntExist_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
@@ -192,7 +192,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_StratNotOnOriginLink_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
@@ -216,8 +216,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_OngoingSpawnAt_GoesToCorrectNodeWithNoStrat_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
-            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
+            UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -237,8 +237,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_OngoingSpawnAt_GoesToDifferentNode_ThrowsException()
         {
             // Given
-            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
-            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 4);
+            UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 4);
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -251,7 +251,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_ById_OngoingSpawnAt_IncludesStrat_ThrowsException()
         {
             // Given
-            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -266,7 +266,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When
@@ -293,7 +293,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_NotSpawningInRoom_RejectsNullStrat()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
@@ -304,7 +304,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_LinkDoesntExist_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
@@ -315,9 +315,9 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_StratNotOnOriginLink_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
-            Strat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).Links[1].Strats["Base"];
+            UnfinalizedStrat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).Links[1].Strats["Base"];
 
             // When and expect
             Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
@@ -327,8 +327,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_NoCurrentRoom_IncludesStrat_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            Strat strat = Model.GetNodeInRoom("Landing Site", 2).Links[5].Strats["Base"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 2).Links[5].Strats["Base"];
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -340,7 +340,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_NoCurrentRoom_IncludesNoStrat_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -359,8 +359,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_OngoingSpawnAt_GoesToCorrectNodeWithNoStrat_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
-            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
+            UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -380,8 +380,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_OngoingSpawnAt_GoesToDifferentNode_ThrowsException()
         {
             // Given
-            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
-            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 4);
+            UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 4);
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -394,9 +394,9 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyVisitNode_OngoingSpawnAt_IncludesStrat_ThrowsException()
         {
             // Given
-            RoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
-            RoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
-            Strat strat = Model.GetNodeInRoom("Crocomire's Room", 2).Links[5].Strats["Base"];
+            UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
+            UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Crocomire's Room", 2).Links[5].Strats["Base"];
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -411,7 +411,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDestroyObstacle_ById_RegistersObstacle()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(initialNode);
 
             // When
@@ -426,7 +426,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDestroyObstacle_ById_ObstacleNotInRoom_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
@@ -437,7 +437,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDestroyObstacle_ById_NoCurrentRoom_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
             state.ClearRoomState();
 
@@ -451,7 +451,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDestroyObstacle_RegistersObstacle()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(initialNode);
 
             // When
@@ -466,7 +466,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDestroyObstacle_ObstacleNotInRoom_ThrowsException()
         {
             // Given
-            RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
             
             // When and expect
@@ -479,22 +479,22 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_ById_RegistersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
 
             // Given
             state.ApplyOpenLock("Bomb Torizo Room Grey Lock (to Flyway)");
 
             // Expect
-            Assert.Contains(openedLock, state.OpenedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(openedLock, state.OpenedExitLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
         }
 
         [Fact]
         public void ApplyOpenLock_ById_AtNoNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -506,7 +506,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_ById_LockDoesntExist_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(node);
 
             // When and expect
@@ -519,23 +519,23 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_RegistersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
 
             // When
             state.ApplyOpenLock(openedLock);
 
             // Expect
-            Assert.Contains(openedLock, state.OpenedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(openedLock, state.OpenedExitLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
         }
 
         [Fact]
         public void ApplyOpenLock_AtNoNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -547,8 +547,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
 
             // When and expect
@@ -561,22 +561,22 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_ById_RemembersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
 
             // When
             state.ApplyBypassLock("Animal Escape Grey Lock (to Flyway)");
 
             // Expect
-            Assert.Contains(bypassedLock, state.BypassedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(bypassedLock, state.BypassedExitLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
         }
 
         [Fact]
         public void ApplyBypassLock_ById_AtNoNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -588,7 +588,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_ById_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InRoomState state = new InRoomState(node);
 
             // When and expect
@@ -601,23 +601,23 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_RemembersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
 
             // When
             state.ApplyBypassLock(bypassedLock);
 
             // Expect
-            Assert.Contains(bypassedLock, state.BypassedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(bypassedLock, state.BypassedExitLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
         }
 
         [Fact]
         public void ApplyBypassLock_AtNoNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -629,8 +629,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InRoomState state = new InRoomState(node);
 
             // When and expect
@@ -643,7 +643,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ClearRoomState_ClearsEverything()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 4);
             InRoomState state = new InRoomState(node);
             state.ApplyDestroyObstacle("A");
             state.ApplyVisitNode(3, "Base");
@@ -675,7 +675,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             state.ApplyVisitNode(3, "Base");
             state.ApplyOpenLock("Landing Site Top Right Yellow Lock (to Power Bombs)");
             state.ApplyBypassLock("Landing Site Top Right Escape Lock (to Power Bombs)");
-            RoomNode newNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
+            UnfinalizedRoomNode newNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
 
             // When
             state.ApplyEnterRoom(newNode);
@@ -740,11 +740,11 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void Clone_CopiesCorrectly()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
-            RoomNode secondNode = Model.GetNodeInRoom("Landing Site", 3);
-            Strat strat = node.Links[3].Strats["Base"];
-            NodeLock openedLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            NodeLock bypassedLock  = Model.Locks["Landing Site Top Right Escape Lock (to Power Bombs)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Landing Site", 3);
+            UnfinalizedStrat strat = node.Links[3].Strats["Base"];
+            UnfinalizedNodeLock openedLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            UnfinalizedNodeLock bypassedLock  = Model.Locks["Landing Site Top Right Escape Lock (to Power Bombs)"];
             InRoomState state = new InRoomState(node);
             state.ApplyDestroyObstacle("A");
             state.ApplyVisitNode(secondNode, strat);
@@ -766,9 +766,9 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Same(strat, clone.VisitedRoomPath[1].strat);
 
             Assert.Single(clone.OpenedExitLocks);
-            Assert.Contains(openedLock, clone.OpenedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(openedLock, clone.OpenedExitLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
             Assert.Single(clone.BypassedExitLocks);
-            Assert.Contains(bypassedLock, clone.BypassedExitLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(bypassedLock, clone.BypassedExitLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
             Assert.Single(clone.DestroyedObstacleIds);
             Assert.Contains("A", clone.DestroyedObstacleIds);
         }
@@ -777,7 +777,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void Clone_SeparatesState()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 4);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 4);
             InRoomState state = new InRoomState(node);
 
             // When

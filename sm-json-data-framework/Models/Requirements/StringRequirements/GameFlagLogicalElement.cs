@@ -12,13 +12,36 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// <summary>
     /// A logical element that is fulfilled by previously activating an in-game flag.
     /// </summary>
-    public class GameFlagLogicalElement : AbstractStringLogicalElement
+    public class GameFlagLogicalElement : AbstractStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>
     {
-        private GameFlag GameFlag { get; set; }
+        private UnfinalizedGameFlagLogicalElement InnerElement { get; set; }
 
-        public GameFlagLogicalElement(GameFlag gameFlag)
+        public GameFlagLogicalElement(UnfinalizedGameFlagLogicalElement innerElement, Action<GameFlagLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            GameFlag = innerElement.GameFlag.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The game flag that must be activated to fulfill this logical element.
+        /// </summary>
+        public GameFlag GameFlag { get; }
+    }
+
+    public class UnfinalizedGameFlagLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>
+    {
+        public UnfinalizedGameFlag GameFlag { get; set; }
+
+        public UnfinalizedGameFlagLogicalElement(UnfinalizedGameFlag gameFlag)
         {
             GameFlag = gameFlag;
+        }
+
+        protected override GameFlagLogicalElement CreateFinalizedElement(UnfinalizedGameFlagLogicalElement sourceElement, Action<GameFlagLogicalElement> mappingsInsertionCallback,
+            ModelFinalizationMappings mappings)
+        {
+            return new GameFlagLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

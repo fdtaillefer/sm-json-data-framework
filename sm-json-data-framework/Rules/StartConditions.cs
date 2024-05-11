@@ -57,20 +57,20 @@ namespace sm_json_data_framework.Rules
         /// this is the provided model's basicStartConditions or not.</param>
         public StartConditions(SuperMetroidModel model, BasicStartConditions overrideBasicStartConditions)
         {
-            List<GameFlag> startingFlags = new List<GameFlag>();
+            List<UnfinalizedGameFlag> startingFlags = new List<UnfinalizedGameFlag>();
             foreach (string flagName in overrideBasicStartConditions.StartingFlagNames)
             {
-                if (!model.GameFlags.TryGetValue(flagName, out GameFlag flag))
+                if (!model.GameFlags.TryGetValue(flagName, out UnfinalizedGameFlag flag))
                 {
                     throw new Exception($"Starting game flag {flagName} not found.");
                 }
                 startingFlags.Add(flag);
             }
 
-            List<NodeLock> startingLocks = new List<NodeLock>();
+            List<UnfinalizedNodeLock> startingLocks = new List<UnfinalizedNodeLock>();
             foreach (string lockName in overrideBasicStartConditions.StartingLockNames)
             {
-                if (!model.Locks.TryGetValue(lockName, out NodeLock nodeLock))
+                if (!model.Locks.TryGetValue(lockName, out UnfinalizedNodeLock nodeLock))
                 {
                     throw new Exception($"Starting node lock {lockName} not found.");
                 }
@@ -86,7 +86,7 @@ namespace sm_json_data_framework.Rules
             ItemInventory startingInventory = new ItemInventory(startingResources);
             foreach (string itemName in overrideBasicStartConditions.StartingItemNames)
             {
-                if (!model.Items.TryGetValue(itemName, out Item item))
+                if (!model.Items.TryGetValue(itemName, out UnfinalizedItem item))
                 {
                     throw new Exception($"Starting item {itemName} not found.");
                 }
@@ -104,12 +104,12 @@ namespace sm_json_data_framework.Rules
 
         public StartConditions(StartConditions other)
         {
-            StartingGameFlags = new List<GameFlag>(other.StartingGameFlags);
+            StartingGameFlags = new List<UnfinalizedGameFlag>(other.StartingGameFlags);
             StartingInventory = other.StartingInventory?.Clone();
             StartingNode = other.StartingNode;
-            StartingOpenLocks = new List<NodeLock>(other.StartingOpenLocks);
+            StartingOpenLocks = new List<UnfinalizedNodeLock>(other.StartingOpenLocks);
             StartingResources = other.StartingResources?.Clone();
-            StartingTakenItemLocations = new List<RoomNode>(other.StartingTakenItemLocations);
+            StartingTakenItemLocations = new List<UnfinalizedRoomNode>(other.StartingTakenItemLocations);
         }
 
         public StartConditions Clone()
@@ -117,7 +117,7 @@ namespace sm_json_data_framework.Rules
             return new StartConditions(this);
         }
 
-        public RoomNode StartingNode { get; set; }
+        public UnfinalizedRoomNode StartingNode { get; set; }
 
         private ItemInventory _itemInventory;
         public ItemInventory StartingInventory { get; set; }
@@ -126,10 +126,10 @@ namespace sm_json_data_framework.Rules
 
         public ResourceCount StartingResources { get; set; }
 
-        public IEnumerable<GameFlag> StartingGameFlags { get; set; } = Enumerable.Empty<GameFlag>();
+        public IEnumerable<UnfinalizedGameFlag> StartingGameFlags { get; set; } = Enumerable.Empty<UnfinalizedGameFlag>();
 
-        public IEnumerable<NodeLock> StartingOpenLocks { get; set; } = Enumerable.Empty<NodeLock>();
+        public IEnumerable<UnfinalizedNodeLock> StartingOpenLocks { get; set; } = Enumerable.Empty<UnfinalizedNodeLock>();
 
-        public IEnumerable<RoomNode> StartingTakenItemLocations { get; set; } = Enumerable.Empty<RoomNode>();
+        public IEnumerable<UnfinalizedRoomNode> StartingTakenItemLocations { get; set; } = Enumerable.Empty<UnfinalizedRoomNode>();
     }
 }

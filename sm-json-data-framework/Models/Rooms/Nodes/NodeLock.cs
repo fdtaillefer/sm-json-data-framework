@@ -14,69 +14,164 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class NodeLock : AbstractModelElement, InitializablePostDeserializeInNode
+    /// <summary>
+    /// Represents a lock on a node. When active, a lock prevents interaction with a node until unlocked or unless bypassed.
+    /// </summary>
+    public class NodeLock : AbstractModelElement<UnfinalizedNodeLock, NodeLock>
+    {
+        private UnfinalizedNodeLock InnerElement { get; set; }
+
+        public NodeLock(UnfinalizedNodeLock innerElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Lock = InnerElement.Lock.Finalize(mappings);
+            UnlockStrats = InnerElement.UnlockStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            BypassStrats = InnerElement.BypassStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            YieldsStrings = InnerElement.YieldsStrings.AsReadOnly();
+            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
+            Node = InnerElement.Node.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The type of this lock.
+        /// </summary>
+        public LockTypeEnum LockType { get { return InnerElement.LockType; } }
+
+        /// <summary>
+        /// Logical requirements that must be met for this lock to be active.
+        /// If not met, the lock is not yet active and does not need to be unlocked or bypassed.
+        /// </summary>
+        public LogicalRequirements Lock { get; }
+
+        /// <summary>
+        /// A name that identifies this lock. Unique across the entire model.
+        /// </summary>
+        public string Name { get { return InnerElement.Name; } }
+
+        /// <summary>
+        /// Strats that can be executed to unlock this lock, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Strat> UnlockStrats { get; }
+
+        /// <summary>
+        /// Strats that can be executed to bypass this lock, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Strat> BypassStrats { get; }
+
+        public IReadOnlySet<string> YieldsStrings { get; }
+
+        /// <summary>
+        /// The game flags that are activated by unlocking this lock.
+        /// </summary>
+        public IReadOnlyList<GameFlag> Yields { get; }
+
+        /// <summary>
+        /// The RoomNode on which this lock is.
+        /// </summary>
+        public RoomNode Node { get; }
+
+        /// <summary>
+        /// Returns specifically whether this lock has been opened. If it's not yet active, this will return false.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <returns></returns>
+        public bool IsOpen(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return InnerElement.IsOpen(model, inGameState);
+        }
+
+        /// <summary>
+        /// Returns whether this lock is currently active in the provided InGameState.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <returns></returns>
+        public bool IsActive(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return InnerElement.IsActive(model, inGameState);
+        }
+
+        /// <summary>
+        /// An IExecutable that corresponds to opening this lock.
+        /// </summary>
+        public IExecutable OpenExecution { get { return InnerElement.OpenExecution; } }
+
+        /// <summary>
+        /// An IExecutable that corresponds to bypassing this lock.
+        /// </summary>
+        public IExecutable BypassExecution { get { return InnerElement.BypassExecution; } }
+    }
+
+    public class UnfinalizedNodeLock : AbstractUnfinalizedModelElement<UnfinalizedNodeLock, NodeLock>, InitializablePostDeserializeInNode
     {
         public LockTypeEnum LockType { get; set; }
 
         /// <summary>
         /// Logical requirements that must be met for this lock to be active
         /// </summary>
-        public LogicalRequirements Lock { get; set; } = new LogicalRequirements();
+        public UnfinalizedLogicalRequirements Lock { get; set; } = new UnfinalizedLogicalRequirements();
 
         public string Name { get; set; }
 
         /// <summary>
         /// Strats that can be executed to unlock this lock, mapped by name.
         /// </summary>
-        public IDictionary<string, Strat> UnlockStrats { get; set; } = new Dictionary<string, Strat>();
+        public IDictionary<string, UnfinalizedStrat> UnlockStrats { get; set; } = new Dictionary<string, UnfinalizedStrat>();
 
         /// <summary>
         /// Strats that can be executed to bypass this lock, mapped by name.
         /// </summary>
-        public IDictionary<string, Strat> BypassStrats { get; set; } = new Dictionary<string, Strat>();
+        public IDictionary<string, UnfinalizedStrat> BypassStrats { get; set; } = new Dictionary<string, UnfinalizedStrat>();
 
         [JsonPropertyName("yields")]
         public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The game flags that are activated by unlocking this lock.</para>
         /// </summary>
         [JsonIgnore]
-        public IList<GameFlag> Yields { get; set; }
+        public IList<UnfinalizedGameFlag> Yields { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The RoomNode on which this lock is.</para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode Node { get; set; }
+        public UnfinalizedRoomNode Node { get; set; }
 
-        public NodeLock()
+        public UnfinalizedNodeLock()
         {
 
         }
 
-        public NodeLock(RawNodeLock rawNodeLock, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedNodeLock(RawNodeLock rawNodeLock, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             LockType = rawNodeLock.LockType;
             Lock = rawNodeLock.Lock.ToLogicalRequirements(knowledgeBase);
             Name = rawNodeLock.Name;
-            UnlockStrats = rawNodeLock.UnlockStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
-            BypassStrats = rawNodeLock.BypassStrats.Select(strat => new Strat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            UnlockStrats = rawNodeLock.UnlockStrats.Select(strat => new UnfinalizedStrat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            BypassStrats = rawNodeLock.BypassStrats.Select(strat => new UnfinalizedStrat(strat, knowledgeBase)).ToDictionary(strat => strat.Name);
             YieldsStrings = new HashSet<string>(rawNodeLock.Yields);
+        }
+
+        protected override NodeLock CreateFinalizedElement(UnfinalizedNodeLock sourceElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new NodeLock(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             Lock.ApplyLogicalOptions(logicalOptions);
 
-            foreach (Strat strat in UnlockStrats.Values)
+            foreach (UnfinalizedStrat strat in UnlockStrats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
             }
 
-            foreach (Strat strat in BypassStrats.Values)
+            foreach (UnfinalizedStrat strat in BypassStrats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
             }
@@ -86,18 +181,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return Lock.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             Node = node;
 
             // Initialize unlock strats
-            foreach (Strat strat in UnlockStrats.Values)
+            foreach (UnfinalizedStrat strat in UnlockStrats.Values)
             {
                 strat.InitializeProperties(model, room);
             }
 
             // Initialize bypass strats
-            foreach (Strat strat in BypassStrats.Values)
+            foreach (UnfinalizedStrat strat in BypassStrats.Values)
             {
                 strat.InitializeProperties(model, room);
             }
@@ -106,18 +201,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Yields = YieldsStrings.Select(s => model.GameFlags[s]).ToList();
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             List<string> unhandled = new List<string>();
 
             unhandled.AddRange(Lock.InitializeReferencedLogicalElementProperties(model, room));
 
-            foreach(Strat strat in UnlockStrats.Values)
+            foreach(UnfinalizedStrat strat in UnlockStrats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
 
-            foreach (Strat strat in BypassStrats.Values)
+            foreach (UnfinalizedStrat strat in BypassStrats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
@@ -193,9 +288,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     internal class OpenExecution : IExecutable
     {
-        private NodeLock NodeLock { get; set; }
+        private UnfinalizedNodeLock NodeLock { get; set; }
 
-        public OpenExecution(NodeLock nodeLock)
+        public OpenExecution(UnfinalizedNodeLock nodeLock)
         {
             NodeLock = nodeLock;
         }
@@ -209,11 +304,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best unlock strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (UnfinalizedStrat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
-                foreach (GameFlag gameFlag in NodeLock.Yields)
+                foreach (UnfinalizedGameFlag gameFlag in NodeLock.Yields)
                 {
                     result.ApplyActivatedGameFlag(gameFlag);
                 }
@@ -227,9 +322,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     internal class BypassExecution : IExecutable
     {
-        private NodeLock NodeLock { get; set; }
+        private UnfinalizedNodeLock NodeLock { get; set; }
 
-        public BypassExecution(NodeLock nodeLock)
+        public BypassExecution(UnfinalizedNodeLock nodeLock)
         {
             NodeLock = nodeLock;
         }
@@ -243,7 +338,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best bypass strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (UnfinalizedStrat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if(result != null)
             {
                 result.ApplyBypassedLock(NodeLock, bestStrat);

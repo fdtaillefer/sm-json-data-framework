@@ -10,18 +10,31 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which requires Samus to spend some frames in acid.
     /// </summary>
-    public class AcidFrames : AbstractDamageNumericalValueLogicalElement
+    public class AcidFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedAcidFrames, AcidFrames>
+    {
+        public AcidFrames(UnfinalizedAcidFrames innerElement, Action<AcidFrames> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedAcidFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedAcidFrames, AcidFrames>
     {
         private decimal AcidLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
-        public AcidFrames()
+        public UnfinalizedAcidFrames()
         {
 
         }
 
-        public AcidFrames(int frames) : base(frames)
+        public UnfinalizedAcidFrames(int frames) : base(frames)
         {
             
+        }
+
+        protected override AcidFrames CreateFinalizedElement(UnfinalizedAcidFrames sourceElement, Action<AcidFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new AcidFrames(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -37,7 +50,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return (int)(baseDamage * AcidLeniencyMultiplier);
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetAcidDamageReducingItems(model, inGameState);
         }

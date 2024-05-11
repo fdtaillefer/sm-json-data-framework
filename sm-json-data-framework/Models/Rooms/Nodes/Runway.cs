@@ -13,7 +13,59 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class Runway : AbstractModelElement, InitializablePostDeserializeInNode, IRunway
+    /// <summary>
+    /// Represents a sequence of contiguous tiles directly connected to a door, which Samus can use to accumulate speed when running out of or (possibly) into a room.
+    /// </summary>
+    public class Runway : AbstractModelElement<UnfinalizedRunway, Runway>, IRunway
+    {
+        private UnfinalizedRunway InnerElement {get;set;}
+
+        public Runway(UnfinalizedRunway innerElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Strats = InnerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Node = InnerElement.Node.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The name of the runway. This is unique across the entire model.
+        /// </summary>
+        public string Name { get { return InnerElement.Name; } }
+
+        public int Length { get { return InnerElement.Length; } }
+
+        public int GentleUpTiles { get { return InnerElement.GentleUpTiles; } }
+
+        public int GentleDownTiles { get { return InnerElement.GentleDownTiles; } }
+
+        public int SteepUpTiles { get { return InnerElement.SteepUpTiles; } }
+
+        public int SteepDownTiles { get { return InnerElement.SteepDownTiles; } }
+
+        public int StartingDownTiles { get { return InnerElement.StartingDownTiles; } }
+
+        public int EndingUpTiles { get { return InnerElement.EndingUpTiles; } }
+        
+        /// <summary>
+        /// The strats that can be executed to use this Runway, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Strat> Strats { get; }
+
+        /// <summary>
+        /// Indicates whether this Runway can be used to continue gaining momentum after entering the room with some momentum.
+        /// </summary>
+        public bool UsableComingIn { get { return InnerElement.UsableComingIn; } }
+
+        /// <summary>
+        /// The node to which this runway is tied.
+        /// </summary>
+        public RoomNode Node { get; }
+
+        public int OpenEnds { get { return InnerElement.OpenEnds; } }
+    }
+
+    public class UnfinalizedRunway : AbstractUnfinalizedModelElement<UnfinalizedRunway, Runway>, InitializablePostDeserializeInNode, IRunway
     {
         public string Name { get; set; }
 
@@ -34,26 +86,26 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The strats that can be executed to use this Runway, mapped by name.
         /// </summary>
-        public IDictionary<string, Strat> Strats { get; set; } = new Dictionary<string, Strat>();
+        public IDictionary<string, UnfinalizedStrat> Strats { get; set; } = new Dictionary<string, UnfinalizedStrat>();
 
-        public bool UsableComingIn = true;
+        public bool UsableComingIn { get; set; } = true;
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The node to which this runway is tied.</para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode Node { get; set; }
+        public UnfinalizedRoomNode Node { get; set; }
 
         [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
 
-        public Runway()
+        public UnfinalizedRunway()
         {
 
         }
 
-        public Runway(RawRunway rawRunway, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedRunway(RawRunway rawRunway, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             Name = rawRunway.Name;
             Length = rawRunway.Length;
@@ -63,15 +115,20 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             SteepDownTiles = rawRunway.SteepDownTiles;
             StartingDownTiles = rawRunway.StartingDownTiles;
             EndingUpTiles = rawRunway.EndingUpTiles;
-            Strats = rawRunway.Strats.Select(rawStrat => new Strat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
+            Strats = rawRunway.Strats.Select(rawStrat => new UnfinalizedStrat(rawStrat, knowledgeBase)).ToDictionary(strat => strat.Name);
             UsableComingIn = rawRunway.UsableComingIn;
             OpenEnds = rawRunway.OpenEnd;
+        }
+
+        protected override Runway CreateFinalizedElement(UnfinalizedRunway sourceElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Runway(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             bool noUsefulStrat = true;
-            foreach(Strat strat in Strats.Values)
+            foreach(UnfinalizedStrat strat in Strats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
                 if(!strat.UselessByLogicalOptions)
@@ -86,21 +143,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return noUsefulStrat;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             Node = node;
 
-            foreach (Strat strat in Strats.Values)
+            foreach (UnfinalizedStrat strat in Strats.Values)
             {
                 strat.InitializeProperties(model, room);
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             List<string> unhandled = new List<string>();
 
-            foreach(Strat strat in Strats.Values)
+            foreach(UnfinalizedStrat strat in Strats.Values)
             {
                 unhandled.AddRange(strat.InitializeReferencedLogicalElementProperties(model, room));
             }
@@ -135,7 +192,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Return the result of the best strat execution
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (UnfinalizedStrat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result == null)
             {
                 return null;
@@ -164,13 +221,13 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class ExecutableRunway : IExecutable
     {
-        public ExecutableRunway(Runway runway, bool comingIn)
+        public ExecutableRunway(UnfinalizedRunway runway, bool comingIn)
         {
             Runway = runway;
             ComingIn = comingIn;
         }
 
-        public Runway Runway { get; private set; }
+        public UnfinalizedRunway Runway { get; private set; }
 
         public bool ComingIn { get; private set; }
 

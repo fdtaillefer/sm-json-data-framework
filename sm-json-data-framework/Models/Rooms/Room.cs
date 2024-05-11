@@ -11,7 +11,95 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class Room : AbstractModelElement, InitializablePostDeserializeOutOfRoom
+    /// <summary>
+    /// A contiguous portion of the game world that can be navigated without going through a door transition.
+    /// </summary>
+    public class Room : AbstractModelElement<UnfinalizedRoom, Room>
+    {
+        private UnfinalizedRoom InnerElement { get; set; }
+
+        public Room(UnfinalizedRoom innerElement, Action<Room> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            RoomEnvironments = InnerElement.RoomEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
+            Nodes = InnerElement.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Links = InnerElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNodeId).AsReadOnly();
+            Obstacles = InnerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
+            Enemies = InnerElement.Enemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.Id).AsReadOnly();
+        }
+
+        /// <summary>
+        /// An arbitrary, numerical ID that can be used to identify this Room.
+        /// </summary>
+        public int Id { get { return InnerElement.Id; } }
+
+        /// <summary>
+        /// A human-legible name that uniquely identifies this Room. 
+        /// Room names typically come from the community and not any official source.
+        /// </summary>
+        public string Name { get { return InnerElement.Name; } }
+
+        /// <summary>
+        /// The name of the in-game area this Room is in, e.g. Brinstar.
+        /// </summary>
+        public string Area { get { return InnerElement.Area; } }
+
+        /// <summary>
+        /// The name of the sub-area (within the <see cref="Area"/>) that this Room is in. 
+        /// Sub-areas are not officially defined in-game.
+        /// </summary>
+        public string Subarea { get { return InnerElement.Subarea; } }
+
+        /// <summary>
+        /// Whether player inputs work while in this room. 
+        /// </summary>
+        public bool Playable { get { return InnerElement.Playable; } }
+
+        /// <summary>
+        /// The in-game address of this Room.
+        /// </summary>
+        public string RoomAddress { get { return InnerElement.RoomAddress; } }
+
+        /// <summary>
+        /// The list of RoomEnvironments that can affect this Room.
+        /// Typically there is only one, but sometimes there are several and the one that is active depends on through which node the room was entered.
+        /// </summary>
+        public IReadOnlyList<RoomEnvironment> RoomEnvironments { get; }
+
+        /// <summary>
+        /// The nodes in this room, mapped by in-room numerical id
+        /// </summary>
+        public IReadOnlyDictionary<int, RoomNode> Nodes { get; }
+
+        /// <summary>
+        /// The links in this room mapped by their origin node ID.
+        /// </summary>
+        public IReadOnlyDictionary<int, Link> Links { get; }
+
+        /// <summary>
+        /// The obstacles that are in this room, mapped by Id.
+        /// </summary>
+        public IReadOnlyDictionary<string, RoomObstacle> Obstacles { get; }
+
+        /// <summary>
+        /// The groups of enemies in this room, mapped their by in-room id
+        /// </summary>
+        public IReadOnlyDictionary<string, RoomEnemy> Enemies { get; }
+
+        /// <summary>
+        /// Returns the LinkTo that describes navigation from fromNodeId to toNodeId, if it exists.
+        /// </summary>
+        /// <param name="fromNodeId">ID of the origin node</param>
+        /// <param name="toNodeId">ID of the destination node</param>
+        /// <returns>The LinkTo, or null if not found.</returns>
+        public UnfinalizedLinkTo GetLinkBetween(int fromNodeId, int toNodeId)
+        {
+            return InnerElement.GetLinkBetween(fromNodeId, toNodeId);
+        }
+    }
+
+    public class UnfinalizedRoom : AbstractUnfinalizedModelElement<UnfinalizedRoom, Room>, InitializablePostDeserializeOutOfRoom
     {
         public int Id { get; set; }
 
@@ -25,27 +113,27 @@ namespace sm_json_data_framework.Models.Rooms
 
         public string RoomAddress { get; set; }
 
-        public IList<RoomEnvironment> RoomEnvironments { get; set; } = new List<RoomEnvironment>();
+        public IList<UnfinalizedRoomEnvironment> RoomEnvironments { get; set; } = new List<UnfinalizedRoomEnvironment>();
 
         /// <summary>
         /// The nodes in this room, mapped by in-room numerical id
         /// </summary>
-        public IDictionary<int, RoomNode> Nodes { get; set; } = new Dictionary<int, RoomNode>();
+        public IDictionary<int, UnfinalizedRoomNode> Nodes { get; set; } = new Dictionary<int, UnfinalizedRoomNode>();
 
         /// <summary>
         /// The links in this room mapped by their origin node ID.
         /// </summary>
-        public IDictionary<int, Link> Links { get; set; } = new Dictionary<int, Link>();
+        public IDictionary<int, UnfinalizedLink> Links { get; set; } = new Dictionary<int, UnfinalizedLink>();
 
         /// <summary>
         /// The obstacles that are in this room, mapped by Id.
         /// </summary>
-        public IDictionary<string, RoomObstacle> Obstacles { get; set; } = new Dictionary<string, RoomObstacle>();
+        public IDictionary<string, UnfinalizedRoomObstacle> Obstacles { get; set; } = new Dictionary<string, UnfinalizedRoomObstacle>();
 
         /// <summary>
         /// The groups of enemies in this room, mapped their by in-room id
         /// </summary>
-        public IDictionary<string, RoomEnemy> Enemies { get; set; } = new Dictionary<string, RoomEnemy>();
+        public IDictionary<string, UnfinalizedRoomEnemy> Enemies { get; set; } = new Dictionary<string, UnfinalizedRoomEnemy>();
 
         // Is this really needed? Should probably remove this later
         /// <summary>
@@ -55,12 +143,12 @@ namespace sm_json_data_framework.Models.Rooms
         [JsonIgnore]
         public SuperMetroidModel SuperMetroidModel { get; set; }
 
-        public Room()
+        public UnfinalizedRoom()
         {
 
         }
 
-        public Room(RawRoom rawRoom, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedRoom(RawRoom rawRoom, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             Id = rawRoom.Id;
             Name = rawRoom.Name;
@@ -68,36 +156,41 @@ namespace sm_json_data_framework.Models.Rooms
             Subarea = rawRoom.Subarea;
             Playable = rawRoom.Playable;
             RoomAddress = rawRoom.RoomAddress;
-            RoomEnvironments = rawRoom.RoomEnvironments.Select(rawEnvironment => new RoomEnvironment(rawEnvironment)).ToList();
-            Nodes = rawRoom.Nodes.Select(rawNode => new RoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id);
-            Links = rawRoom.Links.Select(rawLink => new Link(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId);
-            Obstacles = rawRoom.Obstacles.Select(rawObstacle => new RoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id);
-            Enemies = rawRoom.Enemies.Select(rawRoomEnemy => new RoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id);
+            RoomEnvironments = rawRoom.RoomEnvironments.Select(rawEnvironment => new UnfinalizedRoomEnvironment(rawEnvironment)).ToList();
+            Nodes = rawRoom.Nodes.Select(rawNode => new UnfinalizedRoomNode(rawNode, knowledgeBase)).ToDictionary(node => node.Id);
+            Links = rawRoom.Links.Select(rawLink => new UnfinalizedLink(rawLink, knowledgeBase)).ToDictionary(link => link.FromNodeId);
+            Obstacles = rawRoom.Obstacles.Select(rawObstacle => new UnfinalizedRoomObstacle(rawObstacle, knowledgeBase)).ToDictionary(obstacle => obstacle.Id);
+            Enemies = rawRoom.Enemies.Select(rawRoomEnemy => new UnfinalizedRoomEnemy(rawRoomEnemy, knowledgeBase)).ToDictionary(roomEnemy =>  roomEnemy.Id);
+        }
+
+        protected override Room CreateFinalizedElement(UnfinalizedRoom sourceElement, Action<Room> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Room(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
-            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            foreach (UnfinalizedRoomEnvironment roomEnvironment in RoomEnvironments)
             {
                 roomEnvironment.ApplyLogicalOptions(logicalOptions);
             }
 
-            foreach (RoomNode node in Nodes.Values)
+            foreach (UnfinalizedRoomNode node in Nodes.Values)
             {
                 node.ApplyLogicalOptions(logicalOptions);
             }
 
-            foreach (RoomObstacle obstacle in Obstacles.Values)
+            foreach (UnfinalizedRoomObstacle obstacle in Obstacles.Values)
             {
                 obstacle.ApplyLogicalOptions(logicalOptions);
             }
 
-            foreach (Link link in Links.Values)
+            foreach (UnfinalizedLink link in Links.Values)
             {
                 link.ApplyLogicalOptions(logicalOptions);
             }
 
-            foreach (RoomEnemy enemy in Enemies.Values)
+            foreach (UnfinalizedRoomEnemy enemy in Enemies.Values)
             {
                 enemy.ApplyLogicalOptions(logicalOptions);
             }
@@ -110,27 +203,27 @@ namespace sm_json_data_framework.Models.Rooms
         {
             SuperMetroidModel = model;
 
-            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            foreach (UnfinalizedRoomEnvironment roomEnvironment in RoomEnvironments)
             {
                 roomEnvironment.InitializeProperties(model, this);
             }
 
-            foreach (RoomNode node in Nodes.Values)
+            foreach (UnfinalizedRoomNode node in Nodes.Values)
             {
                 node.InitializeProperties(model, this);
             }
 
-            foreach (RoomObstacle obstacle in Obstacles.Values)
+            foreach (UnfinalizedRoomObstacle obstacle in Obstacles.Values)
             {
                 obstacle.InitializeProperties(model, this);
             }
 
-            foreach (Link link in Links.Values)
+            foreach (UnfinalizedLink link in Links.Values)
             {
                 link.InitializeProperties(model, this);
             }
 
-            foreach (RoomEnemy enemy in Enemies.Values)
+            foreach (UnfinalizedRoomEnemy enemy in Enemies.Values)
             {
                 enemy.InitializeProperties(model, this);
             }
@@ -142,11 +235,11 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="fromNodeId">ID of the origin node</param>
         /// <param name="toNodeId">ID of the destination node</param>
         /// <returns>The LinkTo, or null if not found.</returns>
-        public LinkTo GetLinkBetween(int fromNodeId, int toNodeId)
+        public UnfinalizedLinkTo GetLinkBetween(int fromNodeId, int toNodeId)
         {
-            if (Links.TryGetValue(fromNodeId, out Link link))
+            if (Links.TryGetValue(fromNodeId, out UnfinalizedLink link))
             {
-                if (link.To.TryGetValue(toNodeId, out LinkTo linkTo))
+                if (link.To.TryGetValue(toNodeId, out UnfinalizedLinkTo linkTo))
                 {
                     return linkTo;
                 }
@@ -158,27 +251,27 @@ namespace sm_json_data_framework.Models.Rooms
         {
             List<string> unhandled = new List<string>();
 
-            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            foreach (UnfinalizedRoomEnvironment roomEnvironment in RoomEnvironments)
             {
                 unhandled.AddRange(roomEnvironment.InitializeReferencedLogicalElementProperties(model, this));
             }
 
-            foreach (RoomNode node in Nodes.Values)
+            foreach (UnfinalizedRoomNode node in Nodes.Values)
             {
                 unhandled.AddRange(node.InitializeReferencedLogicalElementProperties(model, this));
             }
 
-            foreach(Link link in Links.Values)
+            foreach(UnfinalizedLink link in Links.Values)
             {
                 unhandled.AddRange(link.InitializeReferencedLogicalElementProperties(model, this));
             }
 
-            foreach (RoomEnemy enemy in Enemies.Values)
+            foreach (UnfinalizedRoomEnemy enemy in Enemies.Values)
             {
                 unhandled.AddRange(enemy.InitializeReferencedLogicalElementProperties(model, this));
             }
 
-            foreach(RoomObstacle obstacle in Obstacles.Values)
+            foreach(UnfinalizedRoomObstacle obstacle in Obstacles.Values)
             {
                 unhandled.AddRange(obstacle.InitializeReferencedLogicalElementProperties(model, this));
             }

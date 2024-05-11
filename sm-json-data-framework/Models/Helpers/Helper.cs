@@ -8,13 +8,38 @@ using System.Text;
 
 namespace sm_json_data_framework.Models.Helpers
 {
-    public class Helper : AbstractModelElement, InitializablePostDeserializeOutOfRoom
+    /// <summary>
+    /// A helper is a container for a common set of logical requirements, which can be referenced many times across the model.
+    /// </summary>
+    public class Helper : AbstractModelElement<UnfinalizedHelper, Helper>
+    {
+        private UnfinalizedHelper InnerElement { get; set; }
+
+        public Helper(UnfinalizedHelper innerElement, Action<Helper> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Requires = innerElement.Requires.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// A unique name that identifies this helper.
+        /// </summary>
+        public string Name { get { return InnerElement.Name;  } }
+
+        /// <summary>
+        /// The logical requirements that this helper represents.
+        /// </summary>
+        public LogicalRequirements Requires { get; }
+    }
+
+    public class UnfinalizedHelper : AbstractUnfinalizedModelElement<UnfinalizedHelper, Helper>, InitializablePostDeserializeOutOfRoom
     {
         public string Name { get; set; }
 
-        public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
+        public UnfinalizedLogicalRequirements Requires { get; set; } = new UnfinalizedLogicalRequirements();
 
-        public Helper()
+        public UnfinalizedHelper()
         {
 
         }
@@ -26,9 +51,14 @@ namespace sm_json_data_framework.Models.Helpers
         /// Logical requirements should be assigned in a second pass.
         /// </summary>
         /// <param name="helper">RawHelper to use as a base</param>
-        public Helper (RawHelper helper)
+        public UnfinalizedHelper (RawHelper helper)
         {
             Name = helper.Name;
+        }
+
+        protected override Helper CreateFinalizedElement(UnfinalizedHelper sourceElement, Action<Helper> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Helper(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

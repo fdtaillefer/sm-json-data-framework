@@ -22,11 +22,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public int ShinesparkFrames { get; set; }
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.CanComeInCharged, out Type type))
             {
-                CanComeInCharged canComeInCharged = (CanComeInCharged)Activator.CreateInstance(type);
+                UnfinalizedCanComeInCharged canComeInCharged = (UnfinalizedCanComeInCharged)Activator.CreateInstance(type);
                 canComeInCharged.FromNodeId = FromNode;
                 canComeInCharged.FramesRemaining = FramesRemaining;
                 canComeInCharged.ShinesparkFrames = ShinesparkFrames;

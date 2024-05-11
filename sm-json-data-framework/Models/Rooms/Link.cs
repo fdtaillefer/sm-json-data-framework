@@ -13,7 +13,26 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// Represents all ways to navigate directly from a specific node to any other node in the same room.
     /// </summary>
-    public class Link : AbstractModelElement, InitializablePostDeserializeInRoom
+    public class Link : AbstractModelElement<UnfinalizedLink, Link>
+    {
+        private UnfinalizedLink InnerElement { get; set; }
+
+        public Link(UnfinalizedLink innerElement, Action<Link> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            To = InnerElement.To.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
+        }
+
+        public int FromNodeId { get { return InnerElement.FromNodeId; } }
+
+        /// <summary>
+        /// The details of how this Link links to different nodes, mapped by target node ID.
+        /// </summary>
+        public IReadOnlyDictionary<int, LinkTo> To { get; }
+    }
+
+    public class UnfinalizedLink : AbstractUnfinalizedModelElement<UnfinalizedLink, Link>, InitializablePostDeserializeInRoom
     {
         [JsonPropertyName("from")]
         public int FromNodeId { get; set; }
@@ -21,23 +40,28 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// The details of how this Link links to different nodes, mapped by target node ID.
         /// </summary>
-        public IDictionary<int, LinkTo> To {get;set;} = new Dictionary<int, LinkTo>();
+        public IDictionary<int, UnfinalizedLinkTo> To {get;set;} = new Dictionary<int, UnfinalizedLinkTo>();
 
-        public Link()
+        public UnfinalizedLink()
         {
 
         }
 
-        public Link(RawLink rawLink, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedLink(RawLink rawLink, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             FromNodeId = rawLink.From;
-            To = rawLink.To.Select(linkTo => new LinkTo(linkTo, knowledgeBase)).ToDictionary(linkTo => linkTo.TargetNodeId);
+            To = rawLink.To.Select(linkTo => new UnfinalizedLinkTo(linkTo, knowledgeBase)).ToDictionary(linkTo => linkTo.TargetNodeId);
+        }
+
+        protected override Link CreateFinalizedElement(UnfinalizedLink sourceElement, Action<Link> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Link(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             bool allDestinationsImpossible = true;
-            foreach (LinkTo linkTo in To.Values)
+            foreach (UnfinalizedLinkTo linkTo in To.Values)
             {
                 linkTo.ApplyLogicalOptions(logicalOptions);
                 if(!linkTo.UselessByLogicalOptions)
@@ -50,19 +74,19 @@ namespace sm_json_data_framework.Models.Rooms
             return allDestinationsImpossible;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
-            foreach (LinkTo linkTo in To.Values)
+            foreach (UnfinalizedLinkTo linkTo in To.Values)
             {
                 linkTo.InitializeProperties(model, room);
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
-            foreach(LinkTo linkTo in To.Values)
+            foreach(UnfinalizedLinkTo linkTo in To.Values)
             {
                 unhandled.AddRange(linkTo.InitializeReferencedLogicalElementProperties(model, room));
             }

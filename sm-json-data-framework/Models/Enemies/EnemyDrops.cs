@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.Raw.Enemies;
+using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,8 +10,38 @@ namespace sm_json_data_framework.Models.Enemies
     /// Contains drop rates for all enemy drop types.
     /// This class makes no assumption about whether those rates are out of 100 or 102 or 255 or any other value.
     /// </summary>
-    public class EnemyDrops : RawEnemyDrops
+    public class EnemyDrops
     {
+        /// <summary>
+        /// The rate for a drop producing nothing.
+        /// </summary>
+        public decimal NoDrop { get; }
+
+        /// <summary>
+        /// The rate for a drop producing small energy.
+        /// </summary>
+        public decimal SmallEnergy { get; }
+
+        /// <summary>
+        /// The rate for a drop producing big energy.
+        /// </summary>
+        public decimal BigEnergy { get; }
+
+        /// <summary>
+        /// The rate for a drop producing missiles.
+        /// </summary>
+        public decimal Missile { get; }
+
+        /// <summary>
+        /// The rate for a drop producing a super missile.
+        /// </summary>
+        public decimal Super { get; }
+
+        /// <summary>
+        /// The rate for a drop producing a power bomb.
+        /// </summary>
+        public decimal PowerBomb { get; }
+
         public EnemyDrops()
         {
 
@@ -36,39 +67,19 @@ namespace sm_json_data_framework.Models.Enemies
             PowerBomb = drops.PowerBomb;
         }
 
+        public EnemyDrops(decimal noDrop = 0, decimal smallEnergy = 0, decimal bigEnergy = 0, decimal missile = 0, decimal super = 0, decimal powerBomb = 0)
+        {
+            NoDrop = noDrop;
+            SmallEnergy = smallEnergy;
+            BigEnergy = bigEnergy;
+            Missile = missile;
+            Super = super;
+            PowerBomb = powerBomb;
+        }
+
         public EnemyDrops Clone()
         {
             return new EnemyDrops(this);
-        }
-
-        /// <summary>
-        /// Sets the provided drop rate for the provided EnemyDrop in this EnemyDrops.
-        /// </summary>
-        /// <param name="enemyDrop">The enemy drop for which to set a drop rate</param>
-        /// <param name="dropRate">The drop rate to set</param>
-        public void SetDropRate(EnemyDropEnum enemyDrop, decimal dropRate)
-        {
-            switch(enemyDrop)
-            {
-                case EnemyDropEnum.NoDrop:
-                    NoDrop = dropRate;
-                    break;
-                case EnemyDropEnum.SmallEnergy:
-                    SmallEnergy = dropRate;
-                    break;
-                case EnemyDropEnum.BigEnergy:
-                    BigEnergy = dropRate;
-                    break;
-                case EnemyDropEnum.Missile:
-                    Missile = dropRate;
-                    break;
-                case EnemyDropEnum.Super:
-                    Super = dropRate;
-                    break;
-                case EnemyDropEnum.PowerBomb:
-                    PowerBomb = dropRate;
-                    break;
-            }
         }
 
         /// <summary>

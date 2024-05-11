@@ -10,19 +10,49 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class ExpansionItem : InGameItem
     {
+        private UnfinalizedExpansionItem InnerElement { get; set; }
+
+        public ExpansionItem(UnfinalizedExpansionItem innerElement, Action<Item> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = InnerElement;
+        }
+
+        /// <summary>
+        /// The resource that this expansion item increases the capacity of.
+        /// </summary>
+        public RechargeableResourceEnum Resource { get { return InnerElement.Resource; } }
+
+        /// <summary>
+        /// The amount by which this item expands the capacity of its resource.
+        /// </summary>
+        public int ResourceAmount { get { return InnerElement.ResourceAmount; }  }
+    }
+
+    public class UnfinalizedExpansionItem : UnfinalizedInGameItem
+    {
         public RechargeableResourceEnum Resource { get; set; }
 
         public int ResourceAmount { get; set; }
 
-        public ExpansionItem()
+        public UnfinalizedExpansionItem()
         {
 
         }
 
-        public ExpansionItem(RawExpansionItem item): base(item)
+        public override ExpansionItem Finalize(ModelFinalizationMappings mappings)
+        {
+            return (ExpansionItem)base.Finalize(mappings);
+        }
+
+        public UnfinalizedExpansionItem(RawExpansionItem item): base(item)
         {
             Resource = item.Resource;
             ResourceAmount = item.ResourceAmount;
+        }
+
+        protected override ExpansionItem CreateFinalizedElement(UnfinalizedItem sourceElement, Action<Item> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new ExpansionItem((UnfinalizedExpansionItem)sourceElement, mappingsInsertionCallback);
         }
     }
 }

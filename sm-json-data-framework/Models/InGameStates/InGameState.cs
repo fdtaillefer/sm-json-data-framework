@@ -47,19 +47,19 @@ namespace sm_json_data_framework.Models.InGameStates
             InternalResources = startConditions.StartingResources.Clone();
 
             // Initialize starting game flags
-            foreach (GameFlag gameFlag in startConditions.StartingGameFlags)
+            foreach (UnfinalizedGameFlag gameFlag in startConditions.StartingGameFlags)
             {
                 ApplyAddGameFlag(gameFlag);
             }
 
             // Initialize starting opened locks
-            foreach (NodeLock openLock in startConditions.StartingOpenLocks)
+            foreach (UnfinalizedNodeLock openLock in startConditions.StartingOpenLocks)
             {
                 ApplyOpenLock(openLock, applyToRoomState: false);
             }
 
             // Initialize starting taken item locations
-            foreach (RoomNode itemNode in startConditions.StartingTakenItemLocations)
+            foreach (UnfinalizedRoomNode itemNode in startConditions.StartingTakenItemLocations)
             {
                 ApplyTakeLocation(itemNode);
             }
@@ -75,11 +75,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="other">The InGameState to copy</param>
         public InGameState(InGameState other)
         {
-            InternalActiveGameFlags = new Dictionary<string, GameFlag>(other.InternalActiveGameFlags);
+            InternalActiveGameFlags = new Dictionary<string, UnfinalizedGameFlag>(other.InternalActiveGameFlags);
 
-            InternalTakenItemLocations = new Dictionary<string, RoomNode>(other.InternalTakenItemLocations);
+            InternalTakenItemLocations = new Dictionary<string, UnfinalizedRoomNode>(other.InternalTakenItemLocations);
 
-            InternalOpenedLocks = new Dictionary<string, NodeLock>(other.InternalOpenedLocks);
+            InternalOpenedLocks = new Dictionary<string, UnfinalizedNodeLock>(other.InternalOpenedLocks);
 
             InternalInventory = other.InternalInventory.Clone();
 
@@ -205,15 +205,15 @@ namespace sm_json_data_framework.Models.InGameStates
             return model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
 
-        protected Dictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
-        public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags { get { return InternalActiveGameFlags.AsReadOnly(); } }
+        protected Dictionary<string, UnfinalizedGameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, UnfinalizedGameFlag>();
+        public ReadOnlyDictionary<string, UnfinalizedGameFlag> ActiveGameFlags { get { return InternalActiveGameFlags.AsReadOnly(); } }
 
-        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other)
+        public Dictionary<string, UnfinalizedGameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other)
         {
-            Dictionary<string, GameFlag> returnFlags = new Dictionary<string, GameFlag>();
+            Dictionary<string, UnfinalizedGameFlag> returnFlags = new Dictionary<string, UnfinalizedGameFlag>();
 
             // For each flag, just check for absence in other
-            foreach (KeyValuePair<string, GameFlag> kvp in InternalActiveGameFlags)
+            foreach (KeyValuePair<string, UnfinalizedGameFlag> kvp in InternalActiveGameFlags)
             {
                 if (!other.ActiveGameFlags.ContainsFlag(kvp.Key))
                 {
@@ -229,7 +229,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="flag">Flag to add</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyAddGameFlag(GameFlag flag)
+        public InGameState ApplyAddGameFlag(UnfinalizedGameFlag flag)
         {
             if (!InternalActiveGameFlags.ContainsFlag(flag))
             {
@@ -238,16 +238,16 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        protected Dictionary<string, NodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
-        public ReadOnlyDictionary<string, NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
+        protected Dictionary<string, UnfinalizedNodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, UnfinalizedNodeLock>();
+        public ReadOnlyDictionary<string, UnfinalizedNodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
 
-        public Dictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other)
+        public Dictionary<string, UnfinalizedNodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other)
         {
 
-            Dictionary<string, NodeLock> returnLocks = new Dictionary<string, NodeLock>();
+            Dictionary<string, UnfinalizedNodeLock> returnLocks = new Dictionary<string, UnfinalizedNodeLock>();
 
             // For each lock, just check for absence in other
-            foreach (KeyValuePair<string, NodeLock> kvp in InternalOpenedLocks)
+            foreach (KeyValuePair<string, UnfinalizedNodeLock> kvp in InternalOpenedLocks)
             {
                 if (!other.OpenedLocks.ContainsLock(kvp.Key))
                 {
@@ -265,7 +265,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="applyToRoomState">If true, will also remember the lock as being opened in the current room visit.
         /// This can only be done if Samus is at the node that has the lock. Se this to false to unlock a lock remotely.</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
+        public InGameState ApplyOpenLock(UnfinalizedNodeLock nodeLock, bool applyToRoomState = true)
         {
             if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
@@ -283,7 +283,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="nodeLock">Lock to bypass</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyBypassLock(NodeLock nodeLock) {
+        public InGameState ApplyBypassLock(UnfinalizedNodeLock nodeLock) {
             if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
                 InternalInRoomState.ApplyBypassLock(nodeLock);
@@ -297,21 +297,21 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
         /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<NodeLock> GetBypassedExitLocks(int previousRoomCount = 0)
+        public IEnumerable<UnfinalizedNodeLock> GetBypassedExitLocks(int previousRoomCount = 0)
         {
             return GetInternalInRoomState(previousRoomCount).BypassedExitLocks;
         }
 
-        protected Dictionary<string, RoomNode> InternalTakenItemLocations { get; set; } = new Dictionary<string, RoomNode>();
+        protected Dictionary<string, UnfinalizedRoomNode> InternalTakenItemLocations { get; set; } = new Dictionary<string, UnfinalizedRoomNode>();
 
-        public ReadOnlyDictionary<string, RoomNode> TakenItemLocations { get { return InternalTakenItemLocations.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, UnfinalizedRoomNode> TakenItemLocations { get { return InternalTakenItemLocations.AsReadOnly(); } }
 
-        public Dictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other)
+        public Dictionary<string, UnfinalizedRoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other)
         {
-            Dictionary<string, RoomNode> returnLocations = new Dictionary<string, RoomNode>();
+            Dictionary<string, UnfinalizedRoomNode> returnLocations = new Dictionary<string, UnfinalizedRoomNode>();
 
             // For each location, just check for absence in other
-            foreach (KeyValuePair<string, RoomNode> kvp in InternalTakenItemLocations)
+            foreach (KeyValuePair<string, UnfinalizedRoomNode> kvp in InternalTakenItemLocations)
             {
                 if (!other.TakenItemLocations.ContainsNode(kvp.Key))
                 {
@@ -328,7 +328,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="location">Node of the location to add</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyTakeLocation(RoomNode location)
+        public InGameState ApplyTakeLocation(UnfinalizedRoomNode location)
         {
             if (!TakenItemLocations.ContainsNode(location))
             {
@@ -355,7 +355,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="item"></param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyAddItem(Item item)
+        public InGameState ApplyAddItem(UnfinalizedItem item)
         {
             InternalInventory.ApplyAddItem(item);
             return this;
@@ -367,7 +367,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyDisableItem(Item item)
+        public InGameState ApplyDisableItem(UnfinalizedItem item)
         {
             InternalInventory.ApplyDisableItem(item);
             return this;
@@ -391,7 +391,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyEnableItem(Item item)
+        public InGameState ApplyEnableItem(UnfinalizedItem item)
         {
             InternalInventory.ApplyEnableItem(item);
             return this;
@@ -415,7 +415,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyDestroyObstacle(RoomObstacle obstacle)
+        public InGameState ApplyDestroyObstacle(UnfinalizedRoomObstacle obstacle)
         {
             InternalInRoomState.ApplyDestroyObstacle(obstacle);
             return this;
@@ -491,13 +491,13 @@ namespace sm_json_data_framework.Models.InGameStates
             InternalPreviousRoomStates.Insert(0, previousState);
         }
 
-        public RoomNode GetCurrentNode(int previousRoomCount = 0)
+        public UnfinalizedRoomNode GetCurrentNode(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             return roomState?.CurrentNode;
         }
 
-        public RoomNode CurrentNode { get { return GetCurrentNode(0); } }
+        public UnfinalizedRoomNode CurrentNode { get { return GetCurrentNode(0); } }
 
         public bool BypassingExitLock(int previousRoomCount = 0)
         {
@@ -511,52 +511,52 @@ namespace sm_json_data_framework.Models.InGameStates
             return roomState?.OpenedExitLock ?? false;
         }
 
-        public Room CurrentRoom { get { return GetCurrentOrPreviousRoom(0); } }
+        public UnfinalizedRoom CurrentRoom { get { return GetCurrentOrPreviousRoom(0); } }
 
-        public Room GetCurrentOrPreviousRoom(int previousRoomCount)
+        public UnfinalizedRoom GetCurrentOrPreviousRoom(int previousRoomCount)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             return roomState?.CurrentRoom;
         }
 
-        public RoomEnvironment GetCurrentOrPreviousRoomEnvironment(int previousRoomCount = 0)
+        public UnfinalizedRoomEnvironment GetCurrentOrPreviousRoomEnvironment(int previousRoomCount = 0)
         {
-            Room currentRoom = GetCurrentOrPreviousRoom(previousRoomCount);
+            UnfinalizedRoom currentRoom = GetCurrentOrPreviousRoom(previousRoomCount);
             if(currentRoom == null)
             {
                 return null;
             }
 
-            RoomNode entranceNode = GetVisitedPath(previousRoomCount)[0].nodeState.Node;
+            UnfinalizedRoomNode entranceNode = GetVisitedPath(previousRoomCount)[0].nodeState.Node;
             return currentRoom.RoomEnvironments
-                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).FirstOrDefault();
+                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<UnfinalizedRoomNode>.Default)).FirstOrDefault();
         }
 
         public bool IsHeatedRoom(int previousRoomCount = 0)
         {
-            RoomEnvironment environment = GetCurrentOrPreviousRoomEnvironment(previousRoomCount);
+            UnfinalizedRoomEnvironment environment = GetCurrentOrPreviousRoomEnvironment(previousRoomCount);
             return environment != null && environment.Heated;
         }
 
-        public DoorEnvironment GetCurrentDoorEnvironment(int previousRoomCount = 0)
+        public UnfinalizedDoorEnvironment GetCurrentDoorEnvironment(int previousRoomCount = 0)
         {
-            RoomNode currentNode = GetCurrentNode(previousRoomCount);
+            UnfinalizedRoomNode currentNode = GetCurrentNode(previousRoomCount);
             if (currentNode == null || !currentNode.DoorEnvironments.Any())
             {
                 return null;
             }
 
-            RoomNode entranceNode = GetVisitedPath(previousRoomCount)[0].nodeState.Node;
+            UnfinalizedRoomNode entranceNode = GetVisitedPath(previousRoomCount)[0].nodeState.Node;
             return currentNode.DoorEnvironments
-                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<RoomNode>.Default)).First();
+                .Where(environment => environment.EntranceNodes == null || environment.EntranceNodes.Contains(entranceNode, ObjectReferenceEqualityComparer<UnfinalizedRoomNode>.Default)).First();
         }
 
         public PhysicsEnum? GetCurrentDoorPhysics(int previousRoomCount = 0) {
-            DoorEnvironment environment = GetCurrentDoorEnvironment(previousRoomCount);
+            UnfinalizedDoorEnvironment environment = GetCurrentDoorEnvironment(previousRoomCount);
             return environment?.Physics;
         }
 
-        public Strat GetLastStrat(int previousRoomCount = 0)
+        public UnfinalizedStrat GetLastStrat(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             return roomState?.LastStrat;
@@ -569,11 +569,11 @@ namespace sm_json_data_framework.Models.InGameStates
             return returnValue ?? new List<int>().AsReadOnly();
         }
 
-        public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0)
+        public IReadOnlyList<(ReadOnlyInNodeState nodeState, UnfinalizedStrat strat)> GetVisitedPath(int previousRoomCount = 0)
         {
             InRoomState roomState = GetInternalInRoomState(previousRoomCount);
             var returnValue = roomState?.VisitedRoomPath;
-            return returnValue ?? new List<(ReadOnlyInNodeState, Strat)>().AsReadOnly();
+            return returnValue ?? new List<(ReadOnlyInNodeState, UnfinalizedStrat)>().AsReadOnly();
         }
 
         public IEnumerable<string> GetDestroyedObstacleIds(int previousRoomCount = 0)
@@ -591,7 +591,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyEnterRoom(RoomNode entryNode)
+        public InGameState ApplyEnterRoom(UnfinalizedRoomNode entryNode)
         {
             // Copy current room state and remember it as previous
             RegisterPreviousRoom(InternalInRoomState.Clone());
@@ -610,15 +610,15 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyExitRoom(SuperMetroidModel model)
         {
-            RoomNode outNode = CurrentNode.OutNode;
+            UnfinalizedRoomNode outNode = CurrentNode.OutNode;
             if (outNode == null)
             {
                 throw new InvalidOperationException($"Cannot exit '{CurrentRoom.Name}' via node {CurrentNode.Id} " +
                     $"because it does not have an out connection to another room.");
             }
 
-            IEnumerable<NodeLock> activeLocks = CurrentNode.GetActiveLocks(model, this)
-                .Except(GetBypassedExitLocks(), ObjectReferenceEqualityComparer<NodeLock>.Default);
+            IEnumerable<UnfinalizedNodeLock> activeLocks = CurrentNode.GetActiveLocks(model, this)
+                .Except(GetBypassedExitLocks(), ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
             if (activeLocks.Any())
             {
                 throw new InvalidOperationException($"Cannot exit '{CurrentRoom.Name}' via node {CurrentNode.Id} " +
@@ -638,20 +638,20 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
         /// it's on a link that connects previous node to new node.</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
+        public InGameState ApplyVisitNode(UnfinalizedRoomNode nodeToVisit, UnfinalizedStrat strat)
         {
             InternalInRoomState.ApplyVisitNode(nodeToVisit, strat);
 
             return this;
         }
 
-        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, ISet<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
+        public IEnumerable<UnfinalizedRunway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, ISet<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
             // If that "current" room is the last remembered one, we have no way to obtain the state of the room before that so just return
             if (previousRoomCount >= InternalPreviousRoomStates.Count)
             {
-                return Enumerable.Empty<Runway>();
+                return Enumerable.Empty<UnfinalizedRunway>();
             }
 
             // Apply physics restriction if applicable
@@ -660,7 +660,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 PhysicsEnum? activePhysics = GetCurrentDoorPhysics(previousRoomCount + 1);
                 if(acceptablePhysics == null || !acceptablePhysics.Contains(activePhysics.Value))
                 {
-                    return Enumerable.Empty<Runway>();
+                    return Enumerable.Empty<UnfinalizedRunway>();
                 }
             }
 
@@ -669,51 +669,51 @@ namespace sm_json_data_framework.Models.InGameStates
             // If we don't know at what node we entered, we can't identify any usable runways
             if (!visitedNodeIds.Any())
             {
-                return Enumerable.Empty<Runway>();
+                return Enumerable.Empty<UnfinalizedRunway>();
             }
 
             // If the current in-room state doesn't respect the in-room path necessary to use retroactive runways, we can't use any
             if(!visitedNodeIds.SequenceEqual(requiredInRoomPath))
             {
-                return Enumerable.Empty<Runway>();
+                return Enumerable.Empty<UnfinalizedRunway>();
             }
 
             // At this point we know our behavior in the current room respects the provided requirements for retroactively using a runway.
             // We must now figure out if the previous room also qualifies.
 
             // Figure out through what node we left the previous room...
-            RoomNode previousRoomExitNode = GetCurrentNode(previousRoomCount + 1);
+            UnfinalizedRoomNode previousRoomExitNode = GetCurrentNode(previousRoomCount + 1);
 
             // If we can't figure out how we left previous room, we can't return any runways
             if (previousRoomExitNode == null)
             {
-                return Enumerable.Empty<Runway>();
+                return Enumerable.Empty<UnfinalizedRunway>();
             }
 
             // If the last room was exited by bypassing a lock, runways can't be used
             if (BypassingExitLock(previousRoomCount + 1))
             {
-                return Enumerable.Empty<Runway>();
+                return Enumerable.Empty<UnfinalizedRunway>();
             }
 
             // If we didn't leave the previous room via a node that led to the node by which we entered current room, no runways are usable
-            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds[0]];
+            UnfinalizedRoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds[0]];
             if (previousRoomExitNode.OutNode != entryNode)
             {
-                return Enumerable.Empty<Runway>();
+                return Enumerable.Empty<UnfinalizedRunway>();
             }
 
             // We've confirmed we can use retroactive runways. Return all runways of the previous room's exit node (excluding logically impossible ones)
             return previousRoomExitNode.Runways.Values.WhereUseful();
         }
 
-        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
+        public IEnumerable<UnfinalizedCanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
             // If that "current" room is the last remembered one, we have no way to obtain the state of the room before that so just return
             if (previousRoomCount >= InternalPreviousRoomStates.Count)
             {
-                return Enumerable.Empty<CanLeaveCharged>();
+                return Enumerable.Empty<UnfinalizedCanLeaveCharged>();
             }
 
             // We will need to know what nodes were visited in the current room. If this info is missing, we can't do anything retroactively.
@@ -721,38 +721,38 @@ namespace sm_json_data_framework.Models.InGameStates
             // If we don't know at what node we entered, we can't identify any usable runways
             if (!visitedNodeIds.Any())
             {
-                return Enumerable.Empty<CanLeaveCharged>();
+                return Enumerable.Empty<UnfinalizedCanLeaveCharged>();
             }
 
             // If the current in-room state doesn't respect the in-room path necessary to use retroactive runways, we can't use any
             if (!visitedNodeIds.SequenceEqual(requiredInRoomPath))
             {
-                return Enumerable.Empty<CanLeaveCharged>();
+                return Enumerable.Empty<UnfinalizedCanLeaveCharged>();
             }
 
-            RoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds[0]];
+            UnfinalizedRoomNode entryNode = GetCurrentOrPreviousRoom(previousRoomCount).Nodes[visitedNodeIds[0]];
 
             // At this point we know our behavior in the current room respects the provided requirements for retroactively using a CanLeaveCharged.
 
             // Figure out through what node we left the previous room...
-            RoomNode previousRoomExitNode = GetCurrentNode(previousRoomCount + 1);
+            UnfinalizedRoomNode previousRoomExitNode = GetCurrentNode(previousRoomCount + 1);
 
             // If we can't figure out how we left previous room, we can't return any canLeaveChargeds
             if (previousRoomExitNode == null)
             {
-                return Enumerable.Empty<CanLeaveCharged>();
+                return Enumerable.Empty<UnfinalizedCanLeaveCharged>();
             }
 
             // If the last room was exited by bypassing a lock, canLeaveChargeds can't be used
             if (BypassingExitLock(previousRoomCount + 1))
             {
-                return Enumerable.Empty<CanLeaveCharged>();
+                return Enumerable.Empty<UnfinalizedCanLeaveCharged>();
             }
 
             // If we didn't leave the previous room via a node that led to the node by which we entered current room, no canLeavechargeds are usable
             if (previousRoomExitNode.OutNode != entryNode)
             {
-                return Enumerable.Empty<CanLeaveCharged>();
+                return Enumerable.Empty<UnfinalizedCanLeaveCharged>();
             }
 
             // Return all CanLeaveCharged that are valid to retroactively execute
@@ -775,7 +775,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
                     // Check the last n visited nodes to make sure they correspond to the prescribed path.
                     // But before this, check the node we were at immediately before those, to make sure we're starting at the right node.
-                    IEnumerable<(ReadOnlyInNodeState nodeState, Strat strat)> lastRoomFinalPath
+                    IEnumerable<(ReadOnlyInNodeState nodeState, UnfinalizedStrat strat)> lastRoomFinalPath
                         = lastRoomPath.TakeLast(clc.InitiateRemotely.PathToDoor.Count() + 1);
                     if (lastRoomFinalPath.First().nodeState.Node != clc.InitiateRemotely.InitiateAtNode)
                     {
@@ -786,7 +786,7 @@ namespace sm_json_data_framework.Models.InGameStates
                         (lastRoomFinalPath.Skip(1), (expectedPath, actualPath) => {
                             // These two path nodes match up if they go to the same room node, and if the actual path uses one of the valid strats
                             return expectedPath.link.TargetNode == actualPath.nodeState.Node
-                                && expectedPath.strats.Contains(actualPath.strat, ObjectReferenceEqualityComparer<Strat>.Default);
+                                && expectedPath.strats.Contains(actualPath.strat, ObjectReferenceEqualityComparer<UnfinalizedStrat>.Default);
                         })
                         // If any node in the actual path does not respect the expected path, 
                         // then last room's exit is incompatible with this CanLeaveCharged
@@ -885,7 +885,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// The read-only dictionary of game flags that are active in this InGameState, mapped by their name.
         /// </summary>
-        public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags { get; }
+        public ReadOnlyDictionary<string, UnfinalizedGameFlag> ActiveGameFlags { get; }
 
         /// <summary>
         /// Creates and returns a new dictionary containing all active game flags from this in-game state
@@ -893,12 +893,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other);
+        public Dictionary<string, UnfinalizedGameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// The read-only dictionary of locks that are opened in this InGameState, mapped by their name.
         /// </summary>
-        public ReadOnlyDictionary<string, NodeLock> OpenedLocks { get; }
+        public ReadOnlyDictionary<string, UnfinalizedNodeLock> OpenedLocks { get; }
 
         /// <summary>
         /// Creates and returns a new dictionary containing all OPENED NODE LOCKS from this in-game state
@@ -906,7 +906,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public Dictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other);
+        public Dictionary<string, UnfinalizedNodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// Returns the locks bypassed by Samus at the current node.
@@ -914,13 +914,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
         /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<NodeLock> GetBypassedExitLocks(int previousRoomCount = 0);
+        public IEnumerable<UnfinalizedNodeLock> GetBypassedExitLocks(int previousRoomCount = 0);
 
         /// <summary>
         /// The read-only dictionary of item locations that have been taken in this InGameState, mapped by their name.
         /// Take note that while node names are not guaranteed to be unique, all item node names are.
         /// </summary>
-        public ReadOnlyDictionary<string, RoomNode> TakenItemLocations { get; }
+        public ReadOnlyDictionary<string, UnfinalizedRoomNode> TakenItemLocations { get; }
 
         /// <summary>
         /// Creates and returns a new dictionary containing all taken item locations from this in-game state
@@ -928,7 +928,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="other">The other in-game state</param>
         /// <returns></returns>
-        public Dictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other);
+        public Dictionary<string, UnfinalizedRoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other);
 
         /// <summary>
         /// The read-only inventory of items collected by Samus according to this in-game state.
@@ -980,13 +980,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
         /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public RoomNode GetCurrentNode(int previousRoomCount = 0);
+        public UnfinalizedRoomNode GetCurrentNode(int previousRoomCount = 0);
 
         /// <summary>
         /// The node the player is currently at. This can be null if in-room state isn't being tracked.
         /// </summary>
         /// <returns></returns>
-        public RoomNode CurrentNode { get; }
+        public UnfinalizedRoomNode CurrentNode { get; }
 
         /// <summary>
         /// Returns whether the player is exiting the room by bypassing a lock on the node they are exiting by.
@@ -1007,7 +1007,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// The room the player is currently in.
         /// </summary>
-        public Room CurrentRoom { get; }
+        public UnfinalizedRoom CurrentRoom { get; }
 
         /// <summary>
         /// Returns the room the player is currently in or was previously in.
@@ -1015,7 +1015,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public Room GetCurrentOrPreviousRoom(int previousRoomCount);
+        public UnfinalizedRoom GetCurrentOrPreviousRoom(int previousRoomCount);
 
         /// <summary>
         /// Returns the RoomEnvironment applicable to the room the player is currently in, or was previously in. This can be null if in-room state isn't being tracked.
@@ -1023,7 +1023,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by.
         /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public RoomEnvironment GetCurrentOrPreviousRoomEnvironment(int previousRoomCount = 0);
+        public UnfinalizedRoomEnvironment GetCurrentOrPreviousRoomEnvironment(int previousRoomCount = 0);
 
         /// <summary>
         /// Returns whether the room the player currently in is heated. Defaults to false if in-room state isn't being tracked.
@@ -1039,7 +1039,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
         /// 0 means current room, 3 means go back 3 rooms, negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public DoorEnvironment GetCurrentDoorEnvironment(int previousRoomCount = 0);
+        public UnfinalizedDoorEnvironment GetCurrentDoorEnvironment(int previousRoomCount = 0);
 
         /// <summary>
         /// Returns the door physics (if any) at the current node.
@@ -1055,7 +1055,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public Strat GetLastStrat(int previousRoomCount = 0);
+        public UnfinalizedStrat GetLastStrat(int previousRoomCount = 0);
 
         /// <summary>
         /// Returns a list of IDs of nodes that have been visited in the specified room since entering, in order, 
@@ -1075,7 +1075,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by. 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IReadOnlyList<(ReadOnlyInNodeState nodeState, Strat strat)> GetVisitedPath(int previousRoomCount = 0);
+        public IReadOnlyList<(ReadOnlyInNodeState nodeState, UnfinalizedStrat strat)> GetVisitedPath(int previousRoomCount = 0);
 
         /// <summary>
         /// Returns a sequence of IDs of obstacles that have been destroyed in the current room since entering.
@@ -1101,12 +1101,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive runways in the room before that. 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<Runway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, ISet<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0);
+        public IEnumerable<UnfinalizedRunway> GetRetroactiveRunways(IEnumerable<int> requiredInRoomPath, ISet<PhysicsEnum> acceptablePhysics, int previousRoomCount = 0);
 
         /// <summary>
         /// <para>Returns all canLeaveChargeds that the player could possibly be able to retroactively use, according to the pathing in this in-game state.
         /// Does not check whether the player is able to use any strats on those canLeaveChargeds, or whether charging or sparking is currently doable.
-        /// To check all of that, see <see cref="CanLeaveCharged.IsUsable(SuperMetroidModel, InGameState, bool)"/>.</para>
+        /// To check all of that, see <see cref="UnfinalizedCanLeaveCharged.IsUsable(SuperMetroidModel, InGameState, bool)"/>.</para>
         /// <para>"Retroactive use" is meant to be done right after entering a room, and aims to retroactively decide how the last room was exited.</para>
         /// <para>A canLeaveCharged would typically be used retroactively to satisfy a canComeInCharged
         /// that is being executed soon after entry of the new room.</para>
@@ -1118,6 +1118,6 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive canLeaveChargeds in the room before that.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0);
+        public IEnumerable<UnfinalizedCanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0);
     }
 }

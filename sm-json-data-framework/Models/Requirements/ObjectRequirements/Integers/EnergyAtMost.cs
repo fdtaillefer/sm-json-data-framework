@@ -10,16 +10,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which requires Samus to take damage down to a fixed amount. It can always be fulfilled, but the cost can vary.
     /// </summary>
-    public class EnergyAtMost : AbstractDamageNumericalValueLogicalElement
+    public class EnergyAtMost : AbstractDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>
     {
-        public EnergyAtMost()
+        public EnergyAtMost(UnfinalizedEnergyAtMost innerElement, Action<EnergyAtMost> mappingsInsertionCallback) 
+            : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedEnergyAtMost : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>
+    {
+        public UnfinalizedEnergyAtMost()
         {
 
         }
 
-        public EnergyAtMost(int energy) : base(energy)
+        public UnfinalizedEnergyAtMost(int energy) : base(energy)
         {
 
+        }
+
+        protected override EnergyAtMost CreateFinalizedElement(UnfinalizedEnergyAtMost sourceElement, Action<EnergyAtMost> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new EnergyAtMost(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -35,10 +49,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return Math.Max(0, currentRegularEnergy - Value);
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // This brings energy down to a specific level, and has no cares for damage reduction items
-            return new Item[] { };
+            return new UnfinalizedItem[] { };
         }
     }
 }

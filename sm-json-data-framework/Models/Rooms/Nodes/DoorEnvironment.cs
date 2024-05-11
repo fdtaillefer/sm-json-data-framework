@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,42 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class DoorEnvironment : AbstractModelElement, InitializablePostDeserializeInNode
+    /// <summary>
+    /// Describes the environment at a specific door. 
+    /// This excludes any property that is always true for an entire room (see <see cref="RoomEnvironment"/> for that).
+    /// </summary>
+    public class DoorEnvironment : AbstractModelElement<UnfinalizedDoorEnvironment, DoorEnvironment>
+    {
+        private UnfinalizedDoorEnvironment InnerElement { get; set; }
+
+        public DoorEnvironment(UnfinalizedDoorEnvironment innerElement, Action<DoorEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            EntranceNodeIds = InnerElement.EntranceNodeIds?.AsReadOnly();
+            EntranceNodes = InnerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+            Node = InnerElement.Node.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The physics that are in effect in this DoorEnvironment
+        /// </summary>
+        public PhysicsEnum Physics { get { return InnerElement.Physics; } }
+
+        public IReadOnlySet<int> EntranceNodeIds { get; }
+
+        /// <summary>
+        /// The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.
+        /// </summary>
+        public IReadOnlyList<RoomNode> EntranceNodes { get; }
+
+        /// <summary>
+        /// The RoomNode on which this environment is.
+        /// </summary>
+        public RoomNode Node { get; }
+    }
+
+    public class UnfinalizedDoorEnvironment : AbstractUnfinalizedModelElement<UnfinalizedDoorEnvironment, DoorEnvironment>, InitializablePostDeserializeInNode
     {
         public PhysicsEnum Physics { get; set; }
 
@@ -17,25 +53,25 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public ISet<int> EntranceNodeIds { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.</para>
         /// </summary>
         [JsonIgnore]
-        public IList<RoomNode> EntranceNodes { get; set; }
+        public IList<UnfinalizedRoomNode> EntranceNodes { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The RoomNode on which this environment is.</para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode Node { get; set; }
+        public UnfinalizedRoomNode Node { get; set; }
 
-        public DoorEnvironment()
+        public UnfinalizedDoorEnvironment()
         {
             
         }
 
-        public DoorEnvironment(RawDoorEnvironment rawEnvironment)
+        public UnfinalizedDoorEnvironment(RawDoorEnvironment rawEnvironment)
         {
             Physics = rawEnvironment.Physics;
             if(rawEnvironment.EntranceNodes != null)
@@ -44,23 +80,28 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
+        protected override DoorEnvironment CreateFinalizedElement(UnfinalizedDoorEnvironment sourceElement, Action<DoorEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new DoorEnvironment(sourceElement, mappingsInsertionCallback, mappings);
+        }
+
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             // Logical options have no power here
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             Node = node;
 
             // Initialize list of EntranceNodes. This also serves as a sanity check and will throw if an ID is invalid.
             if (EntranceNodeIds != null)
             {
-                List<RoomNode> entranceNodes = new List<RoomNode>();
+                List<UnfinalizedRoomNode> entranceNodes = new List<UnfinalizedRoomNode>();
                 foreach (int entranceNodeId in EntranceNodeIds)
                 {
-                    room.Nodes.TryGetValue(entranceNodeId, out RoomNode entranceNode);
+                    room.Nodes.TryGetValue(entranceNodeId, out UnfinalizedRoomNode entranceNode);
                     if (entranceNode == null)
                     {
                         throw new Exception($"A DoorEnvironment's entranceNode ID {entranceNodeId} not found in room '{room.Name}' (the environment was on node {node.Id}).");
@@ -71,7 +112,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             // No logical element in a door environment
             return Enumerable.Empty<string>();

@@ -79,7 +79,7 @@ namespace sm_json_data_framework.Models
         public SuperMetroidModel()
         {
             // Weapons can't have an initializer directly on itself because of the custom setter
-            Weapons = new Dictionary<string, Weapon>();
+            Weapons = new Dictionary<string, UnfinalizedWeapon>();
         }
 
         /// <summary>
@@ -108,14 +108,14 @@ namespace sm_json_data_framework.Models
 
             // Put items in model
             Items = rawModel.ItemContainer.ImplicitItems
-                    .Select(n => new Item(n))
-                    .Concat(rawModel.ItemContainer.UpgradeItems.Select(rawItem => new InGameItem(rawItem)))
-                    .Concat(rawModel.ItemContainer.ExpansionItems.Select(rawItem => new ExpansionItem(rawItem)))
+                    .Select(n => new UnfinalizedItem(n))
+                    .Concat(rawModel.ItemContainer.UpgradeItems.Select(rawItem => new UnfinalizedInGameItem(rawItem)))
+                    .Concat(rawModel.ItemContainer.ExpansionItems.Select(rawItem => new UnfinalizedExpansionItem(rawItem)))
                     .ToDictionary(i => i.Name);
 
             // Put game flags in model
             GameFlags = rawModel.ItemContainer.GameFlags
-                .Select(n => new GameFlag(n))
+                .Select(n => new UnfinalizedGameFlag(n))
                 .ToDictionary(f => f.Name);
 
             // Put basic starting conditions in model
@@ -124,11 +124,11 @@ namespace sm_json_data_framework.Models
             BasicStartConditions = basicStartConditions;
 
             // Put helpers in model
-            Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new Helper(rawHelper)).ToDictionary(h => h.Name);
+            Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new UnfinalizedHelper(rawHelper)).ToDictionary(h => h.Name);
 
             // Put techs in model
             IEnumerable<RawTech> rawTechs = rawModel.TechContainer.SelectAllTechs();
-            Techs = rawTechs.Select(rawTech => new Tech(rawTech)).ToDictionary(t => t.Name);
+            Techs = rawTechs.Select(rawTech => new UnfinalizedTech(rawTech)).ToDictionary(t => t.Name);
 
             // At this point, Techs and Helpers don't contain their LogicalRequirements, we skipped them because
             // they could reference Techs and Helpers that didn't exist yet. Go back and assign them.
@@ -145,11 +145,11 @@ namespace sm_json_data_framework.Models
             }
 
             // Put weapons in model
-            Weapons = rawModel.WeaponContainer.Weapons.Select(rawWeapon => new Weapon(rawWeapon, knowledgeBase))
+            Weapons = rawModel.WeaponContainer.Weapons.Select(rawWeapon => new UnfinalizedWeapon(rawWeapon, knowledgeBase))
                 .ToDictionary(weapon => weapon.Name);
 
             // Put regular enemies and bosses in model
-            Enemies = rawModel.EnemyContainer.Enemies.Concat(rawModel.BossContainer.Enemies).Select(rawEnemy => new Enemy(rawEnemy))
+            Enemies = rawModel.EnemyContainer.Enemies.Concat(rawModel.BossContainer.Enemies).Select(rawEnemy => new UnfinalizedEnemy(rawEnemy))
                 .ToDictionary(enemy => enemy.Name);
 
             // Put connections in model
@@ -162,7 +162,7 @@ namespace sm_json_data_framework.Models
                 if (rawConnection.Direction == ConnectionDirectionEnum.Forward
                     || rawConnection.Direction == ConnectionDirectionEnum.Bidirectional)
                 {
-                    Connection forwardConnection = new Connection(rawConnection, rawNode1, rawNode2);
+                    UnfinalizedConnection forwardConnection = new UnfinalizedConnection(rawConnection, rawNode1, rawNode2);
                     Connections.Add(forwardConnection.FromNode.IdentifyingString, forwardConnection);
                 }
 
@@ -170,13 +170,13 @@ namespace sm_json_data_framework.Models
                 if (rawConnection.Direction == ConnectionDirectionEnum.Backward
                     || rawConnection.Direction == ConnectionDirectionEnum.Bidirectional)
                 {
-                    Connection backwardConnection = new Connection(rawConnection, rawNode2, rawNode1);
+                    UnfinalizedConnection backwardConnection = new UnfinalizedConnection(rawConnection, rawNode2, rawNode1);
                     Connections.Add(backwardConnection.FromNode.IdentifyingString, backwardConnection);
                 }
             }
 
             // Put rooms in model
-            Rooms = rawModel.RoomContainer.Rooms.Select(rawRoom => new Room(rawRoom, knowledgeBase)).ToDictionary(room => room.Name);
+            Rooms = rawModel.RoomContainer.Rooms.Select(rawRoom => new UnfinalizedRoom(rawRoom, knowledgeBase)).ToDictionary(room => room.Name);
 
             // Now we've created all models in a basic state...
             InitializeBaseModel();
@@ -199,25 +199,25 @@ namespace sm_json_data_framework.Models
         private void InitializeBaseModel()
         {
             // Initialize a few top-level convenience maps
-            Dictionary<string, RoomEnemy> roomEnemies = new Dictionary<string, RoomEnemy>();
-            Dictionary<string, NodeLock> locks = new Dictionary<string, NodeLock>();
-            Dictionary<string, RoomNode> nodes = new Dictionary<string, RoomNode>();
-            Dictionary<string, Runway> runways = new Dictionary<string, Runway>();
-            foreach (Room room in Rooms.Values)
+            Dictionary<string, UnfinalizedRoomEnemy> roomEnemies = new Dictionary<string, UnfinalizedRoomEnemy>();
+            Dictionary<string, UnfinalizedNodeLock> locks = new Dictionary<string, UnfinalizedNodeLock>();
+            Dictionary<string, UnfinalizedRoomNode> nodes = new Dictionary<string, UnfinalizedRoomNode>();
+            Dictionary<string, UnfinalizedRunway> runways = new Dictionary<string, UnfinalizedRunway>();
+            foreach (UnfinalizedRoom room in Rooms.Values)
             {
-                foreach (RoomEnemy roomEnemy in room.Enemies.Values)
+                foreach (UnfinalizedRoomEnemy roomEnemy in room.Enemies.Values)
                 {
                     roomEnemies.Add(roomEnemy.GroupName, roomEnemy);
                 }
 
-                foreach (RoomNode node in room.Nodes.Values)
+                foreach (UnfinalizedRoomNode node in room.Nodes.Values)
                 {
                     nodes.Add(node.Name, node);
-                    foreach (Runway runway in node.Runways.Values)
+                    foreach (UnfinalizedRunway runway in node.Runways.Values)
                     {
                         runways.Add(runway.Name, runway);
                     }
-                    foreach (KeyValuePair<string, NodeLock> kvp in node.Locks)
+                    foreach (KeyValuePair<string, UnfinalizedNodeLock> kvp in node.Locks)
                     {
                         locks.Add(kvp.Key, kvp.Value);
                     }
@@ -230,11 +230,11 @@ namespace sm_json_data_framework.Models
 
 
             // Initialize properties of objects within the model
-            foreach (Enemy enemy in Enemies.Values)
+            foreach (UnfinalizedEnemy enemy in Enemies.Values)
             {
                 enemy.InitializeProperties(this);
             }
-            foreach (Room room in Rooms.Values)
+            foreach (UnfinalizedRoom room in Rooms.Values)
             {
                 room.InitializeProperties(this);
             }
@@ -248,22 +248,22 @@ namespace sm_json_data_framework.Models
             // Initialize all references within logical elements
             List<string> unhandledLogicalElementProperties = new List<string>();
 
-            foreach (Helper helper in Helpers.Values)
+            foreach (UnfinalizedHelper helper in Helpers.Values)
             {
                 unhandledLogicalElementProperties.AddRange(helper.InitializeReferencedLogicalElementProperties(this));
             }
 
-            foreach (Tech tech in Techs.Values)
+            foreach (UnfinalizedTech tech in Techs.Values)
             {
                 unhandledLogicalElementProperties.AddRange(tech.InitializeReferencedLogicalElementProperties(this));
             }
 
-            foreach (Weapon weapon in Weapons.Values)
+            foreach (UnfinalizedWeapon weapon in Weapons.Values)
             {
                 unhandledLogicalElementProperties.AddRange(weapon.InitializeReferencedLogicalElementProperties(this));
             }
 
-            foreach (Room room in Rooms.Values)
+            foreach (UnfinalizedRoom room in Rooms.Values)
             {
                 unhandledLogicalElementProperties.AddRange(room.InitializeReferencedLogicalElementProperties(this));
             }
@@ -294,32 +294,32 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// The helpers in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Helper> Helpers { get; set; } = new Dictionary<string, Helper>();
+        public IDictionary<string, UnfinalizedHelper> Helpers { get; set; } = new Dictionary<string, UnfinalizedHelper>();
 
         /// <summary>
         /// The techs in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Tech> Techs { get; set; } = new Dictionary<string, Tech>();
+        public IDictionary<string, UnfinalizedTech> Techs { get; set; } = new Dictionary<string, UnfinalizedTech>();
 
         /// <summary>
         /// The items in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Item> Items { get; set; } = new Dictionary<string, Item>();
+        public IDictionary<string, UnfinalizedItem> Items { get; set; } = new Dictionary<string, UnfinalizedItem>();
 
         /// <summary>
         /// The game flags in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, GameFlag> GameFlags { get; set; } = new Dictionary<string, GameFlag>();
+        public IDictionary<string, UnfinalizedGameFlag> GameFlags { get; set; } = new Dictionary<string, UnfinalizedGameFlag>();
 
         /// <summary>
         /// The rooms in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Room> Rooms { get; set; } = new Dictionary<string, Room>();
+        public IDictionary<string, UnfinalizedRoom> Rooms { get; set; } = new Dictionary<string, UnfinalizedRoom>();
 
         /// <summary>
         /// The nodes in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, RoomNode> Nodes { get; set; } = new Dictionary<string, RoomNode>();
+        public IDictionary<string, UnfinalizedRoomNode> Nodes { get; set; } = new Dictionary<string, UnfinalizedRoomNode>();
 
         /// <summary>
         /// Gets and returns a node, referenced by its room name and node ID.
@@ -328,14 +328,14 @@ namespace sm_json_data_framework.Models
         /// <param name="nodeId">ID of the node to find within the room</param>
         /// <returns>The node</returns>
         /// <exception cref="Exception">If the room or node is not found</exception>
-        public RoomNode GetNodeInRoom(string roomName, int nodeId)
+        public UnfinalizedRoomNode GetNodeInRoom(string roomName, int nodeId)
         {
-            if (!Rooms.TryGetValue(roomName, out Room room))
+            if (!Rooms.TryGetValue(roomName, out UnfinalizedRoom room))
             {
                 throw new Exception($"Room '{roomName}' not found.");
             }
 
-            if (!room.Nodes.TryGetValue(nodeId, out RoomNode node))
+            if (!room.Nodes.TryGetValue(nodeId, out UnfinalizedRoomNode node))
             {
                 throw new Exception($"Node ID {nodeId} not found in room '{room.Name}'.");
             }
@@ -346,28 +346,28 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// The runways in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Runway> Runways { get; set; } = new Dictionary<string, Runway>();
+        public IDictionary<string, UnfinalizedRunway> Runways { get; set; } = new Dictionary<string, UnfinalizedRunway>();
 
         /// <summary>
         /// The node locks in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, NodeLock> Locks { get; set; } = new Dictionary<string, NodeLock>();
+        public IDictionary<string, UnfinalizedNodeLock> Locks { get; set; } = new Dictionary<string, UnfinalizedNodeLock>();
 
         /// <summary>
         /// All groups of enemies found in any room, mapped by their group name.
         /// </summary>
-        public IDictionary<string, RoomEnemy> RoomEnemies { get; set; } = new Dictionary<string, RoomEnemy>();
+        public IDictionary<string, UnfinalizedRoomEnemy> RoomEnemies { get; set; } = new Dictionary<string, UnfinalizedRoomEnemy>();
 
         /// <summary>
         /// A dictionary that maps a node's IdentifyingString to a one-way connection with that node as the origin.
         /// </summary>
-        public IDictionary<string, Connection> Connections { get; set; } = new Dictionary<string, Connection>();
+        public IDictionary<string, UnfinalizedConnection> Connections { get; set; } = new Dictionary<string, UnfinalizedConnection>();
 
-        private IDictionary<string, Weapon> _weapons;
+        private IDictionary<string, UnfinalizedWeapon> _weapons;
         /// <summary>
         /// The weapons in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Weapon> Weapons {
+        public IDictionary<string, UnfinalizedWeapon> Weapons {
             get { return _weapons; }
             set
             {
@@ -382,12 +382,12 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// A dicionary mapping all weapon categories to a list of weapons in that category.
         /// </summary>
-        public IDictionary<WeaponCategoryEnum, IEnumerable<Weapon>> WeaponsByCategory { get; private set; }
+        public IDictionary<WeaponCategoryEnum, IEnumerable<UnfinalizedWeapon>> WeaponsByCategory { get; private set; }
 
         /// <summary>
         /// The normal enemies and boss enemies in this model, mapped by name.
         /// </summary>
-        public IDictionary<string, Enemy> Enemies { get; set; } = new Dictionary<string, Enemy>();
+        public IDictionary<string, UnfinalizedEnemy> Enemies { get; set; } = new Dictionary<string, UnfinalizedEnemy>();
 
         /// <summary>
         /// An <see cref="InGameStateComparer"/> which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
@@ -412,46 +412,42 @@ namespace sm_json_data_framework.Models
                 InGameStateComparer = logicalOptionsToApply.InGameStateComparer;
             }
 
-            foreach(GameFlag gameFlag in GameFlags.Values) {
+            foreach(UnfinalizedGameFlag gameFlag in GameFlags.Values) {
                 gameFlag.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Helper helper in Helpers.Values)
+            foreach (UnfinalizedHelper helper in Helpers.Values)
             {
                 helper.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Item item in Items.Values)
+            foreach (UnfinalizedItem item in Items.Values)
             {
                 item.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Tech tech in Techs.Values)
+            foreach (UnfinalizedTech tech in Techs.Values)
             {
                 tech.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Weapon weapon in Weapons.Values)
+            foreach (UnfinalizedWeapon weapon in Weapons.Values)
             {
                 weapon.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Enemy enemy in Enemies.Values)
+            foreach (UnfinalizedEnemy enemy in Enemies.Values)
             {
                 enemy.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Connection connection in Connections.Values)
+            foreach (UnfinalizedConnection connection in Connections.Values)
             {
                 connection.ApplyLogicalOptions(logicalOptionsToApply);
             }
 
-            foreach (Room room in Rooms.Values)
+            foreach (UnfinalizedRoom room in Rooms.Values)
             {
-                if(room.Name == "Main Street")
-                {
-                    int sdfsdf = 0;
-                }
                 room.ApplyLogicalOptions(logicalOptionsToApply);
             }
         }

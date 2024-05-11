@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,42 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class RoomEnvironment : AbstractModelElement, InitializablePostDeserializeInRoom
+    /// <summary>
+    /// Describes the environment in a specific room. 
+    /// This excludes any property that can vary within a given room (see <see cref="DoorEnvironment"/> for that).
+    /// </summary>
+    public class RoomEnvironment : AbstractModelElement<UnfinalizedRoomEnvironment, RoomEnvironment>
+    {
+        private UnfinalizedRoomEnvironment InnerElement { get; set; }
+
+        public RoomEnvironment(UnfinalizedRoomEnvironment innerElement, Action<RoomEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            EntranceNodeIds = InnerElement.EntranceNodeIds.AsReadOnly();
+            EntranceNodes = InnerElement.EntranceNodes.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+            Room = InnerElement.Room.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// Whether the environment is geated, making Samus take damage unless she has something to mitigate the heat.
+        /// </summary>
+        public bool Heated { get { return InnerElement.Heated; } }
+
+        public IReadOnlySet<int> EntranceNodeIds { get; }
+
+        /// <summary>
+        /// The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.
+        /// </summary>
+        public IReadOnlyList<RoomNode> EntranceNodes { get; }
+
+        /// <summary>
+        /// The room to which this environment applies.
+        /// </summary>
+        public Room Room { get; }
+    }
+
+    public class UnfinalizedRoomEnvironment : AbstractUnfinalizedModelElement<UnfinalizedRoomEnvironment, RoomEnvironment>, InitializablePostDeserializeInRoom
     {
         public bool Heated { get; set; }
 
@@ -17,31 +53,25 @@ namespace sm_json_data_framework.Models.Rooms
         public ISet<int> EntranceNodeIds { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.</para>
         /// </summary>
         [JsonIgnore]
-        public IList<RoomNode> EntranceNodes { get; set; }
+        public IList<UnfinalizedRoomNode> EntranceNodes { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The room to which this environment applies.</para>
         /// </summary>
         [JsonIgnore]
-        public Room Room { get; set; }
+        public UnfinalizedRoom Room { get; set; }
 
-        public RoomEnvironment()
+        public UnfinalizedRoomEnvironment()
         {
 
         }
 
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical options have no power here
-            return false;
-        }
-
-        public RoomEnvironment(RawRoomEnvironment rawEnvironment)
+        public UnfinalizedRoomEnvironment(RawRoomEnvironment rawEnvironment)
         {
             Heated = rawEnvironment.Heated;
             if (rawEnvironment.EntranceNodes != null)
@@ -50,17 +80,28 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room)
+        protected override RoomEnvironment CreateFinalizedElement(UnfinalizedRoomEnvironment sourceElement, Action<RoomEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new RoomEnvironment(sourceElement, mappingsInsertionCallback, mappings);
+        }
+
+        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here
+            return false;
+        }
+
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             Room = room;
 
             // Initialize list of EntranceNodes. This also serves as a sanity check and will throw if an ID is invalid.
             if (EntranceNodeIds != null)
             {
-                List<RoomNode> entranceNodes = new List<RoomNode>();
+                List<UnfinalizedRoomNode> entranceNodes = new List<UnfinalizedRoomNode>();
                 foreach (int nodeId in EntranceNodeIds)
                 {
-                    room.Nodes.TryGetValue(nodeId, out RoomNode node);
+                    room.Nodes.TryGetValue(nodeId, out UnfinalizedRoomNode node);
                     if (node == null)
                     {
                         throw new Exception($"A RoomEnvironment's entranceNode ID {nodeId} not found in room '{room.Name}'.");
@@ -71,11 +112,10 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             // No logical element in a room environment
             return Enumerable.Empty<string>();
         }
-
     }
 }

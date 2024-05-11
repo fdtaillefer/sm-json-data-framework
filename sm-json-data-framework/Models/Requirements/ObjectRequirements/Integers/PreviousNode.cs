@@ -10,16 +10,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which Requires Samus to have arrived at the current node strictly from a subset of acceptable nodes.
     /// </summary>
-    public class PreviousNode : AbstractObjectLogicalElementWithNodeId
+    public class PreviousNode : AbstractObjectLogicalElementWithNodeId<UnfinalizedPreviousNode, PreviousNode>
     {
-        public PreviousNode()
+        public PreviousNode(UnfinalizedPreviousNode innerElement, Action<PreviousNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback, mappings)
+        {
+
+        }
+    }
+
+    public class UnfinalizedPreviousNode : AbstractUnfinalizedObjectLogicalElementWithNodeId<UnfinalizedPreviousNode, PreviousNode>
+    {
+        public UnfinalizedPreviousNode()
         {
 
         }
 
-        public PreviousNode(int nodeId) : base(nodeId)
+        public UnfinalizedPreviousNode(int nodeId) : base(nodeId)
         {
 
+        }
+
+        protected override PreviousNode CreateFinalizedElement(UnfinalizedPreviousNode sourceElement, Action<PreviousNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new PreviousNode(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

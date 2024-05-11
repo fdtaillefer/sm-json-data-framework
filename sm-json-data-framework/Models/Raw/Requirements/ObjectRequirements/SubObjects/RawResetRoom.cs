@@ -22,11 +22,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public bool MustStayPut { get; set; } = false;
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.ResetRoom, out Type type))
             {
-                ResetRoom resetRoom = (ResetRoom)Activator.CreateInstance(type);
+                UnfinalizedResetRoom resetRoom = (UnfinalizedResetRoom)Activator.CreateInstance(type);
                 resetRoom.NodeIds = new List<int>(Nodes);
                 resetRoom.NodeIdsToAvoid = new HashSet<int>(NodesToAvoid);
                 resetRoom.ObstaclesIdsToAvoid = new HashSet<string>(ObstaclesToAvoid);

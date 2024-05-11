@@ -12,7 +12,7 @@ namespace sm_json_data_framework.Models.Enemies
     {
         public WeaponMultiplier() { }
 
-        public WeaponMultiplier(Weapon weapon, decimal multiplier)
+        public WeaponMultiplier(UnfinalizedWeapon weapon, decimal multiplier)
         {
             Weapon = weapon;
             Multiplier = multiplier;
@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The Weapon whose damage is multiplied
         /// </summary>
-        public Weapon Weapon { get; }
+        public UnfinalizedWeapon Weapon { get; }
 
         /// <summary>
         /// The value by which to multiply base weapon damage

@@ -55,8 +55,8 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ItemInventory(ItemInventory other)
         {
-            InternalNonConsumableItems = new Dictionary<string, Item>(other.InternalNonConsumableItems);
-            InternalExpansionItems = new Dictionary<string, (ExpansionItem item, int count)>(other.InternalExpansionItems);
+            InternalNonConsumableItems = new Dictionary<string, UnfinalizedItem>(other.InternalNonConsumableItems);
+            InternalExpansionItems = new Dictionary<string, (UnfinalizedExpansionItem item, int count)>(other.InternalExpansionItems);
             InternalDisabledItemNames = new HashSet<string>(other.InternalDisabledItemNames);
 
             InternalBaseResourceMaximums = other.InternalBaseResourceMaximums.Clone();
@@ -99,15 +99,15 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        protected IDictionary<string, Item> InternalNonConsumableItems { get; } = new Dictionary<string, Item>();
-        public ReadOnlyDictionary<string, Item> NonConsumableItems { get { return InternalNonConsumableItems.AsReadOnly(); } }
+        protected IDictionary<string, UnfinalizedItem> InternalNonConsumableItems { get; } = new Dictionary<string, UnfinalizedItem>();
+        public ReadOnlyDictionary<string, UnfinalizedItem> NonConsumableItems { get { return InternalNonConsumableItems.AsReadOnly(); } }
 
         protected ISet<string> InternalDisabledItemNames { get; } = new HashSet<string>();
         public IReadOnlySet<string> DisabledItemNames { get { return InternalDisabledItemNames.AsReadOnly(); } }
 
         
-        protected IDictionary<string, (ExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (ExpansionItem item, int count)>();
-        public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get { return InternalExpansionItems.AsReadOnly(); } }
+        protected IDictionary<string, (UnfinalizedExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (UnfinalizedExpansionItem item, int count)>();
+        public ReadOnlyDictionary<string, (UnfinalizedExpansionItem item, int count)> ExpansionItems { get { return InternalExpansionItems.AsReadOnly(); } }
 
         protected ResourceCount InternalBaseResourceMaximums { get; }
 
@@ -132,7 +132,7 @@ namespace sm_json_data_framework.Models.InGameStates
             } 
         }
 
-        public bool HasItem(Item item)
+        public bool HasItem(UnfinalizedItem item)
         {
             return HasItem(item.Name);
         }
@@ -159,8 +159,8 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public bool ContainsAnyInGameItem()
         {
-            return InternalNonConsumableItems.Values.Where(i => i is InGameItem).Any()
-                || InternalExpansionItems.Values.Where(i => i.item is InGameItem).Any();
+            return InternalNonConsumableItems.Values.Where(i => i is UnfinalizedInGameItem).Any()
+                || InternalExpansionItems.Values.Where(i => i.item is UnfinalizedInGameItem).Any();
         }
 
         /// <summary>
@@ -168,10 +168,10 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="item"></param>
         /// <returns>This, for chaining</returns>
-        public ItemInventory ApplyAddItem(Item item)
+        public ItemInventory ApplyAddItem(UnfinalizedItem item)
         {
             // Expansion items have a count
-            if (item is ExpansionItem expansionItem)
+            if (item is UnfinalizedExpansionItem expansionItem)
             {
                 if (!InternalExpansionItems.ContainsKey(expansionItem.Name))
                 {
@@ -204,7 +204,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
-        public bool IsItemDisabled(Item item)
+        public bool IsItemDisabled(UnfinalizedItem item)
         {
             return IsItemDisabled(item.Name);
         }
@@ -220,7 +220,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
         /// <returns>This, for chaining</returns>
-        public ItemInventory ApplyDisableItem(Item item)
+        public ItemInventory ApplyDisableItem(UnfinalizedItem item)
         {
             return ApplyDisableItem(item.Name);
         }
@@ -246,7 +246,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
         /// <returns>This, for chaining</returns>
-        public ItemInventory ApplyEnableItem(Item item)
+        public ItemInventory ApplyEnableItem(UnfinalizedItem item)
         {
             return ApplyEnableItem(item.Name);
         }
@@ -274,7 +274,7 @@ namespace sm_json_data_framework.Models.InGameStates
             returnInventory.InternalDisabledItemNames.Clear();
 
             // For non-consumable items, just check for absence in other
-            foreach (KeyValuePair<string, Item> kvp in InternalNonConsumableItems)
+            foreach (KeyValuePair<string, UnfinalizedItem> kvp in InternalNonConsumableItems)
             {
                 if (!other.NonConsumableItems.ContainsKey(kvp.Key))
                 {
@@ -329,18 +329,18 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// A dictionary of the non consumable items in this inventory, mapped by name.
         /// </summary>
-        public ReadOnlyDictionary<string, Item> NonConsumableItems { get; }
+        public ReadOnlyDictionary<string, UnfinalizedItem> NonConsumableItems { get; }
 
         /// <summary>
         /// A set of items that have been manually disabled. This doesn't remove them from inventory but does prevent
-        /// <see cref="HasItem(Item)"/> from returning true for them.
+        /// <see cref="HasItem(UnfinalizedItem)"/> from returning true for them.
         /// </summary>
         public IReadOnlySet<string> DisabledItemNames { get; }
 
         /// <summary>
         /// A dictionary of the non consumable items in this inventory (bundled with the number of pickups owned), mapped by name.
         /// </summary>
-        public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get; }
+        public ReadOnlyDictionary<string, (UnfinalizedExpansionItem item, int count)> ExpansionItems { get; }
 
         /// <summary>
         /// The resource maximums that Samus would have if this item inventory contained no expansion items.
@@ -357,7 +357,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="item">Item to look for</param>
         /// <returns></returns>
-        public bool HasItem(Item item);
+        public bool HasItem(UnfinalizedItem item);
 
         /// <summary>
         /// Returns whether this inventory contains an item with the provided name. If the item is present but disabled, returns false.
@@ -395,7 +395,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="item">Item to check</param>
         /// <returns></returns>
-        public bool IsItemDisabled(Item item);
+        public bool IsItemDisabled(UnfinalizedItem item);
 
         /// <summary>
         /// Returns whether the item with the provided name is present but disabled in this inventory.

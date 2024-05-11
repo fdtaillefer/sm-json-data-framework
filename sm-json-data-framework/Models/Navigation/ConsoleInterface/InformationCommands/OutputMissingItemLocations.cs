@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             ValidCommand = str => str.ToLower() == "smil";
             Execution = (navigator, command) =>
             {
-                IEnumerable<RoomNode>
+                IEnumerable<UnfinalizedRoomNode>
                            missingItemNodes = navigator.GameModel.Nodes.Values
                            .Where(node => node.NodeType == NodeTypeEnum.Item)
                            .Except(navigator.CurrentInGameState.TakenItemLocations.Values)
@@ -31,7 +31,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
 
                 // Output missing item locations
                 // Output missing non-consumable items
-                foreach (RoomNode node in missingItemNodes)
+                foreach (UnfinalizedRoomNode node in missingItemNodes)
                 {
                     Console.WriteLine($"Missing item location '{node.Name}' in room '{node.Room.Name}' (containing item '{node.NodeItemName}')");
                 }

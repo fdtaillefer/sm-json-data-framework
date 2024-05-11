@@ -21,9 +21,9 @@ namespace sm_json_data_framework.Models.Raw.Requirements
 
         public IList<AbstractRawLogicalElement> LogicalElements { get; private set; } = new List<AbstractRawLogicalElement>();
 
-        public LogicalRequirements ToLogicalRequirements(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedLogicalRequirements ToLogicalRequirements(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            return new LogicalRequirements(LogicalElements.Select(element => element.ToLogicalElement(knowledgeBase)));
+            return new UnfinalizedLogicalRequirements(LogicalElements.Select(element => element.ToLogicalElement(knowledgeBase)));
         }
     }
 }

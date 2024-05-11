@@ -9,14 +9,27 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// <summary>
     /// A logical element that is just a raw, uninterpreted string, directly from a json file.
     /// </summary>
-    public class UninterpretedStringLogicalElement: AbstractStringLogicalElement
+    public class UninterpretedStringLogicalElement : AbstractStringLogicalElement<UnfinalizedUninterpretedStringLogicalElement, UninterpretedStringLogicalElement>
     {
-        public UninterpretedStringLogicalElement(string stringValue)
+        public UninterpretedStringLogicalElement(UnfinalizedUninterpretedStringLogicalElement innerElement, Action<UninterpretedStringLogicalElement> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedUninterpretedStringLogicalElement: AbstractUnfinalizedStringLogicalElement<UnfinalizedUninterpretedStringLogicalElement, UninterpretedStringLogicalElement>
+    {
+        public UnfinalizedUninterpretedStringLogicalElement(string stringValue)
         {
             StringValue = stringValue;
         }
 
         public string StringValue { get; set; }
+
+        protected override UninterpretedStringLogicalElement CreateFinalizedElement(UnfinalizedUninterpretedStringLogicalElement sourceElement, Action<UninterpretedStringLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mapping)
+        {
+            return new UninterpretedStringLogicalElement(sourceElement, mappingsInsertionCallback);
+        }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {

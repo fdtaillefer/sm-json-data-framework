@@ -14,53 +14,53 @@ using System.Threading.Tasks;
 namespace sm_json_data_framework.Models.Requirements
 {
     /// <summary>
-    /// A static class containing utility methods that are useful in the process of creating <see cref="AbstractLogicalElement"/>s.
+    /// A static class containing utility methods that are useful in the process of creating <see cref="AbstractUnfinalizedLogicalElement"/>s.
     /// </summary>
     public static class LogicalElementCreationUtils
     {
         /// <summary>
-        /// A dictionary that maps an ObjectLogicalElementTypeEnum to a a subtype of <see cref="AbstractObjectLogicalElement"/>
+        /// A dictionary that maps an ObjectLogicalElementTypeEnum to a a subtype of <see cref="AbstractUnfinalizedObjectLogicalElement"/>
         /// that is the default Class to use to represent a logical element of that type.
         /// </summary>
         public static ReadOnlyDictionary<ObjectLogicalElementTypeEnum, Type> DefaultObjectLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>
         {
-            { ObjectLogicalElementTypeEnum.And, typeof(And) },
-            { ObjectLogicalElementTypeEnum.Or, typeof(Or) },
+            { ObjectLogicalElementTypeEnum.And, typeof(UnfinalizedAnd) },
+            { ObjectLogicalElementTypeEnum.Or, typeof(UnfinalizedOr) },
 
-            { ObjectLogicalElementTypeEnum.AcidFrames, typeof(AcidFrames) },
-            { ObjectLogicalElementTypeEnum.DraygonElectricityFrames, typeof(DraygonElectricityFrames) },
-            { ObjectLogicalElementTypeEnum.EnergyAtMost, typeof(EnergyAtMost) },
-            { ObjectLogicalElementTypeEnum.HeatFrames, typeof(HeatFrames) },
-            { ObjectLogicalElementTypeEnum.HibashiHits, typeof(HibashiHits) },
-            { ObjectLogicalElementTypeEnum.LavaFrames, typeof(LavaFrames) },
-            { ObjectLogicalElementTypeEnum.LavaPhysicsFrames, typeof(LavaPhysicsFrames) },
-            { ObjectLogicalElementTypeEnum.PreviousNode, typeof(PreviousNode) },
-            { ObjectLogicalElementTypeEnum.SpikeHits, typeof(SpikeHits) },
-            { ObjectLogicalElementTypeEnum.ThornHits, typeof(ThornHits) },
+            { ObjectLogicalElementTypeEnum.AcidFrames, typeof(UnfinalizedAcidFrames) },
+            { ObjectLogicalElementTypeEnum.DraygonElectricityFrames, typeof(UnfinalizedDraygonElectricityFrames) },
+            { ObjectLogicalElementTypeEnum.EnergyAtMost, typeof(UnfinalizedEnergyAtMost) },
+            { ObjectLogicalElementTypeEnum.HeatFrames, typeof(UnfinalizedHeatFrames) },
+            { ObjectLogicalElementTypeEnum.HibashiHits, typeof(UnfinalizedHibashiHits) },
+            { ObjectLogicalElementTypeEnum.LavaFrames, typeof(UnfinalizedLavaFrames) },
+            { ObjectLogicalElementTypeEnum.LavaPhysicsFrames, typeof(UnfinalizedLavaPhysicsFrames) },
+            { ObjectLogicalElementTypeEnum.PreviousNode, typeof(UnfinalizedPreviousNode) },
+            { ObjectLogicalElementTypeEnum.SpikeHits, typeof(UnfinalizedSpikeHits) },
+            { ObjectLogicalElementTypeEnum.ThornHits, typeof(UnfinalizedThornHits) },
 
-            { ObjectLogicalElementTypeEnum.PreviousStratProperty, typeof(PreviousStratProperty) },
+            { ObjectLogicalElementTypeEnum.PreviousStratProperty, typeof(UnfinalizedPreviousStratProperty) },
 
-            { ObjectLogicalElementTypeEnum.AdjacentRunway, typeof(AdjacentRunway) },
-            { ObjectLogicalElementTypeEnum.Ammo, typeof(Ammo) },
-            { ObjectLogicalElementTypeEnum.AmmoDrain, typeof(AmmoDrain) },
-            { ObjectLogicalElementTypeEnum.CanComeInCharged, typeof(CanComeInCharged) },
-            { ObjectLogicalElementTypeEnum.CanShineCharge, typeof(CanShineCharge) },
-            { ObjectLogicalElementTypeEnum.EnemyDamage, typeof(EnemyDamage) },
-            { ObjectLogicalElementTypeEnum.EnemyKill, typeof(EnemyKill) },
-            { ObjectLogicalElementTypeEnum.ResetRoom, typeof(ResetRoom) }
+            { ObjectLogicalElementTypeEnum.AdjacentRunway, typeof(UnfinalizedAdjacentRunway) },
+            { ObjectLogicalElementTypeEnum.Ammo, typeof(UnfinalizedAmmo) },
+            { ObjectLogicalElementTypeEnum.AmmoDrain, typeof(UnfinalizedAmmoDrain) },
+            { ObjectLogicalElementTypeEnum.CanComeInCharged, typeof(UnfinalizedCanComeInCharged) },
+            { ObjectLogicalElementTypeEnum.CanShineCharge, typeof(UnfinalizedCanShineCharge) },
+            { ObjectLogicalElementTypeEnum.EnemyDamage, typeof(UnfinalizedEnemyDamage) },
+            { ObjectLogicalElementTypeEnum.EnemyKill, typeof(UnfinalizedEnemyKill) },
+            { ObjectLogicalElementTypeEnum.ResetRoom, typeof(UnfinalizedResetRoom) }
         }.AsReadOnly();
 
         /// <summary>
-        /// A dictionary that maps an ObjectLogicalElementTypeEnum to a a subtype of <see cref="AbstractObjectLogicalElement"/>
+        /// A dictionary that maps an ObjectLogicalElementTypeEnum to a a subtype of <see cref="AbstractUnfinalizedObjectLogicalElement"/>
         /// that is the default Class to use to represent a logical element of that type.
         /// </summary>
         public static ReadOnlyDictionary<StringLogicalElementTypeEnum, Type> DefaultStringLogicalElementTypes = new Dictionary<StringLogicalElementTypeEnum, Type>
         {
-            { StringLogicalElementTypeEnum.Never, typeof(NeverLogicalElement) },
-            { StringLogicalElementTypeEnum.Helper, typeof(HelperLogicalElement) },
-            { StringLogicalElementTypeEnum.Tech, typeof(TechLogicalElement) },
-            { StringLogicalElementTypeEnum.Item, typeof(ItemLogicalElement) },
-            { StringLogicalElementTypeEnum.Gameflag, typeof(GameFlagLogicalElement) }
+            { StringLogicalElementTypeEnum.Never, typeof(UnfinalizedNeverLogicalElement) },
+            { StringLogicalElementTypeEnum.Helper, typeof(UnfinalizedHelperLogicalElement) },
+            { StringLogicalElementTypeEnum.Tech, typeof(UnfinalizedTechLogicalElement) },
+            { StringLogicalElementTypeEnum.Item, typeof(UnfinalizedItemLogicalElement) },
+            { StringLogicalElementTypeEnum.Gameflag, typeof(UnfinalizedGameFlagLogicalElement) }
         }.AsReadOnly();
 
         /// <summary>

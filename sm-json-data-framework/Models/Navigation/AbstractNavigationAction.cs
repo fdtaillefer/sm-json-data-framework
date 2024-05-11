@@ -98,7 +98,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// If this action changed the player's position, this property describes that change. Otherwise, this is null.
         /// </summary>
-        public (RoomNode fromNode, RoomNode toNode) PositionChange { get; protected set; } = (null, null);
+        public (UnfinalizedRoomNode fromNode, UnfinalizedRoomNode toNode) PositionChange { get; protected set; } = (null, null);
 
         /// <summary>
         /// The inventory of items that have been gained by the player as a result of this action.
@@ -124,46 +124,46 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// The enumeration of game flags that have been obtained by the player as a result of this action.
         /// </summary>
-        public IEnumerable<GameFlag> GameFlagsGained { get; protected set; } = Enumerable.Empty<GameFlag>();
+        public IEnumerable<UnfinalizedGameFlag> GameFlagsGained { get; protected set; } = Enumerable.Empty<UnfinalizedGameFlag>();
 
         /// <summary>
         /// The enumeration of game flags that have been obtained by the player as a result of this action.
         /// </summary>
-        public IEnumerable<GameFlag> GameFlagsLost { get; protected set; } = Enumerable.Empty<GameFlag>();
+        public IEnumerable<UnfinalizedGameFlag> GameFlagsLost { get; protected set; } = Enumerable.Empty<UnfinalizedGameFlag>();
 
         /// <summary>
         /// The enumeration of node locks that have been opened as a result of this action.
         /// </summary>
-        public IEnumerable<NodeLock> LocksOpened { get; protected set; } = Enumerable.Empty<NodeLock>();
+        public IEnumerable<UnfinalizedNodeLock> LocksOpened { get; protected set; } = Enumerable.Empty<UnfinalizedNodeLock>();
 
         /// <summary>
         /// The enumeration of node  locks that have been closed as a result of this action.
         /// This can only really happen by reversing an action.
         /// </summary>
-        public IEnumerable<NodeLock> LocksClosed { get; protected set; } = Enumerable.Empty<NodeLock>();
+        public IEnumerable<UnfinalizedNodeLock> LocksClosed { get; protected set; } = Enumerable.Empty<UnfinalizedNodeLock>();
 
         /// <summary>
         /// The enumeration of item locations whose item has been taken by the player as a result of this action.
         /// </summary>
-        public IEnumerable<RoomNode> ItemLocationsTaken { get; protected set; } = Enumerable.Empty<RoomNode>();
+        public IEnumerable<UnfinalizedRoomNode> ItemLocationsTaken { get; protected set; } = Enumerable.Empty<UnfinalizedRoomNode>();
 
         /// <summary>
         /// The enumeration of item locations whose item has been put back where it was as a result of this action.
         /// </summary>
-        public IEnumerable<RoomNode> ItemLocationsPutBack { get; protected set; } = Enumerable.Empty<RoomNode>();
+        public IEnumerable<UnfinalizedRoomNode> ItemLocationsPutBack { get; protected set; } = Enumerable.Empty<UnfinalizedRoomNode>();
 
         /// <summary>
         /// <para>The enumeration of in-room obstacles that have been destroyed as a result of this action.</para>
         /// <para>Note that changes to obstacles are not kept when changing rooms.</para>
         /// </summary>
-        public IEnumerable<RoomObstacle> ObstaclesDestroyed { get; protected set; } = Enumerable.Empty<RoomObstacle>();
+        public IEnumerable<UnfinalizedRoomObstacle> ObstaclesDestroyed { get; protected set; } = Enumerable.Empty<UnfinalizedRoomObstacle>();
 
         /// <summary>
         /// <para>The enumeration of in-room obstacles that have been restored as a result of this action.
         /// This can only really happen by reversing an action, since it's deemed unnecessary to indicate that exiting a room restores obstacles.</para>
         /// <para>Note that changes to obstacles are not kept when changing rooms.</para>
         /// </summary>
-        public IEnumerable<RoomObstacle> ObstaclesRestored { get; protected set; } = Enumerable.Empty<RoomObstacle>();
+        public IEnumerable<UnfinalizedRoomObstacle> ObstaclesRestored { get; protected set; } = Enumerable.Empty<UnfinalizedRoomObstacle>();
 
         /// <summary>
         /// A ResourceCount representing the player's resources before this action.
@@ -180,22 +180,22 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// A sequence of runways that were used (possibly retroactively) along with the accompanying runway strat.
         /// </summary>
-        public IEnumerable<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; set; } = Enumerable.Empty<(Runway, Strat)>();
+        public IEnumerable<(UnfinalizedRunway runwayUsed, UnfinalizedStrat stratUsed)> RunwaysUsed { get; set; } = Enumerable.Empty<(UnfinalizedRunway, UnfinalizedStrat)>();
 
         /// <summary>
         /// A sequence of canLeaveCharged that were executed (possibly retroactively) along with the accompanying canLeaveCharged strat.
         /// </summary>
-        public IEnumerable<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(CanLeaveCharged, Strat)>();
+        public IEnumerable<(UnfinalizedCanLeaveCharged canLeaveChargedUsed, UnfinalizedStrat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(UnfinalizedCanLeaveCharged, UnfinalizedStrat)>();
 
         /// <summary>
         /// A sequence of node locks that were opened along with the open strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(NodeLock openedLock, Strat stratUsed)>();
+        public IEnumerable<(UnfinalizedNodeLock openedLock, UnfinalizedStrat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(UnfinalizedNodeLock openedLock, UnfinalizedStrat stratUsed)>();
 
         /// <summary>
         /// A sequence of node locks that were bypassed along with the bypass strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(NodeLock bypassedLock, Strat stratUsed)>();
+        public IEnumerable<(UnfinalizedNodeLock bypassedLock, UnfinalizedStrat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(UnfinalizedNodeLock bypassedLock, UnfinalizedStrat stratUsed)>();
 
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
@@ -206,12 +206,12 @@ namespace sm_json_data_framework.Models.Navigation
         /// A sequence of items that were involved in some way, excluding damage reduction
         /// and operation of weapons already present in <see cref="KilledEnemies"/>.
         /// </summary>
-        public ISet<Item> ItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public ISet<UnfinalizedItem> ItemsInvolved { get; set; } = new HashSet<UnfinalizedItem>(ObjectReferenceEqualityComparer<UnfinalizedItem>.Default);
 
         /// <summary>
         /// A sequence of items that were involved in reducing incoming damage.
         /// </summary>
-        public ISet<Item> DamageReducingItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public ISet<UnfinalizedItem> DamageReducingItemsInvolved { get; set; } = new HashSet<UnfinalizedItem>(ObjectReferenceEqualityComparer<UnfinalizedItem>.Default);
         #endregion
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace sm_json_data_framework.Models.Navigation
             if (outputEffects)
             {
                 // Items gained and lost
-                foreach (Item item in ItemsGained.NonConsumableItems.Values)
+                foreach (UnfinalizedItem item in ItemsGained.NonConsumableItems.Values)
                 {
                     Console.WriteLine($"Gained item '{item.Name}'");
                 }
@@ -362,7 +362,7 @@ namespace sm_json_data_framework.Models.Navigation
                     Console.WriteLine($"Gained item '{item.Name}' X {count}");
                 }
 
-                foreach (Item item in ItemsLost.NonConsumableItems.Values)
+                foreach (UnfinalizedItem item in ItemsLost.NonConsumableItems.Values)
                 {
                     Console.WriteLine($"Lost item '{item.Name}'");
                 }
@@ -398,45 +398,45 @@ namespace sm_json_data_framework.Models.Navigation
                 }
 
                 // Game flags gained and lost
-                foreach (GameFlag flag in GameFlagsGained)
+                foreach (UnfinalizedGameFlag flag in GameFlagsGained)
                 {
                     Console.WriteLine($"Gained game flag '{flag.Name}'");
                 }
 
-                foreach (GameFlag flag in GameFlagsLost)
+                foreach (UnfinalizedGameFlag flag in GameFlagsLost)
                 {
                     Console.WriteLine($"Lost game flag '{flag.Name}'");
                 }
 
                 // Locks opened and closed
-                foreach (NodeLock nodeLock in LocksOpened)
+                foreach (UnfinalizedNodeLock nodeLock in LocksOpened)
                 {
                     Console.WriteLine($"Opened lock '{nodeLock.Name}'");
                 }
 
-                foreach (NodeLock nodeLock in LocksClosed)
+                foreach (UnfinalizedNodeLock nodeLock in LocksClosed)
                 {
                     Console.WriteLine($"Closed lock '{nodeLock.Name}'");
                 }
 
                 // Item locations taken and put back
-                foreach (RoomNode itemLocation in ItemLocationsTaken)
+                foreach (UnfinalizedRoomNode itemLocation in ItemLocationsTaken)
                 {
                     Console.WriteLine($"Item at location '{itemLocation.Name}' has been taken");
                 }
 
-                foreach (RoomNode itemLocation in ItemLocationsPutBack)
+                foreach (UnfinalizedRoomNode itemLocation in ItemLocationsPutBack)
                 {
                     Console.WriteLine($"Item at location '{itemLocation.Name}' has been put back");
                 }
 
                 //Obstacles destroyed and restored
-                foreach (RoomObstacle obstacle in ObstaclesDestroyed)
+                foreach (UnfinalizedRoomObstacle obstacle in ObstaclesDestroyed)
                 {
                     Console.WriteLine($"Destroyed obstacle '{obstacle.Name}'");
                 }
 
-                foreach (RoomObstacle obstacle in ObstaclesRestored)
+                foreach (UnfinalizedRoomObstacle obstacle in ObstaclesRestored)
                 {
                     Console.WriteLine($"Restored obstacle '{obstacle.Name}'");
                 }

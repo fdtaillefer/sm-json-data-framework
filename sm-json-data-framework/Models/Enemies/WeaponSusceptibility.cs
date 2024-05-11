@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The weapon the implicit enemy is susceptible to
         /// </summary>
-        public Weapon Weapon { get { return WeaponMultiplier.Weapon; } }
+        public UnfinalizedWeapon Weapon { get { return WeaponMultiplier.Weapon; } }
 
         /// <summary>
         /// The number of perfectly-aimed shots of the weapon it would take to kill the implicit enemy

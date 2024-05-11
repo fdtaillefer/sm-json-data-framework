@@ -8,17 +8,39 @@ using System.Text;
 namespace sm_json_data_framework.Models.Requirements.StringRequirements
 {
     /// <summary>
-    /// A logical element that is fulfilled by fulfilling the requirements of an inner Tech.
+    /// A logical element that is fulfilled by fulfilling the requirements of a Tech.
     /// </summary>
-    public class TechLogicalElement : AbstractStringLogicalElement
+    public class TechLogicalElement : AbstractStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>
     {
-        private Tech Tech { get; set; }
+        private UnfinalizedTechLogicalElement InnerElement { get; set; }
+
+        public TechLogicalElement(UnfinalizedTechLogicalElement innerElement, Action<TechLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Tech = innerElement.Tech.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The tech that must be executed to fulfill this logical element.
+        /// </summary>
+        public Tech Tech { get; }
+    }
+
+    public class UnfinalizedTechLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>
+    {
+        public UnfinalizedTech Tech { get; set; }
 
         private int Tries { get; set; } = LogicalOptions.DefaultNumberOfTries;
 
-        public TechLogicalElement(Tech tech)
+        public UnfinalizedTechLogicalElement(UnfinalizedTech tech)
         {
             Tech = tech;
+        }
+
+        protected override TechLogicalElement CreateFinalizedElement(UnfinalizedTechLogicalElement sourceElement, Action<TechLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new TechLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

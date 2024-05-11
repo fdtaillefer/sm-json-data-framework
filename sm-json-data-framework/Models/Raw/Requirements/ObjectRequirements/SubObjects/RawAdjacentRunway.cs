@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
+using sm_json_data_framework.Models.Items;
 
 namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubObjects
 {
@@ -27,11 +28,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public bool OverrideRunwayRequirements { get; set; } = false;
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.AdjacentRunway, out Type type))
             {
-                AdjacentRunway adjacentRunway = (AdjacentRunway)Activator.CreateInstance(type);
+                UnfinalizedAdjacentRunway adjacentRunway = (UnfinalizedAdjacentRunway)Activator.CreateInstance(type);
                 adjacentRunway.FromNodeId = FromNode;
                 adjacentRunway.OverrideRunwayRequirements = OverrideRunwayRequirements;
                 adjacentRunway.UsedTiles = UsedTiles;
@@ -40,7 +41,13 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
                 {
                     adjacentRunway.InRoomPath = new List<int>(InRoomPath);
                 }
-                if (Physics != null)
+
+                // No physics specified means all physics work
+                if (Physics == null)
+                {
+                    adjacentRunway.Physics = Enum.GetValues<PhysicsEnum>().ToHashSet();
+                }
+                else
                 {
                     adjacentRunway.Physics = new HashSet<PhysicsEnum>(Physics);
                 }

@@ -12,12 +12,38 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// <summary>
     /// A logical element which requires Samus spend a fixed amount of a specific ammo type.
     /// </summary>
-    public class Ammo : AbstractObjectLogicalElement
+    public class Ammo : AbstractObjectLogicalElement<UnfinalizedAmmo, Ammo>
+    {
+        private UnfinalizedAmmo InnerElement { get; set; }
+
+        public Ammo(UnfinalizedAmmo innerElement, Action<Ammo> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+        }
+
+        /// <summary>
+        /// The type of ammo that is being consumed by this.
+        /// </summary>
+        public AmmoEnum AmmoType { get { return InnerElement.AmmoType; } }
+
+        /// <summary>
+        /// The amount of ammo that is being consumed by this.
+        /// </summary>
+        public int Count { get { return InnerElement.Count; } }
+    }
+
+    public class UnfinalizedAmmo : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmo, Ammo>
     {
         [JsonPropertyName("type")]
         public AmmoEnum AmmoType { get; set; }
         
         public int Count { get; set; }
+
+        protected override Ammo CreateFinalizedElement(UnfinalizedAmmo sourceElement, Action<Ammo> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Ammo(sourceElement, mappingsInsertionCallback);
+        }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
@@ -30,7 +56,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             // No properties need to be handled here
             return Enumerable.Empty<string>();

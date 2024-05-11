@@ -8,16 +8,57 @@ using System.Text;
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     /// <summary>
-    /// An abstract superclass for the many AbstractObjectLogicalElementWithNumericalIntegerValues that happen to inflict damage on Samus.
+    /// An abstract superclass for the many <see cref="AbstractObjectLogicalElementWithNumericalIntegerValue{SourceType, ConcreteType}"/> that happen to inflict damage on Samus.
     /// </summary>
-    public abstract class AbstractDamageNumericalValueLogicalElement: AbstractObjectLogicalElementWithNumericalIntegerValue
+    public abstract class AbstractDamageNumericalValueLogicalElement<SourceType, ConcreteType>: AbstractObjectLogicalElementWithNumericalIntegerValue<SourceType, ConcreteType>
+        where SourceType : AbstractUnfinalizedDamageNumericalValueLogicalElement<SourceType, ConcreteType>
+        where ConcreteType : AbstractDamageNumericalValueLogicalElement<SourceType, ConcreteType>
     {
-        public AbstractDamageNumericalValueLogicalElement()
+        private SourceType InnerElement { get; set; }
+
+        protected AbstractDamageNumericalValueLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+        }
+
+        /// <summary>
+        /// Calculates the amount of damage that fulfilling this logical element will inflict on Samus.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to evaluate</param>
+        /// <param name="times">The number of consecutive times that Samus will take this damage.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns>The calculated amount of damage</returns>
+        public int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return InnerElement.CalculateDamage(model, inGameState, times, previousRoomCount);
+        }
+
+        /// <summary>
+        /// Returns the enumeration of items that are responsible for reducing incurred damage, 
+        /// given the execution described by the provided parameters.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state that execution would start with.</param>
+        /// <returns></returns>
+        public IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return InnerElement.GetDamageReducingItems(model, inGameState);
+        }
+    }
+
+    public abstract class AbstractUnfinalizedDamageNumericalValueLogicalElement<ConcreteType, TargetType>: AbstractUnfinalizedObjectLogicalElementWithNumericalIntegerValue<ConcreteType, TargetType>
+        where ConcreteType : AbstractUnfinalizedDamageNumericalValueLogicalElement<ConcreteType, TargetType>
+        where TargetType : AbstractDamageNumericalValueLogicalElement<ConcreteType, TargetType>
+    {
+        public AbstractUnfinalizedDamageNumericalValueLogicalElement()
         {
 
         }
 
-        public AbstractDamageNumericalValueLogicalElement(int value) : base(value)
+        public AbstractUnfinalizedDamageNumericalValueLogicalElement(int value) : base(value)
         {
 
         }
@@ -45,7 +86,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state that execution would start with.</param>
         /// <returns></returns>
-        public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState);
+        public abstract IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState);
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {

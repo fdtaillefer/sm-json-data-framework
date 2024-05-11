@@ -10,16 +10,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which requires Samus to take a number of hits from the Norfair flame jets (known as Hibashi).
     /// </summary>
-    public class HibashiHits : AbstractDamageNumericalValueLogicalElement
+    public class HibashiHits : AbstractDamageNumericalValueLogicalElement<UnfinalizedHibashiHits, HibashiHits>
     {
-        public HibashiHits()
+        public HibashiHits(UnfinalizedHibashiHits innerElement, Action<HibashiHits> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedHibashiHits : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedHibashiHits, HibashiHits>
+    {
+        public UnfinalizedHibashiHits()
         {
 
         }
 
-        public HibashiHits(int hits) : base(hits)
+        public UnfinalizedHibashiHits(int hits) : base(hits)
         {
 
+        }
+
+        protected override HibashiHits CreateFinalizedElement(UnfinalizedHibashiHits sourceElement, Action<HibashiHits> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new HibashiHits(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -32,7 +46,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.HibashiDamage) * Value * times;
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetEnvironmentalDamageReducingItems(model, inGameState);
         }

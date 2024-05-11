@@ -14,33 +14,57 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// A container class for a series of logical elements.
     /// </summary>
-    public class LogicalRequirements : AbstractModelElement, IExecutable
+    public class LogicalRequirements : AbstractModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutable
+    {
+        private UnfinalizedLogicalRequirements InnerElement { get; }
+
+        public LogicalRequirements(UnfinalizedLogicalRequirements innerElement, Action<LogicalRequirements> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            LogicalElements = innerElement.LogicalElements.Select(unfinalized => unfinalized.FinalizeUntypedLogicalElement(mappings)).ToList().AsReadOnly();
+        }
+
+        public IReadOnlyList<ILogicalElement> LogicalElements { get; }
+
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return InnerElement.Execute(model, inGameState, times, previousRoomCount);
+        }
+    }
+
+    public class UnfinalizedLogicalRequirements : AbstractUnfinalizedModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutable
     {
         internal class NeverRequirements
         {
-            public static readonly LogicalRequirements Instance = new LogicalRequirements(new AbstractLogicalElement[] { new NeverLogicalElement() });
+            public static readonly UnfinalizedLogicalRequirements Instance = new UnfinalizedLogicalRequirements(new IUnfinalizedLogicalElement[] { new UnfinalizedNeverLogicalElement() });
         }
 
         internal class AlwaysRequirements
         {
-            public static readonly LogicalRequirements Instance = new LogicalRequirements();
+            public static readonly UnfinalizedLogicalRequirements Instance = new UnfinalizedLogicalRequirements();
         }
 
-        public LogicalRequirements()
+        public UnfinalizedLogicalRequirements()
         {
 
         }
 
-        public LogicalRequirements(IEnumerable<AbstractLogicalElement> logicalElements)
+        public UnfinalizedLogicalRequirements(IEnumerable<IUnfinalizedLogicalElement> logicalElements)
         {
             LogicalElements = LogicalElements.Concat(logicalElements).ToList();
         }
 
-        public IList<AbstractLogicalElement> LogicalElements { get; private set; } = new List<AbstractLogicalElement>();
+        protected override LogicalRequirements CreateFinalizedElement(UnfinalizedLogicalRequirements sourceElement, Action<LogicalRequirements> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new LogicalRequirements(sourceElement, mappingsInsertionCallback, mappings);
+        }
+
+        public IList<IUnfinalizedLogicalElement> LogicalElements { get; private set; } = new List<IUnfinalizedLogicalElement>();
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
-            foreach (AbstractLogicalElement logicalElement in LogicalElements)
+            foreach (IUnfinalizedLogicalElement logicalElement in LogicalElements)
             {
                 logicalElement.ApplyLogicalOptions(logicalOptions);
             }
@@ -58,7 +82,7 @@ namespace sm_json_data_framework.Models.Requirements
 
         /// <summary>
         /// Returns whether this set of logical requirements in its base state is logically impossible to fully complete
-        /// (due to having a mandatory <see cref="NeverLogicalElement"/>).
+        /// (due to having a mandatory <see cref="UnfinalizedNeverLogicalElement"/>).
         /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
         /// which are not available here.
         /// </summary>
@@ -75,11 +99,11 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="model">A SuperMetroidModel that contains global data</param>
         /// <param name="room">The room in which this LogicalRequirements is, or null if it's not in a room</param>
         /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
-            foreach(AbstractLogicalElement logicalElement in LogicalElements)
+            foreach(IUnfinalizedLogicalElement logicalElement in LogicalElements)
             {
                 unhandled.AddRange(logicalElement.InitializeReferencedLogicalElementProperties(model, room));
             }
@@ -118,7 +142,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// Returns an instance of LogicalRequirements whose execution never succeeds.
         /// </summary>
         /// <returns></returns>
-        public static LogicalRequirements Never()
+        public static UnfinalizedLogicalRequirements Never()
         {
             return NeverRequirements.Instance;
         }

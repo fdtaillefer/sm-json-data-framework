@@ -21,15 +21,15 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements
             LogicalRequirements = logicalRequirements;
         }
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
-            LogicalRequirements convertedRequirements = LogicalRequirements.ToLogicalRequirements(knowledgeBase);
+            UnfinalizedLogicalRequirements convertedRequirements = LogicalRequirements.ToLogicalRequirements(knowledgeBase);
             // Convert property name to logicalElementEnum
             ObjectLogicalElementTypeEnum elementTypeEnum
                 = (ObjectLogicalElementTypeEnum)Enum.Parse(typeof(ObjectLogicalElementTypeEnum), PropertyName, true);
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(elementTypeEnum, out Type type))
             {
-                return (AbstractObjectLogicalElementWithSubRequirements)Activator.CreateInstance(type, convertedRequirements);
+                return (IUnfinalizedLogicalElement)Activator.CreateInstance(type, convertedRequirements);
             } else
             {
                 throw new Exception($"The identifier {PropertyName} could not be matched to a sub-requirements logical element type to instantiate.");

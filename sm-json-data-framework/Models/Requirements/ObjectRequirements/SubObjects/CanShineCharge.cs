@@ -15,7 +15,42 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// <summary>
     /// A logical element which requires Samus to charge a blue suit and possibly use it to shinespark (if it has any shinespark frames).
     /// </summary>
-    public class CanShineCharge : AbstractObjectLogicalElement, IRunway
+    public class CanShineCharge : AbstractObjectLogicalElement<UnfinalizedCanShineCharge, CanShineCharge>, IRunway
+    {
+        private UnfinalizedCanShineCharge InnerElement {get;set;}
+        public CanShineCharge(UnfinalizedCanShineCharge innerElement, Action<CanShineCharge> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+        }
+
+        public int Length { get { return InnerElement.Length; } }
+
+        public int EndingUpTiles { get { return InnerElement.EndingUpTiles; } }
+
+        public int GentleUpTiles { get { return InnerElement.GentleUpTiles; } }
+
+        public int GentleDownTiles { get { return InnerElement.GentleDownTiles; } }
+
+        public int SteepUpTiles { get { return InnerElement.SteepUpTiles; } }
+
+        public int SteepDownTiles { get { return InnerElement.SteepDownTiles; } }
+
+        public int StartingDownTiles { get { return InnerElement.StartingDownTiles; } }
+
+        public int OpenEnds { get { return InnerElement.OpenEnds; } }
+
+        /// <summary>
+        /// The duration (in frames) of the shinespark that goes alongside this CanShineCharge, if any. Can be 0 if no shinespark is involved.
+        /// </summary>
+        public int ShinesparkFrames { get { return InnerElement.ShinesparkFrames; } }
+
+        /// <summary>
+        /// Indicates whether this CanShineCharge involves executing a shinespark.
+        /// </summary>
+        public bool MustShinespark { get { return InnerElement.MustShinespark; } }
+    }
+
+    public class UnfinalizedCanShineCharge : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanShineCharge, CanShineCharge>, IRunway
     {
         [JsonIgnore]
         public int Length { get => UsedTiles; }
@@ -49,6 +84,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
 
+        protected override CanShineCharge CreateFinalizedElement(UnfinalizedCanShineCharge sourceElement, Action<CanShineCharge> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new CanShineCharge(sourceElement, mappingsInsertionCallback);
+        }
+
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             TilesSavedWithStutter = logicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
@@ -75,7 +115,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             // No properties need to be handled here
             return Enumerable.Empty<string>();
@@ -105,7 +145,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 InGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, energyCost);
                 ExecutionResult result = new ExecutionResult(resultingState);
-                result.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                result.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return result;
             }
             // If we don't have enough for the shinespark, we cannot do this

@@ -10,18 +10,32 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which requires Samus to spend some frames in lava while under lava physics (i.e. with Gravity Suit turned off even if available).
     /// </summary>
-    public class LavaPhysicsFrames: AbstractDamageNumericalValueLogicalElement
+    public class LavaPhysicsFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedLavaPhysicsFrames, LavaPhysicsFrames>
+    {
+        public LavaPhysicsFrames(UnfinalizedLavaPhysicsFrames innerElement, Action<LavaPhysicsFrames> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedLavaPhysicsFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedLavaPhysicsFrames, LavaPhysicsFrames>
     {
         private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
-        public LavaPhysicsFrames()
+        public UnfinalizedLavaPhysicsFrames()
         {
 
         }
 
-        public LavaPhysicsFrames(int frames) : base(frames)
+        public UnfinalizedLavaPhysicsFrames(int frames) : base(frames)
         {
 
+        }
+
+        protected override LavaPhysicsFrames CreateFinalizedElement(UnfinalizedLavaPhysicsFrames sourceElement, Action<LavaPhysicsFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new LavaPhysicsFrames(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -37,7 +51,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return (int)(baseDamage * LavaLeniencyMultiplier);
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetLavaPhysicsDamageReducingItems(model, inGameState);
         }

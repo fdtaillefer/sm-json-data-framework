@@ -18,6 +18,6 @@ namespace sm_json_data_framework.Models.Raw.Requirements
         /// </summary>
         /// <param name="knowledgeBase">A model containing all data that could be needed to create any logical element.</param>
         /// <returns></returns>
-        public abstract AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase);
+        public abstract IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase);
     }
 }

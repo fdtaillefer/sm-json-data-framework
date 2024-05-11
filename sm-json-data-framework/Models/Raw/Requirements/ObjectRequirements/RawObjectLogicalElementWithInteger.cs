@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements
             Value = value;
         }
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             
             // Convert property name to logicalElementEnum
@@ -28,8 +28,8 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements
                 = (ObjectLogicalElementTypeEnum)Enum.Parse(typeof(ObjectLogicalElementTypeEnum), PropertyName, true);
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(elementTypeEnum, out Type type))
             {
-                AbstractObjectLogicalElementWithInteger logicalElement =
-                    (AbstractObjectLogicalElementWithInteger)Activator.CreateInstance(type, Value);
+                IUnfinalizedLogicalElement logicalElement =
+                    (IUnfinalizedLogicalElement)Activator.CreateInstance(type, Value);
                 return logicalElement;
             }
             else

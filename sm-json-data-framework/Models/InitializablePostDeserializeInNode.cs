@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models
         /// <param name="model">The model to use to initialize the foreign properties</param>
         /// <param name="room">The room in which this model is located</param>
         /// <param name="node">The node in which this model is located</param>
-        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node);
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node);
 
         /// <summary>
         /// <para>Goes through all logical elements within this model and any relevant sub-model,
@@ -31,6 +31,6 @@ namespace sm_json_data_framework.Models
         /// <param name="room">The room in which this model is located</param>
         /// <param name="node">The node in which this model is located</param>
         /// <returns>A sequence of strings describing references that could not be resolved.</returns>
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node);
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node);
     }
 }

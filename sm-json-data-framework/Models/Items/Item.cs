@@ -9,15 +9,36 @@ namespace sm_json_data_framework.Models.Items
     /// <summary>
     /// Represents an item, regardless of whether this is explicitly an item in the game or just implicitly an item.
     /// </summary>
-    public class Item: AbstractModelElement
+    public class Item : AbstractModelElement<UnfinalizedItem, Item>
+    {
+        private Item InnerElement { get; set; }
+
+        public Item(UnfinalizedItem innerElement, Action<Item> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = InnerElement;
+        }
+
+        /// <summary>
+        /// The unique name of this item.
+        /// </summary>
+        public string Name { get { return InnerElement.Name; } }
+    }
+
+    public class UnfinalizedItem: AbstractUnfinalizedModelElement<UnfinalizedItem, Item>
     {
         public string Name { get; set; }
 
-        public Item() { }
+        public UnfinalizedItem() { }
 
-        public Item (string name)
+        public UnfinalizedItem (string name)
         {
             Name = name;
+        }
+
+        protected override Item CreateFinalizedElement(UnfinalizedItem sourceElement, Action<Item> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new Item(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

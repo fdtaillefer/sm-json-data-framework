@@ -12,12 +12,37 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// <summary>
     /// A logical element that removes a fixed amount of a specific ammo from Samus, without requiring her to lose the full amount if she runs out.
     /// </summary>
-    public class AmmoDrain : AbstractObjectLogicalElement
+    public class AmmoDrain : AbstractObjectLogicalElement<UnfinalizedAmmoDrain, AmmoDrain>
+    {
+        private UnfinalizedAmmoDrain InnerElement {get;set;}
+
+        public AmmoDrain(UnfinalizedAmmoDrain innerElement, Action<AmmoDrain> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+        }
+
+        /// <summary>
+        /// The type of ammo that is being drained by this.
+        /// </summary>
+        public AmmoEnum AmmoType { get { return InnerElement.AmmoType; } }
+
+        /// <summary>
+        /// The amount of ammo that is being drained by this.
+        /// </summary>
+        public int Count { get { return InnerElement.Count; } }
+    }
+
+    public class UnfinalizedAmmoDrain : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmoDrain, AmmoDrain>
     {
         [JsonPropertyName("type")]
         public AmmoEnum AmmoType { get; set; }
 
         public int Count { get; set; }
+
+        protected override AmmoDrain CreateFinalizedElement(UnfinalizedAmmoDrain sourceElement, Action<AmmoDrain> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new AmmoDrain(sourceElement, mappingsInsertionCallback);
+        }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
@@ -30,7 +55,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             // No properties need to be handled here
             return Enumerable.Empty<string>();

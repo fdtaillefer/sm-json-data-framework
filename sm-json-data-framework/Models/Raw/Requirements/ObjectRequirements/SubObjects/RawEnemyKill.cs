@@ -20,11 +20,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public ISet<AmmoEnum> FarmableAmmo { get; set; } = new HashSet<AmmoEnum>();
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.EnemyKill, out Type type))
             {
-                EnemyKill enemyKill = (EnemyKill)Activator.CreateInstance(type);
+                UnfinalizedEnemyKill enemyKill = (UnfinalizedEnemyKill)Activator.CreateInstance(type);
                 enemyKill.GroupedEnemyNames = Enemies.Select(subGroup => (IList<string>) new List<string>(subGroup)).ToList();
                 enemyKill.ExplicitWeaponNames = new HashSet<string>(ExplicitWeapons);
                 enemyKill.ExcludedWeaponNames = new List<string>(ExcludedWeapons);

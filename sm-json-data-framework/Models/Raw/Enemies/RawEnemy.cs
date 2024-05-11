@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Raw.Enemies
 
         public string Name { get; set; }
 
-        public IList<EnemyAttack> Attacks { get; set; } = new List<EnemyAttack>();
+        public IList<UnfinalizedEnemyAttack> Attacks { get; set; } = new List<UnfinalizedEnemyAttack>();
 
         public int Hp { get; set; }
 

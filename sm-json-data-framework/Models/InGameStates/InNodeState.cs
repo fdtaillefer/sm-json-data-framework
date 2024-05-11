@@ -13,17 +13,17 @@ namespace sm_json_data_framework.Models.InGameStates
     /// </summary>
     public class InNodeState : ReadOnlyInNodeState
     {
-        public RoomNode Node { get; }
+        public UnfinalizedRoomNode Node { get; }
 
-        protected List<NodeLock> InternalOpenedLocks { get; } = new List<NodeLock>();
+        protected List<UnfinalizedNodeLock> InternalOpenedLocks { get; } = new List<UnfinalizedNodeLock>();
 
-        public IReadOnlyCollection<NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
+        public IReadOnlyCollection<UnfinalizedNodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
 
-        protected List<NodeLock> InternalBypassedLocks { get; } = new List<NodeLock>();
+        protected List<UnfinalizedNodeLock> InternalBypassedLocks { get; } = new List<UnfinalizedNodeLock>();
 
-        public IReadOnlyCollection<NodeLock> BypassedLocks { get { return InternalBypassedLocks.AsReadOnly(); } }
+        public IReadOnlyCollection<UnfinalizedNodeLock> BypassedLocks { get { return InternalBypassedLocks.AsReadOnly(); } }
 
-        public InNodeState(RoomNode node)
+        public InNodeState(UnfinalizedRoomNode node)
         {
             Node = node;
         }
@@ -31,8 +31,8 @@ namespace sm_json_data_framework.Models.InGameStates
         public InNodeState(InNodeState other)
         {
             Node = other.Node;
-            InternalOpenedLocks = new List<NodeLock>(other.InternalOpenedLocks);
-            InternalBypassedLocks = new List<NodeLock>(other.InternalBypassedLocks);
+            InternalOpenedLocks = new List<UnfinalizedNodeLock>(other.InternalOpenedLocks);
+            InternalBypassedLocks = new List<UnfinalizedNodeLock>(other.InternalBypassedLocks);
         }
 
         public InNodeState Clone()
@@ -51,7 +51,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="lockName">Name of the lock being opened</param>
         public void ApplyOpenLock(string lockName)
         {
-            if (!Node.Locks.TryGetValue(lockName, out NodeLock foundLock))
+            if (!Node.Locks.TryGetValue(lockName, out UnfinalizedNodeLock foundLock))
             {
                 throw new ArgumentException($"There is no lock named {lockName} on node {Node.Id} of room '{Node.Room.Name}'");
             }
@@ -62,9 +62,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Registers the provided NodeLock as being opened during the current node visit.
         /// </summary>
         /// <param name="nodeLock">Lock being opened</param>
-        public void ApplyOpenLock(NodeLock nodeLock)
+        public void ApplyOpenLock(UnfinalizedNodeLock nodeLock)
         {
-            Node.Locks.TryGetValue(nodeLock.Name, out NodeLock foundLock);
+            Node.Locks.TryGetValue(nodeLock.Name, out UnfinalizedNodeLock foundLock);
             if(foundLock != nodeLock)
             {
                 throw new ArgumentException("Can't open a lock that's not on the node being visited");
@@ -77,7 +77,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This should only be called by one of the public ApplyOpenLock() methods, after validating the operation.
         /// </summary>
         /// <param name="nodeLock">Lock being opened</param>
-        protected void ApplyOpenLockSafe(NodeLock nodeLock)
+        protected void ApplyOpenLockSafe(UnfinalizedNodeLock nodeLock)
         {
             InternalOpenedLocks.Add(nodeLock);
         }
@@ -88,7 +88,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="lockName">Name of the lock being bypassed</param>
         public void ApplyBypassLock(string lockName)
         {
-            if (!Node.Locks.TryGetValue(lockName, out NodeLock foundLock))
+            if (!Node.Locks.TryGetValue(lockName, out UnfinalizedNodeLock foundLock))
             {
                 throw new ArgumentException($"There is no lock named {lockName} on node {Node.Id} of room '{Node.Room.Name}'");
             }
@@ -99,9 +99,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Registers the provided NodeLock as being bypassed during the current node visit.
         /// </summary>
         /// <param name="nodeLock">Lock being bypassed</param>
-        public void ApplyBypassLock(NodeLock nodeLock)
+        public void ApplyBypassLock(UnfinalizedNodeLock nodeLock)
         {
-            Node.Locks.TryGetValue(nodeLock.Name, out NodeLock foundLock);
+            Node.Locks.TryGetValue(nodeLock.Name, out UnfinalizedNodeLock foundLock);
             if (foundLock != nodeLock)
             { 
                 throw new ArgumentException("Can't bypass a lock that's not on the node being visited");
@@ -114,7 +114,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// This should only be called by one of the public ApplyBypassLock() methods, after validating the operation.
         /// </summary>
         /// <param name="nodeLock">Lock being bypassed</param>
-        protected void ApplyBypassLockSafe(NodeLock nodeLock)
+        protected void ApplyBypassLockSafe(UnfinalizedNodeLock nodeLock)
         {
             InternalBypassedLocks.Add(nodeLock);
         }
@@ -128,17 +128,17 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// The node at which this InNodeState describes the situation.
         /// </summary>
-        public RoomNode Node { get; }
+        public UnfinalizedRoomNode Node { get; }
 
         /// <summary>
         /// An enumeration of locks that were opened by Samus during this visit.
         /// </summary>
-        public IReadOnlyCollection<NodeLock> OpenedLocks { get; }
+        public IReadOnlyCollection<UnfinalizedNodeLock> OpenedLocks { get; }
 
         /// <summary>
         /// An enumeration of locks that were bypassed by Samus during this visit.
         /// </summary>
-        public IReadOnlyCollection<NodeLock> BypassedLocks { get; }
+        public IReadOnlyCollection<UnfinalizedNodeLock> BypassedLocks { get; }
 
         /// <summary>
         /// Creates and returns a copy of this InNodeState, as a full-fledged modifiable one.

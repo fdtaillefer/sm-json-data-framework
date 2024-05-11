@@ -10,18 +10,32 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which requires Samus to spend some frames in a heated room.
     /// </summary>
-    public class HeatFrames : AbstractDamageNumericalValueLogicalElement
+    public class HeatFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedHeatFrames, HeatFrames>
+    {
+        public HeatFrames(UnfinalizedHeatFrames innerElement, Action<HeatFrames> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedHeatFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedHeatFrames, HeatFrames>
     {
         private decimal HeatLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
-        public HeatFrames()
+        public UnfinalizedHeatFrames()
         {
 
         }
 
-        public HeatFrames(int frames): base(frames)
+        public UnfinalizedHeatFrames(int frames): base(frames)
         {
             
+        }
+
+        protected override HeatFrames CreateFinalizedElement(UnfinalizedHeatFrames sourceElement, Action<HeatFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new HeatFrames(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -37,7 +51,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return (int)(baseDamage * HeatLeniencyMultiplier);
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetHeatDamageReducingItems(model, inGameState);
         }

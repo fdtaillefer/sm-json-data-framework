@@ -21,8 +21,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_ById_RemembersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
 
             // When
@@ -36,7 +36,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_ById_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InNodeState state = new InNodeState(node);
 
             // When and expect
@@ -47,8 +47,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_RemembersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
 
             // When
@@ -62,8 +62,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyOpenLock_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
 
             // When and expect
@@ -76,8 +76,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_ById_RemembersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
 
             // When
@@ -91,7 +91,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_ById_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
             InNodeState state = new InNodeState(node);
 
             // When and expect
@@ -102,8 +102,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_RemembersLock()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
 
             // When
@@ -117,8 +117,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyBypassLock_LockNotOnNode_ThrowsException()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InNodeState state = new InNodeState(node);
 
             // When and expect
@@ -131,9 +131,9 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void Clone_CopiesCorrectly()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             InNodeState original = new InNodeState(node);
             original.ApplyOpenLock(openedLock);
             original.ApplyBypassLock(bypassedLock);
@@ -151,15 +151,15 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void Clone_SeparatesState()
         {
             // Given
-            RoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
+            UnfinalizedRoomNode node = Model.GetNodeInRoom("Bomb Torizo Room", 1);
             InNodeState original = new InNodeState(node);
 
             // When
             InNodeState clone = original.Clone();
 
             // Subsequently given
-            NodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
-            NodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
+            UnfinalizedNodeLock openedLock = Model.Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            UnfinalizedNodeLock bypassedLock = Model.Locks["Animal Escape Grey Lock (to Flyway)"];
             clone.ApplyOpenLock(openedLock);
             clone.ApplyBypassLock(bypassedLock);
 

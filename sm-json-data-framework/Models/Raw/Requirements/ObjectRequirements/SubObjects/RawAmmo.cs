@@ -18,11 +18,11 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public int Count { get; set; }
 
-        public override AbstractLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
+        public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.Ammo, out Type type))
             {
-                Ammo ammo = (Ammo)Activator.CreateInstance(type);
+                UnfinalizedAmmo ammo = (UnfinalizedAmmo)Activator.CreateInstance(type);
                 ammo.AmmoType = Type;
                 ammo.Count = Count;
                 return ammo;

@@ -13,8 +13,8 @@ namespace sm_json_data_framework.Models.Raw.Enemies
 
         public RawEnemyDamageMultiplier(RawEnemyDamageMultiplier other)
         {
-            this.Weapon = other.Weapon;
-            this.Value = other.Value;
+            Weapon = other.Weapon;
+            Value = other.Value;
         }
 
         public RawEnemyDamageMultiplier CLone()

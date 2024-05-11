@@ -11,15 +11,38 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// <summary>
     /// A logical element that is fulfilled by fulfilling the requirements of an inner Helper.
     /// </summary>
-    public class HelperLogicalElement : AbstractStringLogicalElement
+    public class HelperLogicalElement : AbstractStringLogicalElement<UnfinalizedHelperLogicalElement, HelperLogicalElement>
     {
-        private Helper Helper { get; set; }
+        private UnfinalizedHelperLogicalElement InnerElement { get; set; }
+
+        public HelperLogicalElement(UnfinalizedHelperLogicalElement innerElement, Action<HelperLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Helper = InnerElement.Helper.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The helper whose logical requirements must be fulfilled for this logical element.
+        /// </summary>
+        public Helper Helper {get;}
+    }
+
+    public class UnfinalizedHelperLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedHelperLogicalElement, HelperLogicalElement>
+    {
+        public UnfinalizedHelper Helper { get; set; }
 
         private int Tries { get; set; } = LogicalOptions.DefaultNumberOfTries;
 
-        public HelperLogicalElement(Helper helper)
+        public UnfinalizedHelperLogicalElement(UnfinalizedHelper helper)
         {
             Helper = helper;
+        }
+
+        protected override HelperLogicalElement CreateFinalizedElement(UnfinalizedHelperLogicalElement sourceElement, Action<HelperLogicalElement> mappingsInsertionCallback,
+            ModelFinalizationMappings mappings)
+        {
+            return new HelperLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

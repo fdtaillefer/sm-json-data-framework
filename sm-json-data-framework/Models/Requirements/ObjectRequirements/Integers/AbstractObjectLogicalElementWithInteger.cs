@@ -1,20 +1,48 @@
 ﻿using sm_json_data_framework.Models.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
-    public abstract class AbstractObjectLogicalElementWithInteger : AbstractObjectLogicalElement
+    /// <summary>
+    /// An abstract object logical element whose json form was an object with just int property with a meaningful property name.
+    /// </summary>
+    /// <typeparam name="SourceType">The unfinalized type that finalizes into this type</typeparam>
+    /// <typeparam name="ConcreteType">The self-type of the concrete sub-type</typeparam>
+    public abstract class AbstractObjectLogicalElementWithInteger<SourceType, ConcreteType>
+        : AbstractObjectLogicalElement<SourceType, ConcreteType>
+        where SourceType : AbstractUnfinalizedObjectLogicalElementWithInteger<SourceType, ConcreteType>
+        where ConcreteType : AbstractObjectLogicalElementWithInteger<SourceType, ConcreteType>
+    {
+        private SourceType InnerElement { get; set; }
+
+        protected AbstractObjectLogicalElementWithInteger(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+        }
+
+        /// <summary>
+        /// The int value of this logical element.
+        /// </summary>
+        public int Value { get { return InnerElement.Value; } }
+    }
+
+    public abstract class AbstractUnfinalizedObjectLogicalElementWithInteger<ConcreteType, TargetType> 
+        : AbstractUnfinalizedObjectLogicalElement<ConcreteType, TargetType>
+        where ConcreteType : AbstractUnfinalizedObjectLogicalElementWithInteger<ConcreteType, TargetType>
+        where TargetType : AbstractObjectLogicalElementWithInteger<ConcreteType, TargetType>
     {
         public int Value { get; set; }
 
-        public AbstractObjectLogicalElementWithInteger()
+        public AbstractUnfinalizedObjectLogicalElementWithInteger()
         {
 
         }
 
-        public AbstractObjectLogicalElementWithInteger(int value)
+        public AbstractUnfinalizedObjectLogicalElementWithInteger(int value)
         {
             Value = value;
         }

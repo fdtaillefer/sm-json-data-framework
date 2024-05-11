@@ -15,7 +15,68 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// Represents a method to farm one cycle of a respawning group of enemies, with the approximate duration.
     /// </summary>
-    public class FarmCycle : AbstractModelElement, InitializablePostDeserializableInRoomEnemy
+    public class FarmCycle : AbstractModelElement<UnfinalizedFarmCycle, FarmCycle>
+    {
+        private UnfinalizedFarmCycle InnerElement { get; set; }
+
+        public FarmCycle(UnfinalizedFarmCycle innerElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Requires = InnerElement.Requires.Finalize(mappings);
+            RoomEnemy = InnerElement.RoomEnemy.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// A name to identify this FarmCycle. This is unique ONLY within a <see cref="RoomEnemy"/>.
+        /// </summary>
+        public string Name { get { return InnerElement.Name; } }
+
+        /// <summary>
+        /// The number of frames it takes to wait for the enemies to spawn, kill them, and grab their drops
+        /// </summary>
+        public int CycleFrames { get { return InnerElement.CycleFrames; } }
+
+        /// <summary>
+        /// The LogicalRequirements that must be fulfilled in order to execute a cycle of farming on the enemies.
+        /// </summary>
+        public LogicalRequirements Requires { get; }
+
+        /// <summary>
+        /// The RoomEnemy to which this FarmCycle applies.
+        /// </summary>
+        public RoomEnemy RoomEnemy { get; }
+
+        /// <summary>
+        /// Returns whether this farm cycle can be farmed "for free", without spending any resources during execution (regardless of drops).
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
+        /// <param name="times">The number of consecutive times that this should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
+        /// (whenever in-room state is relevant).</param>
+        /// <returns></returns>
+        public bool IsFree(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return InnerElement.IsFree(model, inGameState, times, previousRoomCount);
+        }
+
+        /// <summary>
+        /// An IExecutable that corresponds to executing the requirements for this farm cycle once, without grabbing any drops.
+        /// </summary>
+        public IExecutable RequirementExecution { get { return InnerElement.RequirementExecution; } }
+
+        /// <summary>
+        /// <para>An IExecutable that corresponds to farming this group of enemies, by camping its spawner(s), killing it repeatedly, and grabbing the drops.
+        /// This is repeated until all qualifying resources are filled.</para>
+        /// <para>Qualifying resources are determined based on logical options.</para>
+        /// <para>For simplicity, a farm execution will be considered a failure if it results in any kind of resource tradeoff.</para>
+        /// </summary>
+        public IExecutable FarmExecution { get { return InnerElement.FarmExecution; } }
+    }
+
+    public class UnfinalizedFarmCycle : AbstractUnfinalizedModelElement<UnfinalizedFarmCycle, FarmCycle>, InitializablePostDeserializableInRoomEnemy
     {
         public string Name { get; set; }
 
@@ -23,21 +84,21 @@ namespace sm_json_data_framework.Models.Rooms
 
         public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions { get; set; } = new SpawnerFarmingOptions().AsReadOnly();
 
-        public LogicalRequirements Requires { get; set; }
+        public UnfinalizedLogicalRequirements Requires { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomEnemy)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomEnemy)"/> has been called.</para>
         /// <para>The RoomEnemy to which this FarmCycle applies</para>
         /// </summary>
         [JsonIgnore]
-        public RoomEnemy RoomEnemy { get; set; }
+        public UnfinalizedRoomEnemy RoomEnemy { get; set; }
 
-        public FarmCycle()
+        public UnfinalizedFarmCycle()
         {
 
         }
 
-        public FarmCycle(RawFarmCycle rawCycle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedFarmCycle(RawFarmCycle rawCycle, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             Name = rawCycle.Name;
             CycleFrames = rawCycle.CycleFrames;
@@ -45,6 +106,11 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 Requires = rawCycle.Requires.ToLogicalRequirements(knowledgeBase);
             }
+        }
+
+        protected override FarmCycle CreateFinalizedElement(UnfinalizedFarmCycle sourceElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new FarmCycle(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -63,12 +129,12 @@ namespace sm_json_data_framework.Models.Rooms
             return Requires.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)
         {
             RoomEnemy = roomEnemy;
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomEnemy roomEnemy)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, room);
         }
@@ -144,9 +210,9 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     internal class RequirementExecution : IExecutable
     {
-        private FarmCycle FarmCycle { get; set; }
+        private UnfinalizedFarmCycle FarmCycle { get; set; }
 
-        public RequirementExecution(FarmCycle farmCycle)
+        public RequirementExecution(UnfinalizedFarmCycle farmCycle)
         {
             FarmCycle = farmCycle;
         }
@@ -161,9 +227,9 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     internal class FarmExecution : IExecutable
     {
-        private FarmCycle FarmCycle { get; set; }
+        private UnfinalizedFarmCycle FarmCycle { get; set; }
 
-        public FarmExecution(FarmCycle farmCycle)
+        public FarmExecution(UnfinalizedFarmCycle farmCycle)
         {
             FarmCycle = farmCycle;
         }

@@ -20,10 +20,10 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             ValidCommand = str => str.ToLower() == "sas";
             Execution = (navigator, command) =>
             {
-                RoomNode currentNode = navigator.CurrentInGameState.CurrentNode;
-                IEnumerable<RoomEnemy> spawners = navigator.CurrentInGameState.CurrentRoom.Enemies.Values
+                UnfinalizedRoomNode currentNode = navigator.CurrentInGameState.CurrentNode;
+                IEnumerable<UnfinalizedRoomEnemy> spawners = navigator.CurrentInGameState.CurrentRoom.Enemies.Values
                     .Where(e => e.IsSpawner && e.Spawns(navigator.GameModel, navigator.CurrentInGameState) && e.HomeNodeIds.Contains(currentNode.Id));
-                foreach (RoomEnemy spawner in spawners)
+                foreach (UnfinalizedRoomEnemy spawner in spawners)
                 {
                     Console.WriteLine($"Accessible spawner {spawner.Id}: {spawner.EnemyName}X{spawner.Quantity} ({spawner.GroupName})");
                 }

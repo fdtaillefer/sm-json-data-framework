@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,41 +12,95 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms
 {
-    public class StratObstacle : AbstractModelElement, InitializablePostDeserializeInRoom
+    /// <summary>
+    /// Represents the need for an obstacle to be destroyed (or bypassed) in order to fulfill a strat.
+    /// Destruction may be done as part of the strat or have been done previously.
+    /// </summary>
+    public class StratObstacle : AbstractModelElement<UnfinalizedStratObstacle, StratObstacle>
+    {
+        private UnfinalizedStratObstacle InnerElement { get; set; }
+
+        public StratObstacle(UnfinalizedStratObstacle innerElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Obstacle = InnerElement.Obstacle.Finalize(mappings);
+            Requires = InnerElement.Requires.Finalize(mappings);
+            Bypass = InnerElement.Bypass?.Finalize(mappings);
+            AdditionalObstacleIds = InnerElement.AdditionalObstacleIds.AsReadOnly();
+            AdditionalObstacles = InnerElement.AdditionalObstacles.Select(obstacle => obstacle.Finalize(mappings)).ToList().AsReadOnly();
+        }
+
+        /// <summary>
+        /// The RoomObstacle that this StratObstacle indicates must be passed through
+        /// </summary>
+        public RoomObstacle Obstacle { get; }
+
+        /// <summary>
+        /// Logical requirements that must be fulfilled in this strat to destroy this obstacle, on top of whatever requirements are on the obstacle itself.
+        /// </summary>
+        public LogicalRequirements Requires { get; }
+
+        /// <summary>
+        /// LogicalRequirements to bypass this obstacle without destroying it when doing the associated strat.
+        /// Bypassing a strat makes it possible to avoid fulfilling the destruction requirements both on the strat and on the obstacle itself.
+        /// If this is null, the obstacle cannot be bypassed.
+        /// </summary>
+        public LogicalRequirements Bypass { get; }
+
+        public IReadOnlySet<string> AdditionalObstacleIds { get; }
+
+        /// <summary>
+        /// The additional RoomObstacles that are destroyed alongside this StratObstacle
+        /// </summary>
+        public IReadOnlyList<RoomObstacle> AdditionalObstacles { get; }
+
+        /// <summary>
+        /// An IExecutable that corresponds to destroying this obstacle.
+        /// </summary>
+        public IExecutable DestroyExecution { get { return InnerElement.DestroyExecution; } }
+
+        /// <summary>
+        /// An IExecutable that corresponds to bypassing this obstacle.
+        /// </summary>
+        public IExecutable BypassExecution { get { return InnerElement.BypassExecution; } }
+    }
+
+    public class UnfinalizedStratObstacle : AbstractUnfinalizedModelElement<UnfinalizedStratObstacle, StratObstacle>, InitializablePostDeserializeInRoom
     {
         [JsonPropertyName("id")]
         public string ObstacleId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The RoomObstacle that this StratObstacle indicates must be passed through</para>
         /// </summary>
         [JsonIgnore]
-        public RoomObstacle Obstacle { get; set; }
+        public UnfinalizedRoomObstacle Obstacle { get; set; }
 
-        public LogicalRequirements Requires { get; set; } = new LogicalRequirements();
+        public UnfinalizedLogicalRequirements Requires { get; set; } = new UnfinalizedLogicalRequirements();
 
         /// <summary>
         /// LogicalRequirements to bypass this obstacle without destroying it when doing the associated strat. If this is null, the obstacle cannot be bypassed.
         /// </summary>
-        public LogicalRequirements Bypass { get; set; }
+        public UnfinalizedLogicalRequirements Bypass { get; set; }
 
         [JsonPropertyName("additionalObstacles")]
         public ISet<string> AdditionalObstacleIds { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The additional RoomObstacles that are destroyed alongside this StratObstacle</para>
         /// </summary>
         [JsonIgnore]
-        public IList<RoomObstacle> AdditionalObstacles { get; set; }
+        public IList<UnfinalizedRoomObstacle> AdditionalObstacles { get; set; }
 
-        public StratObstacle()
+        public UnfinalizedStratObstacle()
         {
 
         }
 
-        public StratObstacle(RawStratObstacle rawStratObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
+        public UnfinalizedStratObstacle(RawStratObstacle rawStratObstacle, LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             ObstacleId = rawStratObstacle.Id;
             Requires = rawStratObstacle.Requires.ToLogicalRequirements(knowledgeBase);
@@ -55,6 +110,12 @@ namespace sm_json_data_framework.Models.Rooms
             }
             AdditionalObstacleIds = new HashSet<string>(rawStratObstacle.AdditionalObstacles);
         }
+
+        protected override StratObstacle CreateFinalizedElement(UnfinalizedStratObstacle sourceElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new StratObstacle(sourceElement, mappingsInsertionCallback, mappings);
+        }
+
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
             Requires.ApplyLogicalOptions(logicalOptions);
@@ -68,7 +129,7 @@ namespace sm_json_data_framework.Models.Rooms
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             // Initialize Obstacle
             Obstacle = room.Obstacles[ObstacleId];
@@ -77,7 +138,7 @@ namespace sm_json_data_framework.Models.Rooms
             AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]).ToList();
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -128,9 +189,9 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     internal class DestroyExecution : IExecutable
     {
-        private StratObstacle StratObstacle { get; set; }
+        private UnfinalizedStratObstacle StratObstacle { get; set; }
 
-        public DestroyExecution(StratObstacle stratObstacle)
+        public DestroyExecution(UnfinalizedStratObstacle stratObstacle)
         {
             StratObstacle = stratObstacle;
         }
@@ -166,9 +227,9 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     internal class BypassExecution: IExecutable
     {
-        private StratObstacle StratObstacle { get; set; }
+        private UnfinalizedStratObstacle StratObstacle { get; set; }
 
-        public BypassExecution(StratObstacle stratObstacle)
+        public BypassExecution(UnfinalizedStratObstacle stratObstacle)
         {
             StratObstacle = stratObstacle;
         }

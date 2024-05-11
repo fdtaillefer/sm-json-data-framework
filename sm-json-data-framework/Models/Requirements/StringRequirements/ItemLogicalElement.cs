@@ -10,13 +10,36 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// <summary>
     /// A logical element that is fulfilled by previously obtaining an item.
     /// </summary>
-    public class ItemLogicalElement : AbstractStringLogicalElement
+    public class ItemLogicalElement : AbstractStringLogicalElement<UnfinalizedItemLogicalElement, ItemLogicalElement>
     {
-        private Item Item { get; set; }
+        private UnfinalizedItemLogicalElement InnerElement { get; set; }
 
-        public ItemLogicalElement(Item item)
+        public ItemLogicalElement(UnfinalizedItemLogicalElement innerElement, Action<ItemLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            Item = innerElement.Item.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The item that Samus must havew to fulfill this logical element.
+        /// </summary>
+        public Item Item { get; }
+    }
+
+    public class UnfinalizedItemLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedItemLogicalElement, ItemLogicalElement>
+    {
+        public UnfinalizedItem Item { get; set; }
+
+        public UnfinalizedItemLogicalElement(UnfinalizedItem item)
         {
             Item = item;
+        }
+
+        protected override ItemLogicalElement CreateFinalizedElement(UnfinalizedItemLogicalElement sourceElement, Action<ItemLogicalElement> mappingsInsertionCallback,
+            ModelFinalizationMappings mappings)
+        {
+            return new ItemLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

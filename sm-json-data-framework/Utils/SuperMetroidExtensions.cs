@@ -24,9 +24,9 @@ namespace sm_json_data_framework.Utils
         /// <param name="names">The names to convert</param>
         /// <param name="model">A SuperMetroidModel that contains existing weapons</param>
         /// <returns>A sequence of Weapons</returns>
-        public static IEnumerable<Weapon> NamesToWeapons(this IEnumerable<string> names, SuperMetroidModel model)
+        public static IEnumerable<UnfinalizedWeapon> NamesToWeapons(this IEnumerable<string> names, SuperMetroidModel model)
         {
-            return names.SelectMany(n => n.NameToWeapons(model)).Distinct(ObjectReferenceEqualityComparer<Weapon>.Default);
+            return names.SelectMany(n => n.NameToWeapons(model)).Distinct(ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default);
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace sm_json_data_framework.Utils
         /// <param name="name">The name to convert</param>
         /// <param name="model">A SuperMetroidModel that contains existing weapons</param>
         /// <returns>A sequence of Weapons, or null if the string matches no weapon or category</returns>
-        public static IEnumerable<Weapon> NameToWeapons(this string name, SuperMetroidModel model)
+        public static IEnumerable<UnfinalizedWeapon> NameToWeapons(this string name, SuperMetroidModel model)
         {
-            if(model.Weapons.TryGetValue(name, out Weapon weapon))
+            if(model.Weapons.TryGetValue(name, out UnfinalizedWeapon weapon))
             {
                 return new[] { weapon };
             }
@@ -77,66 +77,66 @@ namespace sm_json_data_framework.Utils
         }
 
         /// <summary>
-        /// Returns an enumeration of the provided abstarct model elements, except those rendered useless by logical options.
+        /// Returns an enumeration of the provided IConfigurableByLogicalOptions objects, except those rendered useless by logical options.
         /// </summary>
-        /// <param name="elements"></param>
+        /// <param name="elements">Enumeration of elements to filter</param>
         /// <returns></returns>
-        public static IEnumerable<T> WhereUseful<T>(this IEnumerable<T> elements) where T: AbstractModelElement
+        public static IEnumerable<T> WhereUseful<T>(this IEnumerable<T> elements) where T: IConfigurableByLogicalOptions
         {
             return elements.Where(clc => !clc.UselessByLogicalOptions);
         }
 
-        public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, string gameFlagName)
+        public static bool ContainsFlag(this IDictionary<string, UnfinalizedGameFlag> flagDictionary, string gameFlagName)
         {
             return flagDictionary.ContainsKey(gameFlagName);
         }
 
-        public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, GameFlag gameFlag)
+        public static bool ContainsFlag(this IDictionary<string, UnfinalizedGameFlag> flagDictionary, UnfinalizedGameFlag gameFlag)
         {
             return flagDictionary.ContainsKey(gameFlag.Name);
         }
 
-        public static bool ContainsLock(this IDictionary<string, NodeLock> lockDictionary, string lockName)
+        public static bool ContainsLock(this IDictionary<string, UnfinalizedNodeLock> lockDictionary, string lockName)
         {
             return lockDictionary.ContainsKey(lockName);
         }
 
-        public static bool ContainsLock(this IDictionary<string, NodeLock> lockDictionary, NodeLock nodeLock)
+        public static bool ContainsLock(this IDictionary<string, UnfinalizedNodeLock> lockDictionary, UnfinalizedNodeLock nodeLock)
         {
             return lockDictionary.ContainsKey(nodeLock.Name);
         }
 
-        public static bool ContainsNode(this IDictionary<string, RoomNode> nodeDictionary, string nodeName)
+        public static bool ContainsNode(this IDictionary<string, UnfinalizedRoomNode> nodeDictionary, string nodeName)
         {
             return nodeDictionary.ContainsKey(nodeName);
         }
 
-        public static bool ContainsNode(this IDictionary<string, RoomNode> nodeDictionary, RoomNode node)
+        public static bool ContainsNode(this IDictionary<string, UnfinalizedRoomNode> nodeDictionary, UnfinalizedRoomNode node)
         {
             return nodeDictionary.ContainsKey(node.Name);
         }
 
-        public static bool ContainsItem(this IDictionary<string, Item> itemDictionary, string itemName)
+        public static bool ContainsItem(this IDictionary<string, UnfinalizedItem> itemDictionary, string itemName)
         {
             return itemDictionary.ContainsKey(itemName);
         }
 
-        public static bool ContainsItem(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsItem(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsKey(item.Name);
         }
 
-        public static bool ContainsVariaSuit(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsVariaSuit(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.VARIA_SUIT_NAME);
         }
 
-        public static bool ContainsGravitySuit(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsGravitySuit(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
         }
 
-        public static bool ContainsSpeedBooster(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsSpeedBooster(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }

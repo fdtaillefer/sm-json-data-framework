@@ -1,7 +1,9 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,39 +15,89 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// <summary>
     /// A logical element which requires Samus to have followed restricted pathing in the room since entering. Includes entering from a subset of the room's nodes.
     /// </summary>
-    public class ResetRoom : AbstractObjectLogicalElement
+    public class ResetRoom : AbstractObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
+    {
+        private UnfinalizedResetRoom InnerElement { get; set; }
+        public ResetRoom(UnfinalizedResetRoom innerElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            NodeIds = innerElement.NodeIds.AsReadOnly();
+            Nodes = innerElement.Nodes.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+            NodeIdsToAvoid = innerElement.NodeIdsToAvoid.AsReadOnly();
+            NodesToAvoid = innerElement.NodesToAvoid.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+            ObstacleIdsToAvoid = innerElement.ObstaclesIdsToAvoid.AsReadOnly();
+            ObstaclesToAvoid = innerElement.ObstaclesToAvoid.Select(obstacle => obstacle.Finalize(mappings)).ToList().AsReadOnly();
+        }
+
+        public IReadOnlyList<int> NodeIds { get; }
+
+        /// <summary>
+        /// The nodes from which room entry allows fulfilling this ResetRoom.
+        /// If samus entered through a different node, this Resetroom cannot be fulfilled during the current room visit.
+        /// </summary>
+        public IReadOnlyList<RoomNode> Nodes { get; }
+
+        public IReadOnlySet<int> NodeIdsToAvoid { get; set; } = new HashSet<int>();
+
+        /// <summary>
+        /// Nodes that must not have been previously visited in the current room visit in order to fulfill this ResetRoom.
+        /// If they have been visited, this Resetroom can no longer be fulfilled during the current room visit.
+        /// </summary>
+        public IReadOnlyList<RoomNode> NodesToAvoid { get; }
+
+        public IReadOnlySet<string> ObstacleIdsToAvoid { get; }
+
+        /// <summary>
+        /// Osbtacles that must not have been previously destroyed in the current room visit in order to fulfill this ResetRoom.
+        /// If they have been destroyed, this Resetroom can no longer be fulfilled during the current room visit.
+        /// </summary>
+        public IReadOnlyList<RoomObstacle> ObstaclesToAvoid { get; }
+
+        /// <summary>
+        /// If true, this is equivalent to <see cref="NodesToAvoid"/> containing all nodes in the room.
+        /// </summary>
+        public bool MustStayPut { get { return InnerElement.MustStayPut; } }
+    }
+
+    public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
     {
         [JsonPropertyName("nodes")]
         public IList<int> NodeIds { get; set; } = new List<int>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The nodes that this element's NodeIds reference. </para>
         /// </summary>
         [JsonIgnore]
-        public IList<RoomNode> Nodes { get; set; }
+        public IList<UnfinalizedRoomNode> Nodes { get; set; }
 
         [JsonPropertyName("nodesToAvoid")]
         public ISet<int> NodeIdsToAvoid { get; set; } = new HashSet<int>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The nodes that this element's NodeIdToAvoids reference. </para>
         /// </summary>
         [JsonIgnore]
-        public IList<RoomNode> NodesToAvoid { get; set; }
+        public IList<UnfinalizedRoomNode> NodesToAvoid { get; set; }
 
         [JsonPropertyName("obstaclesToAvoid")]
         public ISet<string> ObstaclesIdsToAvoid { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, Room)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The obstacles that this element's ObstaclesIdsToAvoid reference. </para>
         /// </summary>
         [JsonIgnore]
-        public IList<RoomObstacle> ObstaclesToAvoid { get; set; }
+        public IList<UnfinalizedRoomObstacle> ObstaclesToAvoid { get; set; }
 
         public bool MustStayPut { get; set; } = false;
+
+        protected override ResetRoom CreateFinalizedElement(UnfinalizedResetRoom sourceElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new ResetRoom(sourceElement, mappingsInsertionCallback, mappings);
+        }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
@@ -58,14 +110,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
-            List<RoomNode> nodes = new List<RoomNode>();
+            List<UnfinalizedRoomNode> nodes = new List<UnfinalizedRoomNode>();
             foreach (int nodeId in NodeIds)
             {
-                if (room.Nodes.TryGetValue(nodeId, out RoomNode node))
+                if (room.Nodes.TryGetValue(nodeId, out UnfinalizedRoomNode node))
                 {
                     nodes.Add(node);
                 }
@@ -76,10 +128,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
             Nodes = nodes;
 
-            List<RoomNode> nodesToAvoid = new List<RoomNode>();
+            List<UnfinalizedRoomNode> nodesToAvoid = new List<UnfinalizedRoomNode>();
             foreach (int nodeIdToAvoid in NodeIdsToAvoid)
             {
-                if (room.Nodes.TryGetValue(nodeIdToAvoid, out RoomNode nodeToAvoid))
+                if (room.Nodes.TryGetValue(nodeIdToAvoid, out UnfinalizedRoomNode nodeToAvoid))
                 {
                     nodesToAvoid.Add(nodeToAvoid);
                 }
@@ -90,10 +142,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
             NodesToAvoid = nodesToAvoid;
 
-            List<RoomObstacle> obstaclesToAvoid = new List<RoomObstacle>();
+            List<UnfinalizedRoomObstacle> obstaclesToAvoid = new List<UnfinalizedRoomObstacle>();
             foreach (string obstacleIdToAvoid in ObstaclesIdsToAvoid)
             {
-                if (room.Obstacles.TryGetValue(obstacleIdToAvoid, out RoomObstacle obstacleToAvoid))
+                if (room.Obstacles.TryGetValue(obstacleIdToAvoid, out UnfinalizedRoomObstacle obstacleToAvoid))
                 {
                     obstaclesToAvoid.Add(obstacleToAvoid);
                 }

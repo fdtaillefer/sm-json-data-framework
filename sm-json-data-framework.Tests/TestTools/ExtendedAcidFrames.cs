@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace sm_json_data_framework.Tests.TestTools
 {
-    public class ExtendedAcidFrames: AcidFrames
+    public class ExtendedAcidFrames: UnfinalizedAcidFrames
     {
         public ExtendedAcidFrames()
         {

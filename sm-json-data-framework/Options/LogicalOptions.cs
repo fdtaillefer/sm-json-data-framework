@@ -135,7 +135,7 @@ namespace sm_json_data_framework.Options
             TriesByTech.Add(techName, numberOfTries);
         }
 
-        public int NumberOfTries(Tech tech)
+        public int NumberOfTries(UnfinalizedTech tech)
         {
             if (TriesByTech.TryGetValue(tech.Name, out int tries))
             {
@@ -166,7 +166,7 @@ namespace sm_json_data_framework.Options
             TriesByHelper.Add(helperName, numberOfTries);
         }
 
-        public int NumberOfTries(Helper helper)
+        public int NumberOfTries(UnfinalizedHelper helper)
         {
             if (TriesByHelper.TryGetValue(helper.Name, out int tries))
             {
@@ -196,7 +196,7 @@ namespace sm_json_data_framework.Options
             TriesByStrat.Add(stratName, numberOfTries);
         }
 
-        public int NumberOfTries(Strat strat)
+        public int NumberOfTries(UnfinalizedStrat strat)
         {
             if (strat.Notable && TriesByStrat.TryGetValue(strat.Name, out int tries))
             {
@@ -254,7 +254,7 @@ namespace sm_json_data_framework.Options
             InternalEnabledTechs.Remove(techName);
         }
 
-        public bool IsTechEnabled(Tech tech)
+        public bool IsTechEnabled(UnfinalizedTech tech)
         {
             return IsTechEnabled(tech.Name);
         }
@@ -291,7 +291,7 @@ namespace sm_json_data_framework.Options
             InternalDisabledStrats.Remove(stratName);
         }
 
-        public bool IsStratEnabled(Strat strat)
+        public bool IsStratEnabled(UnfinalizedStrat strat)
         {
             // Non-notable strats are always enabled. Beyond that, strats are enabled by default unless disabled
             return (!strat.Notable || !InternalDisabledStrats.Contains(strat.Name));
@@ -315,7 +315,7 @@ namespace sm_json_data_framework.Options
             InternalRemovedGameFlags.Remove(flagName);
         }
 
-        public bool IsGameFlagEnabled(GameFlag gameFlag)
+        public bool IsGameFlagEnabled(UnfinalizedGameFlag gameFlag)
         {
             return !InternalRemovedGameFlags.Contains(gameFlag.Name);
         }
@@ -383,21 +383,21 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="tech"></param>
         /// <returns></returns>
-        public int NumberOfTries(Tech tech);
+        public int NumberOfTries(UnfinalizedTech tech);
 
         /// <summary>
         /// Returns the number of tries that are logically expected to be attempted before a success for the provided helper.
         /// </summary>
         /// <param name="helper"></param>
         /// <returns></returns>
-        public int NumberOfTries(Helper helper);
+        public int NumberOfTries(UnfinalizedHelper helper);
 
         /// <summary>
         /// Returns the number of tries that are logically expected to be attempted before a success for the provided strat.
         /// </summary>
         /// <param name="strat"></param>
         /// <returns></returns>
-        public int NumberOfTries(Strat strat);
+        public int NumberOfTries(UnfinalizedStrat strat);
 
         /// <summary>
         /// An instance of <see cref="InGameStateComparer"/>, initialized with the current relative resource values.
@@ -436,7 +436,7 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="tech">Tech to check for</param>
         /// <returns></returns>
-        public bool IsTechEnabled(Tech tech);
+        public bool IsTechEnabled(UnfinalizedTech tech);
 
         /// <summary>
         /// Indicates thse logical options expect the player to shinespark.
@@ -449,14 +449,14 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="strat">Strat to check for</param>
         /// <returns></returns>
-        public bool IsStratEnabled(Strat strat);
+        public bool IsStratEnabled(UnfinalizedStrat strat);
 
         /// <summary>
         /// Indicates whether the player is expected to be able to enable the provided GameFlag according to this LogicalOptions.
         /// </summary>
         /// <param name="gameFlag">GameFlag to check for</param>
         /// <returns></returns>
-        public bool IsGameFlagEnabled(GameFlag gameFlag);
+        public bool IsGameFlagEnabled(UnfinalizedGameFlag gameFlag);
 
         /// <summary>
         /// A sub-model containing the logical options with regards to using enemy spawners for farming resources.

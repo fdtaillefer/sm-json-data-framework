@@ -45,27 +45,27 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// A sequence of runways that were used (possibly retroactively) along with the accompanying runway strat.
         /// </summary>
-        public IEnumerable<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; set; } = Enumerable.Empty<(Runway, Strat)>();
+        public IEnumerable<(UnfinalizedRunway runwayUsed, UnfinalizedStrat stratUsed)> RunwaysUsed { get; set; } = Enumerable.Empty<(UnfinalizedRunway, UnfinalizedStrat)>();
 
         /// <summary>
         /// A sequence of canLeaveCharged that were executed (possibly retroactively) along with the accompanying canLeaveCharged strat.
         /// </summary>
-        public IEnumerable<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(CanLeaveCharged, Strat)>();
+        public IEnumerable<(UnfinalizedCanLeaveCharged canLeaveChargedUsed, UnfinalizedStrat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(UnfinalizedCanLeaveCharged, UnfinalizedStrat)>();
 
         /// <summary>
         /// A sequence of node locks that were opened along with the open strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(NodeLock openedLock, Strat stratUsed)>();
+        public IEnumerable<(UnfinalizedNodeLock openedLock, UnfinalizedStrat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(UnfinalizedNodeLock openedLock, UnfinalizedStrat stratUsed)>();
 
         /// <summary>
         /// A sequence of node locks that were bypassed along with the bypass strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(NodeLock bypassedLock, Strat stratUsed)>();
+        public IEnumerable<(UnfinalizedNodeLock bypassedLock, UnfinalizedStrat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(UnfinalizedNodeLock bypassedLock, UnfinalizedStrat stratUsed)>();
 
         /// <summary>
         /// A sequence of game flags that were activated.
         /// </summary>
-        public IEnumerable<GameFlag> ActivatedGameFlags { get; set; } = Enumerable.Empty<GameFlag>();
+        public IEnumerable<UnfinalizedGameFlag> ActivatedGameFlags { get; set; } = Enumerable.Empty<UnfinalizedGameFlag>();
 
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
@@ -77,12 +77,12 @@ namespace sm_json_data_framework.Models.Requirements
         /// This excludes items needed to operate weapons described in <see cref="KilledEnemies"/>.
         /// This also excludes items whose only contribution was reducing damage (they are in <see cref="DamageReducingItemsInvolved"/>).
         /// </summary>
-        public ISet<Item> ItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public ISet<UnfinalizedItem> ItemsInvolved { get; set; } = new HashSet<UnfinalizedItem>(ObjectReferenceEqualityComparer<UnfinalizedItem>.Default);
 
         /// <summary>
         /// A sequence of items that were involved in reducing incoming damage.
         /// </summary>
-        public ISet<Item> DamageReducingItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public ISet<UnfinalizedItem> DamageReducingItemsInvolved { get; set; } = new HashSet<UnfinalizedItem>(ObjectReferenceEqualityComparer<UnfinalizedItem>.Default);
 
         /// <summary>
         /// Given the result of an execution done on this result's resulting state, updates this result to represent
@@ -112,7 +112,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="usePreviousRoom">Indicates whether the obstacles were destroyed in the context of the previous room.</param>
         /// <param name="previousRoomCount">Indicates in which previous playable room to destroy the obstacles, if any.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
-        public void ApplyDestroyObstacles(IEnumerable<RoomObstacle> obstacles, int previousRoomCount = 0)
+        public void ApplyDestroyObstacles(IEnumerable<UnfinalizedRoomObstacle> obstacles, int previousRoomCount = 0)
         {
             // While we can retroactively do some things in previous rooms, we will not retroactively alter the room state.
             if (previousRoomCount == 0)
@@ -129,7 +129,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="nodeLock">The lock to mark as open</param>
         /// <param name="strat">The strat used to open the lock</param>
-        public void ApplyOpenedLock(NodeLock nodeLock, Strat strat)
+        public void ApplyOpenedLock(UnfinalizedNodeLock nodeLock, UnfinalizedStrat strat)
         {
             OpenedLocks = OpenedLocks.Append((nodeLock, strat));
             ResultingState.ApplyOpenLock(nodeLock);
@@ -140,7 +140,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="nodeLock">The lock to bypass</param>
         /// <param name="strat">The strat used to bypass the lock</param>
-        public void ApplyBypassedLock(NodeLock nodeLock, Strat strat)
+        public void ApplyBypassedLock(UnfinalizedNodeLock nodeLock, UnfinalizedStrat strat)
         {
             BypassedLocks = BypassedLocks.Append((nodeLock, strat));
             ResultingState.ApplyBypassLock(nodeLock);
@@ -150,7 +150,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// Applies the activation of the provided gameFlag both in this ExecutionResult and in its resulting InGameState.
         /// </summary>
         /// <param name="gameFlag"></param>
-        public void ApplyActivatedGameFlag(GameFlag gameFlag)
+        public void ApplyActivatedGameFlag(UnfinalizedGameFlag gameFlag)
         {
             if (!ResultingState.ActiveGameFlags.ContainsFlag(gameFlag))
             {
@@ -164,7 +164,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="runway">The used runway</param>
         /// <param name="strat">The strat used on that runway</param>
-        public void AddUsedRunway(Runway runway, Strat strat)
+        public void AddUsedRunway(UnfinalizedRunway runway, UnfinalizedStrat strat)
         {
             RunwaysUsed = RunwaysUsed.Append((runway, strat));
         }
@@ -174,7 +174,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="canLeaveCharged">The executed canLeaveCharged</param>
         /// <param name="strat">The strat used to execute that canLeaveCharged</param>
-        public void AddExecutedCanLeaveCharged(CanLeaveCharged canLeaveCharged, Strat strat)
+        public void AddExecutedCanLeaveCharged(UnfinalizedCanLeaveCharged canLeaveCharged, UnfinalizedStrat strat)
         {
             CanLeaveChargedExecuted = CanLeaveChargedExecuted.Append((canLeaveCharged, strat));
         }
@@ -186,7 +186,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="enemy">The killed enemy</param>
         /// <param name="weapon">The weapon that was used to kill</param>
         /// <param name="shots">The number of shots the kill took</param>
-        public void AddKilledEnemy(Enemy enemy, Weapon weapon, int shots)
+        public void AddKilledEnemy(UnfinalizedEnemy enemy, UnfinalizedWeapon weapon, int shots)
         {
             KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, new[] { (weapon, shots) }));
         }
@@ -197,7 +197,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <param name="enemy">The killed enemy</param>
         /// <param name="killMethod">An enumeration of weapons alongside their number of shots fired</param>
-        public void AddKilledEnemy(Enemy enemy, IEnumerable<(Weapon weapon, int shots)> killMethod)
+        public void AddKilledEnemy(UnfinalizedEnemy enemy, IEnumerable<(UnfinalizedWeapon weapon, int shots)> killMethod)
         {
             KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, killMethod));
         }
@@ -207,7 +207,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// This should exclude damage reduction and the operation of weapons recorded in <see cref="KilledEnemies"/>.
         /// </summary>
         /// <param name="items">The items</param>
-        public void AddItemsInvolved(IEnumerable<Item> items)
+        public void AddItemsInvolved(IEnumerable<UnfinalizedItem> items)
         {
             ItemsInvolved.UnionWith(items);
         }
@@ -216,7 +216,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// Adds to this ExecutionResult a record of taking less damage due to having the provided items.
         /// </summary>
         /// <param name="items">The items</param>
-        public void AddDamageReducingItemsInvolved(IEnumerable<Item> items)
+        public void AddDamageReducingItemsInvolved(IEnumerable<UnfinalizedItem> items)
         {
             DamageReducingItemsInvolved.UnionWith(items);
         }
@@ -254,14 +254,14 @@ namespace sm_json_data_framework.Models.Requirements
     /// </summary>
     public class IndividualEnemyKillResult
     {
-        public IndividualEnemyKillResult(Enemy enemy, IEnumerable<(Weapon weapon, int shots)> killMethod)
+        public IndividualEnemyKillResult(UnfinalizedEnemy enemy, IEnumerable<(UnfinalizedWeapon weapon, int shots)> killMethod)
         {
             Enemy = enemy;
             KillMethod = killMethod;
         }
 
-        public Enemy Enemy { get; private set; }
+        public UnfinalizedEnemy Enemy { get; private set; }
 
-        public IEnumerable<(Weapon weapon, int shots)> KillMethod { get; private set; }
+        public IEnumerable<(UnfinalizedWeapon weapon, int shots)> KillMethod { get; private set; }
     }
 }

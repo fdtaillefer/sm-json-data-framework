@@ -10,16 +10,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// <summary>
     /// A logical element which requires Samus to take a number of hits from spikes.
     /// </summary>
-    public class SpikeHits : AbstractDamageNumericalValueLogicalElement
+    public class SpikeHits : AbstractDamageNumericalValueLogicalElement<UnfinalizedSpikeHits, SpikeHits>
     {
-        public SpikeHits()
+        public SpikeHits(UnfinalizedSpikeHits innerElement, Action<SpikeHits> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+
+        }
+    }
+
+    public class UnfinalizedSpikeHits : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedSpikeHits, SpikeHits>
+    {
+        public UnfinalizedSpikeHits()
         {
 
         }
 
-        public SpikeHits(int hits) : base(hits)
+        public UnfinalizedSpikeHits(int hits) : base(hits)
         {
 
+        }
+
+        protected override SpikeHits CreateFinalizedElement(UnfinalizedSpikeHits sourceElement, Action<SpikeHits> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new SpikeHits(sourceElement, mappingsInsertionCallback);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -33,7 +47,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.SpikeDamage) * Value * times;
         }
 
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetEnvironmentalDamageReducingItems(model, inGameState);
         }

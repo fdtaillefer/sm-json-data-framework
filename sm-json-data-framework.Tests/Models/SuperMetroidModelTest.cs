@@ -173,7 +173,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Tech arbitraryTech = model.Techs["canWalljump"];
+            UnfinalizedTech arbitraryTech = model.Techs["canWalljump"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryTech.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -193,7 +193,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Helper arbitraryHelper = model.Helpers["h_canOpenZebetites"];
+            UnfinalizedHelper arbitraryHelper = model.Helpers["h_canOpenZebetites"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryHelper.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -213,7 +213,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Weapon arbitraryWeapon = model.Weapons["Wave"];
+            UnfinalizedWeapon arbitraryWeapon = model.Weapons["Wave"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryWeapon.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -234,7 +234,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Enemy arbitraryEnemy = model.Enemies["Geemer (blue)"];
+            UnfinalizedEnemy arbitraryEnemy = model.Enemies["Geemer (blue)"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryEnemy.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -254,7 +254,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Connection arbitraryConnection= model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString];
+            UnfinalizedConnection arbitraryConnection= model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString];
             ReadOnlyLogicalOptions appliedOptions = arbitraryConnection.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -275,7 +275,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Room arbitraryRoom = model.Rooms["Climb"];
+            UnfinalizedRoom arbitraryRoom = model.Rooms["Climb"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRoom.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -299,7 +299,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Link arbitraryLink = model.Rooms["Landing Site"].Links[1];
+            UnfinalizedLink arbitraryLink = model.Rooms["Landing Site"].Links[1];
             ReadOnlyLogicalOptions appliedOptions = arbitraryLink.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -319,7 +319,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LinkTo arbitraryLinkTo = model.Rooms["Landing Site"].Links[1].To[4];
+            UnfinalizedLinkTo arbitraryLinkTo = model.Rooms["Landing Site"].Links[1].To[4];
             ReadOnlyLogicalOptions appliedOptions = arbitraryLinkTo.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -339,7 +339,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Strat arbitraryStrat = model.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"];
+            UnfinalizedStrat arbitraryStrat = model.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryStrat.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -361,7 +361,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomObstacle arbitraryRoomObstacle = model.Rooms["Climb"].Obstacles["A"];
+            UnfinalizedRoomObstacle arbitraryRoomObstacle = model.Rooms["Climb"].Obstacles["A"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRoomObstacle.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -381,7 +381,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomEnemy arbitraryRoomEnemy = model.Rooms["Early Supers Room"].Enemies["e1"];
+            UnfinalizedRoomEnemy arbitraryRoomEnemy = model.Rooms["Early Supers Room"].Enemies["e1"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRoomEnemy.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -404,7 +404,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            FarmCycle arbitraryFarmCycle = model.Rooms["Early Supers Room"].Enemies["e1"].FarmCycles["Crouch over spawn point"];
+            UnfinalizedFarmCycle arbitraryFarmCycle = model.Rooms["Early Supers Room"].Enemies["e1"].FarmCycles["Crouch over spawn point"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryFarmCycle.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -424,7 +424,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomNode arbitraryNode = model.GetNodeInRoom("Landing Site", 1);
+            UnfinalizedRoomNode arbitraryNode = model.GetNodeInRoom("Landing Site", 1);
             ReadOnlyLogicalOptions appliedOptions = arbitraryNode.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -449,7 +449,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Runway arbitraryRunway = model.GetNodeInRoom("Climb", 5).Runways["Base Runway - Climb Bottom Right Door (to Pit Room)"];
+            UnfinalizedRunway arbitraryRunway = model.GetNodeInRoom("Climb", 5).Runways["Base Runway - Climb Bottom Right Door (to Pit Room)"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRunway.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -469,7 +469,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged arbitraryCanLeaveCharged = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First();
+            UnfinalizedCanLeaveCharged arbitraryCanLeaveCharged = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First();
             ReadOnlyLogicalOptions appliedOptions = arbitraryCanLeaveCharged.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -490,7 +490,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            ViewableNode arbitraryViewableNode = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
+            UnfinalizedViewableNode arbitraryViewableNode = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
             ReadOnlyLogicalOptions appliedOptions = arbitraryViewableNode.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -510,7 +510,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            NodeLock arbitraryLock = model.GetNodeInRoom("West Ocean", 4).Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            UnfinalizedNodeLock arbitraryLock = model.GetNodeInRoom("West Ocean", 4).Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryLock.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -532,12 +532,12 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LogicalRequirements arbitraryLogicalRequirements = model.Rooms["Climb"].Links[6].To[3].Strats["Behemoth Spark Top"].Requires;
+            UnfinalizedLogicalRequirements arbitraryLogicalRequirements = model.Rooms["Climb"].Links[6].To[3].Strats["Behemoth Spark Top"].Requires;
             ReadOnlyLogicalOptions appliedOptions = arbitraryLogicalRequirements.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
 
-            foreach (AbstractLogicalElement logicalElement in arbitraryLogicalRequirements.LogicalElements)
+            foreach (IUnfinalizedLogicalElement logicalElement in arbitraryLogicalRequirements.LogicalElements)
             {
                 Assert.Same(appliedOptions, logicalElement.AppliedLogicalOptions);
             }
@@ -555,7 +555,7 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Or arbitraryOr = (Or)model.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(Or).IsAssignableFrom(element.GetType())).First();
+            UnfinalizedOr arbitraryOr = (UnfinalizedOr)model.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(UnfinalizedOr).IsAssignableFrom(element.GetType())).First();
             ReadOnlyLogicalOptions appliedOptions = arbitraryOr.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -575,8 +575,8 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            And arbitraryAnd =(And) ((Or)model.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(Or).IsAssignableFrom(element.GetType())).First())
-                .LogicalRequirements.LogicalElements.Where(element => typeof(And).IsAssignableFrom(element.GetType())).First();
+            UnfinalizedAnd arbitraryAnd =(UnfinalizedAnd) ((UnfinalizedOr)model.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(UnfinalizedOr).IsAssignableFrom(element.GetType())).First())
+                .LogicalRequirements.LogicalElements.Where(element => typeof(UnfinalizedAnd).IsAssignableFrom(element.GetType())).First();
             ReadOnlyLogicalOptions appliedOptions = arbitraryAnd.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);

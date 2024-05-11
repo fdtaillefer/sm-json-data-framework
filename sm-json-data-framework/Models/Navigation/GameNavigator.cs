@@ -180,14 +180,14 @@ namespace sm_json_data_framework.Models.Navigation
             string intent = $"Move from node {CurrentInGameState.CurrentNode.Id} to node {nodeId}{intentFiltersSuffix} in room '{CurrentInGameState.CurrentRoom.Name}'";
 
             // Does that node exist?
-            if (!InternalInGameState.CurrentRoom.Nodes.TryGetValue(nodeId, out RoomNode destinationNode))
+            if (!InternalInGameState.CurrentRoom.Nodes.TryGetValue(nodeId, out UnfinalizedRoomNode destinationNode))
             {
                 intent = intent + $", but that node doesn't exist in {InternalInGameState.CurrentRoom.Name}";
                 return new Failure(intent);
             }
 
             // Find a link from current node to that node
-            LinkTo linkTo = InternalInGameState.InRoomState.GetLinkToNode(nodeId);
+            UnfinalizedLinkTo linkTo = InternalInGameState.InRoomState.GetLinkToNode(nodeId);
             if (linkTo == null)
             {
                 intent = intent + $", but no links found in {InternalInGameState.CurrentRoom.Name} from node {InternalInGameState.GetCurrentNode().Id} to {nodeId}";
@@ -195,7 +195,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // We found a link, try to follow it
-            IEnumerable<KeyValuePair<string, Strat>> potentialStrats = linkTo.Strats;
+            IEnumerable<KeyValuePair<string, UnfinalizedStrat>> potentialStrats = linkTo.Strats;
             if (stratFilters != null && stratFilters.Any())
             {
                 foreach (StratFilter filter in stratFilters)
@@ -229,7 +229,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The resulting action. If interaction fails, returns a failure action.</returns>
         public AbstractNavigationAction InteractWithNode()
         {
-            RoomNode node = InternalInGameState.GetCurrentNode();
+            UnfinalizedRoomNode node = InternalInGameState.GetCurrentNode();
 
             string intent = node.NodeType switch
             {
@@ -281,7 +281,7 @@ namespace sm_json_data_framework.Models.Navigation
 
 
             // If an item was picked up, we may want to adjust resources according to normal game behavior
-            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is ExpansionItem expansionItem && !InternalInGameState.TakenItemLocations.ContainsNode(node))
+            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is UnfinalizedExpansionItem expansionItem && !InternalInGameState.TakenItemLocations.ContainsNode(node))
             {
                 switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
                 {
@@ -312,7 +312,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The resulting action. If unlocking fails, returns a failure action.</returns>
         public AbstractNavigationAction UnlockNode()
         {
-            RoomNode node = InternalInGameState.GetCurrentNode();
+            UnfinalizedRoomNode node = InternalInGameState.GetCurrentNode();
 
             string intent = $"Unlock node {node.Name}";
 
@@ -351,16 +351,16 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="attemptOpen">Whether to attempt to open locks</param>
         /// <param name="attemptBypass">Whether to attempt to bypass locks</param>
         /// <returns></returns>
-        private (List<NodeLock> failedLocks, List<NodeLock> openedLocks, List<NodeLock> bypassedLocks, ExecutionResult result)
-            DealWithLocks(RoomNode node, bool attemptOpen, bool attemptBypass)
+        private (List<UnfinalizedNodeLock> failedLocks, List<UnfinalizedNodeLock> openedLocks, List<UnfinalizedNodeLock> bypassedLocks, ExecutionResult result)
+            DealWithLocks(UnfinalizedRoomNode node, bool attemptOpen, bool attemptBypass)
         {
             ExecutionResult result = null;
 
-            List<NodeLock> failedLocks = new List<NodeLock>();
-            List<NodeLock> openedLocks = new List<NodeLock>();
-            List<NodeLock> bypassedLocks = new List<NodeLock>();
-            IEnumerable<NodeLock> activeLocks = node.Locks.Values.Where(l => l.IsActive(GameModel, CurrentInGameState));
-            foreach (NodeLock currentLock in activeLocks)
+            List<UnfinalizedNodeLock> failedLocks = new List<UnfinalizedNodeLock>();
+            List<UnfinalizedNodeLock> openedLocks = new List<UnfinalizedNodeLock>();
+            List<UnfinalizedNodeLock> bypassedLocks = new List<UnfinalizedNodeLock>();
+            IEnumerable<UnfinalizedNodeLock> activeLocks = node.Locks.Values.Where(l => l.IsActive(GameModel, CurrentInGameState));
+            foreach (UnfinalizedNodeLock currentLock in activeLocks)
             {
                 ExecutionResult currentResult = null;
 
@@ -424,7 +424,7 @@ namespace sm_json_data_framework.Models.Navigation
             string intent = $"Farm enemy spawner of enemy {roomEnemyId}";
 
             // Does that enemy exist?
-            if (!InternalInGameState.CurrentRoom.Enemies.TryGetValue(roomEnemyId, out RoomEnemy enemyToFarm))
+            if (!InternalInGameState.CurrentRoom.Enemies.TryGetValue(roomEnemyId, out UnfinalizedRoomEnemy enemyToFarm))
             {
                 intent = intent + $", but that enemy doesn't exist in {InternalInGameState.CurrentRoom.Name}";
                 return new Failure(intent);

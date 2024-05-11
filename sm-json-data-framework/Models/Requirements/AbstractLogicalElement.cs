@@ -4,20 +4,67 @@ using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
+using System.Formats.Tar;
+using System.Security.AccessControl;
 using System.Text;
 
 namespace sm_json_data_framework.Models.Requirements
 {
-    public abstract class AbstractLogicalElement : AbstractModelElement, IExecutable
+    /// <summary>
+    /// The abstract base class for all logical elements. 
+    /// A logical element is a building block of the logica that decides whether Samus is able to do somethign in the game.
+    /// </summary>
+    /// <typeparam name="SourceType">The unfinalized type that finalizes into this type</typeparam>
+    /// <typeparam name="ConcreteType">The self-type of the concrete sub-type</typeparam>
+    public abstract class AbstractLogicalElement<SourceType, ConcreteType> : AbstractModelElement<SourceType, ConcreteType>, ILogicalElement
+        where ConcreteType: AbstractLogicalElement<SourceType, ConcreteType>
+        where SourceType : AbstractUnfinalizedLogicalElement<SourceType, ConcreteType>
+    {
+        private SourceType InnerElement { get; set; }
+
+        public AbstractLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+        }
+
+        // Inherited from IExecutable
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return InnerElement.Execute(model, inGameState, times, previousRoomCount);
+        }
+
+        public bool IsNever()
+        {
+            return InnerElement.IsNever();
+        }
+    }
+
+    /// <summary>
+    /// The untyped interface portion of <see cref="AbstractLogicalElement{SourceType, ConcreteType}"/>.
+    /// </summary>
+    public interface ILogicalElement : IExecutable, IModelElement
     {
         /// <summary>
-        /// If this logical element contains any properties that are an object referenced by another property(which is its identifier), initializes them.
-        /// Also delegates to any sub-logical elements.
+        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on a mandatory)
+        /// <see cref="NeverLogicalElement"/>.
+        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
+        /// which are not available here.
         /// </summary>
-        /// <param name="model">A SuperMetroidModel that contains global data</param>
-        /// <param name="room">The room in which this logical element is, or null if it's not in a room</param>
-        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
-        public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room);
+        /// <returns></returns>
+        public bool IsNever();
+    }
+
+    public abstract class AbstractUnfinalizedLogicalElement<ConcreteType, TargetType> : AbstractUnfinalizedModelElement<ConcreteType, TargetType>, IUnfinalizedLogicalElement
+        where ConcreteType : AbstractUnfinalizedLogicalElement<ConcreteType, TargetType>
+        where TargetType : AbstractLogicalElement<ConcreteType, TargetType>
+    {
+        public ILogicalElement FinalizeUntypedLogicalElement(ModelFinalizationMappings mappings)
+        {
+            return Finalize(mappings);
+        }
+
+        public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room);
 
         // Inherited from IExecutable
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
@@ -41,6 +88,33 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
         protected abstract ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
+        public abstract bool IsNever();
+
+        // STITCHME could be nice to ask for always? As in isAlwaysFree()
+    }
+
+    /// <summary>
+    /// The untyped interface portion of <see cref="AbstractUnfinalizedLogicalElement{ConcreteType, TargetType}"/>.
+    /// </summary>
+    public interface IUnfinalizedLogicalElement: IUnfinalizedModelElement, IExecutable
+    {
+        /// <summary>
+        /// An untyped version of <see cref="AbstractUnfinalizedModelElement{ConcreteType, TargetType}.Finalize(ModelFinalizationMappings)"/>, specifically for
+        /// a <see cref="AbstractUnfinalizedLogicalElement{ConcreteType, TargetType}"/>.
+        /// </summary>
+        /// <param name="mappings">A model containing mappings between unfinalized instances and corresponding finalized instances</param>
+        /// <returns></returns>
+        public ILogicalElement FinalizeUntypedLogicalElement(ModelFinalizationMappings mappings);
+
+        /// <summary>
+        /// If this logical element contains any properties that are an object referenced by another property(which is its identifier), initializes them.
+        /// Also delegates to any sub-logical elements.
+        /// </summary>
+        /// <param name="model">A SuperMetroidModel that contains global data</param>
+        /// <param name="room">The room in which this logical element is, or null if it's not in a room</param>
+        /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room);
+
         /// <summary>
         /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on a mandatory)
         /// <see cref="NeverLogicalElement"/>.
@@ -48,8 +122,6 @@ namespace sm_json_data_framework.Models.Requirements
         /// which are not available here.
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsNever();
-
-        // STITCHME could be nice to ask for always? As in isAlwaysFree()
+        public bool IsNever();
     }
 }

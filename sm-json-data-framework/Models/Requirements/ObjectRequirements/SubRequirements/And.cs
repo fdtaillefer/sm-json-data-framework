@@ -11,16 +11,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     /// <summary>
     /// A logical element that is fulfilled by fulfilling all of its inner logical elements.
     /// </summary>
-    public class And : AbstractObjectLogicalElementWithSubRequirements
+    public class And : AbstractObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>
     {
-        public And()
+        public And(UnfinalizedAnd innerElement, Action<And> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback, mappings)
+        {
+
+        }
+    }
+
+    public class UnfinalizedAnd : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>
+    {
+        public UnfinalizedAnd()
         {
 
         }
 
-        public And(LogicalRequirements logicalRequirements): base(logicalRequirements)
+        public UnfinalizedAnd(UnfinalizedLogicalRequirements logicalRequirements): base(logicalRequirements)
         {
             
+        }
+
+        protected override And CreateFinalizedElement(UnfinalizedAnd sourceElement, Action<And> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new And(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)

@@ -12,21 +12,58 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
+    public class InitiateRemotely : AbstractModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>
+    {
+        private UnfinalizedInitiateRemotely InnerElement { get; set; }
+
+        public InitiateRemotely(UnfinalizedInitiateRemotely innerElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(innerElement, mappingsInsertionCallback)
+        {
+            InnerElement = innerElement;
+            InitiateAtNode = InnerElement.InitiateAtNode.Finalize(mappings);
+            PathToDoor = (IReadOnlyList<(LinkTo link, IReadOnlyList<Strat> strats)>)InnerElement.PathToDoor.Select(node => (node.link.Finalize(mappings), node.strats.Select(strat => strat.Finalize(mappings)).ToList().AsReadOnly()))
+                .ToList().AsReadOnly();
+            ExitNode = InnerElement.ExitNode.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The node referenced by the <see cref="InitiateAtNodeId"/> property.
+        /// </summary>
+        public RoomNode InitiateAtNode { get; }
+
+        /// <summary>
+        /// Indicates whether the door at <see cref="ExitNode"/> needs to be opened before doing the remove initiation.
+        /// For the door to be considered opened, it must have no active locks and its node must have been visited during the current room visit.
+        /// </summary>
+        public bool MustOpenDoorFirst { get; }
+
+        /// <summary>
+        /// <para>A path that must be followed by Samus to execute the remote CanLeaveCharged, represented as links to follow and appropriate strats.</para>
+        /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
+        /// </summary>
+        public IReadOnlyList<(LinkTo link, IReadOnlyList<Strat> strats)> PathToDoor { get; }
+
+        /// <summary>
+        /// The node through which this remote initiation ultimately exits the room charged.
+        /// </summary>
+        public RoomNode ExitNode { get; }
+    }
+
     /// <summary>
-    /// Contains info relating to a <see cref="CanLeaveCharged"/> being initiated remotely.
+    /// Contains info relating to a <see cref="UnfinalizedCanLeaveCharged"/> being initiated remotely.
     /// This means it is initiated at a different node that the one by which the room will be exited.
     /// </summary>
-    public class InitiateRemotely : AbstractModelElement, InitializablePostDeserializableInCanLeaveCharged
+    public class UnfinalizedInitiateRemotely : AbstractUnfinalizedModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>, InitializablePostDeserializableInCanLeaveCharged
     {
         [JsonPropertyName("initiateAt")]
         public int InitiateAtNodeId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode, CanLeaveCharged)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The node referenced by the <see cref="InitiateAtNodeId"/> property.</para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode InitiateAtNode { get; set; }
+        public UnfinalizedRoomNode InitiateAtNode { get; set; }
 
         /// <summary>
         /// Indicates whether the door at <see cref="ExitNode"/> needs to be opened before doing the remove initiation.
@@ -38,30 +75,35 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IList<InitiateRemotelyPathToDoorNode> PathToDoorNodes { get; set; } = new List<InitiateRemotelyPathToDoorNode>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode, CanLeaveCharged)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The path referenced by the <see cref="PathToDoorNodes"/> property, represented as links to follow and appropriate strats.</para>
         /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
         /// </summary>
         [JsonIgnore]
-        public IList<(LinkTo link, IList<Strat> strats)> PathToDoor { get; set; } = new List<(LinkTo link, IList<Strat> strats)>();
+        public IList<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)> PathToDoor { get; set; } = new List<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, Room, RoomNode, CanLeaveCharged)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The node through which this remote initiation ultimately exits the room charged.</para>
         /// </summary>
         [JsonIgnore]
-        public RoomNode ExitNode { get; set; }
+        public UnfinalizedRoomNode ExitNode { get; set; }
 
-        public InitiateRemotely()
+        public UnfinalizedInitiateRemotely()
         {
 
         }
 
-        public InitiateRemotely(RawInitiateRemotely rawInitiateRemotely)
+        public UnfinalizedInitiateRemotely(RawInitiateRemotely rawInitiateRemotely)
         {
             InitiateAtNodeId = rawInitiateRemotely.InitiateAt;
             MustOpenDoorFirst = rawInitiateRemotely.MustOpenDoorFirst;
             PathToDoorNodes = rawInitiateRemotely.PathToDoor.Select(pathNode => new InitiateRemotelyPathToDoorNode(pathNode)).ToList();
+        }
+
+        protected override InitiateRemotely CreateFinalizedElement(UnfinalizedInitiateRemotely sourceElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+        {
+            return new InitiateRemotely(sourceElement, mappingsInsertionCallback, mappings);
         }
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
@@ -73,7 +115,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 var (_, strats) = PathToDoor[i];
                 bool anyStratPossible = false;
-                foreach(Strat strat in strats)
+                foreach(UnfinalizedStrat strat in strats)
                 {
                     strat.ApplyLogicalOptions(logicalOptions);
                     if (!strat.UselessByLogicalOptions)
@@ -92,26 +134,26 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return anyNodeImpossible;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
+        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)
         {
             // Initialize the start and end nodes of the remote canLeaveCharged
             InitiateAtNode = room.Nodes[InitiateAtNodeId];
             ExitNode = canLeaveCharged.Node;
 
             // Initialize the path to follow
-            List<(LinkTo link, IList<Strat> strats)> pathToDoor = new ();
-            RoomNode currentNodeFrom = InitiateAtNode;
+            List<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)> pathToDoor = new ();
+            UnfinalizedRoomNode currentNodeFrom = InitiateAtNode;
             foreach (var pathNode in PathToDoorNodes)
             {
-                if(room.Nodes.TryGetValue(pathNode.DestinationNodeId, out RoomNode destination))
+                if(room.Nodes.TryGetValue(pathNode.DestinationNodeId, out UnfinalizedRoomNode destination))
                 {
-                    LinkTo link = room.GetLinkBetween(currentNodeFrom.Id, pathNode.DestinationNodeId);
+                    UnfinalizedLinkTo link = room.GetLinkBetween(currentNodeFrom.Id, pathNode.DestinationNodeId);
                     if (link != null)
                     {
-                        List<Strat> strats = new ();
+                        List<UnfinalizedStrat> strats = new ();
                         foreach (string stratName in pathNode.StratNames)
                         {
-                            Strat strat = link.Strats.Values.SingleOrDefault(strat => strat.Name == stratName);
+                            UnfinalizedStrat strat = link.Strats.Values.SingleOrDefault(strat => strat.Name == stratName);
                             if (strat == null)
                             {
                                 throw new Exception($"Strat {stratName} not found on link from node {currentNodeFrom.Id} to node {pathNode.DestinationNodeId}" +
@@ -150,7 +192,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             PathToDoor = pathToDoor;
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, Room room, RoomNode node, CanLeaveCharged canLeaveCharged)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)
         {
             // All referenced nodes and links and strats belong to other objects, so nothing to do here
             return Enumerable.Empty<string>();
