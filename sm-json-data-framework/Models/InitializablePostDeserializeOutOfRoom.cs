@@ -14,17 +14,17 @@ namespace sm_json_data_framework.Models
         /// Initializes properties in this model, which wouldn't be initialized by simply parsing the relevant json file.
         /// </summary>
         /// <param name="model">The model to use to initialize the foreign properties</param>
-        public void InitializeProperties(SuperMetroidModel model);
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model);
 
         /// <summary>
         /// <para>Goes through all logical elements within this model and any relevant sub-model,
         /// attempting to resolve all references within logical elements into the object they are referencing.
         /// Those resolved values are then used to initialize corresponding properties.</para>
-        /// <para>Concrete implementations are allowed to depend on data initialized by <see cref="Initialize(SuperMetroidModel)"/>, so this must be
+        /// <para>Concrete implementations are allowed to depend on data initialized by <see cref="Initialize(UnfinalizedSuperMetroidModel)"/>, so this must be
         /// called only after that method has been called.</para>
         /// </summary>
         /// <param name="model">A SuperMetroidModel that contains global data</param>
         /// <returns>A sequence of strings describing references that could not be resolved.</returns>
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model);
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model);
     }
 }

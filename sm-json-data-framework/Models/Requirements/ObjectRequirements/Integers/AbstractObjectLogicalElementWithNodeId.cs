@@ -45,13 +45,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The node that this element's value references. </para>
         /// </summary>
         [JsonIgnore]
         public UnfinalizedRoomNode Node {get;set;}
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             if (room.Nodes.TryGetValue(Value, out UnfinalizedRoomNode node))
             {

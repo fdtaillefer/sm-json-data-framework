@@ -22,37 +22,28 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             : base(innerElement, mappingsInsertionCallback)
         {
             InnerElement = innerElement;
-            NodeIds = innerElement.NodeIds.AsReadOnly();
-            Nodes = innerElement.Nodes.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
-            NodeIdsToAvoid = innerElement.NodeIdsToAvoid.AsReadOnly();
-            NodesToAvoid = innerElement.NodesToAvoid.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
-            ObstacleIdsToAvoid = innerElement.ObstaclesIdsToAvoid.AsReadOnly();
-            ObstaclesToAvoid = innerElement.ObstaclesToAvoid.Select(obstacle => obstacle.Finalize(mappings)).ToList().AsReadOnly();
+            Nodes = innerElement.Nodes.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            NodesToAvoid = innerElement.NodesToAvoid.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            ObstaclesToAvoid = innerElement.ObstaclesToAvoid.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
         }
 
-        public IReadOnlyList<int> NodeIds { get; }
-
         /// <summary>
-        /// The nodes from which room entry allows fulfilling this ResetRoom.
+        /// The nodes from which room entry allows fulfilling this ResetRoom, mapped by their in-room ID.
         /// If samus entered through a different node, this Resetroom cannot be fulfilled during the current room visit.
         /// </summary>
-        public IReadOnlyList<RoomNode> Nodes { get; }
-
-        public IReadOnlySet<int> NodeIdsToAvoid { get; set; } = new HashSet<int>();
+        public IReadOnlyDictionary<int, RoomNode> Nodes { get; }
 
         /// <summary>
-        /// Nodes that must not have been previously visited in the current room visit in order to fulfill this ResetRoom.
+        /// Nodes that must not have been previously visited in the current room visit in order to fulfill this ResetRoom, mapped by their in-room ID.
         /// If they have been visited, this Resetroom can no longer be fulfilled during the current room visit.
         /// </summary>
-        public IReadOnlyList<RoomNode> NodesToAvoid { get; }
-
-        public IReadOnlySet<string> ObstacleIdsToAvoid { get; }
+        public IReadOnlyDictionary<int, RoomNode> NodesToAvoid { get; }
 
         /// <summary>
-        /// Osbtacles that must not have been previously destroyed in the current room visit in order to fulfill this ResetRoom.
+        /// Osbtacles that must not have been previously destroyed in the current room visit in order to fulfill this ResetRoom, mapped by their in-room ID.
         /// If they have been destroyed, this Resetroom can no longer be fulfilled during the current room visit.
         /// </summary>
-        public IReadOnlyList<RoomObstacle> ObstaclesToAvoid { get; }
+        public IReadOnlyDictionary<string, RoomObstacle> ObstaclesToAvoid { get; }
 
         /// <summary>
         /// If true, this is equivalent to <see cref="NodesToAvoid"/> containing all nodes in the room.
@@ -66,7 +57,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public IList<int> NodeIds { get; set; } = new List<int>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The nodes that this element's NodeIds reference. </para>
         /// </summary>
         [JsonIgnore]
@@ -76,7 +67,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public ISet<int> NodeIdsToAvoid { get; set; } = new HashSet<int>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The nodes that this element's NodeIdToAvoids reference. </para>
         /// </summary>
         [JsonIgnore]
@@ -86,7 +77,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public ISet<string> ObstaclesIdsToAvoid { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The obstacles that this element's ObstaclesIdsToAvoid reference. </para>
         /// </summary>
         [JsonIgnore]
@@ -110,7 +101,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -159,7 +150,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
 

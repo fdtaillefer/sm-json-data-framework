@@ -55,11 +55,11 @@ namespace sm_json_data_framework.Models
 
     /// <summary>
     /// <para>
-    /// Represents a Super Metroid world, for a set of logical options. Think of this as being able to represent 
+    /// Represents a Super Metroid world, possibly altered by a set of logical options. Think of this as being able to represent the ROM of
     /// e.g. the vanilla game or a randomizer seed.
     /// </para>
     /// <para>
-    /// Note that the model and some of its contents are NOT immutable, however normal use is not intended to modify them.
+    /// This model is immutable.
     /// </para>
     /// </summary>
     public class SuperMetroidModel
@@ -76,7 +76,273 @@ namespace sm_json_data_framework.Models
         public const string ENERGY_TANK_NAME = "ETank";
         public const string RESERVE_TANK_NAME = "ReserveTank";
 
-        public SuperMetroidModel()
+        private UnfinalizedSuperMetroidModel InnerModel { get; set; }
+
+        public SuperMetroidModel(UnfinalizedSuperMetroidModel sourceModel)
+        {
+            InnerModel = sourceModel;
+            ModelFinalizationMappings mappings = new ModelFinalizationMappings();
+            Items = InnerModel.Items.Values.Select(item => item.Finalize(mappings)).ToDictionary(item => item.Name).AsReadOnly();
+            GameFlags = InnerModel.GameFlags.Values.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Weapons = InnerModel.Weapons.Values.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            WeaponsByCategory = InnerModel.WeaponsByCategory
+                .Select(kvp => new KeyValuePair<WeaponCategoryEnum, IReadOnlyList<Weapon>>(kvp.Key, kvp.Value.Select(weapon => weapon.Finalize(mappings)).ToList().AsReadOnly()))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
+            Enemies = InnerModel.Enemies.Values.Select(enemy => enemy.Finalize(mappings)).ToDictionary(enemy => enemy.Name).AsReadOnly();
+            Helpers = InnerModel.Helpers.Values.Select(helper => helper.Finalize(mappings)).ToDictionary(helper => helper.Name).AsReadOnly();
+            Techs = InnerModel.Techs.Values.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
+            Rooms = InnerModel.Rooms.Values.Select(room => room.Finalize(mappings)).ToDictionary(room => room.Name).AsReadOnly();
+            Nodes = InnerModel.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Name).AsReadOnly();
+            Runways = InnerModel.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
+            Locks = InnerModel.Locks.Values.Select(locks => locks.Finalize(mappings)).ToDictionary(locks => locks.Name).AsReadOnly();
+            RoomEnemies = InnerModel.RoomEnemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.GroupName).AsReadOnly();
+            Connections = InnerModel.Connections.Select(kvp => new KeyValuePair<string, Connection>(kvp.Key, kvp.Value.Finalize(mappings)))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
+            Rules = InnerModel.Rules;
+            StartConditions = InnerModel.StartConditions.Finalize(mappings);
+        }
+
+        /// <summary>
+        /// The items in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Item> Items { get; }
+
+        /// <summary>
+        /// The game flags in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, GameFlag> GameFlags { get; }
+
+        /// <summary>
+        /// The weapons in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Weapon> Weapons { get; }
+
+        /// <summary>
+        /// A dicionary mapping all weapon categories to a list of weapons in that category.
+        /// </summary>
+        public IReadOnlyDictionary<WeaponCategoryEnum, IReadOnlyList<Weapon>> WeaponsByCategory { get; }
+
+        /// <summary>
+        /// The normal enemies and boss enemies in this model, mapped by name.
+        /// </summary>
+        public IDictionary<string, Enemy> Enemies { get; }
+
+        /// <summary>
+        /// The helpers in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Helper> Helpers { get; }
+
+        /// <summary>
+        /// The techs in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Tech> Techs { get; }
+
+        /// <summary>
+        /// The rooms in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Room> Rooms { get; }
+
+        /// <summary>
+        /// The nodes in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, RoomNode> Nodes { get; }
+
+        /// <summary>
+        /// The runways in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, Runway> Runways { get; }
+
+        /// <summary>
+        /// The node locks in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, NodeLock> Locks { get; }
+
+        /// <summary>
+        /// All groups of enemies found in any room, mapped by their group name.
+        /// </summary>
+        public IReadOnlyDictionary<string, RoomEnemy> RoomEnemies { get; }
+
+        /// <summary>
+        /// A dictionary that maps a node's IdentifyingString to a one-way connection with that node as the origin.
+        /// </summary>
+        public IReadOnlyDictionary<string, Connection> Connections { get; }
+
+        /// <summary>
+        /// A repository of game rules we are operating by.
+        /// </summary>
+        public SuperMetroidRules Rules { get; }
+
+        /// <summary>
+        /// Describes the start condition for the game, complete with relevant objects within this model.
+        /// </summary>
+        public StartConditions StartConditions { get; }
+
+        /// <summary>
+        /// An <see cref="InGameStateComparer"/> which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
+        /// </summary>
+        public InGameStateComparer InGameStateComparer { get; private set; } = LogicalOptions.DefaultInGameStateComparer;
+
+        public ReadOnlyInGameState InitialGameState { get; }
+
+        /// <summary>
+        /// Gets and returns a node, referenced by its room name and node ID.
+        /// </summary>
+        /// <param name="roomName">Name of the room that contains the node to find</param>
+        /// <param name="nodeId">ID of the node to find within the room</param>
+        /// <returns>The node</returns>
+        /// <exception cref="Exception">If the room or node is not found</exception>
+        public RoomNode GetNodeInRoom(string roomName, int nodeId)
+        {
+            if (!Rooms.TryGetValue(roomName, out Room room))
+            {
+                throw new Exception($"Room '{roomName}' not found.");
+            }
+
+            if (!room.Nodes.TryGetValue(nodeId, out RoomNode node))
+            {
+                throw new Exception($"Node ID {nodeId} not found in room '{room.Name}'.");
+            }
+
+            return node;
+        }
+
+        /// <summary>
+        /// Clones the provided LogicalOptions, and applies then to this model.
+        /// </summary>
+        /// <param name="logicalOptions">The LogicalOptions to apply. If null, this instead removes all alterations from logical options.</param>
+        public void ApplyLogicalOptions(LogicalOptions logicalOptions)
+        {
+            ReadOnlyLogicalOptions logicalOptionsToApply = null;
+
+            if (logicalOptions == null)
+            {
+                InGameStateComparer = LogicalOptions.DefaultInGameStateComparer;
+            }
+            else
+            {
+                logicalOptionsToApply = logicalOptions.Clone().AsReadOnly();
+                InGameStateComparer = logicalOptionsToApply.InGameStateComparer;
+            }
+
+            foreach (GameFlag gameFlag in GameFlags.Values)
+            {
+                gameFlag.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Helper helper in Helpers.Values)
+            {
+                helper.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Item item in Items.Values)
+            {
+                item.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Tech tech in Techs.Values)
+            {
+                tech.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Weapon weapon in Weapons.Values)
+            {
+                weapon.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Enemy enemy in Enemies.Values)
+            {
+                enemy.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Connection connection in Connections.Values)
+            {
+                connection.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+
+            foreach (Room room in Rooms.Values)
+            {
+                room.ApplyLogicalOptions(logicalOptionsToApply);
+            }
+        }
+
+        /// <summary>
+        /// Compares the two provided game states, using the internal comparer.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public int CompareInGameStates(ReadOnlyInGameState x, ReadOnlyInGameState y)
+        {
+            return InGameStateComparer.Compare(x, y);
+        }
+
+        /// <summary>
+        /// <para>Given an enumeration of executables, attempts to find the least costly one that can be successfully executed.
+        /// Returns the associated execution result.
+        /// If a no-cost executable is found, its result is returned immediately.</para>
+        /// <para>If there are no executables, this is an automatic failure.</para>
+        /// </summary>
+        /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
+        /// <param name="executables">An enumeration of executables to attempt executing.</param>
+        /// <param name="times">The number of consecutive times the executables should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <param name="acceptationCondition">An optional Predicate that is checked against the resulting in-game state of executions.
+        /// Executions whose resulting state does not respect the predicate are rejected.</param>
+        /// <returns>The best executable, alongside its ExecutionResult, or default values if none succeeded</returns>
+        public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyInGameState initialInGameState, int times = 1,
+            int previousRoomCount = 0, Predicate<ReadOnlyInGameState> acceptationCondition = null) where T : IExecutable
+        {
+            return InnerModel.ExecuteBest(executables, initialInGameState, times, previousRoomCount, acceptationCondition);
+        }
+
+        /// <summary>
+        /// <para>Given an enumeration of executables, executes them all successively, starting from the provided initialGameState.</para>
+        /// <para>This method will give up at the first failed execution and return null.</para>
+        /// <para>If there are no executables, this is an automatic success.</para>
+        /// </summary>
+        /// <typeparam name="T">The type of the executables to execute.</typeparam>
+        /// <param name="executables">An enumeration of executables. This must not modify the InGameState provided to it.</param>
+        /// <param name="initialInGameState">The initial in-game state. Will not be modified by this method.</param>
+        /// <param name="times">The number of consecutive times the executables should be executed.
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.
+        /// This will never return the initialInGameState instance.</returns>
+        public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, ReadOnlyInGameState initialInGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return InnerModel.ExecuteAll(executables, initialInGameState, times, previousRoomCount);
+        }
+
+        /// <summary>
+        /// Creates and returns a copy of the initial game state. Requires this model to have been initialized.
+        /// </summary>
+        /// <returns></returns>
+        public InGameState CreateInitialGameStateCopy()
+        {
+            return InitialGameState.Clone();
+        }
+
+        /// <summary>
+        /// Creates and returns a game navigator at the starting location and with starting resources.
+        /// Requires this model to have been initialized.
+        /// </summary>
+        /// <param name="maxPreviousStatesSize">The maximum number of previous states that the created navigator
+        /// should keep in memory.</param>
+        /// <returns></returns>
+        public GameNavigator CreateInitialGameNavigator(int maxPreviousStatesSize)
+        {
+            // TODO This likely requires moving a lot of code to finalized models and replacing unfinalized models in all InGameState things.
+            // Will do in a later commit.
+            throw new NotSupportedException();
+        }
+    }
+
+    public class UnfinalizedSuperMetroidModel
+    {
+        public UnfinalizedSuperMetroidModel()
         {
             // Weapons can't have an initializer directly on itself because of the custom setter
             Weapons = new Dictionary<string, UnfinalizedWeapon>();
@@ -97,7 +363,7 @@ namespace sm_json_data_framework.Models
         /// to represent that StringLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
         /// The provided C# types must extend the default type that is normally used for any given StringLogicalElementTypeEnum.</param>
         /// <exception cref="Exception">If this method fails to interpret any logical element</exception>
-        public SuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null,
+        public UnfinalizedSuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null,
             IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
@@ -127,8 +393,10 @@ namespace sm_json_data_framework.Models
             Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new UnfinalizedHelper(rawHelper)).ToDictionary(h => h.Name);
 
             // Put techs in model
-            IEnumerable<RawTech> rawTechs = rawModel.TechContainer.SelectAllTechs();
-            Techs = rawTechs.Select(rawTech => new UnfinalizedTech(rawTech)).ToDictionary(t => t.Name);
+            Techs = rawModel.TechContainer.SelectTopLevelTechs()
+                .Select(rawTech => new UnfinalizedTech(rawTech))
+                .SelectMany(tech => tech.SelectWithExtensions())
+                .ToDictionary(tech => tech.Name);
 
             // At this point, Techs and Helpers don't contain their LogicalRequirements, we skipped them because
             // they could reference Techs and Helpers that didn't exist yet. Go back and assign them.
@@ -139,7 +407,7 @@ namespace sm_json_data_framework.Models
                 Helpers[rawHelper.Name].Requires = rawHelper.Requires.ToLogicalRequirements(knowledgeBase);
             }
 
-            foreach (RawTech rawTech in rawTechs)
+            foreach (RawTech rawTech in rawModel.TechContainer.SelectAllTechs())
             {
                 Techs[rawTech.Name].Requires = rawTech.Requires.ToLogicalRequirements(knowledgeBase);
             }
@@ -240,7 +508,7 @@ namespace sm_json_data_framework.Models
             }
 
             // Now that rooms, flags, and items are in the model, create and assign start conditions
-            StartConditions = new StartConditions(this);
+            StartConditions = new UnfinalizedStartConditions(this);
 
             // Create and assign initial game state
             InitialGameState = new InGameState(StartConditions);
@@ -289,7 +557,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// Describes the start condition for the game, complete with relevant objects within this model.
         /// </summary>
-        public StartConditions StartConditions { get; set; }
+        public UnfinalizedStartConditions StartConditions { get; set; }
 
         /// <summary>
         /// The helpers in this model, mapped by name.

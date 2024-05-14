@@ -27,8 +27,7 @@ namespace sm_json_data_framework.Models.Rooms
             Obstacle = InnerElement.Obstacle.Finalize(mappings);
             Requires = InnerElement.Requires.Finalize(mappings);
             Bypass = InnerElement.Bypass?.Finalize(mappings);
-            AdditionalObstacleIds = InnerElement.AdditionalObstacleIds.AsReadOnly();
-            AdditionalObstacles = InnerElement.AdditionalObstacles.Select(obstacle => obstacle.Finalize(mappings)).ToList().AsReadOnly();
+            AdditionalObstacles = InnerElement.AdditionalObstacles.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
         }
 
         /// <summary>
@@ -48,12 +47,10 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public LogicalRequirements Bypass { get; }
 
-        public IReadOnlySet<string> AdditionalObstacleIds { get; }
-
         /// <summary>
-        /// The additional RoomObstacles that are destroyed alongside this StratObstacle
+        /// The additional RoomObstacles that are destroyed alongside this StratObstacle, mapped by their in-room ID.
         /// </summary>
-        public IReadOnlyList<RoomObstacle> AdditionalObstacles { get; }
+        public IReadOnlyDictionary<string, RoomObstacle> AdditionalObstacles { get; }
 
         /// <summary>
         /// An IExecutable that corresponds to destroying this obstacle.
@@ -72,7 +69,7 @@ namespace sm_json_data_framework.Models.Rooms
         public string ObstacleId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The RoomObstacle that this StratObstacle indicates must be passed through</para>
         /// </summary>
         [JsonIgnore]
@@ -89,7 +86,7 @@ namespace sm_json_data_framework.Models.Rooms
         public ISet<string> AdditionalObstacleIds { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The additional RoomObstacles that are destroyed alongside this StratObstacle</para>
         /// </summary>
         [JsonIgnore]
@@ -129,7 +126,7 @@ namespace sm_json_data_framework.Models.Rooms
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             // Initialize Obstacle
             Obstacle = room.Obstacles[ObstacleId];
@@ -138,7 +135,7 @@ namespace sm_json_data_framework.Models.Rooms
             AdditionalObstacles = AdditionalObstacleIds.Select(id => room.Obstacles[id]).ToList();
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -195,7 +192,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
 
@@ -233,7 +230,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The bypass attempt fails if there's no way to bypass
             if (StratObstacle.Bypass == null)

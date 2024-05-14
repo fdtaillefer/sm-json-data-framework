@@ -27,11 +27,10 @@ namespace sm_json_data_framework.Models.Enemies
             InnerElement = innerElement;
             Attacks = InnerElement.Attacks.Values.Select(attack => attack.Finalize(mappings)).ToDictionary(attack => attack.Name);
             Dimensions = InnerElement.Dimensions.Finalize(mappings);
-            InvulnerabilityStrings = InnerElement.InvulnerabilityStrings.AsReadOnly();
-            InvulnerableWeapons = InnerElement.InvulnerableWeapons.Select(weapon => weapon.Finalize(mappings)).ToList().AsReadOnly();
-            WeaponMultipliers = InnerElement.WeaponMultipliers.AsReadOnly();
+            InvulnerableWeapons = InnerElement.InvulnerableWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            WeaponMultipliers = InnerElement.WeaponMultipliers.Select(kvp => new KeyValuePair<string, WeaponMultiplier>(kvp.Key, kvp.Value.Finalize(mappings))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
+            WeaponSusceptibilities = InnerElement.WeaponSusceptibilities.Select(kvp => new KeyValuePair<string, WeaponSusceptibility>(kvp.Key, kvp.Value.Finalize(mappings))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
             Areas = InnerElement.Areas.AsReadOnly();
-            WeaponSusceptibilities = InnerElement.WeaponSusceptibilities.AsReadOnly();
         }
 
         /// <summary>
@@ -84,12 +83,10 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         public bool Grapplable { get { return InnerElement.Grapplable; } }
 
-        public IReadOnlySet<string> InvulnerabilityStrings { get; }
-
         /// <summary>
-        /// The list of all weapons this enemy is invulnerable to.
+        /// All weapons this enemy is invulnerable to, mapped by name.
         /// </summary>
-        public IReadOnlyList<Weapon> InvulnerableWeapons { get; }
+        public IReadOnlyDictionary<string, Weapon> InvulnerableWeapons { get; }
 
         /// <summary>
         /// Contains damage multipliers for all weapons this enemy takes damage from, mapped by weapon name.
@@ -102,7 +99,7 @@ namespace sm_json_data_framework.Models.Enemies
         public IReadOnlySet<string> Areas { get; }
 
         /// <summary>
-        /// A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it
+        /// A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it. Mapped by weapon name.
         /// </summary>
         public IReadOnlyDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; }
 
@@ -114,7 +111,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <param name="fullResources">An enumeration of rechargeable resources that are considered full
         /// (and hence no longer cause their corresponding enemy drop to happen).</param>
         /// <returns></returns>
-        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
+        public EnemyDrops GetEffectiveDropRates(UnfinalizedSuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
         {
             return InnerElement.GetEffectiveDropRates(model, fullResources);
         }
@@ -127,7 +124,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <param name="fullResources">An enumeration of consumable resources that are considered full
         /// (and hence no longer cause their corresponding enemy drop to happen).</param>
         /// <returns></returns>
-        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
+        public EnemyDrops GetEffectiveDropRates(UnfinalizedSuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
         {
             return InnerElement.GetEffectiveDropRates(model, fullResources);
         }
@@ -163,7 +160,7 @@ namespace sm_json_data_framework.Models.Enemies
         public ISet<string> InvulnerabilityStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The sequence of all weapons this enemy is invulnerable to.</para>
         /// </summary>
         [JsonIgnore]
@@ -173,20 +170,20 @@ namespace sm_json_data_framework.Models.Enemies
         public IList<RawEnemyDamageMultiplier> RawDamageMultipliers { get; set; } = new List<RawEnemyDamageMultiplier>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>Contains damage multipliers for all weapons this enemy takes damage from, mapped by weapon name.</para>
         /// </summary>
         [JsonIgnore]
-        public Dictionary<string, WeaponMultiplier> WeaponMultipliers { get; private set; }
+        public Dictionary<string, UnfinalizedWeaponMultiplier> WeaponMultipliers { get; private set; }
 
         public ISet<string> Areas { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
-        /// <para>A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
+        /// <para>A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it. Mapped by weapon name.</para>
         /// </summary>
         [JsonIgnore]
-        public IDictionary<string, WeaponSusceptibility> WeaponSusceptibilities { get; set; }
+        public IDictionary<string, UnfinalizedWeaponSusceptibility> WeaponSusceptibilities { get; set; }
 
         public UnfinalizedEnemy()
         {
@@ -220,11 +217,19 @@ namespace sm_json_data_framework.Models.Enemies
 
         protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Logical options have no power here, but we can still delegate to the attacks.
-            // The other sub-models are too abstract to be considered elements
             foreach (UnfinalizedEnemyAttack attack in Attacks.Values)
             {
                 attack.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach(UnfinalizedWeaponMultiplier weaponMultiplier in WeaponMultipliers.Values)
+            {
+                weaponMultiplier.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (UnfinalizedWeaponSusceptibility weaponSusceptibility in WeaponSusceptibilities.Values)
+            {
+                weaponSusceptibility.ApplyLogicalOptions(logicalOptions);
             }
 
             Dimensions.ApplyLogicalOptions(logicalOptions);
@@ -232,29 +237,29 @@ namespace sm_json_data_framework.Models.Enemies
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model)
         {
             // Convert InvulnerabilityStrings to Weapons
             InvulnerableWeapons = InvulnerabilityStrings.NamesToWeapons(model).ToList();
 
             // Get a WeaponMultiplier for all non-immune weapons
             WeaponMultipliers = RawDamageMultipliers
-                .SelectMany(rdm => rdm.Weapon.NameToWeapons(model).Select(w => new WeaponMultiplier(w, rdm.Value)))
+                .SelectMany(rdm => rdm.Weapon.NameToWeapons(model).Select(w => new UnfinalizedWeaponMultiplier(w, rdm.Value)))
                 .ToDictionary(m => m.Weapon.Name);
             foreach (UnfinalizedWeapon neutralWeapon in model.Weapons.Values
                 .Except(WeaponMultipliers.Values.Select(wm => wm.Weapon), ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default)
                 .Except(InvulnerableWeapons, ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default))
             {
-                WeaponMultipliers.Add(neutralWeapon.Name, new WeaponMultiplier(neutralWeapon, 1m));
+                WeaponMultipliers.Add(neutralWeapon.Name, new UnfinalizedWeaponMultiplier(neutralWeapon, 1m));
             }
 
             // Create a WeaponSusceptibility for each non-immune weapon
             WeaponSusceptibilities = WeaponMultipliers.Values
-                .Select(wm => new WeaponSusceptibility(wm.NumberOfHits(Hp), wm))
+                .Select(wm => new UnfinalizedWeaponSusceptibility(wm.NumberOfHits(Hp), wm))
                 .ToDictionary(ws => ws.Weapon.Name);
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model)
         {
             // No logical elements in here
             return Enumerable.Empty<string>();
@@ -268,7 +273,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <param name="fullResources">An enumeration of rechargeable resources that are considered full
         /// (and hence no longer cause their corresponding enemy drop to happen).</param>
         /// <returns></returns>
-        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
+        public EnemyDrops GetEffectiveDropRates(UnfinalizedSuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
         {
             return model.Rules.CalculateEffectiveDropRates(Drops, model.Rules.GetUnneededDrops(fullResources));
         }
@@ -281,7 +286,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <param name="fullResources">An enumeration of consumable resources that are considered full
         /// (and hence no longer cause their corresponding enemy drop to happen).</param>
         /// <returns></returns>
-        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
+        public EnemyDrops GetEffectiveDropRates(UnfinalizedSuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
         {
             if(fullResources.Any())
             {

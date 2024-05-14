@@ -27,7 +27,7 @@ namespace sm_json_data_framework.Models.Requirements
 
         public IReadOnlyList<ILogicalElement> LogicalElements { get; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return InnerElement.Execute(model, inGameState, times, previousRoomCount);
         }
@@ -99,7 +99,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="model">A SuperMetroidModel that contains global data</param>
         /// <param name="room">The room in which this LogicalRequirements is, or null if it's not in a room</param>
         /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -111,7 +111,7 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If logical options make these logical requirements impossible, don't bother trying
             if(UselessByLogicalOptions)
@@ -132,7 +132,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public ExecutionResult ExecuteOne(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult ExecuteOne(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;

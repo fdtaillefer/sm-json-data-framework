@@ -11,12 +11,12 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class Item : AbstractModelElement<UnfinalizedItem, Item>
     {
-        private Item InnerElement { get; set; }
+        private UnfinalizedItem InnerElement { get; set; }
 
         public Item(UnfinalizedItem innerElement, Action<Item> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = InnerElement;
+            InnerElement = innerElement;
         }
 
         /// <summary>

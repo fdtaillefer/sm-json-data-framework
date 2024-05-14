@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Navigation
             IntentDescription = intent;
         }
 
-        public AbstractNavigationAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult): this(intent)
+        public AbstractNavigationAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult): this(intent)
         {
             Succeeded = true;
 
@@ -218,7 +218,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// Creates and returns an action representing the reverse of this action.
         /// </summary>
         /// <returns></returns>
-        public abstract AbstractNavigationAction Reverse(SuperMetroidModel model);
+        public abstract AbstractNavigationAction Reverse(UnfinalizedSuperMetroidModel model);
 
         /// <summary>
         /// Transfers to the provided action data from an AbstractNavigationAction that corresponds 

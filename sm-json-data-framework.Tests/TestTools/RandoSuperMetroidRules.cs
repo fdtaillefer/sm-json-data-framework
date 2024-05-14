@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        private IEnumerable<UnfinalizedItem> ReturnVariaIfPresent(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> ReturnVariaIfPresent(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasVariaSuit())
             {
@@ -41,7 +41,7 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        public override IEnumerable<UnfinalizedItem> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetEnvironmentalDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Report Varia as being the only suit that reduces environmental damage
             return ReturnVariaIfPresent(model, inGameState);
@@ -60,7 +60,7 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        public override IEnumerable<UnfinalizedItem> GetHeatDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetHeatDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Report Varia as being the only suit that reduces heat damage
             return ReturnVariaIfPresent(model, inGameState);
@@ -86,7 +86,7 @@ namespace sm_json_data_framework.Tests.TestTools
             return CalculateLavaDamage(inGameState, lavaPhysicsFrames);
         }
 
-        public override IEnumerable<UnfinalizedItem> GetLavaDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetLavaDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Report Varia as being the only suit that reduces lava damage
             return ReturnVariaIfPresent(model, inGameState);
@@ -105,7 +105,7 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        public override IEnumerable<UnfinalizedItem> GetAcidDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetAcidDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Report Varia as being the only suit that reduces acid damage
             return ReturnVariaIfPresent(model, inGameState);
@@ -124,7 +124,7 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        public override IEnumerable<UnfinalizedItem> GetElectricityGrappleDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetElectricityGrappleDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Report Varia as being the only suit that reduces electricity grapple damage
             return ReturnVariaIfPresent(model, inGameState);

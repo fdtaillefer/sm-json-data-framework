@@ -22,8 +22,7 @@ namespace sm_json_data_framework.Models.Rooms
             : base(innerElement, mappingsInsertionCallback)
         {
             InnerElement = innerElement;
-            EntranceNodeIds = InnerElement.EntranceNodeIds.AsReadOnly();
-            EntranceNodes = InnerElement.EntranceNodes.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+            EntranceNodes = InnerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
             Room = InnerElement.Room.Finalize(mappings);
         }
 
@@ -32,12 +31,10 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public bool Heated { get { return InnerElement.Heated; } }
 
-        public IReadOnlySet<int> EntranceNodeIds { get; }
-
         /// <summary>
-        /// The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.
+        /// The nodes that enable this environment if Samus has entered the room from one of them, mapped by in-room ID. Or, if null, the environment is always applicable.
         /// </summary>
-        public IReadOnlyList<RoomNode> EntranceNodes { get; }
+        public IReadOnlyDictionary<int, RoomNode> EntranceNodes { get; }
 
         /// <summary>
         /// The room to which this environment applies.
@@ -53,14 +50,14 @@ namespace sm_json_data_framework.Models.Rooms
         public ISet<int> EntranceNodeIds { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.</para>
         /// </summary>
         [JsonIgnore]
         public IList<UnfinalizedRoomNode> EntranceNodes { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The room to which this environment applies.</para>
         /// </summary>
         [JsonIgnore]
@@ -91,7 +88,7 @@ namespace sm_json_data_framework.Models.Rooms
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             Room = room;
 
@@ -112,7 +109,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             // No logical element in a room environment
             return Enumerable.Empty<string>();

@@ -14,7 +14,7 @@ namespace sm_json_data_framework.Tests.InGameStates
     public class InNodeStateTest
     {
         // Use a static model to build it only once.
-        private static SuperMetroidModel Model { get; set; } = new SuperMetroidModel(StaticTestObjects.RawModel);
+        private static UnfinalizedSuperMetroidModel Model { get; set; } = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
         #region Tests for ApplyOpenLock()
         [Fact]

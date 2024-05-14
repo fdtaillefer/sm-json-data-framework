@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int NodeId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The node that is viewable</para>
         /// </summary>
         [JsonIgnore]
@@ -85,7 +85,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return noUsefulStrat;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             // Initialize Node
             Node = room.Nodes[NodeId];
@@ -97,7 +97,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             List<string> unhandled = new List<string>();
 

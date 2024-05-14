@@ -28,8 +28,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Lock = InnerElement.Lock.Finalize(mappings);
             UnlockStrats = InnerElement.UnlockStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
             BypassStrats = InnerElement.BypassStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            YieldsStrings = InnerElement.YieldsStrings.AsReadOnly();
-            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
+            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
             Node = InnerElement.Node.Finalize(mappings);
         }
 
@@ -59,12 +58,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IReadOnlyDictionary<string, Strat> BypassStrats { get; }
 
-        public IReadOnlySet<string> YieldsStrings { get; }
-
         /// <summary>
-        /// The game flags that are activated by unlocking this lock.
+        /// The game flags that are activated by unlocking this lock, mapped by name.
         /// </summary>
-        public IReadOnlyList<GameFlag> Yields { get; }
+        public IReadOnlyDictionary<string, GameFlag> Yields { get; }
 
         /// <summary>
         /// The RoomNode on which this lock is.
@@ -77,7 +74,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsOpen(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsOpen(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return InnerElement.IsOpen(model, inGameState);
         }
@@ -88,7 +85,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsActive(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsActive(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return InnerElement.IsActive(model, inGameState);
         }
@@ -129,14 +126,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The game flags that are activated by unlocking this lock.</para>
         /// </summary>
         [JsonIgnore]
         public IList<UnfinalizedGameFlag> Yields { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The RoomNode on which this lock is.</para>
         /// </summary>
         [JsonIgnore]
@@ -181,7 +178,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return Lock.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             Node = node;
 
@@ -201,7 +198,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Yields = YieldsStrings.Select(s => model.GameFlags[s]).ToList();
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             List<string> unhandled = new List<string>();
 
@@ -226,7 +223,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsOpen(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsOpen(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return inGameState.OpenedLocks.ContainsLock(this);
         }
@@ -237,7 +234,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsActive(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsActive(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // This lock cannot be active if it's been opened
             if (inGameState.OpenedLocks.ContainsLock(this))
@@ -295,7 +292,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             NodeLock = nodeLock;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Can't open a lock that isn't active
             if (!NodeLock.IsActive(model, inGameState))
@@ -329,7 +326,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             NodeLock = nodeLock;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If there are no bypass strats, bypassing fails
             if (!NodeLock.BypassStrats.Any())

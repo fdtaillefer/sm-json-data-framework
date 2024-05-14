@@ -61,7 +61,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count -2) == Value;
         }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (IsFulfilled(inGameState, previousRoomCount))
             {

@@ -23,13 +23,13 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public MoveToNodeAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, UnfinalizedStrat stratUsed, ExecutionResult executionResult) :
+        public MoveToNodeAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyInGameState initialInGameState, UnfinalizedStrat stratUsed, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
             StratUsed = stratUsed;
         }
 
-        public override AbstractNavigationAction Reverse(SuperMetroidModel model)
+        public override AbstractNavigationAction Reverse(UnfinalizedSuperMetroidModel model)
         {
             MoveToNodeAction reverseAction = new MoveToNodeAction($"Undo action '{this.IntentDescription}'");
             TransferDataToReverseAbstractAction(reverseAction);

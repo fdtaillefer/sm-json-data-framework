@@ -90,7 +90,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode Node { get; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return InnerElement.Execute(model, inGameState, times, previousRoomCount);
         }
@@ -146,7 +146,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int StartingDownTiles { get; set; } = 0;
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The node in which this CanLeaveCharged is.</para>
         /// </summary>
         [JsonIgnore]
@@ -227,7 +227,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return useless;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             Node = node;
 
@@ -239,7 +239,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             InitiateRemotely?.InitializeProperties(model, room, node, this);
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             List<string> unhandled = new List<string>();
 
@@ -256,7 +256,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return unhandled.Distinct();
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There are many things to check...
             // If logical options have rendered this CanLeaveCharged unusable, it can't be executed

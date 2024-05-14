@@ -234,7 +234,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>The new state of this if execution succeeds, or null in case of failure.</returns>
-        public ExecutionResult AndThen(IExecutable executable, SuperMetroidModel model, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult AndThen(IExecutable executable, UnfinalizedSuperMetroidModel model, int times = 1, int previousRoomCount = 0)
         {
             ExecutionResult result = executable.Execute(model, ResultingState, times: times, previousRoomCount: previousRoomCount);
             if (result == null)

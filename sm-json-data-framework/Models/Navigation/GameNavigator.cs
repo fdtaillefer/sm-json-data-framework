@@ -53,7 +53,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="initialState">The starting inGameState for this navigator. A clone of this will be used.</param>
         /// <param name="maxPreviousStatesSize">The maximum number of previous states that this navigator should keep in memory.</param>
         /// <param name="options">Optional game navigation options. If left null, default options will be used.</param>
-        public GameNavigator(SuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
+        public GameNavigator(UnfinalizedSuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
         {
             GameModel = model;
             InternalInGameState = initialState.Clone();
@@ -77,7 +77,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// A model that can be used to obtain data about the current game configuration.
         /// </summary>
-        public SuperMetroidModel GameModel { get; private set; }
+        public UnfinalizedSuperMetroidModel GameModel { get; private set; }
 
         private int MaxPreviousStatesSize { get; set; }
 

@@ -44,7 +44,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             LogicalRequirements = logicalRequirements;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             return LogicalRequirements.InitializeReferencedLogicalElementProperties(model, room);
         }

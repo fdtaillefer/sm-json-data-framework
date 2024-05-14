@@ -51,7 +51,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public string EnemyName { get; set; }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemy that this element's EnemyName references. </para>
         /// </summary>
         [JsonIgnore]
@@ -61,7 +61,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public string AttackName { get; set; }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemy attack that this element's AttackName references. </para>
         /// </summary>
         [JsonIgnore]
@@ -85,7 +85,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             if(model.Enemies.TryGetValue(EnemyName, out UnfinalizedEnemy enemy))
             {
@@ -107,7 +107,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
 

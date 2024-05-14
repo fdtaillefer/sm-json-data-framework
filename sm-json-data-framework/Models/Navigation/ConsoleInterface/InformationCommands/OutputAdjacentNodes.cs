@@ -19,8 +19,8 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             ValidCommand = str => str.ToLower() == "san";
             Execution = (navigator, command) =>
             {
-                IEnumerable<UnfinalizedLinkTo> links = navigator.CurrentInGameState.CurrentNode.Links.Values;
-                foreach (UnfinalizedLinkTo link in navigator.CurrentInGameState.CurrentNode.Links.Values)
+                IEnumerable<UnfinalizedLinkTo> links = navigator.CurrentInGameState.CurrentNode.LinksTo.Values;
+                foreach (UnfinalizedLinkTo link in navigator.CurrentInGameState.CurrentNode.LinksTo.Values)
                 {
                     string output = $"Adjacent node {link.TargetNodeId}: {link.TargetNode.Name}";
                     if(link.UselessByLogicalOptions)

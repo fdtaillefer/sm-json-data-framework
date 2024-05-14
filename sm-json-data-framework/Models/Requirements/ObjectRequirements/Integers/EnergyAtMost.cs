@@ -42,14 +42,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return false;
         }
 
-        public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int currentRegularEnergy = inGameState.Resources.GetAmount(Items.RechargeableResourceEnum.RegularEnergy);
             // Don't take damage if we've already reached the threshold
             return Math.Max(0, currentRegularEnergy - Value);
         }
 
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // This brings energy down to a specific level, and has no cares for damage reduction items
             return new UnfinalizedItem[] { };

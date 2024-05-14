@@ -63,7 +63,7 @@ namespace sm_json_data_framework.Models.Rooms
         public UnfinalizedLogicalRequirements Requires { get; set; } = new UnfinalizedLogicalRequirements();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The room in which this obstacle is.</para>
         /// </summary>
         [JsonIgnore]
@@ -96,12 +96,12 @@ namespace sm_json_data_framework.Models.Rooms
             return Requires.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             Room = room;
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 

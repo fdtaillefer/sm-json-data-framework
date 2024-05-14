@@ -125,12 +125,12 @@ namespace sm_json_data_framework.Models.Weapons
             return UseRequires.UselessByLogicalOptions || ShotRequires.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model)
         {
             // Nothing relevant to initialize
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model)
         {
             List<string> unhandled = new List<string>();
 

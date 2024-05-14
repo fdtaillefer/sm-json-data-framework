@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Tests.InGameStates
     public class InRoomStateTest
     {
         // Use a static model to build it only once.
-        private static SuperMetroidModel Model { get; set; } = new SuperMetroidModel(StaticTestObjects.RawModel);
+        private static UnfinalizedSuperMetroidModel Model { get; set; } = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
         #region Tests for ctor(RoomNode)
         [Fact]
@@ -68,7 +68,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            UnfinalizedLinkTo expectedLink = initialNode.Links[8];
+            UnfinalizedLinkTo expectedLink = initialNode.LinksTo[8];
             InRoomState state = new InRoomState(initialNode);
 
             // When
@@ -99,7 +99,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            UnfinalizedStrat expectedStrat = initialNode.Links[8].Strats["Base"];
+            UnfinalizedStrat expectedStrat = initialNode.LinksTo[8].Strats["Base"];
             InRoomState state = new InRoomState(initialNode);
 
             // When
@@ -270,8 +270,8 @@ namespace sm_json_data_framework.Tests.InGameStates
             InRoomState state = new InRoomState(initialNode);
 
             // When
-            state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), state.CurrentNode.Links[8].Strats["Base"])
-                .ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), state.CurrentNode.Links[1].Strats["Parlor Quick Charge"]);
+            state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), state.CurrentNode.LinksTo[8].Strats["Base"])
+                .ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), state.CurrentNode.LinksTo[1].Strats["Parlor Quick Charge"]);
 
             // Expect
             Assert.Equal("Parlor and Alcatraz", state.CurrentRoom.Name);
@@ -308,7 +308,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             InRoomState state = new InRoomState(initialNode);
 
             // When and expect
-            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), state.CurrentNode.Links[8].Strats["Base"]));
+            Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), state.CurrentNode.LinksTo[8].Strats["Base"]));
         }
 
         [Fact]
@@ -317,7 +317,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             // Given
             UnfinalizedRoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
-            UnfinalizedStrat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).Links[1].Strats["Base"];
+            UnfinalizedStrat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).LinksTo[1].Strats["Base"];
 
             // When and expect
             Assert.Throws<ArgumentException>(() => state.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
@@ -328,7 +328,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 5);
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 2).Links[5].Strats["Base"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 2).LinksTo[5].Strats["Base"];
             InRoomState state = new InRoomState(node);
             state.ClearRoomState();
 
@@ -396,7 +396,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             // Given
             UnfinalizedRoomNode firstNode = Model.GetNodeInRoom("Crocomire's Room", 2);
             UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Crocomire's Room", 5);
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Crocomire's Room", 2).Links[5].Strats["Base"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Crocomire's Room", 2).LinksTo[5].Strats["Base"];
             InRoomState state = new InRoomState(firstNode);
             state.ClearRoomState();
             state.ApplyVisitNode(firstNode, null);
@@ -742,7 +742,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             // Given
             UnfinalizedRoomNode node = Model.GetNodeInRoom("Landing Site", 4);
             UnfinalizedRoomNode secondNode = Model.GetNodeInRoom("Landing Site", 3);
-            UnfinalizedStrat strat = node.Links[3].Strats["Base"];
+            UnfinalizedStrat strat = node.LinksTo[3].Strats["Base"];
             UnfinalizedNodeLock openedLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
             UnfinalizedNodeLock bypassedLock  = Model.Locks["Landing Site Top Right Escape Lock (to Power Bombs)"];
             InRoomState state = new InRoomState(node);

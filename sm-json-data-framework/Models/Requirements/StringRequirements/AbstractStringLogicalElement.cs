@@ -27,7 +27,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         where ConcreteType : AbstractUnfinalizedLogicalElement<ConcreteType, TargetType>
         where TargetType : AbstractLogicalElement<ConcreteType, TargetType>
     {
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             // String logical elements don't have properties
             return Enumerable.Empty<string>();

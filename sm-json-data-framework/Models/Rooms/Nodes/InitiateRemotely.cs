@@ -21,7 +21,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             InnerElement = innerElement;
             InitiateAtNode = InnerElement.InitiateAtNode.Finalize(mappings);
-            PathToDoor = (IReadOnlyList<(LinkTo link, IReadOnlyList<Strat> strats)>)InnerElement.PathToDoor.Select(node => (node.link.Finalize(mappings), node.strats.Select(strat => strat.Finalize(mappings)).ToList().AsReadOnly()))
+            PathToDoor = InnerElement.PathToDoor
+                .Select(node => (node.link.Finalize(mappings), (IReadOnlyDictionary<string, Strat>)node.strats.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly()))
                 .ToList().AsReadOnly();
             ExitNode = InnerElement.ExitNode.Finalize(mappings);
         }
@@ -38,10 +39,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public bool MustOpenDoorFirst { get; }
 
         /// <summary>
-        /// <para>A path that must be followed by Samus to execute the remote CanLeaveCharged, represented as links to follow and appropriate strats.</para>
+        /// <para>A path that must be followed by Samus to execute the remote CanLeaveCharged, represented as links to follow and appropriate strats(that are mapped by name).</para>
         /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
         /// </summary>
-        public IReadOnlyList<(LinkTo link, IReadOnlyList<Strat> strats)> PathToDoor { get; }
+        public IReadOnlyList<(LinkTo linkTo, IReadOnlyDictionary<string, Strat> strats)> PathToDoor { get; }
 
         /// <summary>
         /// The node through which this remote initiation ultimately exits the room charged.
@@ -59,7 +60,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int InitiateAtNodeId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The node referenced by the <see cref="InitiateAtNodeId"/> property.</para>
         /// </summary>
         [JsonIgnore]
@@ -75,7 +76,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IList<InitiateRemotelyPathToDoorNode> PathToDoorNodes { get; set; } = new List<InitiateRemotelyPathToDoorNode>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The path referenced by the <see cref="PathToDoorNodes"/> property, represented as links to follow and appropriate strats.</para>
         /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
         /// </summary>
@@ -83,7 +84,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IList<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)> PathToDoor { get; set; } = new List<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The node through which this remote initiation ultimately exits the room charged.</para>
         /// </summary>
         [JsonIgnore]
@@ -134,7 +135,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return anyNodeImpossible;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)
         {
             // Initialize the start and end nodes of the remote canLeaveCharged
             InitiateAtNode = room.Nodes[InitiateAtNodeId];
@@ -192,7 +193,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             PathToDoor = pathToDoor;
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)
         {
             // All referenced nodes and links and strats belong to other objects, so nothing to do here
             return Enumerable.Empty<string>();

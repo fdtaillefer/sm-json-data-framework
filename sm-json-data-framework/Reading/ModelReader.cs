@@ -41,7 +41,7 @@ namespace sm_json_data_framework.Reading
 
         /// <summary>
         /// Delegates to <see cref="ReadRawModel(string)"/>, then uses that raw model to delegate to
-        /// <see cref="SuperMetroidModel.SuperMetroidModel(RawSuperMetroidModel, SuperMetroidRules, LogicalOptions, IBasicStartConditionsCustomizer, IEnumerable{ValueTuple{ObjectLogicalElementTypeEnum, Type}}, IEnumerable{ValueTuple{StringLogicalElementTypeEnum, Type}})"/>
+        /// <see cref="UnfinalizedSuperMetroidModel.SuperMetroidModel(RawSuperMetroidModel, SuperMetroidRules, LogicalOptions, IBasicStartConditionsCustomizer, IEnumerable{ValueTuple{ObjectLogicalElementTypeEnum, Type}}, IEnumerable{ValueTuple{StringLogicalElementTypeEnum, Type}})"/>
         /// </summary>
         /// <param name="rules">A repository of game rules to operate by.
         /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
@@ -53,14 +53,14 @@ namespace sm_json_data_framework.Reading
         /// to represent that ObjectLogicalElementTypeEnum when deserializing logical requirements from a json file.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
-        public static SuperMetroidModel ReadModel(SuperMetroidRules rules = null,
+        public static UnfinalizedSuperMetroidModel ReadModel(SuperMetroidRules rules = null,
             IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             string baseDirectory = null, 
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
             RawSuperMetroidModel rawModel = ReadRawModel(baseDirectory);
-            return new SuperMetroidModel(rawModel, rules, basicStartConditionsCustomizer, overrideObjectTypes, overrideStringTypes);
+            return new UnfinalizedSuperMetroidModel(rawModel, rules, basicStartConditionsCustomizer, overrideObjectTypes, overrideStringTypes);
         }
 
         private static JsonSerializerOptions CreateJsonSerializerOptionsForRawModel()

@@ -21,11 +21,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             InnerElement = innerElement;
             GroupedEnemyNames = innerElement.GroupedEnemyNames.Select(group => group.AsReadOnly()).ToList().AsReadOnly();
             GroupedEnemies = innerElement.GroupedEnemies.Select(group => group.Select(enemy => enemy.Finalize(mappings)).ToList().AsReadOnly()).ToList().AsReadOnly();
-            ExplicitWeaponNames = innerElement.ExplicitWeaponNames.AsReadOnly();
-            ExplicitWeapons = innerElement.ExplicitWeapons.Select(weapon => weapon.Finalize(mappings)).ToList().AsReadOnly();
-            ExcludedWeaponNames = innerElement.ExcludedWeaponNames.ToHashSet().AsReadOnly();
-            ExcludedWeapons = innerElement.ExcludedWeapons.Select(weapon => weapon.Finalize(mappings)).ToList().AsReadOnly();
-            ValidWeapons = innerElement.ValidWeapons.Select(weapon => weapon.Finalize(mappings)).ToList().AsReadOnly();
+            ExplicitWeapons = innerElement.ExplicitWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            ExcludedWeapons = innerElement.ExcludedWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            ValidWeapons = innerElement.ValidWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
             FarmableAmmo = innerElement.FarmableAmmo.ToHashSet().AsReadOnly();
         }
 
@@ -37,27 +35,23 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public IReadOnlyList<IReadOnlyList<Enemy>> GroupedEnemies { get; }
 
-        public IReadOnlySet<string> ExplicitWeaponNames { get; }
-
         /// <summary>
-        /// The weapons that this element's ExplicitWeapons reference. These weapons are the only ones that are allowed for this enemy kill,
-        /// overriding the default behavior of allowing all non-situational weapons.
+        /// the only weapons that are allowed for this enemy kill, overriding the default behavior of allowing all non-situational weapons.
+        /// Mapped by name.
         /// </summary>
-        public IReadOnlyList<Weapon> ExplicitWeapons { get; }
-
-        public IReadOnlySet<string> ExcludedWeaponNames { get; }
+        public IReadOnlyDictionary<string, Weapon> ExplicitWeapons { get; }
 
         /// <summary>
-        /// The weapons that this element's ExcludedWeapons reference. These weapons are not allowed for this enemy kill.
+        /// Weapons that are disallowed for this EnemyKill, mapped by name.
         /// </summary>
-        public IReadOnlyList<Weapon> ExcludedWeapons { get; }
+        public IReadOnlyDictionary<string, Weapon> ExcludedWeapons { get; }
 
         /// <summary>
-        /// The weapons that Samus may attempt to use to resolve this EnemyKill. This is built based on ExplicitWeapons, ExcludedWeapons,
+        /// The weapons that Samus may attempt to use to resolve this EnemyKill, mapped by name. This is built based on ExplicitWeapons, ExcludedWeapons,
         /// and the list of all existing weapons.
         /// </summary>
         [JsonIgnore]
-        public IReadOnlyList<Weapon> ValidWeapons { get; }
+        public IReadOnlyDictionary<string, Weapon> ValidWeapons { get; }
 
         /// <summary>
         /// The set of ammo types that are considered farmable in the context of this EnemyKill, meaning the ammo cost for those types can be waived.
@@ -75,7 +69,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public IList<IList<string>> GroupedEnemyNames { get; set; } = new List<IList<string>>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemies that this element's GroupedEnemyNames reference. These enemies are the enemies that must be killed,
         /// separated into groups that can be entirely hit by a single shot from a weapon that hits groups.</para>
         /// </summary>
@@ -86,7 +80,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public ISet<string> ExplicitWeaponNames { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The weapons that this element's ExplicitWeapons reference. These weapons are the only ones that are allowed for this enemy kill,
         /// overriding the default behavior of allowing all non-situational weapons.</para>
         /// </summary>
@@ -97,14 +91,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public IEnumerable<string> ExcludedWeaponNames { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The weapons that this element's ExcludedWeapons reference. These weapons are not allowed for this enemy kill.</para>
         /// </summary>
         [JsonIgnore]
         public IEnumerable<UnfinalizedWeapon> ExcludedWeapons { get; set; }
 
         /// <summary>
-        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(SuperMetroidModel, UnfinalizedRoom)"/>.</para>
+        /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The weapons that Samus may attempt to use to resolve this EnemyKill. This is built based on ExplicitWeapons, ExcludedWeapons,
         /// and the list of all existing weapons.</para>
         /// </summary>
@@ -139,7 +133,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -209,7 +203,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Create an ExecutionResult immediately so we can record free kills in it
             ExecutionResult result = new ExecutionResult(inGameState.Clone());
@@ -264,7 +258,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 IEnumerable<(UnfinalizedWeapon splashWeapon, int splashShots)> splashCombinations = nonFreeSplashWeapons.SelectMany(w =>
                     // Figure out what different shot counts for this weapon will lead to different numbers of casualties
                     currentEnemyGroup
-                        .Select(e => e.WeaponSusceptibilities.TryGetValue(w.Name, out WeaponSusceptibility susceptibility) ? susceptibility.Shots : 0)
+                        .Select(e => e.WeaponSusceptibilities.TryGetValue(w.Name, out UnfinalizedWeaponSusceptibility susceptibility) ? susceptibility.Shots : 0)
                         .Where(shots => shots > 0)
                         // Convert each different number of shot into a combination of this weapon and the number of shots
                         .Select(shots => (splashWeapon: w, splashShots: shots))
@@ -355,7 +349,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         private int SplashShots { get; set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             ExecutionResult result = null;
             // We'll need to track the health of individual enemies, so create an EnemyWithHealth for each
@@ -376,7 +370,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 enemiesWithHealth = enemiesWithHealth
                     .Select(e =>
                     {
-                        e.Enemy.WeaponSusceptibilities.TryGetValue(SplashWeapon.Name, out WeaponSusceptibility susceptibility);
+                        e.Enemy.WeaponSusceptibilities.TryGetValue(SplashWeapon.Name, out UnfinalizedWeaponSusceptibility susceptibility);
                         // If the splash weapon hurts the enemy, apply damage
                         if (susceptibility != null)
                         {
@@ -444,11 +438,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         private int PriorSplashShots { get; set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             bool enemyInitiallyFull = EnemyWithHealth.Health == EnemyWithHealth.Enemy.Hp;
 
-            EnemyWithHealth.Enemy.WeaponSusceptibilities.TryGetValue(Weapon.Name, out WeaponSusceptibility susceptibility);
+            EnemyWithHealth.Enemy.WeaponSusceptibilities.TryGetValue(Weapon.Name, out UnfinalizedWeaponSusceptibility susceptibility);
             if (susceptibility == null)
             {
                 return null;

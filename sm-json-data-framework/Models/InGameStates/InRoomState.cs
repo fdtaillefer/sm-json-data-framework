@@ -137,7 +137,7 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 throw new ArgumentException($"Node {nodeId} doesn't exist in room '{CurrentRoom.Name}'");
             }
-            CurrentNode.Links.TryGetValue(nodeId, out UnfinalizedLinkTo linkTo);
+            CurrentNode.LinksTo.TryGetValue(nodeId, out UnfinalizedLinkTo linkTo);
             if (linkTo == null)
             {
                 throw new ArgumentException($"There is no link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
@@ -190,7 +190,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
             if (strat != null)
             {
-                CurrentNode.Links.TryGetValue(node.Id, out UnfinalizedLinkTo link);
+                CurrentNode.LinksTo.TryGetValue(node.Id, out UnfinalizedLinkTo link);
                 if (link == null)
                 {
                     throw new ArgumentException($"There is no link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
@@ -213,7 +213,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public UnfinalizedLinkTo GetLinkToNode(int targetNodeId)
         {
             UnfinalizedLinkTo link;
-            CurrentNode.Links.TryGetValue(targetNodeId, out link);
+            CurrentNode.LinksTo.TryGetValue(targetNodeId, out link);
             return link;
         }
 

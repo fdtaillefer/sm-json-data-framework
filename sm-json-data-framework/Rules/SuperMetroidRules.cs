@@ -195,7 +195,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravitySupersedesVaria(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravitySupersedesVaria(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasGravitySuit())
             {
@@ -218,7 +218,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravityTurnedOff(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravityTurnedOff(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasVariaSuit())
             {
@@ -238,7 +238,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenVariaSupersedesGravity(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenVariaSupersedesGravity(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasVariaSuit())
             {
@@ -287,7 +287,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetEnvironmentalDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -321,7 +321,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetHeatDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetHeatDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity and Varia are equivalent. Varia's more iconic for heat reduction, so let's prioritize it.
             return GetDamageReducingItemsWhenVariaSupersedesGravity(model, inGameState);
@@ -379,7 +379,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetLavaDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetLavaDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -393,7 +393,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetLavaPhysicsDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetLavaPhysicsDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity turned off
             return GetDamageReducingItemsWhenGravityTurnedOff(model, inGameState);
@@ -431,7 +431,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetAcidDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetAcidDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -469,7 +469,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetElectricityGrappleDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<UnfinalizedItem> GetElectricityGrappleDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
@@ -533,7 +533,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetEnemyDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState, UnfinalizedEnemyAttack enemyAttack)
+        public virtual IEnumerable<UnfinalizedItem> GetEnemyDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, UnfinalizedEnemyAttack enemyAttack)
         {
             // What we return depends not only on the suits available, but also on the attack
             if(enemyAttack.AffectedByGravity && enemyAttack.AffectedByVaria)

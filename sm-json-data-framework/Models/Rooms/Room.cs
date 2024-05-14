@@ -137,11 +137,11 @@ namespace sm_json_data_framework.Models.Rooms
 
         // Is this really needed? Should probably remove this later
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The SuperMetroidModel that this room is a part of.</para>
         /// </summary>
         [JsonIgnore]
-        public SuperMetroidModel SuperMetroidModel { get; set; }
+        public UnfinalizedSuperMetroidModel SuperMetroidModel { get; set; }
 
         public UnfinalizedRoom()
         {
@@ -199,7 +199,7 @@ namespace sm_json_data_framework.Models.Rooms
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model)
         {
             SuperMetroidModel = model;
 
@@ -247,7 +247,7 @@ namespace sm_json_data_framework.Models.Rooms
             return null;
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model)
         {
             List<string> unhandled = new List<string>();
 

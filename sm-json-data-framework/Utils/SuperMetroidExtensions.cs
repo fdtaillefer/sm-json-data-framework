@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Utils
         /// <param name="names">The names to convert</param>
         /// <param name="model">A SuperMetroidModel that contains existing weapons</param>
         /// <returns>A sequence of Weapons</returns>
-        public static IEnumerable<UnfinalizedWeapon> NamesToWeapons(this IEnumerable<string> names, SuperMetroidModel model)
+        public static IEnumerable<UnfinalizedWeapon> NamesToWeapons(this IEnumerable<string> names, UnfinalizedSuperMetroidModel model)
         {
             return names.SelectMany(n => n.NameToWeapons(model)).Distinct(ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default);
         }
@@ -36,7 +36,7 @@ namespace sm_json_data_framework.Utils
         /// <param name="name">The name to convert</param>
         /// <param name="model">A SuperMetroidModel that contains existing weapons</param>
         /// <returns>A sequence of Weapons, or null if the string matches no weapon or category</returns>
-        public static IEnumerable<UnfinalizedWeapon> NameToWeapons(this string name, SuperMetroidModel model)
+        public static IEnumerable<UnfinalizedWeapon> NameToWeapons(this string name, UnfinalizedSuperMetroidModel model)
         {
             if(model.Weapons.TryGetValue(name, out UnfinalizedWeapon weapon))
             {
@@ -61,9 +61,19 @@ namespace sm_json_data_framework.Utils
         /// Builds and returns a list of all techs found inside this RawTechContainer (at any level).
         /// </summary>
         /// <returns></returns>
-        public static IEnumerable<RawTech> SelectAllTechs(this RawTechContainer rawTechContainer)
+        public static IList<RawTech> SelectAllTechs(this RawTechContainer rawTechContainer)
         {
             return rawTechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList();
+        }
+
+        // We put this as an extension rather than in RawTechContainer because we want RawTechContainer to stay a basic model with no logic as much as possible
+        /// <summary>
+        /// Builds and returns a list of all techs found at the top level of a TechCategory inside this RawTechContainer.
+        /// </summary>
+        /// <returns></returns>
+        public static IList<RawTech> SelectTopLevelTechs(this RawTechContainer rawTechContainer)
+        {
+            return rawTechContainer.TechCategories.SelectMany(category => category.Techs).ToList();
         }
 
         // We put this as an extension rather than in RawTech because we want RawTech to stay a basic model with no logic as much as possible
@@ -71,7 +81,7 @@ namespace sm_json_data_framework.Utils
         /// Returns a list containing this RawTech and all its extension raw techs (and all their own extension raw techs, and so on).
         /// </summary>
         /// <returns></returns>
-        public static IEnumerable<RawTech> SelectWithExtensions(this RawTech rawTech)
+        public static IList<RawTech> SelectWithExtensions(this RawTech rawTech)
         {
             return rawTech.ExtensionTechs.SelectMany(tech => tech.SelectWithExtensions()).Prepend(rawTech).ToList();
         }

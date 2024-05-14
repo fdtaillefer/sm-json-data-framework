@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
         /// <returns></returns>
-        public bool IsFree(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public bool IsFree(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return InnerElement.IsFree(model, inGameState, times, previousRoomCount);
         }
@@ -87,7 +87,7 @@ namespace sm_json_data_framework.Models.Rooms
         public UnfinalizedLogicalRequirements Requires { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomEnemy)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomEnemy)"/> has been called.</para>
         /// <para>The RoomEnemy to which this FarmCycle applies</para>
         /// </summary>
         [JsonIgnore]
@@ -129,12 +129,12 @@ namespace sm_json_data_framework.Models.Rooms
             return Requires.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)
         {
             RoomEnemy = roomEnemy;
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, room);
         }
@@ -149,7 +149,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="usePreviousRoom">If true, uses the last known room state at the previous room instead of the current room to answer
         /// (whenever in-room state is relevant).</param>
         /// <returns></returns>
-        public bool IsFree(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public bool IsFree(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Execute the requirements of this cycle once
             ExecutionResult executionResult = RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
@@ -216,7 +216,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return FarmCycle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
@@ -233,7 +233,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             var requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // Can't even execute one cycle, so return a failure
@@ -366,7 +366,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
         /// <param name="resourcesToRefill">The resources that should be refilled.</param>
         /// <returns></returns>
-        private ExecutionResult ExecuteRefill(SuperMetroidModel model, ReadOnlyInGameState inGameState, IEnumerable<ConsumableResourceEnum> resourcesToRefill)
+        private ExecutionResult ExecuteRefill(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, IEnumerable<ConsumableResourceEnum> resourcesToRefill)
         {
             InGameState resultingState = inGameState.Clone();
             foreach (ConsumableResourceEnum resource in resourcesToRefill)
@@ -386,7 +386,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="costingResources">A dictionary of resources that have a cost associated with executing a cycle.
         /// The resource is the key and the cost per cycle is the value.</param>
         /// <returns></returns>
-        private IEnumerable<ConsumableResourceEnum> ComputeFarmableResources(SuperMetroidModel model,
+        private IEnumerable<ConsumableResourceEnum> ComputeFarmableResources(UnfinalizedSuperMetroidModel model,
             IDictionary<ConsumableResourceEnum, int> costingResources)
         {
             ISet<ConsumableResourceEnum> farmableResources = new HashSet<ConsumableResourceEnum>();
@@ -430,7 +430,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="effectiveDropRates">The effective drop rates, after accounting for unneeded drops.</param>
         /// <param name="costingResources">A dictionary  of resources to their cost per cycle.</param>
         /// <returns></returns>
-        private decimal CalculateResourceVariationPerSecond(SuperMetroidModel model, ConsumableResourceEnum resource,
+        private decimal CalculateResourceVariationPerSecond(UnfinalizedSuperMetroidModel model, ConsumableResourceEnum resource,
             EnemyDrops effectiveDropRates, IDictionary<ConsumableResourceEnum, int> costingResources)
         {
             decimal variationPerCycle = CalculateResourceVariationPerCycle(model, resource, effectiveDropRates, costingResources);
@@ -448,7 +448,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="effectiveDropRates">The effective drop rates, after accounting for unneeded drops.</param>
         /// <param name="costingResources">A dictionary  of resources to their cost per cycle.</param>
         /// <returns></returns>
-        private decimal CalculateResourceVariationPerCycle(SuperMetroidModel model, ConsumableResourceEnum resource,
+        private decimal CalculateResourceVariationPerCycle(UnfinalizedSuperMetroidModel model, ConsumableResourceEnum resource,
         EnemyDrops effectiveDropRates, IDictionary<ConsumableResourceEnum, int> costingResources)
         {
             // If this farm cycle has to spend some of this resource, do some adaptations:

@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return false;
         }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.ActiveGameFlags.ContainsFlag(GameFlag))
             {

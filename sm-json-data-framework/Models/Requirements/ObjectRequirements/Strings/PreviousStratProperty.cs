@@ -61,7 +61,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return false;
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             // A strat property is a free-form string so we have nothing to initialize
             return Enumerable.Empty<string>();
@@ -79,7 +79,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (IsFulfilled(inGameState, previousRoomCount))
             {

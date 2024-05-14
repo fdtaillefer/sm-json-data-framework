@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             : base(innerElement, mappingsInsertionCallback)
         {
             InnerElement = innerElement;
-            NodeItem = InnerElement.NodeItem.Finalize(mappings);
+            NodeItem = InnerElement.NodeItem?.Finalize(mappings);
             DoorEnvironments = InnerElement.DoorEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
             InteractionRequires = InnerElement.InteractionRequires.Finalize(mappings);
             Runways = InnerElement.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
@@ -39,13 +39,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Locks = InnerElement.Locks.Values.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
             Utility = InnerElement.Utility.AsReadOnly();
             ViewableNodes = InnerElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToList().AsReadOnly();
-            YieldsStrings = InnerElement.YieldsStrings.AsReadOnly();
-            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
-            Note = InnerElement.Note.AsReadOnly();
+            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Note = InnerElement.Note?.AsReadOnly();
             Room = InnerElement.Room.Finalize(mappings);
-            OutConnection = InnerElement.OutConnection.Finalize(mappings);
-            OutNode = InnerElement.OutNode.Finalize(mappings);
-            Links = InnerElement.Links.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
+            OutConnection = InnerElement.OutConnection?.Finalize(mappings);
+            OutNode = InnerElement.OutNode?.Finalize(mappings);
+            LinksTo = InnerElement.LinksTo.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
             TwinDoorAddresses = InnerElement.TwinDoorAddresses.Select(twinAddress => twinAddress.Finalize(mappings)).ToList().AsReadOnly();
         }
 
@@ -136,12 +135,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IReadOnlyList<ViewableNode> ViewableNodes { get; }
 
-        public IReadOnlySet<string> YieldsStrings { get; }
-
         /// <summary>
-        /// The game flags that are activated by interacting with this node.
+        /// The game flags that are activated by interacting with this node, mapped by name.
         /// </summary>
-        public IReadOnlyList<GameFlag> Yields { get; }
+        public IReadOnlyDictionary<string, GameFlag> Yields { get; }
 
         /// <summary>
         /// General information notes about this node.
@@ -166,7 +163,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Contains all in-room links from this node to another, mapped by the destination node ID.
         /// </summary>
-        public IReadOnlyDictionary<int, LinkTo> Links { get; }
+        public IReadOnlyDictionary<int, LinkTo> LinksTo { get; }
 
         /// <summary>
         /// The list of twin doors that this node has.
@@ -178,7 +175,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         /// <param name="inGameState">InGameState to evaluate for active locks</param>
         /// <returns></returns>
-        public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public IEnumerable<NodeLock> GetActiveLocks(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             //Should remove that .Name and pass just nodeLock again, once I've removed all Unfinalized everywhere
             // Return locks whose locking conditions have been met, and that haven't been opened
@@ -197,7 +194,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int Id { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>A string that identifies this node, often used as a key in Dictionaries.</para>
         /// </summary>
         [JsonIgnore]
@@ -213,7 +210,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public string NodeItemName { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The item that can be obtained by interacting with this node (if any).</para>
         /// </summary>
         [JsonIgnore]
@@ -237,14 +234,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public int? OverrideSpawnAtNodeId { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The node referenced by the <see cref="OverrideSpawnAtNodeId"/> property, if any.</para>
         /// </summary>
         [JsonIgnore]
         public UnfinalizedRoomNode OverrideSpawnAtNode { get; set; }
 
         /// <summary>
-        /// <para>Not reliable before <see cref="Initialize(SuperMetroidModel)"/> has been called.</para>
+        /// <para>Not reliable before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.</para>
         /// </summary>
         [JsonIgnore]
@@ -269,7 +266,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The game flags that are activated by interacting with this node.</para>
         /// </summary>
         [JsonIgnore]
@@ -279,32 +276,32 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IList<string> Note { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The room in which this node is.</para>
         /// </summary>
         [JsonIgnore]
         public UnfinalizedRoom Room { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the one-way connection that connects this node to its destination.</para>
         /// </summary>
         [JsonIgnore]
         public UnfinalizedConnection OutConnection { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the node that leaving the room via this node leads to.</para>
         /// </summary>
         [JsonIgnore]
         public UnfinalizedRoomNode OutNode { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>Contains all in-room links from this node to another, mapped by the destination node ID.</para>
         /// </summary>
         [JsonIgnore]
-        public IDictionary<int, UnfinalizedLinkTo> Links { 
+        public IDictionary<int, UnfinalizedLinkTo> LinksTo { 
             get 
             {
                 if (Room.Links.TryGetValue(Id, out UnfinalizedLink link))
@@ -397,14 +394,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         /// <param name="inGameState">InGameState to evaluate for active locks</param>
         /// <returns></returns>
-        public IEnumerable<UnfinalizedNodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public IEnumerable<UnfinalizedNodeLock> GetActiveLocks(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
             return Locks.Values.WhereUseful().Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
                 .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock));
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             Room = room;
 
@@ -476,7 +473,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -535,7 +532,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Node = node;
         }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // First thing is making sure no locks prevent interaction
             IEnumerable<UnfinalizedNodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);

@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Tests.Options
     public class LogicalOptionsTest
     {
         // Use a static model to build it only once.
-        private static SuperMetroidModel Model { get; set; } = new SuperMetroidModel(StaticTestObjects.RawModel);
+        private static UnfinalizedSuperMetroidModel Model { get; set; } = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
         [Fact]
         public void NumberOfTries_TechWithRegisteredNumber_ReturnsRegisteredValue()
@@ -83,7 +83,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_StratWithRegisteredNumber_ReturnsRegisteredValue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             int expected = 5;
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterStratTries(strat.Name, expected);
@@ -99,7 +99,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_NonNotableStrat_ReturnsDefaultNumber()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 5).Links[2].Strats["Base"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 5).LinksTo[2].Strats["Base"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterStratTries(strat.Name, 5);
 
@@ -114,7 +114,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_UnalteredStrat_ReturnsDefaultNumber()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -221,7 +221,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_NoMention_ReturnsTrue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -235,7 +235,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_ExplicitlyDisabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledStrat(strat.Name);
 
@@ -250,7 +250,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_Reenabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledStrat(strat.Name);
             logicalOptions.UnregisterDisabledStrat(strat.Name);
@@ -266,7 +266,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_NonNotableDisabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 5).Links[2].Strats["Base"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 5).LinksTo[2].Strats["Base"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledStrat(strat.Name);
 
@@ -326,7 +326,7 @@ namespace sm_json_data_framework.Tests.Options
         public void Clone_CopiesCorectly()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             UnfinalizedTech disabledTech = Model.Techs["canWalljump"];
             UnfinalizedTech enabledTech = Model.Techs["canIBJ"];
             UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];
@@ -406,7 +406,7 @@ namespace sm_json_data_framework.Tests.Options
 
             // Subsequently given
             // Modifications to clone
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).Links[3].Strats["Ceiling E-Tank Dboost"];
+            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             UnfinalizedTech disabledTech = Model.Techs["canWalljump"];
             UnfinalizedTech enabledTech = Model.Techs["canIBJ"];
             UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];

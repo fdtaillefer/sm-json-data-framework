@@ -18,24 +18,54 @@ namespace sm_json_data_framework.Rules
     /// </summary>
     public class StartConditions
     {
+        public RoomNode StartingNode { get; }
+
+        public ReadOnlyItemInventory StartingInventory { get; }
+
+        public ReadOnlyResourceCount BaseResourceMaximums { get { return StartingInventory?.BaseResourceMaximums; } }
+
+        public ReadOnlyResourceCount StartingResources { get; }
+
+        public IReadOnlyList<GameFlag> StartingGameFlags { get; }
+
+        public IReadOnlyList<NodeLock> StartingOpenLocks { get; }
+
+        public IReadOnlyList<RoomNode> StartingTakenItemLocations { get; }
+
+        public StartConditions(UnfinalizedStartConditions sourceElement, ModelFinalizationMappings mappings)
+        {
+            StartingNode = sourceElement.StartingNode.Finalize(mappings);
+            StartingInventory = sourceElement.StartingInventory.Clone().AsReadOnly();
+            StartingResources = sourceElement.StartingResources.Clone().AsReadOnly();
+            StartingGameFlags = sourceElement.StartingGameFlags.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
+            StartingOpenLocks = sourceElement.StartingOpenLocks.Select(nodeLock => nodeLock.Finalize(mappings)).ToList().AsReadOnly();
+            StartingTakenItemLocations = sourceElement.StartingTakenItemLocations.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+        }
+    }
+
+    /// <summary>
+    /// A container for game start configuration.
+    /// </summary>
+    public class UnfinalizedStartConditions
+    {
         /// <summary>
         /// Creates and returns StartConditions representing the vanilla starting conditions.
         /// </summary>
         /// <param name="model">Model from which any needed Item/GameFlag/etc. instances will be obtained.</param>
         /// <returns>The StartConditions</returns>
-        public static StartConditions CreateVanillaStartConditions(UnfinalizedSuperMetroidModel model)
+        public static UnfinalizedStartConditions CreateVanillaStartConditions(UnfinalizedSuperMetroidModel model)
         {
-            StartConditions vanillaStartConditions = new StartConditions();
+            UnfinalizedStartConditions vanillaStartConditions = new UnfinalizedStartConditions();
             vanillaStartConditions.StartingInventory = ItemInventory.CreateVanillaStartingInventory(model);
             vanillaStartConditions.StartingResources = vanillaStartConditions.StartingInventory.BaseResourceMaximums.Clone();
             vanillaStartConditions.StartingNode = model.GetNodeInRoom("Ceres Elevator Room", 1);
 
-            // Start with no open locks, taken items, or active game flags, so we can leave those as their empty defaults
+            // Start with no open locks, taken items, or active game falgs, so we can leave those as their empty defaults
 
             return vanillaStartConditions;
         }
 
-        public StartConditions()
+        public UnfinalizedStartConditions()
         {
 
         }
@@ -44,7 +74,7 @@ namespace sm_json_data_framework.Rules
         /// Constructor that constructs StartConditions using the provided model and the <see cref="BasicStartConditions"/> it contains.
         /// </summary>
         /// <param name="model">Model from which to construct StartConditions</param>
-        public StartConditions(UnfinalizedSuperMetroidModel model): this(model, model.BasicStartConditions)
+        public UnfinalizedStartConditions(UnfinalizedSuperMetroidModel model): this(model, model.BasicStartConditions)
         {
 
         }
@@ -55,7 +85,7 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">Model from which to reference objects for the start conditions</param>
         /// <param name="overrideBasicStartConditions">The basic start conditions to use, regardless of whether
         /// this is the provided model's basicStartConditions or not.</param>
-        public StartConditions(UnfinalizedSuperMetroidModel model, BasicStartConditions overrideBasicStartConditions)
+        public UnfinalizedStartConditions(UnfinalizedSuperMetroidModel model, BasicStartConditions overrideBasicStartConditions)
         {
             List<UnfinalizedGameFlag> startingFlags = new List<UnfinalizedGameFlag>();
             foreach (string flagName in overrideBasicStartConditions.StartingFlagNames)
@@ -102,7 +132,7 @@ namespace sm_json_data_framework.Rules
             StartingInventory = startingInventory;
         }
 
-        public StartConditions(StartConditions other)
+        public UnfinalizedStartConditions(UnfinalizedStartConditions other)
         {
             StartingGameFlags = new List<UnfinalizedGameFlag>(other.StartingGameFlags);
             StartingInventory = other.StartingInventory?.Clone();
@@ -112,13 +142,19 @@ namespace sm_json_data_framework.Rules
             StartingTakenItemLocations = new List<UnfinalizedRoomNode>(other.StartingTakenItemLocations);
         }
 
-        public StartConditions Clone()
+        public UnfinalizedStartConditions Clone()
         {
-            return new StartConditions(this);
+            return new UnfinalizedStartConditions(this);
+        }
+
+        public StartConditions Finalize(ModelFinalizationMappings mappings)
+        {
+            return new StartConditions(this, mappings);
         }
 
         public UnfinalizedRoomNode StartingNode { get; set; }
 
+        private ItemInventory _itemInventory;
         public ItemInventory StartingInventory { get; set; }
 
         public ReadOnlyResourceCount BaseResourceMaximums { get { return StartingInventory?.BaseResourceMaximums; } }
@@ -130,38 +166,5 @@ namespace sm_json_data_framework.Rules
         public IEnumerable<UnfinalizedNodeLock> StartingOpenLocks { get; set; } = Enumerable.Empty<UnfinalizedNodeLock>();
 
         public IEnumerable<UnfinalizedRoomNode> StartingTakenItemLocations { get; set; } = Enumerable.Empty<UnfinalizedRoomNode>();
-    }
-
-    public class StartConditionsBuilder
-    {
-        private UnfinalizedRoomNode startingNode;
-
-        private ItemInventory startingInventory;
-
-        private ResourceCount startingResources;
-
-        private IEnumerable<UnfinalizedGameFlag> startingGameFlags = Enumerable.Empty<UnfinalizedGameFlag>();
-
-        private IEnumerable<UnfinalizedNodeLock> startingOpenLocks = Enumerable.Empty<UnfinalizedNodeLock>();
-
-        private IEnumerable<UnfinalizedRoomNode> startingTakenItemLocations = Enumerable.Empty<UnfinalizedRoomNode>();
-
-        public StartConditionsBuilder StartingNode(UnfinalizedRoomNode node)
-        {
-            startingNode = node;
-            return this;
-        }
-
-        public StartConditionsBuilder StartingInventory(ItemInventory inventory)
-        {
-            startingInventory = inventory;
-            return this;
-        }
-
-        public StartConditionsBuilder StartingResources(ResourceCount resources)
-        {
-            startingResources = resources;
-            return this;
-        }
     }
 }

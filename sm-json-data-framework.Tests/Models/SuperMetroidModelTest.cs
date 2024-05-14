@@ -1,19 +1,17 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.Items;
-using sm_json_data_framework.Models.Raw;
-using sm_json_data_framework.Models.Requirements;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
-using sm_json_data_framework.Options;
-using sm_json_data_framework.Reading;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
 using sm_json_data_framework.Utils;
 using System;
@@ -26,12 +24,17 @@ namespace sm_json_data_framework.Tests.Models
 {
     public class SuperMetroidModelTest
     {
-        #region Tests for Ctor(RawSuperMetroidModel, [...])
+
+        #region Tests for Ctor(UnfinalizedSuperMetroidModel)
+
         [Fact]
-        public void ConstructorFromRawModel_ReadsAllData()
+        public void Ctor_AssignsAllData()
         {
+            // Given
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
+
             // When
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
             // Expect
             // Room counts
@@ -113,476 +116,376 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ConstructorFromRawModel_UsesOptionalParameters()
+        public void Ctor_CreatesOneInstancePerUnfinalizedRoom()
         {
             // Given
-            RawSuperMetroidModel rawModel = ModelReader.ReadRawModel();
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            SuperMetroidModel model = new SuperMetroidModel(rawModel, rules: new RandoSuperMetroidRules(),
-                basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(),
-                overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) },
-                overrideStringTypes: new List<(StringLogicalElementTypeEnum typeEnum, Type type)> { (StringLogicalElementTypeEnum.Item, typeof(ExtendedItemLogicalElement)) });
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
+            // Expect all properties that reference a room, to have the same instance as the one in the main model
+            Room arbitraryRoom = model.Rooms["Climb"];
+            RoomNode node = model.GetNodeInRoom("Climb", 1);
+            Assert.Same(arbitraryRoom, node.Room);
 
-            // Expect
-            Assert.True(model.Rules is RandoSuperMetroidRules);
-            Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
-            Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].Links[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
-            Assert.NotEmpty(model.Rooms["Parlor and Alcatraz"].Nodes[5].Links[8].Strats["Alcatraz Escape"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedItemLogicalElement)));
-        }
-        #endregion
+            RoomEnvironment roomEnvironment = model.Rooms["Climb"].RoomEnvironments[0];
+            Assert.Same(arbitraryRoom, roomEnvironment.Room);
 
-        #region Tests for ApplyLogicalOptiopns()
+            RoomEnemy roomEnemy = model.RoomEnemies["Climb Pirates"];
+            Assert.Same(arbitraryRoom, roomEnemy.Room);
 
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToSuperMetroidModelProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-
-            ReadOnlyLogicalOptions appliedOptions = model.Rooms["Landing Site"].AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, model.Weapons["Wave"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.Enemies["Geemer (blue)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.Items["SpeedBooster"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.GameFlags["f_ZebesSetAblaze"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.Techs["canWalljump"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.Helpers["h_canOpenZebetites"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString].AppliedLogicalOptions);
+            RoomObstacle roomObstacle = model.Rooms["Climb"].Obstacles["A"];
+            Assert.Same(arbitraryRoom, roomObstacle.Room);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToTechProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedNode()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedTech arbitraryTech = model.Techs["canWalljump"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryTech.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference a node, to have the same instance as the one in the Room model
+            // Nodes in models
+            RoomNode arbitraryNode = model.GetNodeInRoom("Big Pink", 14);
+            RoomNode node = model.GetNodeInRoom("Big Pink", 5);
+            Assert.Same(arbitraryNode, node.SpawnAtNode);
 
-            Assert.Same(appliedOptions, arbitraryTech.Requires.AppliedLogicalOptions);
+            LinkTo linkTo = model.Rooms["Big Pink"].Links[5].To[14];
+            Assert.Same(arbitraryNode, linkTo.TargetNode);
+
+            Assert.Same(arbitraryNode, model.Nodes["Big Pink X-Ray Climb Setup Junction"]);
+
+            RoomNode arbitraryNode2 = model.GetNodeInRoom("Landing Site", 1);
+            CanLeaveCharged canLeaveCharged = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged[0];
+            Assert.Same(arbitraryNode2, canLeaveCharged.Node);
+
+            InitiateRemotely initiateRemotely = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged[0].InitiateRemotely;
+            Assert.Same(arbitraryNode2, initiateRemotely.ExitNode);
+
+            DoorEnvironment doorEnvironment = model.GetNodeInRoom("Landing Site", 1).DoorEnvironments[0];
+            Assert.Same(arbitraryNode2, doorEnvironment.Node);
+
+            NodeLock nodeLock = model.Locks["Landing Site Top Left Escape Lock (to Gauntlet)"];
+            Assert.Same(arbitraryNode2, nodeLock.Node);
+
+            node = model.GetNodeInRoom("Gauntlet Entrance", 2);
+            Assert.Same(arbitraryNode2, node.OutNode);
+
+            Runway runway = model.GetNodeInRoom("Landing Site", 1).Runways["Base Runway - Landing Site Top Left Door (to Gauntlet)"];
+            Assert.Same(arbitraryNode2, runway.Node);
+
+            RoomNode arbitraryNode3 = model.GetNodeInRoom("Landing Site", 3);
+            initiateRemotely = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged[0].InitiateRemotely;
+            Assert.Same(arbitraryNode3, initiateRemotely.InitiateAtNode);
+
+            RoomNode arbitraryNode4 = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
+            ViewableNode viewableNode = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
+            Assert.Same(arbitraryNode4, viewableNode.Node);
+
+            RoomNode arbitraryNode5 = model.GetNodeInRoom("Early Supers Room", 3);
+            StratFailure stratFailure = model.Rooms["Early Supers Room"].Links[1].To[2].Strats["Early Supers Mockball"].Failures["Crumble Fall"];
+            Assert.Same(arbitraryNode5, stratFailure.LeadsToNode);
+
+            RoomNode arbitraryNode6 = model.GetNodeInRoom("Ceres Elevator Room", 1);
+            StartConditions startConditions = model.StartConditions;
+            Assert.Same(arbitraryNode6, startConditions.StartingNode);
+
+            RoomNode arbitraryNode7 = model.GetNodeInRoom("Volcano Room", 1);
+            doorEnvironment = model.GetNodeInRoom("Volcano Room", 2).DoorEnvironments.Where(environment => environment.Physics == PhysicsEnum.Lava).First();
+            Assert.Same(arbitraryNode7, doorEnvironment.EntranceNodes[1]);
+
+            RoomEnvironment roomEnvironment = model.Rooms["Volcano Room"].RoomEnvironments.Where(environment => !environment.Heated).First();
+            Assert.Same(arbitraryNode7, roomEnvironment.EntranceNodes[1]);
+
+            RoomNode arbitraryNode8 = model.GetNodeInRoom("Construction Zone", 4);
+            RoomEnemy roomEnemy = model.RoomEnemies["Construction Zone Geemers"];
+            Assert.Same(arbitraryNode8, roomEnemy.HomeNodes[4]);
+
+            RoomNode arbitraryNode9 = model.GetNodeInRoom("Waterway Energy Tank Room", 2);
+            roomEnemy = model.RoomEnemies["Waterway Skulteras"];
+            Assert.Same(arbitraryNode9, roomEnemy.BetweenNodes[2]);
+
+            // Nodes in logical elements
+            // PreviousNode
+            RoomNode arbitraryNode10 = model.GetNodeInRoom("Pink Brinstar Power Bomb Room", 4);
+            PreviousNode previousNodeLogicalElement = (PreviousNode)model.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"].Requires.LogicalElements
+                .Where(element => typeof(PreviousNode).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryNode10, previousNodeLogicalElement.Node);
+
+            // AdjacentRunway
+            RoomNode arbitraryNode11 = model.GetNodeInRoom("Construction Zone", 3);
+            AdjacentRunway adjacentRunway = (AdjacentRunway)model.Rooms["Construction Zone"].Links[3].To[4].Strats["Construction Room X-Ray Climb"].Requires.LogicalElements
+                .Where(element => typeof(AdjacentRunway).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryNode11, adjacentRunway.FromNode);
+            // ResetRoom
+            ResetRoom resetRoom = (ResetRoom)model.Rooms["Construction Zone"].Links[3].To[4].Strats["Construction Room X-Ray Climb"].Requires.LogicalElements
+                .Where(element => typeof(ResetRoom).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryNode11, resetRoom.Nodes[3]);
+
+            RoomNode arbitraryNode12 = model.GetNodeInRoom("Big Pink", 13);
+            resetRoom = (ResetRoom)model.Rooms["Big Pink"].Links[5].To[4].Strats["Big Pink Left-Side X-Ray Climb"].Requires.LogicalElements
+                .Where(element => typeof(ResetRoom).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryNode12, resetRoom.NodesToAvoid[13]);
+
+            // CanComeInCharged
+            RoomNode arbitraryNode13 = model.GetNodeInRoom("Green Brinstar Main Shaft / Etecoon Room", 10);
+            CanComeInCharged canComeInCharged = (CanComeInCharged)model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Links[10].To[9].Strats["Shinespark"].Requires.LogicalElements
+                .Where(element => typeof(CanComeInCharged).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryNode13, canComeInCharged.FromNode);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToHelperProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedStrat()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedHelper arbitraryHelper = model.Helpers["h_canOpenZebetites"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryHelper.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryHelper.Requires.AppliedLogicalOptions);
+            // Expect all properties that reference a strat, to have the same instance as the one in the Room model
+            Strat arbitraryStrat = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"];
+            var initiateRemotelyPathToDoorNode = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First().InitiateRemotely.PathToDoor[0];
+            Assert.Same(arbitraryStrat, initiateRemotelyPathToDoorNode.strats["Shinespark"]);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToWeaponProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedEnemy()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedWeapon arbitraryWeapon = model.Weapons["Wave"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryWeapon.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference an enemy, to have the same instance as the one in the main model
+            Enemy arbitraryEnemy = model.Enemies["Sidehopper"];
+            RoomEnemy roomEnemy = model.RoomEnemies["Morph Ball Room Sidehoppers"];
+            Assert.Same(arbitraryEnemy, roomEnemy.Enemy);
 
-            Assert.Same(appliedOptions, arbitraryWeapon.UseRequires.AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryWeapon.ShotRequires.AppliedLogicalOptions);
+            EnemyDamage enemyDamage = (EnemyDamage) model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["Run Through"].Requires.LogicalElements
+                .Where(element => typeof(EnemyDamage).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryEnemy, enemyDamage.Enemy);
+
+            EnemyKill enemyKill = (EnemyKill)model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["PB Sidehopper Kill with Bomb Blocks"].Obstacles["C"].Requires.LogicalElements
+                .Where(element => typeof(EnemyKill).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryEnemy, enemyKill.GroupedEnemies.First().First());
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToEnemyProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedWeapon()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedEnemy arbitraryEnemy = model.Enemies["Geemer (blue)"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryEnemy.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference a weapon, to have the same instance as the one in the main model
+            Weapon arbitraryWeapon = model.Weapons["Missile"];
+            WeaponMultiplier weaponMultiplier = model.Enemies["Alcoon"].WeaponMultipliers["Missile"];
+            Assert.Same(arbitraryWeapon, weaponMultiplier.Weapon);
 
-            Assert.Same(appliedOptions, arbitraryEnemy.Attacks["contact"].AppliedLogicalOptions);
+            WeaponSusceptibility weaponSusceptibility = model.Enemies["Alcoon"].WeaponSusceptibilities["Missile"];
+            Assert.Same(arbitraryWeapon, weaponSusceptibility.Weapon);
+
+            Enemy enemy = model.Enemies["Boyon"];
+            Assert.Same(arbitraryWeapon, enemy.InvulnerableWeapons["Missile"]);
+
+            EnemyKill enemyKill = (EnemyKill)model.Rooms["Pink Brinstar Power Bomb Room"].Links[1].To[4].Strats["Good Weapon Sidehopper Kill"].Obstacles["A"].Requires.LogicalElements
+                .Where(element => typeof(EnemyKill).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryWeapon, enemyKill.ExplicitWeapons["Missile"]);
+
+            Assert.Same(arbitraryWeapon, enemyKill.ValidWeapons["Missile"]);
+
+            enemyKill = (EnemyKill)model.Rooms["Metroid Room 1"].Links[1].To[3].Strats["Tank and PB Kill"].Requires.LogicalElements
+                .Where(element => typeof(EnemyKill).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryWeapon, enemyKill.ExcludedWeapons["Missile"]);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToConnectionProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedWeaponMultiplier()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedConnection arbitraryConnection= model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryConnection.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryConnection.FromNode.AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryConnection.ToNode.AppliedLogicalOptions);
+            // Expect all properties that reference a weaponMultiplier, to have the same instance as the one in the enemy
+            WeaponMultiplier arbitraryWeaponMultiplier = model.Enemies["Alcoon"].WeaponMultipliers["Missile"];
+            WeaponSusceptibility weaponSusceptibility = model.Enemies["Alcoon"].WeaponSusceptibilities["Missile"];
+            Assert.Same(arbitraryWeaponMultiplier, weaponSusceptibility.WeaponMultiplier);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToRoomProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedTech()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedRoom arbitraryRoom = model.Rooms["Climb"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryRoom.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryRoom.Nodes[1].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoom.Links[1].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoom.RoomEnvironments[0].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoom.Obstacles["A"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoom.Enemies["e1"].AppliedLogicalOptions);
+            // Expect all properties that reference a tech, to have the same instance as the one in the main model
+            Tech arbitraryTech = model.Techs["canDelayedWalljump"];
+            TechLogicalElement techLogicalElement = (TechLogicalElement)model.Rooms["Landing Site"].Links[5].To[7].Strats["Gauntlet Walljumps"].Requires.LogicalElements
+                .Where(element => typeof(TechLogicalElement).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryTech, techLogicalElement.Tech);
+            Tech tech = model.Techs["canPreciseWalljump"];
+            Assert.Same(arbitraryTech, tech.ExtensionTechs["canDelayedWalljump"]);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToLinkProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedHelper()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedLink arbitraryLink = model.Rooms["Landing Site"].Links[1];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryLink.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryLink.To[4].AppliedLogicalOptions);
+            // Expect all properties that reference a helper, to have the same instance as the one in the main model
+            Helper arbitraryHelper = model.Helpers["h_canDestroyBombWalls"];
+            HelperLogicalElement helperLogicalElement = (HelperLogicalElement)model.Rooms["Landing Site"].Links[1].To[7].Strats["Base"].Obstacles["A"].Requires.LogicalElements
+                .Where(element => typeof(HelperLogicalElement).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryHelper, helperLogicalElement.Helper);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToLinkToProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedItem()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedLinkTo arbitraryLinkTo = model.Rooms["Landing Site"].Links[1].To[4];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryLinkTo.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference an item, to have the same instance as the one in the main model
+            Item arbitraryItem = model.Items["Morph"];
+            RoomNode node = model.GetNodeInRoom("Morph Ball Room", 4);
+            Assert.Same(arbitraryItem, node.NodeItem);
 
-            Assert.Same(appliedOptions, arbitraryLinkTo.Strats["Shinespark"].AppliedLogicalOptions);
+            ItemLogicalElement itemLogicalElement = (ItemLogicalElement)model.Rooms["Parlor and Alcatraz"].Links[2].To[8].Strats["Base"].Requires.LogicalElements
+                .Where(element => typeof(ItemLogicalElement).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryItem, itemLogicalElement.Item);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToStratProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedGameFlag()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedStrat arbitraryStrat = model.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryStrat.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference a game flag, to have the same instance as the one in the main model
+            GameFlag arbitraryGameFlag = model.GameFlags["f_ZebesAwake"];
+            NodeLock nodeLock = model.Locks["Pit Room Left Grey Lock (to Climb)"];
+            Assert.Same(arbitraryGameFlag, nodeLock.Yields["f_ZebesAwake"]);
 
-            Assert.Same(appliedOptions, arbitraryStrat.Failures["Crumble Failure"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryStrat.Obstacles["A"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryStrat.Requires.AppliedLogicalOptions);
+            GameFlag arbitraryGameFlag2 = model.GameFlags["f_DefeatedSporeSpawn"];
+            RoomNode node = model.GetNodeInRoom("Spore Spawn Room", 3);
+            Assert.Same(arbitraryGameFlag2, node.Yields["f_DefeatedSporeSpawn"]);
+
+            GameFlagLogicalElement gameFlagLogicalElement = (GameFlagLogicalElement)model.RoomEnemies["Spore Spawn"].StopSpawn.LogicalElements
+                .Where(element => typeof(GameFlagLogicalElement).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryGameFlag2, gameFlagLogicalElement.GameFlag);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToRoomObstacleProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedRoomEnemy()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedRoomObstacle arbitraryRoomObstacle = model.Rooms["Climb"].Obstacles["A"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryRoomObstacle.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference a room enemy, to have the same instance as the one in the room
+            RoomEnemy arbitraryRoomEnemy = model.Rooms["West Ocean"].Enemies["e1"];
+            Assert.Same(arbitraryRoomEnemy, model.RoomEnemies["West Ocean Zeb"]);
 
-            Assert.Same(appliedOptions, arbitraryRoomObstacle.Requires.AppliedLogicalOptions);
+            FarmCycle farmCycle = model.RoomEnemies["West Ocean Zeb"].FarmCycles["Crouch over spawn point"];
+            Assert.Same(arbitraryRoomEnemy, farmCycle.RoomEnemy);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToRoomEnemyProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedRoomObstacle()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedRoomEnemy arbitraryRoomEnemy = model.Rooms["Early Supers Room"].Enemies["e1"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryRoomEnemy.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            // Expect all properties that reference a room obstacle, to have the same instance as the one in the room
+            RoomObstacle arbitraryObstacle = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Obstacles["A"];
+            ResetRoom resetRoom = (ResetRoom)model.Runways["Base Runway - Green Shaft Mid-Low Left Door (to Firefleas)"].Strats["Base"].Requires.LogicalElements
+                .Where(element => typeof(ResetRoom).IsAssignableFrom(element.GetType()))
+                .First();
+            Assert.Same(arbitraryObstacle, resetRoom.ObstaclesToAvoid["A"]);
 
-            Assert.Same(appliedOptions, arbitraryRoomEnemy.FarmCycles["Crouch over spawn point"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoomEnemy.Spawn.AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoomEnemy.StopSpawn.AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoomEnemy.DropRequires.AppliedLogicalOptions);
+            RoomObstacle arbitraryObstacle2 = model.Rooms["Morph Ball Room"].Obstacles["A"];
+            StratObstacle stratObstacle = model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["PB Sidehopper Kill with Bomb Blocks"].Obstacles["C"];
+            Assert.Same(arbitraryObstacle2, stratObstacle.AdditionalObstacles["A"]);
+
+            RoomObstacle arbitraryObstacle3 = model.Rooms["Morph Ball Room"].Obstacles["C"];
+            Assert.Same(arbitraryObstacle3, stratObstacle.Obstacle);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToFarmCycleProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedConnection()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedFarmCycle arbitraryFarmCycle = model.Rooms["Early Supers Room"].Enemies["e1"].FarmCycles["Crouch over spawn point"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryFarmCycle.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryFarmCycle.Requires.AppliedLogicalOptions);
+            // Expect all properties that reference a connection, to have the same instance as the one in the main model
+            Connection arbitraryConnection = model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString];
+            RoomNode node = model.GetNodeInRoom("Landing Site", 1);
+            Assert.Same(arbitraryConnection, node.OutConnection);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToNodeProperties()
+        public void Ctor_CreatesOneInstancePerUnfinalizedLinkTo()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
+            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
             // When
-            model.ApplyLogicalOptions(logicalOptions);
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
 
-            // Expect
-            UnfinalizedRoomNode arbitraryNode = model.GetNodeInRoom("Landing Site", 1);
-            ReadOnlyLogicalOptions appliedOptions = arbitraryNode.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-            
-            Assert.Same(appliedOptions, arbitraryNode.Locks["Landing Site Top Left Escape Lock (to Gauntlet)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryNode.DoorEnvironments[0].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryNode.CanLeaveCharged[0].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryNode.InteractionRequires.AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryNode.Runways["Base Runway - Landing Site Top Left Door (to Gauntlet)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0].AppliedLogicalOptions);
+            // Expect all properties that reference a LinkTo, to have the same instance as the one in the parent Link
+            LinkTo arbitraryLinkTo = model.Rooms["Landing Site"].Links[3].To[1];
+            var initiateRemotelyPathToDoorNode = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First().InitiateRemotely.PathToDoor[0];
+            Assert.Same(arbitraryLinkTo, initiateRemotelyPathToDoorNode.linkTo);
+
+            RoomNode node = model.GetNodeInRoom("Landing Site", 3);
+            Assert.Same(arbitraryLinkTo, node.LinksTo[1]);
         }
 
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToRunwayProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedRunway arbitraryRunway = model.GetNodeInRoom("Climb", 5).Runways["Base Runway - Climb Bottom Right Door (to Pit Room)"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryRunway.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryRunway.Strats["Base"].AppliedLogicalOptions);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToCanLeaveChargedProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedCanLeaveCharged arbitraryCanLeaveCharged = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First();
-            ReadOnlyLogicalOptions appliedOptions = arbitraryCanLeaveCharged.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryCanLeaveCharged.Strats["Base"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryCanLeaveCharged.InitiateRemotely.AppliedLogicalOptions);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToViewableNodeProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedViewableNode arbitraryViewableNode = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryViewableNode.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryViewableNode.Strats["Base"].AppliedLogicalOptions);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToNodeLockProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedNodeLock arbitraryLock = model.GetNodeInRoom("West Ocean", 4).Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
-            ReadOnlyLogicalOptions appliedOptions = arbitraryLock.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryLock.UnlockStrats["Base"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryLock.BypassStrats["Bowling Skip"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryLock.Lock.AppliedLogicalOptions);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToLogicalRequirementsProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedLogicalRequirements arbitraryLogicalRequirements = model.Rooms["Climb"].Links[6].To[3].Strats["Behemoth Spark Top"].Requires;
-            ReadOnlyLogicalOptions appliedOptions = arbitraryLogicalRequirements.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            foreach (IUnfinalizedLogicalElement logicalElement in arbitraryLogicalRequirements.LogicalElements)
-            {
-                Assert.Same(appliedOptions, logicalElement.AppliedLogicalOptions);
-            }
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToAndOrProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedOr arbitraryOr = (UnfinalizedOr)model.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(UnfinalizedOr).IsAssignableFrom(element.GetType())).First();
-            ReadOnlyLogicalOptions appliedOptions = arbitraryOr.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryOr.AppliedLogicalOptions);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToAndProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.TilesToShineCharge = 20;
-            SuperMetroidModel model = new SuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            UnfinalizedAnd arbitraryAnd =(UnfinalizedAnd) ((UnfinalizedOr)model.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(UnfinalizedOr).IsAssignableFrom(element.GetType())).First())
-                .LogicalRequirements.LogicalElements.Where(element => typeof(UnfinalizedAnd).IsAssignableFrom(element.GetType())).First();
-            ReadOnlyLogicalOptions appliedOptions = arbitraryAnd.AppliedLogicalOptions;
-            Assert.NotSame(logicalOptions, appliedOptions);
-            Assert.Equal(20, appliedOptions.TilesToShineCharge);
-
-            Assert.Same(appliedOptions, arbitraryAnd.AppliedLogicalOptions);
-        }
+        // Then a test for optional stuff??
 
         #endregion
     }

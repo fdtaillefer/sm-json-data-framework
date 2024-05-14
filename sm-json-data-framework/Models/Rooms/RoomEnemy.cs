@@ -101,7 +101,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to use to check. This will NOT be altered by this method.</param>
         /// <returns></returns>
-        public bool Spawns(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool Spawns(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return InnerElement.Spawns(model, inGameState);
         }
@@ -121,7 +121,7 @@ namespace sm_json_data_framework.Models.Rooms
         public string EnemyName { get; set; }
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The actual Enemy this RoomEnemy represents.</para>
         /// </summary>
         [JsonIgnore]
@@ -133,7 +133,7 @@ namespace sm_json_data_framework.Models.Rooms
         public ISet<int> HomeNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The nodes in which this enemy roams, mapped by their node ID. Mutually-exclusive with <see cref="BetweenNodes"/>.</para>
         /// </summary>
         [JsonIgnore]
@@ -143,7 +143,7 @@ namespace sm_json_data_framework.Models.Rooms
         public ISet<int> BetweenNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>Contains two nodes between which this enemy roams (without ever actually being in either), mapped by their node ID. Mutually-exclusive with <see cref="HomeNodes"/>.</para>
         /// </summary>
         [JsonIgnore]
@@ -163,7 +163,7 @@ namespace sm_json_data_framework.Models.Rooms
         public IDictionary<string, UnfinalizedFarmCycle> FarmCycles { get; set; } = new Dictionary<string, UnfinalizedFarmCycle>();
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The Room in which this enemy group is.</para>
         /// </summary>
         [JsonIgnore]
@@ -214,7 +214,7 @@ namespace sm_json_data_framework.Models.Rooms
             return false;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             Room = room;
             Enemy = model.Enemies[EnemyName];
@@ -227,7 +227,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 
@@ -251,7 +251,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to use to check. This will NOT be altered by this method.</param>
         /// <returns></returns>
-        public bool Spawns(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool Spawns(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // If spawn conditions for this room enemy aren't met, it's impossible for the enemy to spawn
             if (Spawn.Execute(model, inGameState) == null)
@@ -296,7 +296,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             RoomEnemy = roomEnemy;
         }
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The enemy can only be farmed if it currently spawns
             if (!RoomEnemy.Spawns(model, inGameState))

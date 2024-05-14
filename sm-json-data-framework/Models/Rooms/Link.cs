@@ -74,7 +74,7 @@ namespace sm_json_data_framework.Models.Rooms
             return allDestinationsImpossible;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             foreach (UnfinalizedLinkTo linkTo in To.Values)
             {
@@ -82,7 +82,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             List<string> unhandled = new List<string>();
 

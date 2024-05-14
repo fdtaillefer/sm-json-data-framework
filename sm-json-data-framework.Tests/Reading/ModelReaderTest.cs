@@ -25,7 +25,7 @@ namespace sm_json_data_framework.Reading
         public void ReadModel_ReadsAllData()
         {
             // When
-            SuperMetroidModel model = ModelReader.ReadModel();
+            UnfinalizedSuperMetroidModel model = ModelReader.ReadModel();
 
             // Expect
             // Room counts
@@ -110,14 +110,14 @@ namespace sm_json_data_framework.Reading
         public void ReadModel_UsesOptionalParameters()
         {
             // When
-            SuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(),
+            UnfinalizedSuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(),
                 basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(), 
                 overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
             Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
-            Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].Links[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
+            Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].LinksTo[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
         }
         #endregion
 

@@ -25,7 +25,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="model">Model from which the Item instances for starting implicit items will be obtained.</param>
         /// <returns>The inventory</returns>
-        public static ItemInventory CreateVanillaStartingInventory(SuperMetroidModel model)
+        public static ItemInventory CreateVanillaStartingInventory(UnfinalizedSuperMetroidModel model)
         {
             return new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
                 .ApplyAddItem(model.Items[SuperMetroidModel.POWER_BEAM_NAME])

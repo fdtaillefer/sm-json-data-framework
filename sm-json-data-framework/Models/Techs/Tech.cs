@@ -21,7 +21,7 @@ namespace sm_json_data_framework.Models.Techs
         {
             InnerElement = innerElement;
             Requires = InnerElement.Requires.Finalize(mappings);
-            ExtensionTechs = InnerElement.ExtensionTechs.Select(tech => tech.Finalize(mappings)).ToList().AsReadOnly();
+            ExtensionTechs = InnerElement.ExtensionTechs.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
         }
 
         /// <summary>
@@ -35,9 +35,9 @@ namespace sm_json_data_framework.Models.Techs
         public LogicalRequirements Requires { get; }
 
         /// <summary>
-        /// A list of techs that are more complex or specific variations of this tech.
+        /// The techs that are more complex or specific variations of this tech, mapped by name.
         /// </summary>
-        public IReadOnlyList<Tech> ExtensionTechs { get; }
+        public IReadOnlyDictionary<string, Tech> ExtensionTechs { get; }
 
         /// <summary>
         /// Returns a list containing this Tech and all its extension techs (and all their own extension techs, and so on).
@@ -45,7 +45,7 @@ namespace sm_json_data_framework.Models.Techs
         /// <returns></returns>
         public IEnumerable<Tech> SelectWithExtensions()
         {
-            return ExtensionTechs.SelectMany(tech => tech.SelectWithExtensions()).Prepend(this).ToList();
+            return ExtensionTechs.SelectMany(tech => tech.Value.SelectWithExtensions()).Prepend(this).ToList();
         }
     }
 
@@ -106,12 +106,12 @@ namespace sm_json_data_framework.Models.Techs
             return ExtensionTechs.SelectMany(tech => tech.SelectWithExtensions()).Prepend(this).ToList();
         }
 
-        public void InitializeProperties(SuperMetroidModel model)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model)
         {
             // Nothing relevant to initialize
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, null);
         }

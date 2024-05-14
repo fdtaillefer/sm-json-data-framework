@@ -34,11 +34,11 @@ namespace sm_json_data_framework.Models.InGameStates
 
         /// <summary>
         /// Creates a new InGameState based on the provided StartConditions. 
-        /// Note that an InGameState created in this way should only be used with the <see cref="SuperMetroidModel"/> that contains
+        /// Note that an InGameState created in this way should only be used with the <see cref="UnfinalizedSuperMetroidModel"/> that contains
         /// the node instance found in the StartConditions.
         /// </summary>
         /// <param name="startConditions">StartConditions on which to base the new InGame State</param>
-        public InGameState(StartConditions startConditions)
+        public InGameState(UnfinalizedStartConditions startConditions)
         {
             // Initialize starting inventory
             InternalInventory = startConditions.StartingInventory.Clone();
@@ -200,7 +200,7 @@ namespace sm_json_data_framework.Models.InGameStates
                 .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
-        public IEnumerable<EnemyDropEnum> GetUnneededDrops(SuperMetroidModel model)
+        public IEnumerable<EnemyDropEnum> GetUnneededDrops(UnfinalizedSuperMetroidModel model)
         {
             return model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
@@ -586,7 +586,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// <para>Positions the in-game state as it would be after entering a room via the provided node. This may place the player at a different node immediately
         /// if the node calls for it.</para>
-        /// <para>This will be executed regardless of the current in-room state. To exit with more applied intelligence, see <see cref="ApplyExitRoom(SuperMetroidModel)"/></para>
+        /// <para>This will be executed regardless of the current in-room state. To exit with more applied intelligence, see <see cref="ApplyExitRoom(UnfinalizedSuperMetroidModel)"/></para>
         /// </para>
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
@@ -608,7 +608,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="model">A SuperMetroidModel, which will be used to when determining whether current node has any active locks</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyExitRoom(SuperMetroidModel model)
+        public InGameState ApplyExitRoom(UnfinalizedSuperMetroidModel model)
         {
             UnfinalizedRoomNode outNode = CurrentNode.OutNode;
             if (outNode == null)
@@ -707,7 +707,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return previousRoomExitNode.Runways.Values.WhereUseful();
         }
 
-        public IEnumerable<UnfinalizedCanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
+        public IEnumerable<UnfinalizedCanLeaveCharged> GetRetroactiveCanLeaveChargeds(UnfinalizedSuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
             // If that "current" room is the last remembered one, we have no way to obtain the state of the room before that so just return
@@ -880,7 +880,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <returns></returns>
-        public IEnumerable<EnemyDropEnum> GetUnneededDrops(SuperMetroidModel model);
+        public IEnumerable<EnemyDropEnum> GetUnneededDrops(UnfinalizedSuperMetroidModel model);
 
         /// <summary>
         /// The read-only dictionary of game flags that are active in this InGameState, mapped by their name.
@@ -1106,7 +1106,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// <para>Returns all canLeaveChargeds that the player could possibly be able to retroactively use, according to the pathing in this in-game state.
         /// Does not check whether the player is able to use any strats on those canLeaveChargeds, or whether charging or sparking is currently doable.
-        /// To check all of that, see <see cref="UnfinalizedCanLeaveCharged.IsUsable(SuperMetroidModel, InGameState, bool)"/>.</para>
+        /// To check all of that, see <see cref="UnfinalizedCanLeaveCharged.IsUsable(UnfinalizedSuperMetroidModel, InGameState, bool)"/>.</para>
         /// <para>"Retroactive use" is meant to be done right after entering a room, and aims to retroactively decide how the last room was exited.</para>
         /// <para>A canLeaveCharged would typically be used retroactively to satisfy a canComeInCharged
         /// that is being executed soon after entry of the new room.</para>
@@ -1118,6 +1118,6 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive canLeaveChargeds in the room before that.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<UnfinalizedCanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0);
+        public IEnumerable<UnfinalizedCanLeaveCharged> GetRetroactiveCanLeaveChargeds(UnfinalizedSuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0);
     }
 }

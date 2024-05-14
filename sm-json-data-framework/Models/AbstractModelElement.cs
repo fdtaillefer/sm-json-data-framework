@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace sm_json_data_framework.Models
 {
     /// <summary>
-    /// A an abstract base class for all model elements in the <see cref="SuperMetroidModel"/> hierarchy.
+    /// A an abstract base class for all model elements in the <see cref="UnfinalizedSuperMetroidModel"/> hierarchy.
     /// A notable feature of this is the ability to be altered by applying <see cref="LogicalOptions"/>.
     /// </summary>
     /// <typeparam name="SourceType">The unfinalized type that finalizes into this type</typeparam>
@@ -44,7 +44,7 @@ namespace sm_json_data_framework.Models
     }
 
     /// <summary>
-    /// A an abstract base class for all unfinalized model elements in the <see cref="SuperMetroidModel"/> hierarchy.
+    /// A an abstract base class for all unfinalized model elements in the <see cref="UnfinalizedSuperMetroidModel"/> hierarchy.
     /// A notable feature of this is the ability to be altered by applying <see cref="LogicalOptions"/>.
     /// </summary>
     public abstract class AbstractUnfinalizedModelElement<ConcreteType, TargetType> : IUnfinalizedModelElement
@@ -135,7 +135,7 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// Applies alterations to this object, based on the provided ReadOnlyLogicalOptions. 
         /// The goal of doing this is to preprocess things and avoid re-calculating them multiple times on the fly.
-        /// This should not be called except as part of the application of logical options to an entire <see cref="SuperMetroidModel"/>.,
+        /// This should not be called except as part of the application of logical options to an entire <see cref="UnfinalizedSuperMetroidModel"/>.,
         /// as that could leave the model in an inconsistent state.
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>

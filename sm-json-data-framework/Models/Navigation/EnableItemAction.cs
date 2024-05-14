@@ -17,13 +17,13 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public EnableItemAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
+        public EnableItemAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
 
         }
 
-        public override AbstractNavigationAction Reverse(SuperMetroidModel model)
+        public override AbstractNavigationAction Reverse(UnfinalizedSuperMetroidModel model)
         {
             EnableItemAction reverseAction = new EnableItemAction($"Undo action '{this.IntentDescription}'");
             TransferDataToReverseAbstractAction(reverseAction);

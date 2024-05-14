@@ -70,12 +70,12 @@ namespace sm_json_data_framework.Models.Helpers
             return Requires.UselessByLogicalOptions;
         }
 
-        public void InitializeProperties(SuperMetroidModel model)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model)
         {
             // Nothing relevant to initialize
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model)
         {
             return Requires.InitializeReferencedLogicalElementProperties(model, null);
         }

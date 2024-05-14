@@ -37,7 +37,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             
         }
 
-        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room)
+        public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
         {
             // If the value is just a numerical value, it doesn't need to match up to anything
             return Enumerable.Empty<string>();

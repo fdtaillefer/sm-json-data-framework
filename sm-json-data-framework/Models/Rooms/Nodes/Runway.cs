@@ -91,7 +91,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public bool UsableComingIn { get; set; } = true;
 
         /// <summary>
-        /// <para>Not available before <see cref="Initialize(SuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
+        /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The node to which this runway is tied.</para>
         /// </summary>
         [JsonIgnore]
@@ -143,7 +143,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return noUsefulStrat;
         }
 
-        public void InitializeProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             Node = node;
 
@@ -153,7 +153,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        public IEnumerable<string> InitializeReferencedLogicalElementProperties(SuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
+        public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)
         {
             List<string> unhandled = new List<string>();
 
@@ -178,7 +178,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
         {
             if(UselessByLogicalOptions)
             {
@@ -231,7 +231,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public bool ComingIn { get; private set; }
 
-        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return Runway.Execute(model, inGameState, ComingIn, times: times, previousRoomCount: previousRoomCount);
         }
