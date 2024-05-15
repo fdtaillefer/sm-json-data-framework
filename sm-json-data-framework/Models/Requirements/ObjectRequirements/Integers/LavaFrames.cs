@@ -12,15 +12,45 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class LavaFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedLavaFrames, LavaFrames>
     {
+        public LavaFrames(int numberOfFrames) : base(numberOfFrames)
+        {
+
+        }
+
         public LavaFrames(UnfinalizedLavaFrames innerElement, Action<LavaFrames> mappingsInsertionCallback) 
             : base(innerElement, mappingsInsertionCallback)
         {
 
         }
+
+        /// <summary>
+        /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
+        /// </summary>
+        private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+
+        public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            int baseDamage = model.Rules.CalculateLavaDamage(inGameState, Value) * times;
+            return (int)(baseDamage * LavaLeniencyMultiplier);
+        }
+
+        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return model.Rules.GetLavaDamageReducingItems(model, inGameState);
+        }
+
+        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            LavaLeniencyMultiplier = logicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
+            base.ApplyLogicalOptions(logicalOptions);
+        }
     }
 
     public class UnfinalizedLavaFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedLavaFrames, LavaFrames>
     {
+        /// <summary>
+        /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
+        /// </summary>
         private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public UnfinalizedLavaFrames()
@@ -45,13 +75,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return false;
         }
 
-        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateLavaDamage(inGameState, Value) * times;
             return (int)(baseDamage * LavaLeniencyMultiplier);
         }
 
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             return model.Rules.GetLavaDamageReducingItems(model, inGameState);
         }

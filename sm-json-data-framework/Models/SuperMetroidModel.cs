@@ -76,30 +76,27 @@ namespace sm_json_data_framework.Models
         public const string ENERGY_TANK_NAME = "ETank";
         public const string RESERVE_TANK_NAME = "ReserveTank";
 
-        private UnfinalizedSuperMetroidModel InnerModel { get; set; }
-
         public SuperMetroidModel(UnfinalizedSuperMetroidModel sourceModel)
         {
-            InnerModel = sourceModel;
             ModelFinalizationMappings mappings = new ModelFinalizationMappings();
-            Items = InnerModel.Items.Values.Select(item => item.Finalize(mappings)).ToDictionary(item => item.Name).AsReadOnly();
-            GameFlags = InnerModel.GameFlags.Values.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
-            Weapons = InnerModel.Weapons.Values.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
-            WeaponsByCategory = InnerModel.WeaponsByCategory
+            Items = sourceModel.Items.Values.Select(item => item.Finalize(mappings)).ToDictionary(item => item.Name).AsReadOnly();
+            GameFlags = sourceModel.GameFlags.Values.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Weapons = sourceModel.Weapons.Values.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            WeaponsByCategory = sourceModel.WeaponsByCategory
                 .Select(kvp => new KeyValuePair<WeaponCategoryEnum, IReadOnlyList<Weapon>>(kvp.Key, kvp.Value.Select(weapon => weapon.Finalize(mappings)).ToList().AsReadOnly()))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
-            Enemies = InnerModel.Enemies.Values.Select(enemy => enemy.Finalize(mappings)).ToDictionary(enemy => enemy.Name).AsReadOnly();
-            Helpers = InnerModel.Helpers.Values.Select(helper => helper.Finalize(mappings)).ToDictionary(helper => helper.Name).AsReadOnly();
-            Techs = InnerModel.Techs.Values.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
-            Rooms = InnerModel.Rooms.Values.Select(room => room.Finalize(mappings)).ToDictionary(room => room.Name).AsReadOnly();
-            Nodes = InnerModel.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Name).AsReadOnly();
-            Runways = InnerModel.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
-            Locks = InnerModel.Locks.Values.Select(locks => locks.Finalize(mappings)).ToDictionary(locks => locks.Name).AsReadOnly();
-            RoomEnemies = InnerModel.RoomEnemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.GroupName).AsReadOnly();
-            Connections = InnerModel.Connections.Select(kvp => new KeyValuePair<string, Connection>(kvp.Key, kvp.Value.Finalize(mappings)))
+            Enemies = sourceModel.Enemies.Values.Select(enemy => enemy.Finalize(mappings)).ToDictionary(enemy => enemy.Name).AsReadOnly();
+            Helpers = sourceModel.Helpers.Values.Select(helper => helper.Finalize(mappings)).ToDictionary(helper => helper.Name).AsReadOnly();
+            Techs = sourceModel.Techs.Values.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
+            Rooms = sourceModel.Rooms.Values.Select(room => room.Finalize(mappings)).ToDictionary(room => room.Name).AsReadOnly();
+            Nodes = sourceModel.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Name).AsReadOnly();
+            Runways = sourceModel.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
+            Locks = sourceModel.Locks.Values.Select(locks => locks.Finalize(mappings)).ToDictionary(locks => locks.Name).AsReadOnly();
+            RoomEnemies = sourceModel.RoomEnemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.GroupName).AsReadOnly();
+            Connections = sourceModel.Connections.Select(kvp => new KeyValuePair<string, Connection>(kvp.Key, kvp.Value.Finalize(mappings)))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
-            Rules = InnerModel.Rules;
-            StartConditions = InnerModel.StartConditions.Finalize(mappings);
+            Rules = sourceModel.Rules;
+            StartConditions = sourceModel.StartConditions.Finalize(mappings);
         }
 
         /// <summary>
@@ -294,7 +291,32 @@ namespace sm_json_data_framework.Models
         public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyInGameState initialInGameState, int times = 1,
             int previousRoomCount = 0, Predicate<ReadOnlyInGameState> acceptationCondition = null) where T : IExecutable
         {
-            return InnerModel.ExecuteBest(executables, initialInGameState, times, previousRoomCount, acceptationCondition);
+            // Try to execute all executables, returning whichever spends the lowest amount of resources
+            (T bestExecutable, ExecutionResult result) bestResult = (default(T), null);
+            foreach (T currentExecutable in executables)
+            {
+                ExecutionResult currentResult = currentExecutable.Execute(this, initialInGameState, times: times, previousRoomCount: previousRoomCount);
+
+                // If the fulfillment was successful
+                if (currentResult != null && (acceptationCondition == null || acceptationCondition.Invoke(currentResult.ResultingState)))
+                {
+
+                    // If the fulfillment did not reduce the amount of resources, return immediately
+                    if (InGameStateComparer.Compare(currentResult.ResultingState, initialInGameState) == 0)
+                    {
+                        return (currentExecutable, currentResult);
+                    }
+
+                    // If the resulting state is the best we've found yet, retain it
+                    if (bestResult.result == null
+                        || InGameStateComparer.Compare(currentResult.ResultingState, bestResult.result.ResultingState) > 0)
+                    {
+                        bestResult = (currentExecutable, currentResult);
+                    }
+                }
+            }
+
+            return bestResult;
         }
 
         /// <summary>
@@ -313,7 +335,34 @@ namespace sm_json_data_framework.Models
         /// This will never return the initialInGameState instance.</returns>
         public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, ReadOnlyInGameState initialInGameState, int times = 1, int previousRoomCount = 0)
         {
-            return InnerModel.ExecuteAll(executables, initialInGameState, times, previousRoomCount);
+            // If there are no executables, this is an instant success. Clone the inGameState to respect the contract.
+            if (!executables.Any())
+            {
+                return new ExecutionResult(initialInGameState.Clone());
+            }
+
+            // Iterate over all executables, attempting to fulfill them
+            ExecutionResult result = null;
+            foreach (IExecutable currentExecutable in executables)
+            {
+                // If this is the first execution, generate an initial result
+                if (result == null)
+                {
+                    result = currentExecutable.Execute(this, initialInGameState, times: times, previousRoomCount: previousRoomCount);
+                }
+                // If this is not the first execution, apply this execution on top of previous result
+                else
+                {
+                    result = result.AndThen(currentExecutable, this, times: times, previousRoomCount: previousRoomCount);
+                }
+
+                // If we failed to execute, give up immediately
+                if (result == null)
+                {
+                    return null;
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -511,7 +560,7 @@ namespace sm_json_data_framework.Models
             StartConditions = new UnfinalizedStartConditions(this);
 
             // Create and assign initial game state
-            InitialGameState = new InGameState(StartConditions);
+            InitialGameState = new UnfinalizedInGameState(StartConditions);
 
             // Initialize all references within logical elements
             List<string> unhandledLogicalElementProperties = new List<string>();
@@ -720,8 +769,8 @@ namespace sm_json_data_framework.Models
             }
         }
 
-        private ReadOnlyInGameState _initialGameState;
-        public ReadOnlyInGameState InitialGameState {
+        private ReadOnlyUnfinalizedInGameState _initialGameState;
+        public ReadOnlyUnfinalizedInGameState InitialGameState {
             get { return _initialGameState; }
             set { _initialGameState = value?.Clone(); } 
         }
@@ -732,7 +781,7 @@ namespace sm_json_data_framework.Models
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public int CompareInGameStates(ReadOnlyInGameState x, ReadOnlyInGameState y)
+        public int CompareInGameStates(ReadOnlyUnfinalizedInGameState x, ReadOnlyUnfinalizedInGameState y)
         {
             return InGameStateComparer.Compare(x, y);
         }
@@ -752,14 +801,14 @@ namespace sm_json_data_framework.Models
         /// <param name="acceptationCondition">An optional Predicate that is checked against the resulting in-game state of executions.
         /// Executions whose resulting state does not respect the predicate are rejected.</param>
         /// <returns>The best executable, alongside its ExecutionResult, or default values if none succeeded</returns>
-        public (T bestExecutable, ExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyInGameState initialInGameState, int times = 1,
-            int previousRoomCount = 0, Predicate<ReadOnlyInGameState> acceptationCondition = null) where T:IExecutable
+        public (T bestExecutable, UnfinalizedExecutionResult result) ExecuteBest<T>(IEnumerable<T> executables, ReadOnlyUnfinalizedInGameState initialInGameState, int times = 1,
+            int previousRoomCount = 0, Predicate<ReadOnlyUnfinalizedInGameState> acceptationCondition = null) where T:IExecutableUnfinalized
         {
             // Try to execute all executables, returning whichever spends the lowest amount of resources
-            (T bestExecutable, ExecutionResult result) bestResult = (default(T), null);
+            (T bestExecutable, UnfinalizedExecutionResult result) bestResult = (default(T), null);
             foreach (T currentExecutable in executables)
             {
-                ExecutionResult currentResult = currentExecutable.Execute(this, initialInGameState, times: times, previousRoomCount: previousRoomCount);
+                UnfinalizedExecutionResult currentResult = currentExecutable.Execute(this, initialInGameState, times: times, previousRoomCount: previousRoomCount);
 
                 // If the fulfillment was successful
                 if (currentResult != null && (acceptationCondition == null || acceptationCondition.Invoke(currentResult.ResultingState)))
@@ -797,17 +846,17 @@ namespace sm_json_data_framework.Models
         /// Only really impacts resource cost, since most items are non-consumable.</param>
         /// <returns>The InGameState obtained by executing all executables, or null if any execution failed.
         /// This will never return the initialInGameState instance.</returns>
-        public ExecutionResult ExecuteAll(IEnumerable<IExecutable> executables, ReadOnlyInGameState initialInGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult ExecuteAll(IEnumerable<IExecutableUnfinalized> executables, ReadOnlyUnfinalizedInGameState initialInGameState, int times = 1, int previousRoomCount = 0)
         {
             // If there are no executables, this is an instant success. Clone the inGameState to respect the contract.
             if(!executables.Any())
             {
-                return new ExecutionResult(initialInGameState.Clone());
+                return new UnfinalizedExecutionResult(initialInGameState.Clone());
             }
 
             // Iterate over all executables, attempting to fulfill them
-            ExecutionResult result = null;
-            foreach (IExecutable currentExecutable in executables)
+            UnfinalizedExecutionResult result = null;
+            foreach (IExecutableUnfinalized currentExecutable in executables)
             {
                 // If this is the first execution, generate an initial result
                 if(result == null)
@@ -833,7 +882,7 @@ namespace sm_json_data_framework.Models
         /// Creates and returns a copy of the initial game state. Requires this model to have been initialized.
         /// </summary>
         /// <returns></returns>
-        public InGameState CreateInitialGameStateCopy()
+        public UnfinalizedInGameState CreateInitialGameStateCopy()
         {
             return InitialGameState.Clone();
         }

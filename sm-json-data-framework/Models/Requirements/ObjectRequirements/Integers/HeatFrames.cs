@@ -12,15 +12,45 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class HeatFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedHeatFrames, HeatFrames>
     {
+        /// <summary>
+        /// A multiplier to apply to heat frame requirements as a leniency, as per applied logical options.
+        /// </summary>
+        private decimal HeatLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+
+        public HeatFrames(int numberOfFrames) : base(numberOfFrames)
+        {
+
+        }
+
         public HeatFrames(UnfinalizedHeatFrames innerElement, Action<HeatFrames> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
 
         }
+
+        public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Value) * times;
+            return (int)(baseDamage * HeatLeniencyMultiplier);
+        }
+
+        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return model.Rules.GetHeatDamageReducingItems(model, inGameState);
+        }
+
+        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            HeatLeniencyMultiplier = logicalOptions?.HeatLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
+            base.ApplyLogicalOptions(logicalOptions);
+        }
     }
 
     public class UnfinalizedHeatFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedHeatFrames, HeatFrames>
     {
+        /// <summary>
+        /// A multiplier to apply to heat frame requirements as a leniency, as per applied logical options.
+        /// </summary>
         private decimal HeatLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public UnfinalizedHeatFrames()
@@ -45,13 +75,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return false;
         }
 
-        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Value) * times;
             return (int)(baseDamage * HeatLeniencyMultiplier);
         }
 
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             return model.Rules.GetHeatDamageReducingItems(model, inGameState);
         }

@@ -35,7 +35,7 @@ namespace sm_json_data_framework.Rules
         public StartConditions(UnfinalizedStartConditions sourceElement, ModelFinalizationMappings mappings)
         {
             StartingNode = sourceElement.StartingNode.Finalize(mappings);
-            StartingInventory = sourceElement.StartingInventory.Clone().AsReadOnly();
+            StartingInventory = new ItemInventory(sourceElement.StartingInventory, mappings).AsReadOnly();
             StartingResources = sourceElement.StartingResources.Clone().AsReadOnly();
             StartingGameFlags = sourceElement.StartingGameFlags.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
             StartingOpenLocks = sourceElement.StartingOpenLocks.Select(nodeLock => nodeLock.Finalize(mappings)).ToList().AsReadOnly();
@@ -56,7 +56,7 @@ namespace sm_json_data_framework.Rules
         public static UnfinalizedStartConditions CreateVanillaStartConditions(UnfinalizedSuperMetroidModel model)
         {
             UnfinalizedStartConditions vanillaStartConditions = new UnfinalizedStartConditions();
-            vanillaStartConditions.StartingInventory = ItemInventory.CreateVanillaStartingInventory(model);
+            vanillaStartConditions.StartingInventory = UnfinalizedItemInventory.CreateVanillaStartingInventory(model);
             vanillaStartConditions.StartingResources = vanillaStartConditions.StartingInventory.BaseResourceMaximums.Clone();
             vanillaStartConditions.StartingNode = model.GetNodeInRoom("Ceres Elevator Room", 1);
 
@@ -113,7 +113,7 @@ namespace sm_json_data_framework.Rules
                 startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
             }
 
-            ItemInventory startingInventory = new ItemInventory(startingResources);
+            UnfinalizedItemInventory startingInventory = new UnfinalizedItemInventory(startingResources);
             foreach (string itemName in overrideBasicStartConditions.StartingItemNames)
             {
                 if (!model.Items.TryGetValue(itemName, out UnfinalizedItem item))
@@ -154,8 +154,8 @@ namespace sm_json_data_framework.Rules
 
         public UnfinalizedRoomNode StartingNode { get; set; }
 
-        private ItemInventory _itemInventory;
-        public ItemInventory StartingInventory { get; set; }
+        private UnfinalizedItemInventory _itemInventory;
+        public UnfinalizedItemInventory StartingInventory { get; set; }
 
         public ReadOnlyResourceCount BaseResourceMaximums { get { return StartingInventory?.BaseResourceMaximums; } }
 

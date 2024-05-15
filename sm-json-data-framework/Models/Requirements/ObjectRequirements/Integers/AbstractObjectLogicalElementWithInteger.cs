@@ -16,18 +16,21 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithInteger<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithInteger<SourceType, ConcreteType>
     {
-        private SourceType InnerElement { get; set; }
+        protected AbstractObjectLogicalElementWithInteger (int value)
+        {
+            Value = value;
+        }
 
         protected AbstractObjectLogicalElementWithInteger(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Value = innerElement.Value;
         }
 
         /// <summary>
         /// The int value of this logical element.
         /// </summary>
-        public int Value { get { return InnerElement.Value; } }
+        public int Value { get; }
     }
 
     public abstract class AbstractUnfinalizedObjectLogicalElementWithInteger<ConcreteType, TargetType> 

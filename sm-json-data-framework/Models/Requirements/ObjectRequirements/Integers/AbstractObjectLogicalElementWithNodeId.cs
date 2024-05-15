@@ -14,7 +14,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     /// <typeparam name="SourceType">The unfinalized type that finalizes into this type</typeparam>
     /// <typeparam name="ConcreteType">The self-type of the concrete sub-type</typeparam>
-    public class AbstractObjectLogicalElementWithNodeId<SourceType, ConcreteType> : AbstractObjectLogicalElementWithInteger<SourceType, ConcreteType>
+    public abstract class AbstractObjectLogicalElementWithNodeId<SourceType, ConcreteType> : AbstractObjectLogicalElementWithInteger<SourceType, ConcreteType>
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithNodeId<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithNodeId<SourceType, ConcreteType>
     {

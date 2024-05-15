@@ -10,6 +10,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithNumericalIntegerValue<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithNumericalIntegerValue<SourceType, ConcreteType>
     {
+        protected AbstractObjectLogicalElementWithNumericalIntegerValue(int value): base(value)
+        {
+
+        }
+
         protected AbstractObjectLogicalElementWithNumericalIntegerValue(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {

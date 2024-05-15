@@ -31,6 +31,26 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// The amount of ammo that is being consumed by this.
         /// </summary>
         public int Count { get { return InnerElement.Count; } }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            int ammoCost = Count * times;
+            if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
+            {
+                var resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
+                return new ExecutionResult(resultingState);
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     public class UnfinalizedAmmo : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmo, Ammo>
@@ -62,14 +82,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int ammoCost = Count * times;
             if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
             {
                 var resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
-                return new ExecutionResult(resultingState);
+                return new UnfinalizedExecutionResult(resultingState);
             }
             else
             {

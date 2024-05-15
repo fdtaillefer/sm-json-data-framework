@@ -14,12 +14,37 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         where SourceType : AbstractUnfinalizedDamageNumericalValueLogicalElement<SourceType, ConcreteType>
         where ConcreteType : AbstractDamageNumericalValueLogicalElement<SourceType, ConcreteType>
     {
-        private SourceType InnerElement { get; set; }
+        protected AbstractDamageNumericalValueLogicalElement (int value): base(value)
+        {
+
+        }
 
         protected AbstractDamageNumericalValueLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            
+        }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            int damage = CalculateDamage(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))
+            {
+                var resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
+                ExecutionResult result = new ExecutionResult(resultingState);
+                result.AddDamageReducingItemsInvolved(GetDamageReducingItems(model, inGameState));
+                return result;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -31,10 +56,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>The calculated amount of damage</returns>
-        public int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            return InnerElement.CalculateDamage(model, inGameState, times, previousRoomCount);
-        }
+        public abstract int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         /// <summary>
         /// Returns the enumeration of items that are responsible for reducing incurred damage, 
@@ -43,10 +65,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state that execution would start with.</param>
         /// <returns></returns>
-        public IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            return InnerElement.GetDamageReducingItems(model, inGameState);
-        }
+        public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState);
     }
 
     public abstract class AbstractUnfinalizedDamageNumericalValueLogicalElement<ConcreteType, TargetType>: AbstractUnfinalizedObjectLogicalElementWithNumericalIntegerValue<ConcreteType, TargetType>
@@ -77,7 +96,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>The calculated amount of damage</returns>
-        public abstract int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
+        public abstract int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         /// <summary>
         /// Returns the enumeration of items that are responsible for reducing incurred damage, 
@@ -86,16 +105,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state that execution would start with.</param>
         /// <returns></returns>
-        public abstract IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState);
+        public abstract IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState);
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int damage = CalculateDamage(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))
             {
                 var resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
-                ExecutionResult result = new ExecutionResult(resultingState);
+                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(resultingState);
                 result.AddDamageReducingItemsInvolved(GetDamageReducingItems(model, inGameState));
                 return result;
             }

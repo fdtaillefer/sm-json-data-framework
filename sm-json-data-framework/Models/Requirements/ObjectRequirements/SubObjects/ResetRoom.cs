@@ -49,6 +49,43 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// If true, this is equivalent to <see cref="NodesToAvoid"/> containing all nodes in the room.
         /// </summary>
         public bool MustStayPut { get { return InnerElement.MustStayPut; } }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
+
+            // If the node at which we entered is not allowed, this is not fulfilled.
+            if (!Nodes.ContainsKey(visitedNodeIds[0]))
+            {
+                return null;
+            }
+
+            // If we have visited a node to avoid, this is not fulfilled.
+            if (NodesToAvoid.Keys.Intersect(visitedNodeIds).Any())
+            {
+                return null;
+            }
+
+            // If we were supposed to stay put but have visited more than the starting node, this is not fulfilled
+            if (MustStayPut && visitedNodeIds.Count > 1)
+            {
+                return null;
+            }
+
+            // If we have destroyed an obstacle that needed to be preserved, this is not fulfilled
+            if (ObstaclesToAvoid.Keys.Intersect(inGameState.GetDestroyedObstacleIds(previousRoomCount)).Any())
+            {
+                return null;
+            }
+
+            // We've avoided all pitfalls. This ResetRoom is fulfilled. Clone the InGameState to fulfill method contract
+            return new ExecutionResult(inGameState.Clone());
+        }
     }
 
     public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
@@ -150,7 +187,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unhandled.Distinct();
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
 
@@ -179,7 +216,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // We've avoided all pitfalls. This ResetRoom is fulfilled. Clone the InGameState to fulfill method contract
-            return new ExecutionResult(inGameState.Clone());
+            return new UnfinalizedExecutionResult(inGameState.Clone());
         }
     }
 }

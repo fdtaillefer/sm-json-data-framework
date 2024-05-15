@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Navigation
             IntentDescription = intent;
         }
 
-        public AbstractNavigationAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult): this(intent)
+        public AbstractNavigationAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState initialInGameState, UnfinalizedExecutionResult executionResult): this(intent)
         {
             Succeeded = true;
 
@@ -34,10 +34,10 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Initialize gained and lost items
-            ItemInventory gainedInventory = executionResult.ResultingState.GetInventoryExceptIn(initialInGameState);
+            UnfinalizedItemInventory gainedInventory = executionResult.ResultingState.GetInventoryExceptIn(initialInGameState);
             ItemsGained = gainedInventory;
             // Cannot lose items, just create an empty inventory
-            ItemsLost = new ItemInventory(model.StartConditions.BaseResourceMaximums.Clone());
+            ItemsLost = new UnfinalizedItemInventory(model.StartConditions.BaseResourceMaximums.Clone());
 
             // Initialize enabled and disabled items
             ItemsDisabledNames = executionResult.ResultingState.Inventory.DisabledItemNames.Except(initialInGameState.Inventory.DisabledItemNames);
@@ -103,13 +103,13 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// The inventory of items that have been gained by the player as a result of this action.
         /// </summary>
-        public ItemInventory ItemsGained { get; set; }
+        public UnfinalizedItemInventory ItemsGained { get; set; }
 
         /// <summary>
         /// The inventory of items that have been lost by the player as a result of this action.
         /// This can only really happen by reversing an action.
         /// </summary>
-        public ItemInventory ItemsLost { get; set; }
+        public UnfinalizedItemInventory ItemsLost { get; set; }
 
         /// <summary>
         /// The names of items that have been disabled by the player as a result of this action.
@@ -200,7 +200,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
         /// </summary>
-        public IEnumerable<IndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<IndividualEnemyKillResult>();
+        public IEnumerable<UnfinalizedIndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<UnfinalizedIndividualEnemyKillResult>();
 
         /// <summary>
         /// A sequence of items that were involved in some way, excluding damage reduction

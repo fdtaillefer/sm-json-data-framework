@@ -53,7 +53,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="initialState">The starting inGameState for this navigator. A clone of this will be used.</param>
         /// <param name="maxPreviousStatesSize">The maximum number of previous states that this navigator should keep in memory.</param>
         /// <param name="options">Optional game navigation options. If left null, default options will be used.</param>
-        public GameNavigator(UnfinalizedSuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
+        public GameNavigator(UnfinalizedSuperMetroidModel model, UnfinalizedInGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
         {
             GameModel = model;
             InternalInGameState = initialState.Clone();
@@ -70,9 +70,9 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// The InGameState describing the current in-game situation of this GameNavigator.
         /// </summary>
-        protected InGameState InternalInGameState {get; set;}
+        protected UnfinalizedInGameState InternalInGameState {get; set;}
 
-        public ReadOnlyInGameState CurrentInGameState { get { return InternalInGameState.AsReadOnly(); } }
+        public ReadOnlyUnfinalizedInGameState CurrentInGameState { get { return InternalInGameState.AsReadOnly(); } }
 
         /// <summary>
         /// A model that can be used to obtain data about the current game configuration.
@@ -85,12 +85,12 @@ namespace sm_json_data_framework.Models.Navigation
         /// Contains previous in-game states, paired with the action that was performed on them to obtain the next state.
         /// More recent actions are at the front of the Deque.
         /// </summary>
-        private Deque<(AbstractNavigationAction action, InGameState initialState)> PreviousStates { get; } = new Deque<(AbstractNavigationAction action, InGameState inGameState)>();
+        private Deque<(AbstractNavigationAction action, UnfinalizedInGameState initialState)> PreviousStates { get; } = new Deque<(AbstractNavigationAction action, UnfinalizedInGameState inGameState)>();
 
         /// <summary>
         /// Contains actions that have been undone, paired with the in-game state that resulted from the action.
         /// </summary>
-        private Stack<(AbstractNavigationAction action, InGameState resultingState)> UndoneActions { get; } = new Stack<(AbstractNavigationAction action, InGameState inGameState)>();
+        private Stack<(AbstractNavigationAction action, UnfinalizedInGameState resultingState)> UndoneActions { get; } = new Stack<(AbstractNavigationAction action, UnfinalizedInGameState inGameState)>();
 
         #region Action methods
 
@@ -100,7 +100,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         /// <param name="action">The action that was performed</param>
         /// <param name="resultingState">The InGameState that resulted from performing the action</param>
-        private void DoAction(AbstractNavigationAction action, InGameState resultingState)
+        private void DoAction(AbstractNavigationAction action, UnfinalizedInGameState resultingState)
         {
             // Can't move forward on a failure
             if(!action.Succeeded)
@@ -351,10 +351,10 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="attemptOpen">Whether to attempt to open locks</param>
         /// <param name="attemptBypass">Whether to attempt to bypass locks</param>
         /// <returns></returns>
-        private (List<UnfinalizedNodeLock> failedLocks, List<UnfinalizedNodeLock> openedLocks, List<UnfinalizedNodeLock> bypassedLocks, ExecutionResult result)
+        private (List<UnfinalizedNodeLock> failedLocks, List<UnfinalizedNodeLock> openedLocks, List<UnfinalizedNodeLock> bypassedLocks, UnfinalizedExecutionResult result)
             DealWithLocks(UnfinalizedRoomNode node, bool attemptOpen, bool attemptBypass)
         {
-            ExecutionResult result = null;
+            UnfinalizedExecutionResult result = null;
 
             List<UnfinalizedNodeLock> failedLocks = new List<UnfinalizedNodeLock>();
             List<UnfinalizedNodeLock> openedLocks = new List<UnfinalizedNodeLock>();
@@ -362,7 +362,7 @@ namespace sm_json_data_framework.Models.Navigation
             IEnumerable<UnfinalizedNodeLock> activeLocks = node.Locks.Values.Where(l => l.IsActive(GameModel, CurrentInGameState));
             foreach (UnfinalizedNodeLock currentLock in activeLocks)
             {
-                ExecutionResult currentResult = null;
+                UnfinalizedExecutionResult currentResult = null;
 
                 // Try to open lock
                 if(attemptOpen)
@@ -455,7 +455,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Try to farm
-            ExecutionResult result = enemyToFarm.SpawnerFarmExecution.Execute(GameModel, CurrentInGameState);
+            UnfinalizedExecutionResult result = enemyToFarm.SpawnerFarmExecution.Execute(GameModel, CurrentInGameState);
             // If execution fails
             if(result == null)
             {
@@ -492,11 +492,11 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Item is present and enabled, create new in-game state with item disabled
-            InGameState newState = InternalInGameState.Clone();
+            UnfinalizedInGameState newState = InternalInGameState.Clone();
             newState.ApplyDisableItem(itemName);
 
             // Create an action to return
-            DisableItemAction action = new DisableItemAction(intent, GameModel, CurrentInGameState, new ExecutionResult(newState));
+            DisableItemAction action = new DisableItemAction(intent, GameModel, CurrentInGameState, new UnfinalizedExecutionResult(newState));
 
             // Register the action as done and return it
             DoAction(action, newState);
@@ -524,11 +524,11 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Item is present and enabled, create new in-game state with item enabled
-            InGameState newState = InternalInGameState.Clone();
+            UnfinalizedInGameState newState = InternalInGameState.Clone();
             newState.ApplyEnableItem(itemName);
 
             // Create an action to return
-            EnableItemAction action = new EnableItemAction(intent, GameModel, CurrentInGameState, new ExecutionResult(newState));
+            EnableItemAction action = new EnableItemAction(intent, GameModel, CurrentInGameState, new UnfinalizedExecutionResult(newState));
 
             // Register the action as done and return it
             DoAction(action, newState);

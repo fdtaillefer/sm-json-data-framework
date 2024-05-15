@@ -111,9 +111,9 @@ namespace sm_json_data_framework.Models.Enemies
         /// <param name="fullResources">An enumeration of rechargeable resources that are considered full
         /// (and hence no longer cause their corresponding enemy drop to happen).</param>
         /// <returns></returns>
-        public EnemyDrops GetEffectiveDropRates(UnfinalizedSuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
+        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<RechargeableResourceEnum> fullResources)
         {
-            return InnerElement.GetEffectiveDropRates(model, fullResources);
+            return model.Rules.CalculateEffectiveDropRates(Drops, model.Rules.GetUnneededDrops(fullResources));
         }
 
         /// <summary>
@@ -124,9 +124,16 @@ namespace sm_json_data_framework.Models.Enemies
         /// <param name="fullResources">An enumeration of consumable resources that are considered full
         /// (and hence no longer cause their corresponding enemy drop to happen).</param>
         /// <returns></returns>
-        public EnemyDrops GetEffectiveDropRates(UnfinalizedSuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
+        public EnemyDrops GetEffectiveDropRates(SuperMetroidModel model, IEnumerable<ConsumableResourceEnum> fullResources)
         {
-            return InnerElement.GetEffectiveDropRates(model, fullResources);
+            if (fullResources.Any())
+            {
+                return model.Rules.CalculateEffectiveDropRates(Drops, model.Rules.GetUnneededDrops(fullResources));
+            }
+            else
+            {
+                return Drops.Clone();
+            }
         }
     }
 

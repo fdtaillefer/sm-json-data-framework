@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public MoveToNodeAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyInGameState initialInGameState, UnfinalizedStrat stratUsed, ExecutionResult executionResult) :
+        public MoveToNodeAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState initialInGameState, UnfinalizedStrat stratUsed, UnfinalizedExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
             StratUsed = stratUsed;

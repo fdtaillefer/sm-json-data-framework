@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public UnlockNodeAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
+        public UnlockNodeAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState initialInGameState, UnfinalizedExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
 

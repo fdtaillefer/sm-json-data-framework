@@ -19,6 +19,11 @@ namespace sm_json_data_framework.Models
     {
         private SourceType InnerElement { get; set; }
 
+        protected AbstractModelElement()
+        {
+
+        }
+
         protected AbstractModelElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
         {
             InnerElement = innerElement;
@@ -27,10 +32,14 @@ namespace sm_json_data_framework.Models
 
         public bool UselessByLogicalOptions { get { return InnerElement.UselessByLogicalOptions; } }
 
-        public ReadOnlyLogicalOptions AppliedLogicalOptions { get { return InnerElement.AppliedLogicalOptions; } }
+        public ReadOnlyLogicalOptions AppliedLogicalOptions { get { return InnerElement?.AppliedLogicalOptions; } }
 
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        public virtual void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
+            if (InnerElement == null)
+            {
+                throw new InvalidOperationException("Can't apply LogicalOptions on this model element, because it doesn't have an inner element.");
+            }
             InnerElement.ApplyLogicalOptions(logicalOptions);
         }
     }

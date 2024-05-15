@@ -29,7 +29,25 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <returns></returns>
         public bool IsFulfilled(ReadOnlyInGameState inGameState, int previousRoomCount = 0)
         {
-            return InnerElement.IsFulfilled(inGameState, previousRoomCount);
+            return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
+        }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            if (IsFulfilled(inGameState, previousRoomCount))
+            {
+                // Clone the InGameState to fulfill method contract
+                return new ExecutionResult(inGameState.Clone());
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -74,17 +92,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <param name="previousRoomCount">The number of playable rooms to go back by.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public bool IsFulfilled(ReadOnlyInGameState inGameState, int previousRoomCount = 0)
+        public bool IsFulfilled(ReadOnlyUnfinalizedInGameState inGameState, int previousRoomCount = 0)
         {
             return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (IsFulfilled(inGameState, previousRoomCount))
             {
                 // Clone the InGameState to fulfill method contract
-                return new ExecutionResult(inGameState.Clone());
+                return new UnfinalizedExecutionResult(inGameState.Clone());
             }
             else
             {

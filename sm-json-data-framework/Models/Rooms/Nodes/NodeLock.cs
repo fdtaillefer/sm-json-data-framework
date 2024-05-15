@@ -74,7 +74,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsOpen(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsOpen(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             return InnerElement.IsOpen(model, inGameState);
         }
@@ -85,20 +85,114 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsActive(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsActive(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
-            return InnerElement.IsActive(model, inGameState);
+            // This lock cannot be active if it's been opened
+            if (inGameState.OpenedLocks.ContainsLock(this))
+            {
+                return false;
+            }
+
+            // The lock isn't open, but it's only active if its activation conditions are met.
+            // The resulting game state has no value because locks are activated passively.
+            return Lock.Execute(model, inGameState) != null;
         }
 
+        IExecutable _openExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to opening this lock.
         /// </summary>
-        public IExecutable OpenExecution { get { return InnerElement.OpenExecution; } }
+        public IExecutable OpenExecution
+        {
+            get
+            {
+                if (_openExecution == null)
+                {
+                    _openExecution = new OpenExecution(this);
+                }
+                return _openExecution;
+            }
+        }
 
+        IExecutable _bypassExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to bypassing this lock.
         /// </summary>
-        public IExecutable BypassExecution { get { return InnerElement.BypassExecution; } }
+        public IExecutable BypassExecution
+        {
+            get
+            {
+                if (_bypassExecution == null)
+                {
+                    _bypassExecution = new BypassExecution(this);
+                }
+                return _bypassExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the opening of a NodeLock in an IExecutable interface.
+    /// </summary>
+    internal class OpenExecution : IExecutable
+    {
+        private NodeLock NodeLock { get; set; }
+
+        public OpenExecution(NodeLock nodeLock)
+        {
+            NodeLock = nodeLock;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // Can't open a lock that isn't active
+            if (!NodeLock.IsActive(model, inGameState))
+            {
+                return null;
+            }
+
+            // Look for the best unlock strat
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            if (result != null)
+            {
+                result.ApplyOpenedLock(NodeLock, bestStrat);
+                foreach (GameFlag gameFlag in NodeLock.Yields.Values)
+                {
+                    result.ApplyActivatedGameFlag(gameFlag);
+                }
+            }
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the bypassing of a NodeLock in an IExecutable interface.
+    /// </summary>
+    internal class BypassExecution : IExecutable
+    {
+        private NodeLock NodeLock { get; set; }
+
+        public BypassExecution(NodeLock nodeLock)
+        {
+            NodeLock = nodeLock;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // If there are no bypass strats, bypassing fails
+            if (!NodeLock.BypassStrats.Any())
+            {
+                return null;
+            }
+
+            // Look for the best bypass strat
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            if (result != null)
+            {
+                result.ApplyBypassedLock(NodeLock, bestStrat);
+            }
+            return result;
+        }
     }
 
     public class UnfinalizedNodeLock : AbstractUnfinalizedModelElement<UnfinalizedNodeLock, NodeLock>, InitializablePostDeserializeInNode
@@ -223,7 +317,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsOpen(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsOpen(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             return inGameState.OpenedLocks.ContainsLock(this);
         }
@@ -234,7 +328,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to evaluate</param>
         /// <returns></returns>
-        public bool IsActive(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public bool IsActive(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             // This lock cannot be active if it's been opened
             if (inGameState.OpenedLocks.ContainsLock(this))
@@ -247,33 +341,33 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return Lock.Execute(model, inGameState) != null;
         }
 
-        IExecutable _openExecution = null;
+        IExecutableUnfinalized _openExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to opening this lock.
         /// </summary>
-        public IExecutable OpenExecution
+        public IExecutableUnfinalized OpenExecution
         {
             get
             {
                 if (_openExecution == null)
                 {
-                    _openExecution = new OpenExecution(this);
+                    _openExecution = new OpenExecutionUnfinalized(this);
                 }
                 return _openExecution;
             }
         }
 
-        IExecutable _bypassExecution = null;
+        IExecutableUnfinalized _bypassExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to bypassing this lock.
         /// </summary>
-        public IExecutable BypassExecution
+        public IExecutableUnfinalized BypassExecution
         {
             get
             {
                 if (_bypassExecution == null)
                 {
-                    _bypassExecution = new BypassExecution(this);
+                    _bypassExecution = new BypassExecutionUnfinalized(this);
                 }
                 return _bypassExecution;
             }
@@ -283,16 +377,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// <summary>
     /// A class that encloses the opening of a NodeLock in an IExecutable interface.
     /// </summary>
-    internal class OpenExecution : IExecutable
+    internal class OpenExecutionUnfinalized : IExecutableUnfinalized
     {
         private UnfinalizedNodeLock NodeLock { get; set; }
 
-        public OpenExecution(UnfinalizedNodeLock nodeLock)
+        public OpenExecutionUnfinalized(UnfinalizedNodeLock nodeLock)
         {
             NodeLock = nodeLock;
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Can't open a lock that isn't active
             if (!NodeLock.IsActive(model, inGameState))
@@ -301,7 +395,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best unlock strat
-            (UnfinalizedStrat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (UnfinalizedStrat bestStrat, UnfinalizedExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
@@ -317,16 +411,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// <summary>
     /// A class that encloses the bypassing of a NodeLock in an IExecutable interface.
     /// </summary>
-    internal class BypassExecution : IExecutable
+    internal class BypassExecutionUnfinalized : IExecutableUnfinalized
     {
         private UnfinalizedNodeLock NodeLock { get; set; }
 
-        public BypassExecution(UnfinalizedNodeLock nodeLock)
+        public BypassExecutionUnfinalized(UnfinalizedNodeLock nodeLock)
         {
             NodeLock = nodeLock;
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If there are no bypass strats, bypassing fails
             if (!NodeLock.BypassStrats.Any())
@@ -335,7 +429,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best bypass strat
-            (UnfinalizedStrat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (UnfinalizedStrat bestStrat, UnfinalizedExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if(result != null)
             {
                 result.ApplyBypassedLock(NodeLock, bestStrat);

@@ -13,6 +13,11 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         where SourceType: AbstractUnfinalizedLogicalElement<SourceType, ConcreteType>
         where ConcreteType: AbstractLogicalElement<SourceType, ConcreteType>
     {
+        public AbstractStringLogicalElement()
+        {
+
+        }
+
         public AbstractStringLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback) 
             :base(innerElement, mappingsInsertionCallback)
         {

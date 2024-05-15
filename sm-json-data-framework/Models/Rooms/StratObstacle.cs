@@ -52,15 +52,100 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IReadOnlyDictionary<string, RoomObstacle> AdditionalObstacles { get; }
 
+        IExecutable _destroyExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to destroying this obstacle.
         /// </summary>
-        public IExecutable DestroyExecution { get { return InnerElement.DestroyExecution; } }
+        public IExecutable DestroyExecution
+        {
+            get
+            {
+                if (_destroyExecution == null)
+                {
+                    _destroyExecution = new DestroyExecution(this);
+                }
+                return _destroyExecution;
+            }
+        }
 
+        IExecutable _bypassExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to bypassing this obstacle.
         /// </summary>
-        public IExecutable BypassExecution { get { return InnerElement.BypassExecution; } }
+        public IExecutable BypassExecution
+        {
+            get
+            {
+                if (_bypassExecution == null)
+                {
+                    _bypassExecution = new BypassExecution(this);
+                }
+                return _bypassExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the destruction of a StratObstacle in an IExecutable interface.
+    /// </summary>
+    internal class DestroyExecution : IExecutable
+    {
+        private StratObstacle StratObstacle { get; set; }
+
+        public DestroyExecution(StratObstacle stratObstacle)
+        {
+            StratObstacle = stratObstacle;
+        }
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
+
+            // Start with the RoomObstacle's requirements
+            ExecutionResult result = StratObstacle.Obstacle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            // If we couldn't execute the RoomObstacle's requirements, give up
+            if (result == null)
+            {
+                return null;
+            }
+
+            // Add this specific StratObstacle's requirements
+            result = result.AndThen(StratObstacle.Requires, model, times: times, previousRoomCount: previousRoomCount);
+            // If that failed, give up
+            if (result == null)
+            {
+                return null;
+            }
+
+            // We have succeeded, but we must update the ExecutionResult and its InGameState to reflect any destroyed obstacles
+            result.ApplyDestroyObstacles(new[] { StratObstacle.Obstacle }.Concat(StratObstacle.AdditionalObstacles.Values), previousRoomCount);
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the bypassing of a StratObstacle in an IExecutable interface.
+    /// </summary>
+    internal class BypassExecution : IExecutable
+    {
+        private StratObstacle StratObstacle { get; set; }
+
+        public BypassExecution(StratObstacle stratObstacle)
+        {
+            StratObstacle = stratObstacle;
+        }
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // The bypass attempt fails if there's no way to bypass
+            if (StratObstacle.Bypass == null)
+            {
+                return null;
+            }
+            else
+            {
+                return StratObstacle.Bypass.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            }
+        }
     }
 
     public class UnfinalizedStratObstacle : AbstractUnfinalizedModelElement<UnfinalizedStratObstacle, StratObstacle>, InitializablePostDeserializeInRoom
@@ -149,32 +234,32 @@ namespace sm_json_data_framework.Models.Rooms
             return unhandled.Distinct();
         }
 
-        IExecutable _destroyExecution = null;
+        IExecutableUnfinalized _destroyExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to destroying this obstacle.
         /// </summary>
-        public IExecutable DestroyExecution
+        public IExecutableUnfinalized DestroyExecution
         {
             get
             {
                 if(_destroyExecution == null)
                 {
-                    _destroyExecution = new DestroyExecution(this);
+                    _destroyExecution = new DestroyExecutionUnfinalized(this);
                 }
                 return _destroyExecution;
             }
         }
 
-        IExecutable _bypassExecution = null;
+        IExecutableUnfinalized _bypassExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to bypassing this obstacle.
         /// </summary>
-        public IExecutable BypassExecution {
+        public IExecutableUnfinalized BypassExecution {
             get
             {
                 if(_bypassExecution == null)
                 {
-                    _bypassExecution = new BypassExecution(this);
+                    _bypassExecution = new BypassExecutionUnfinalized(this);
                 }
                 return _bypassExecution;
             }
@@ -184,20 +269,20 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// A class that encloses the destruction of a StratObstacle in an IExecutable interface.
     /// </summary>
-    internal class DestroyExecution : IExecutable
+    internal class DestroyExecutionUnfinalized : IExecutableUnfinalized
     {
         private UnfinalizedStratObstacle StratObstacle { get; set; }
 
-        public DestroyExecution(UnfinalizedStratObstacle stratObstacle)
+        public DestroyExecutionUnfinalized(UnfinalizedStratObstacle stratObstacle)
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There may be up to 2 requirements. This StratObstacle may have some, and the RoomObstacle may also have some general requirements that apply to any strat.
 
             // Start with the RoomObstacle's requirements
-            ExecutionResult result = StratObstacle.Obstacle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            UnfinalizedExecutionResult result = StratObstacle.Obstacle.Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // If we couldn't execute the RoomObstacle's requirements, give up
             if (result == null)
             {
@@ -222,15 +307,15 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// A class that encloses the bypassing of a StratObstacle in an IExecutable interface.
     /// </summary>
-    internal class BypassExecution: IExecutable
+    internal class BypassExecutionUnfinalized: IExecutableUnfinalized
     {
         private UnfinalizedStratObstacle StratObstacle { get; set; }
 
-        public BypassExecution(UnfinalizedStratObstacle stratObstacle)
+        public BypassExecutionUnfinalized(UnfinalizedStratObstacle stratObstacle)
         {
             StratObstacle = stratObstacle;
         }
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // The bypass attempt fails if there's no way to bypass
             if (StratObstacle.Bypass == null)

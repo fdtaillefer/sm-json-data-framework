@@ -22,17 +22,30 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Helper = InnerElement.Helper.Finalize(mappings);
         }
 
+        public override bool IsNever()
+        {
+            return Helper.Requires.IsNever();
+        }
+
         /// <summary>
         /// The helper whose logical requirements must be fulfilled for this logical element.
         /// </summary>
         public Helper Helper {get;}
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return Helper.Requires.Execute(model, inGameState, times: times * InnerElement.Tries, previousRoomCount: previousRoomCount);
+        }
     }
 
     public class UnfinalizedHelperLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedHelperLogicalElement, HelperLogicalElement>
     {
         public UnfinalizedHelper Helper { get; set; }
 
-        private int Tries { get; set; } = LogicalOptions.DefaultNumberOfTries;
+        /// <summary>
+        /// Number of tries the player is expected to take to execute the helper, as per applied logical options.
+        /// </summary>
+        public int Tries { get; private set; } = LogicalOptions.DefaultNumberOfTries;
 
         public UnfinalizedHelperLogicalElement(UnfinalizedHelper helper)
         {
@@ -57,10 +70,10 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         public override bool IsNever()
         {
-            return false;
+            return Helper.Requires.IsNever();
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return Helper.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
         }

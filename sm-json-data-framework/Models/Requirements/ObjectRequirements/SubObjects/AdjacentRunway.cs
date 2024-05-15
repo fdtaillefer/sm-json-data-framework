@@ -61,11 +61,104 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool OverrideRunwayRequirements { get { return InnerElement.OverrideRunwayRequirements; } }
 
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // If no in-room path is specified, then player will be required to have entered at fromNode and not moved
+            IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
+
+            // Find all runways from the previous room that can be retroactively attempted and are long enough.
+            // We're calculating runway length to account for open ends, but using 0 for tilesSavedWithStutter because no charging is involved.
+            IEnumerable<Runway> retroactiveRunways = inGameState.GetRetroactiveRunways(requiredInRoomPath, Physics, previousRoomCount)
+                .Where(r => model.Rules.CalculateEffectiveRunwayLength(r, tilesSavedWithStutter: 0) >= UsedTiles);
+
+            // If we found no usable runways, give up
+            if (!retroactiveRunways.Any())
+            {
+                return null;
+            }
+
+            // Make sure we're able to use one of the runways (unless we're overriding this step)
+            ExecutionResult executionResult;
+            if (OverrideRunwayRequirements)
+            {
+                executionResult = new ExecutionResult(inGameState.Clone());
+            }
+            else
+            {
+                (_, executionResult) = model.ExecuteBest(retroactiveRunways.Select(runway => runway.AsExecutable(comingIn: false)),
+                    inGameState, times: times, previousRoomCount: previousRoomCount);
+            }
+
+            // If retroactive runway execution failed, give up
+            if (executionResult == null)
+            {
+                return executionResult;
+            }
+
+            // If we have useFrames, apply them by spending frames at the previous room's exit node
+            if (UseFrames > 0)
+            {
+                executionResult = executionResult.AndThen(UseFramesExecution, model, previousRoomCount: previousRoomCount + 1);
+            }
+
+            return executionResult;
+
+            // Note that there are no concerns here about unlocking the previous door, because unlocking a door to use it cannot be done retroactively.
+            // It has to have already been done in order to use the door in the first place.
+        }
+
+        IExecutable _useFramesExecution = null;
         /// <summary>
         /// An IExecutable for spending frames at the last visited node in a given room. 
         /// This only really makes sense if that node is a door, since otherwise there is no DoorEnvironment available.
         /// </summary>
-        public IExecutable UseFramesExecution { get { return InnerElement.UseFramesExecution; } }
+        public IExecutable UseFramesExecution
+        {
+            get
+            {
+                if (_useFramesExecution == null)
+                {
+                    _useFramesExecution = new UseFramesExecution(UseFrames);
+                }
+                return _useFramesExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// An IExecutable for spending frames at the last visited node in a given room. This only really makes sense if that node is a door, since otherwise there is no DoorEnvironment available.
+    /// </summary>
+    internal class UseFramesExecution : IExecutable
+    {
+        private int Frames { get; set; }
+
+        public UseFramesExecution(int frames)
+        {
+            Frames = frames;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            List<IExecutable> frameExecutables = new List<IExecutable>();
+
+            PhysicsEnum? physics = inGameState.GetCurrentDoorPhysics(previousRoomCount);
+            if (physics != null)
+            {
+                frameExecutables.Add(physics.Value.FramesExecutable(Frames));
+            }
+
+            if (inGameState.IsHeatedRoom(previousRoomCount))
+            {
+                frameExecutables.Add(new HeatFrames(Frames));
+            }
+
+            return model.ExecuteAll(frameExecutables, inGameState, previousRoomCount: previousRoomCount);
+        }
     }
 
     public class UnfinalizedAdjacentRunway : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAdjacentRunway, AdjacentRunway>
@@ -119,7 +212,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If no in-room path is specified, then player will be required to have entered at fromNode and not moved
             IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
@@ -136,10 +229,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // Make sure we're able to use one of the runways (unless we're overriding this step)
-            ExecutionResult executionResult;
+            UnfinalizedExecutionResult executionResult;
             if(OverrideRunwayRequirements)
             {
-                executionResult = new ExecutionResult(inGameState.Clone());
+                executionResult = new UnfinalizedExecutionResult(inGameState.Clone());
             }
             else
             {
@@ -165,18 +258,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // It has to have already been done in order to use the door in the first place.
         }
 
-        IExecutable _useFramesExecution = null;
+        IExecutableUnfinalized _useFramesExecution = null;
         /// <summary>
         /// An IExecutable for spending frames at the last visited node in a given room. 
         /// This only really makes sense if that node is a door, since otherwise there is no DoorEnvironment available.
         /// </summary>
-        public IExecutable UseFramesExecution
+        public IExecutableUnfinalized UseFramesExecution
         {
             get
             {
                 if (_useFramesExecution == null)
                 {
-                    _useFramesExecution = new UseFramesExecution(UseFrames);
+                    _useFramesExecution = new UseFramesExecutionUnfinalized(UseFrames);
                 }
                 return _useFramesExecution;
             }
@@ -186,23 +279,23 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// <summary>
     /// An IExecutable for spending frames at the last visited node in a given room. This only really makes sense if that node is a door, since otherwise there is no DoorEnvironment available.
     /// </summary>
-    internal class UseFramesExecution : IExecutable
+    internal class UseFramesExecutionUnfinalized : IExecutableUnfinalized
     {
         private int Frames{ get; set; }
 
-        public UseFramesExecution(int frames)
+        public UseFramesExecutionUnfinalized(int frames)
         {
             Frames= frames;
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            List<IExecutable> frameExecutables = new List<IExecutable>();
+            List<IExecutableUnfinalized> frameExecutables = new List<IExecutableUnfinalized>();
 
             PhysicsEnum? physics = inGameState.GetCurrentDoorPhysics(previousRoomCount);
             if(physics != null)
             {
-                frameExecutables.Add(physics.Value.FramesExecutable(Frames));
+                frameExecutables.Add(physics.Value.FramesExecutableUnfinalized(Frames));
             }
 
             if (inGameState.IsHeatedRoom(previousRoomCount))

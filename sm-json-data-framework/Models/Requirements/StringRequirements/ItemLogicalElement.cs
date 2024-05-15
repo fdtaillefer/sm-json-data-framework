@@ -25,6 +25,26 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// The item that Samus must havew to fulfill this logical element.
         /// </summary>
         public Item Item { get; }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            if (inGameState.Inventory.HasItem(Item))
+            {
+                // Clone the In-game state to fulfill method contract
+                ExecutionResult result = new ExecutionResult(inGameState.Clone());
+                result.AddItemsInvolved(new[] { Item });
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     public class UnfinalizedItemLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedItemLogicalElement, ItemLogicalElement>
@@ -53,12 +73,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return false;
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.Inventory.HasItem(Item))
             {
                 // Clone the In-game state to fulfill method contract
-                ExecutionResult result = new ExecutionResult(inGameState.Clone());
+                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(inGameState.Clone());
                 result.AddItemsInvolved(new[] { Item });
                 return result;
             }

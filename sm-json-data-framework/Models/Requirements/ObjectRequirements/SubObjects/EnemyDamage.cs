@@ -43,6 +43,29 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// The number of hits if the enemy attack Samus must take.
         /// </summary>
         public int Hits { get { return InnerElement.Hits; } }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
+
+            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))
+            {
+                InGameState resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
+                ExecutionResult result = new ExecutionResult(resultingState);
+                result.AddDamageReducingItemsInvolved(model.Rules.GetEnemyDamageReducingItems(model, inGameState, Attack));
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     public class UnfinalizedEnemyDamage : AbstractUnfinalizedObjectLogicalElement<UnfinalizedEnemyDamage, EnemyDamage>
@@ -107,15 +130,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
 
             if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))
             {
-                InGameState resultingState = inGameState.Clone();
+                UnfinalizedInGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
-                ExecutionResult result = new ExecutionResult(resultingState);
+                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(resultingState);
                 result.AddDamageReducingItemsInvolved(model.Rules.GetEnemyDamageReducingItems(model, inGameState, Attack));
                 return result;
             }

@@ -90,13 +90,57 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode Node { get; }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return InnerElement.Execute(model, inGameState, times, previousRoomCount);
+            // There are many things to check...
+            // If logical options have rendered this CanLeaveCharged unusable, it can't be executed
+            if (UselessByLogicalOptions)
+            {
+                return null;
+            }
+
+            // If we don't have SpeedBooster, this is not usable
+            if (!inGameState.Inventory.HasSpeedBooster())
+            {
+                return null;
+            }
+
+            // If the player is unable to charge a shinespark with the available runway, this is not usable
+            if (model.Rules.CalculateEffectiveRunwayLength(this, InnerElement.TilesSavedWithStutter) < InnerElement.TilesToShineCharge)
+            {
+                return null;
+            }
+
+            // STITCHME Is there any remote initiation check anywhere? If this is remote it should only be executable if the path followed in the room matches the remote config
+            // I think there were checks elsewhere though, I think it's in InGameState.GetRetroactiveCanLeaveChargdes().
+
+            // Figure out how much energy we will need to have for the shinespark
+            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
+            int shinesparkEnergyToSpend = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
+
+            // Try to execute all strats, 
+            // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount,
+                // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
+                acceptationCondition: igs => igs.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeededForShinespark);
+
+            // If we couldn't find a successful strat, give up
+            if (result == null)
+            {
+                return null;
+            }
+
+            // Add a record of the canLeaveCharged being executed
+            result.AddExecutedCanLeaveCharged(this, bestStrat);
+
+            // Finally, spend the energy for executing a shinespark if needed (we already asked to check that the state has enough)
+            result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, shinesparkEnergyToSpend);
+
+            return result;
         }
     }
 
-    public class UnfinalizedCanLeaveCharged : AbstractUnfinalizedModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, InitializablePostDeserializeInNode, IRunway, IExecutable
+    public class UnfinalizedCanLeaveCharged : AbstractUnfinalizedModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, InitializablePostDeserializeInNode, IRunway, IExecutableUnfinalized
     {
         [JsonIgnore]
         public int Length { get => UsedTiles; }
@@ -115,9 +159,15 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public bool MustShinespark { get { return ShinesparkFrames > 0; } }
 
-        private decimal TilesSavedWithStutter { get; set; } = LogicalOptions.DefaultTilesSavedWithStutter;
+        /// <summary>
+        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
+        /// </summary>
+        public decimal TilesSavedWithStutter { get; private set; } = LogicalOptions.DefaultTilesSavedWithStutter;
 
-        private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
+        /// <summary>
+        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
+        /// </summary>
+        public decimal TilesToShineCharge { get; private set; } = LogicalOptions.DefaultTilesToShineCharge;
 
         public UnfinalizedInitiateRemotely InitiateRemotely {get;set;}
 
@@ -256,7 +306,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return unhandled.Distinct();
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There are many things to check...
             // If logical options have rendered this CanLeaveCharged unusable, it can't be executed
@@ -286,7 +336,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Try to execute all strats, 
             // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark
-            (UnfinalizedStrat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount,
+            (UnfinalizedStrat bestStrat, UnfinalizedExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount,
                 // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
                 acceptationCondition: igs => igs.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeededForShinespark);
 

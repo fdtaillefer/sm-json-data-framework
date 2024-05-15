@@ -61,13 +61,50 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IReadOnlySet<string> StratProperties { get; }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return InnerElement.Execute(model, inGameState, times, previousRoomCount);
+            if (UselessByLogicalOptions)
+            {
+                return null;
+            }
+
+            times = times * InnerElement.Tries;
+
+            ExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+
+            if (result == null)
+            {
+                return null;
+            }
+
+            // Iterate over intact obstacles that need to be dealt with (so ignore obstacles that are already destroyed)
+            foreach (StratObstacle obstacle in Obstacles.Values.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.Obstacle.Id)))
+            {
+                // Try destroying the obstacle first
+                ExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, previousRoomCount: previousRoomCount);
+
+                // If destruction fails, try to bypass instead
+                if (destroyResult == null)
+                {
+                    result = result.AndThen(obstacle.BypassExecution, model, times: times, previousRoomCount: previousRoomCount);
+                    // If bypass also fails, we cannot get past this obstacle. Give up.
+                    if (result == null)
+                    {
+                        return null;
+                    }
+                }
+                // If destruction succeeded, carry on with the result of that
+                else
+                {
+                    result = destroyResult;
+                }
+            }
+
+            return result;
         }
     }
 
-    public class UnfinalizedStrat : AbstractUnfinalizedModelElement<UnfinalizedStrat, Strat>, InitializablePostDeserializeInRoom, IExecutable
+    public class UnfinalizedStrat : AbstractUnfinalizedModelElement<UnfinalizedStrat, Strat>, InitializablePostDeserializeInRoom, IExecutableUnfinalized
     {
         public string Name { get; set; }
 
@@ -87,7 +124,10 @@ namespace sm_json_data_framework.Models.Rooms
 
         public ISet<string> StratProperties { get; set; } = new HashSet<string>();
 
-        private int Tries { get; set; } = LogicalOptions.DefaultNumberOfTries;
+        /// <summary>
+        /// Number of tries the player is expected to take to execute the strat, as per applied logical options.
+        /// </summary>
+        public int Tries { get; private set; } = LogicalOptions.DefaultNumberOfTries;
 
         public UnfinalizedStrat() { 
 
@@ -135,7 +175,7 @@ namespace sm_json_data_framework.Models.Rooms
             return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if(UselessByLogicalOptions)
             {
@@ -144,7 +184,7 @@ namespace sm_json_data_framework.Models.Rooms
 
             times = times * Tries;
 
-            ExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            UnfinalizedExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
 
             if (result == null)
             {
@@ -155,7 +195,7 @@ namespace sm_json_data_framework.Models.Rooms
             foreach (UnfinalizedStratObstacle obstacle in Obstacles.Values.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.ObstacleId)))
             {
                 // Try destroying the obstacle first
-                ExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, previousRoomCount: previousRoomCount);
+                UnfinalizedExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, previousRoomCount: previousRoomCount);
 
                 // If destruction fails, try to bypass instead
                 if (destroyResult == null)

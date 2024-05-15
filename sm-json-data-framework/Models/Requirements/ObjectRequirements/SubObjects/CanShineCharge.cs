@@ -48,6 +48,45 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// Indicates whether this CanShineCharge involves executing a shinespark.
         /// </summary>
         public bool MustShinespark { get { return InnerElement.MustShinespark; } }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // Always need the SpeedBooster to charge a bluesuit
+            if (!inGameState.Inventory.HasSpeedBooster())
+            {
+                return null;
+            }
+
+            // The runway must be long enough to charge
+            if (model.Rules.CalculateEffectiveRunwayLength(this, InnerElement.TilesSavedWithStutter) < InnerElement.TilesToShineCharge)
+            {
+                return null;
+            }
+
+            // If we have enough energy for the shinespark to go through, consume the energy cost and return the result
+            int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
+
+            // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
+            if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
+            {
+                int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
+                InGameState resultingState = inGameState.Clone();
+                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, energyCost);
+                ExecutionResult result = new ExecutionResult(resultingState);
+                result.AddItemsInvolved(new Item[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
+                return result;
+            }
+            // If we don't have enough for the shinespark, we cannot do this
+            else
+            {
+                return null;
+            }
+        }
     }
 
     public class UnfinalizedCanShineCharge : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanShineCharge, CanShineCharge>, IRunway
@@ -80,9 +119,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool MustShinespark { get { return ShinesparkFrames > 0; } }
 
-        private decimal TilesSavedWithStutter { get; set; } = LogicalOptions.DefaultTilesSavedWithStutter;
+        /// <summary>
+        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
+        /// </summary>
+        public decimal TilesSavedWithStutter { get; private set; } = LogicalOptions.DefaultTilesSavedWithStutter;
 
-        private decimal TilesToShineCharge { get; set; } = LogicalOptions.DefaultTilesToShineCharge;
+        /// <summary>
+        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
+        /// </summary>
+        public decimal TilesToShineCharge { get; private set; } = LogicalOptions.DefaultTilesToShineCharge;
 
         protected override CanShineCharge CreateFinalizedElement(UnfinalizedCanShineCharge sourceElement, Action<CanShineCharge> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
@@ -121,7 +166,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Enumerable.Empty<string>();
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Always need the SpeedBooster to charge a bluesuit
             if (!inGameState.Inventory.HasSpeedBooster())
@@ -142,9 +187,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
             {
                 int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
-                InGameState resultingState = inGameState.Clone();
+                UnfinalizedInGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, energyCost);
-                ExecutionResult result = new ExecutionResult(resultingState);
+                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(resultingState);
                 result.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
                 return result;
             }

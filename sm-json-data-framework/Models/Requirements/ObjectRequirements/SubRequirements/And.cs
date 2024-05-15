@@ -18,6 +18,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         {
 
         }
+
+        public override bool IsNever()
+        {
+            return LogicalRequirements.IsNever();
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return LogicalRequirements.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+        }
     }
 
     public class UnfinalizedAnd : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>
@@ -50,7 +60,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             return LogicalRequirements.IsNever();
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return LogicalRequirements.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }

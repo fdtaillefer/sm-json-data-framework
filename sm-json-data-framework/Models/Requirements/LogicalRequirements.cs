@@ -16,31 +16,77 @@ namespace sm_json_data_framework.Models.Requirements
     /// </summary>
     public class LogicalRequirements : AbstractModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutable
     {
-        private UnfinalizedLogicalRequirements InnerElement { get; }
+        internal class NeverRequirements
+        {
+            public static readonly LogicalRequirements Instance = new LogicalRequirements(new List<ILogicalElement> { new NeverLogicalElement() }.AsReadOnly());
+        }
+
+        internal class AlwaysRequirements
+        {
+            public static readonly LogicalRequirements Instance = new LogicalRequirements(new List<ILogicalElement>().AsReadOnly());
+        }
+
+        private LogicalRequirements(IReadOnlyList<ILogicalElement> logicalElements)
+        {
+            LogicalElements = logicalElements;
+        }
 
         public LogicalRequirements(UnfinalizedLogicalRequirements innerElement, Action<LogicalRequirements> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             LogicalElements = innerElement.LogicalElements.Select(unfinalized => unfinalized.FinalizeUntypedLogicalElement(mappings)).ToList().AsReadOnly();
         }
 
         public IReadOnlyList<ILogicalElement> LogicalElements { get; }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        /// <summary>
+        /// Returns whether this set of logical requirements in its base state is logically impossible to fully complete
+        /// (due to having a mandatory <see cref="NeverLogicalElement"/>).
+        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
+        /// which are not available here.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsNever()
         {
-            return InnerElement.Execute(model, inGameState, times, previousRoomCount);
+            return LogicalElements.Where(element => element.IsNever()).Any();
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // If logical options make these logical requirements impossible, don't bother trying
+            if (UselessByLogicalOptions)
+            {
+                return null;
+            }
+            return model.ExecuteAll(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
+        }
+
+        /// <summary>
+        /// Attempts to execute one logical element inside this LogicalRequirements (the cheapest one) 
+        /// based on the provided in-game state (which will not be altered), by fulfilling its execution requirements.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
+        /// <param name="times">The number of consecutive times that this should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns></returns>
+        public ExecutionResult ExecuteOne(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
+            return result;
         }
     }
 
-    public class UnfinalizedLogicalRequirements : AbstractUnfinalizedModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutable
+    public class UnfinalizedLogicalRequirements : AbstractUnfinalizedModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutableUnfinalized
     {
-        internal class NeverRequirements
+        internal class UnfinalizedNeverRequirements
         {
             public static readonly UnfinalizedLogicalRequirements Instance = new UnfinalizedLogicalRequirements(new IUnfinalizedLogicalElement[] { new UnfinalizedNeverLogicalElement() });
         }
 
-        internal class AlwaysRequirements
+        internal class UnfinalizedAlwaysRequirements
         {
             public static readonly UnfinalizedLogicalRequirements Instance = new UnfinalizedLogicalRequirements();
         }
@@ -111,7 +157,7 @@ namespace sm_json_data_framework.Models.Requirements
             return unhandled;
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If logical options make these logical requirements impossible, don't bother trying
             if(UselessByLogicalOptions)
@@ -132,9 +178,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public ExecutionResult ExecuteOne(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult ExecuteOne(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (_, UnfinalizedExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;
         }
 
@@ -144,7 +190,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns></returns>
         public static UnfinalizedLogicalRequirements Never()
         {
-            return NeverRequirements.Instance;
+            return UnfinalizedNeverRequirements.Instance;
         }
     }
 }

@@ -175,7 +175,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         /// <param name="inGameState">InGameState to evaluate for active locks</param>
         /// <returns></returns>
-        public IEnumerable<NodeLock> GetActiveLocks(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             //Should remove that .Name and pass just nodeLock again, once I've removed all Unfinalized everywhere
             // Return locks whose locking conditions have been met, and that haven't been opened
@@ -183,10 +183,111 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock.Name));
         }
 
+        IExecutable _interactExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to interacting with this node.
         /// </summary>
-        public IExecutable InteractExecution { get { return InnerElement.InteractExecution; } }
+        public IExecutable InteractExecution
+        {
+            get
+            {
+                if (_interactExecution == null)
+                {
+                    _interactExecution = new InteractExecution(this);
+                }
+                return _interactExecution;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A class that encloses the opening of a NodeLock in an IExecutable interface. 
+    /// Note that if this picks up a resource item, it does not apply any change to current resources, 
+    /// in an attempt to avoid applying non-repeatable changes that could have logical implications.
+    /// </summary>
+    internal class InteractExecution : IExecutable
+    {
+        private RoomNode Node { get; set; }
+
+        public InteractExecution(RoomNode node)
+        {
+            Node = node;
+        }
+
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            // First thing is making sure no locks prevent interaction
+            IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);
+            IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState)
+                .Where(activeLock => !bypassedLocks.Contains(activeLock, ObjectReferenceEqualityComparer<NodeLock>.Default));
+
+            // Can't interact with the node if there's active locks that haven't been opened or bypassed
+            if (unhandledLocks.Any())
+            {
+                return null;
+            }
+
+            // Locks are ok, let's try to actually interact with the node
+
+            // Start by executing the node's interaction requirements
+            ExecutionResult result = Node.InteractionRequires.Execute(model, inGameState, times, previousRoomCount);
+
+            // Give up if interaction requirements couldn't be met
+            if (result == null)
+            {
+                return null;
+            }
+
+            // Actually interact with the node now
+
+
+            // Activate game flags
+            foreach (GameFlag flag in Node.Yields.Values)
+            {
+                result.ApplyActivatedGameFlag(flag);
+            }
+
+            // Take item at location
+            if (Node.NodeItem != null && !inGameState.TakenItemLocations.ContainsNode(Node))
+            {
+                result.ResultingState.ApplyTakeLocation(Node);
+                result.ResultingState.ApplyAddItem(Node.NodeItem);
+            }
+
+            // Use any refill utility
+            foreach (UtilityEnum utility in Node.Utility)
+            {
+                switch (utility)
+                {
+                    case UtilityEnum.Energy:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.RegularEnergy);
+                        break;
+                    case UtilityEnum.Reserve:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.ReserveEnergy);
+                        break;
+                    case UtilityEnum.Missile:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Missile);
+                        break;
+                    case UtilityEnum.Super:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.Super);
+                        break;
+                    case UtilityEnum.PowerBomb:
+                        result.ResultingState.ApplyRefillResource(RechargeableResourceEnum.PowerBomb);
+                        break;
+                    // Other utilities don't do anything for us
+                    default:
+                        break;
+                }
+            }
+
+            // Use node to exit the room
+            if (Node.OutNode != null)
+            {
+                result.ResultingState.ApplyEnterRoom(Node.OutNode);
+            }
+
+            return result;
+        }
     }
 
     public class UnfinalizedRoomNode : AbstractUnfinalizedModelElement<UnfinalizedRoomNode, RoomNode>, InitializablePostDeserializeInRoom
@@ -394,7 +495,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         /// <param name="inGameState">InGameState to evaluate for active locks</param>
         /// <returns></returns>
-        public IEnumerable<UnfinalizedNodeLock> GetActiveLocks(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public IEnumerable<UnfinalizedNodeLock> GetActiveLocks(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
             return Locks.Values.WhereUseful().Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
@@ -502,37 +603,38 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return unhandled.Distinct();
         }
 
-        IExecutable _interactExecution = null;
+        IExecutableUnfinalized _interactExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to interacting with this node.
         /// </summary>
-        public IExecutable InteractExecution
+        public IExecutableUnfinalized InteractExecution
         {
             get
             {
                 if (_interactExecution == null)
                 {
-                    _interactExecution = new InteractExecution(this);
+                    _interactExecution = new InteractExecutionUnfinalized(this);
                 }
                 return _interactExecution;
             }
         }
     }
+
     /// <summary>
     /// A class that encloses the opening of a NodeLock in an IExecutable interface. 
     /// Note that if this picks up a resource item, it does not apply any change to current resources, 
     /// in an attempt to avoid applying non-repeatable changes that could have logical implications.
     /// </summary>
-    internal class InteractExecution : IExecutable
+    internal class InteractExecutionUnfinalized : IExecutableUnfinalized
     {
         private UnfinalizedRoomNode Node { get; set; }
 
-        public InteractExecution(UnfinalizedRoomNode node)
+        public InteractExecutionUnfinalized(UnfinalizedRoomNode node)
         {
             Node = node;
         }
 
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // First thing is making sure no locks prevent interaction
             IEnumerable<UnfinalizedNodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);
@@ -548,7 +650,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Locks are ok, let's try to actually interact with the node
 
             // Start by executing the node's interaction requirements
-            ExecutionResult result = Node.InteractionRequires.Execute(model, inGameState, times, previousRoomCount);
+            UnfinalizedExecutionResult result = Node.InteractionRequires.Execute(model, inGameState, times, previousRoomCount);
 
             // Give up if interaction requirements couldn't be met
             if(result == null)

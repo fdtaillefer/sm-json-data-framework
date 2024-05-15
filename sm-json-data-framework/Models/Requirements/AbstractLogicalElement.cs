@@ -20,24 +20,48 @@ namespace sm_json_data_framework.Models.Requirements
         where ConcreteType: AbstractLogicalElement<SourceType, ConcreteType>
         where SourceType : AbstractUnfinalizedLogicalElement<SourceType, ConcreteType>
     {
-        private SourceType InnerElement { get; set; }
+        public AbstractLogicalElement()
+        {
+
+        }
 
         public AbstractLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            
         }
 
         // Inherited from IExecutable
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return InnerElement.Execute(model, inGameState, times, previousRoomCount);
+            if (UselessByLogicalOptions)
+            {
+                return null;
+            }
+            return ExecuteUseful(model, inGameState, times, previousRoomCount);
         }
 
-        public bool IsNever()
-        {
-            return InnerElement.IsNever();
-        }
+        /// <summary>
+        /// Has the same purpose as <see cref="Execute(SuperMetroidModel, ReadOnlyInGameState, int, int)"/>, but will only be called if this logical element
+        /// has not be rendered impossible by logical options, meaning implementations don't need to test for it.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
+        /// <param name="times">The number of consecutive times that this should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
+        protected abstract ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
+
+        /// <summary>
+        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on) a mandatory
+        /// <see cref="NeverLogicalElement"/>.
+        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
+        /// which are not available here.
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool IsNever();
     }
 
     /// <summary>
@@ -46,7 +70,7 @@ namespace sm_json_data_framework.Models.Requirements
     public interface ILogicalElement : IExecutable, IModelElement
     {
         /// <summary>
-        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on a mandatory)
+        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on) a mandatory
         /// <see cref="NeverLogicalElement"/>.
         /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
         /// which are not available here.
@@ -67,7 +91,7 @@ namespace sm_json_data_framework.Models.Requirements
         public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room);
 
         // Inherited from IExecutable
-        public ExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (UselessByLogicalOptions) {
                 return null;
@@ -76,7 +100,7 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// Has the same purpose as <see cref="Execute(UnfinalizedSuperMetroidModel, ReadOnlyInGameState, int, int)"/>, but will only be called if this logical element
+        /// Has the same purpose as <see cref="Execute(UnfinalizedSuperMetroidModel, ReadOnlyUnfinalizedInGameState, int, int)"/>, but will only be called if this logical element
         /// has not be rendered impossible by logical options, meaning implementations don't need to test for it.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -86,7 +110,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
-        protected abstract ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
+        protected abstract UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         public abstract bool IsNever();
 
@@ -96,7 +120,7 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// The untyped interface portion of <see cref="AbstractUnfinalizedLogicalElement{ConcreteType, TargetType}"/>.
     /// </summary>
-    public interface IUnfinalizedLogicalElement: IUnfinalizedModelElement, IExecutable
+    public interface IUnfinalizedLogicalElement: IUnfinalizedModelElement, IExecutableUnfinalized
     {
         /// <summary>
         /// An untyped version of <see cref="AbstractUnfinalizedModelElement{ConcreteType, TargetType}.Finalize(ModelFinalizationMappings)"/>, specifically for
@@ -116,7 +140,7 @@ namespace sm_json_data_framework.Models.Requirements
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room);
 
         /// <summary>
-        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on a mandatory)
+        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on) a mandatory
         /// <see cref="NeverLogicalElement"/>.
         /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
         /// which are not available here.

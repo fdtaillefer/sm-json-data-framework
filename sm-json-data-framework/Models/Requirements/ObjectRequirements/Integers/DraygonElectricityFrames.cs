@@ -17,6 +17,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
 
         }
+
+        public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return model.Rules.CalculateElectricityGrappleDamage(inGameState, Value) * times;
+        }
+
+        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            return model.Rules.GetElectricityGrappleDamageReducingItems(model, inGameState);
+        }
     }
 
     public class UnfinalizedDraygonElectricityFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedDraygonElectricityFrames, DraygonElectricityFrames>
@@ -42,12 +52,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return false;
         }
 
-        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return model.Rules.CalculateElectricityGrappleDamage(inGameState, Value) * times;
         }
 
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
         {
             return model.Rules.GetElectricityGrappleDamageReducingItems(model, inGameState);
         }

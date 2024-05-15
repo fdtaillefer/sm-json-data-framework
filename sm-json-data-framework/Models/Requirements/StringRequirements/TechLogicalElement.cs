@@ -25,13 +25,26 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// The tech that must be executed to fulfill this logical element.
         /// </summary>
         public Tech Tech { get; }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            return Tech.Requires.Execute(model, inGameState, times: times * InnerElement.Tries, previousRoomCount: previousRoomCount);
+        }
     }
 
     public class UnfinalizedTechLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>
     {
         public UnfinalizedTech Tech { get; set; }
 
-        private int Tries { get; set; } = LogicalOptions.DefaultNumberOfTries;
+        /// <summary>
+        /// Number of tries the player is expected to take to execute the tech, as per applied logical options.
+        /// </summary>
+        public int Tries { get; private set; } = LogicalOptions.DefaultNumberOfTries;
 
         public UnfinalizedTechLogicalElement(UnfinalizedTech tech)
         {
@@ -56,7 +69,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return false;
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return Tech.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
         }

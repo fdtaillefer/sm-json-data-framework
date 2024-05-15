@@ -27,6 +27,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// The game flag that must be activated to fulfill this logical element.
         /// </summary>
         public GameFlag GameFlag { get; }
+
+        public override bool IsNever()
+        {
+            return false;
+        }
+
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        {
+            if (inGameState.ActiveGameFlags.ContainsFlag(GameFlag))
+            {
+                // Clone the In-game state to fulfill method contract
+                return new ExecutionResult(inGameState.Clone());
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 
     public class UnfinalizedGameFlagLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>
@@ -57,12 +75,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return false;
         }
 
-        protected override ExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.ActiveGameFlags.ContainsFlag(GameFlag))
             {
                 // Clone the In-game state to fulfill method contract
-                return new ExecutionResult(inGameState.Clone());
+                return new UnfinalizedExecutionResult(inGameState.Clone());
             }
             else
             {
