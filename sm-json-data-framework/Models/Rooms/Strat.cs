@@ -104,7 +104,7 @@ namespace sm_json_data_framework.Models.Rooms
         }
     }
 
-    public class UnfinalizedStrat : AbstractUnfinalizedModelElement<UnfinalizedStrat, Strat>, InitializablePostDeserializeInRoom, IExecutableUnfinalized
+    public class UnfinalizedStrat : AbstractUnfinalizedModelElement<UnfinalizedStrat, Strat>, InitializablePostDeserializeInRoom
     {
         public string Name { get; set; }
 
@@ -173,48 +173,6 @@ namespace sm_json_data_framework.Models.Rooms
                 }
             }
             return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
-        }
-
-        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            if(UselessByLogicalOptions)
-            {
-                return null;
-            }
-
-            times = times * Tries;
-
-            UnfinalizedExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
-
-            if (result == null)
-            {
-                return null;
-            }
-
-            // Iterate over intact obstacles that need to be dealt with (so ignore obstacles that are already destroyed)
-            foreach (UnfinalizedStratObstacle obstacle in Obstacles.Values.Where(o => !inGameState.GetDestroyedObstacleIds(previousRoomCount).Contains(o.ObstacleId)))
-            {
-                // Try destroying the obstacle first
-                UnfinalizedExecutionResult destroyResult = result.AndThen(obstacle.DestroyExecution, model, times: times, previousRoomCount: previousRoomCount);
-
-                // If destruction fails, try to bypass instead
-                if (destroyResult == null)
-                {
-                    result = result.AndThen(obstacle.BypassExecution, model, times: times, previousRoomCount: previousRoomCount);
-                    // If bypass also fails, we cannot get past this obstacle. Give up.
-                    if (result == null)
-                    {
-                        return null;
-                    }
-                }
-                // If destruction succeeded, carry on with the result of that
-                else
-                {
-                    result = destroyResult;
-                }
-            }
-
-            return result;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

@@ -69,16 +69,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             
             return false;
         }
-
-        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Value) * times;
-            return (int)(baseDamage * LavaLeniencyMultiplier);
-        }
-
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            return model.Rules.GetLavaPhysicsDamageReducingItems(model, inGameState);
-        }
     }
 }

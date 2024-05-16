@@ -195,30 +195,6 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravitySupersedesVaria(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            if (inGameState.Inventory.HasGravitySuit())
-            {
-                return new [] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
-            }
-            else if (inGameState.Inventory.HasVariaSuit())
-            {
-                return new [] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
-            }
-            else
-            {
-                return new UnfinalizedItem[] { };
-            }
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage of some damage source where Gravity and Varia both offer reduction, but Gravity supersedes Varia.</para>
-        /// <para>Does not return Varia when Gravity is available.</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
         private IEnumerable<Item> GetDamageReducingItemsWhenGravitySupersedesVaria(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasGravitySuit())
@@ -232,25 +208,6 @@ namespace sm_json_data_framework.Rules
             else
             {
                 return new Item[] { };
-            }
-        }
-
-        /// <summary>
-        /// Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage of some damage source where Gravity and Varia both offer reduction, but Gravity is manually turned off even if available. 
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenGravityTurnedOff(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            if (inGameState.Inventory.HasVariaSuit())
-            {
-                return new[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
-            }
-            else
-            {
-                return new UnfinalizedItem[] { };
             }
         }
 
@@ -281,30 +238,6 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        private IEnumerable<UnfinalizedItem> GetDamageReducingItemsWhenVariaSupersedesGravity(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            if (inGameState.Inventory.HasVariaSuit())
-            {
-                return new [] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
-            }
-            else if (inGameState.Inventory.HasGravitySuit())
-            {
-                return new [] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
-            }
-            else
-            {
-                return new UnfinalizedItem[] { };
-            }
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage of some damage source where Gravity and Varia both offer reduction, but Varia supersedes Gravity.</para>
-        /// <para>Does not return Gravity when Varia is available.</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
         private IEnumerable<Item> GetDamageReducingItemsWhenVariaSupersedesGravity(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             if (inGameState.Inventory.HasVariaSuit())
@@ -318,31 +251,6 @@ namespace sm_json_data_framework.Rules
             else
             {
                 return new Item[] { };
-            }
-        }
-
-        /// <summary>
-        /// Calculates and returns the environmental damage Samus would take for the provided in-game state and base environmental damage. This method is intended
-        /// for environment-based punctual hits, not damage over time.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="baseDamage">The base damage</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateEnvironmentalDamage(ReadOnlyUnfinalizedInGameState inGameState, int baseDamage)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return baseDamage / 4;
-            }
-            else if (hasVaria)
-            {
-                return baseDamage / 2;
-            }
-            else
-            {
-                return baseDamage;
             }
         }
 
@@ -379,44 +287,10 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetEnvironmentalDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateEnvironmentalDamage(ReadOnlyUnfinalizedInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
         public virtual IEnumerable<Item> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a heated room, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateHeatDamage(ReadOnlyUnfinalizedInGameState inGameState, int heatFrames)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity || hasVaria)
-            {
-                return 0;
-            }
-            else
-            {
-                return heatFrames / 4;
-            }
         }
 
         /// <summary>
@@ -441,20 +315,6 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateHeatDamage(ReadOnlyUnfinalizedInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetHeatDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            // Gravity and Varia are equivalent. Varia's more iconic for heat reduction, so let's prioritize it.
-            return GetDamageReducingItemsWhenVariaSupersedesGravity(model, inGameState);
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
         /// for a reduction in the damage returned by <see cref="CalculateHeatDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
@@ -465,30 +325,6 @@ namespace sm_json_data_framework.Rules
         {
             // Gravity and Varia are equivalent. Varia's more iconic for heat reduction, so let's prioritize it.
             return GetDamageReducingItemsWhenVariaSupersedesGravity(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateLavaDamage(ReadOnlyUnfinalizedInGameState inGameState, int lavaFrames)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return 0;
-            }
-            else if (hasVaria)
-            {
-                return lavaFrames / 4;
-            }
-            else
-            {
-                return lavaFrames / 2;
-            }
         }
 
         /// <summary>
@@ -522,26 +358,6 @@ namespace sm_json_data_framework.Rules
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateLavaPhysicsDamage(ReadOnlyUnfinalizedInGameState inGameState, int lavaPhysicsFrames)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            if (hasVaria)
-            {
-                return lavaPhysicsFrames / 4;
-            }
-            else
-            {
-                return lavaPhysicsFrames / 2;
-            }
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava while undergoing lava physics 
-        /// (i.e. with Gravity Suit turned off if available), given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
         public virtual int CalculateLavaPhysicsDamage(ReadOnlyInGameState inGameState, int lavaPhysicsFrames)
         {
             bool hasVaria = inGameState.Inventory.HasVariaSuit();
@@ -553,20 +369,6 @@ namespace sm_json_data_framework.Rules
             {
                 return lavaPhysicsFrames / 2;
             }
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateLavaDamage(ReadOnlyUnfinalizedInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetLavaDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
         }
 
         /// <summary>
@@ -585,20 +387,6 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateLavaPhysicsDamage(ReadOnlyUnfinalizedInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetLavaPhysicsDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            // Gravity turned off
-            return GetDamageReducingItemsWhenGravityTurnedOff(model, inGameState);
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
         /// for a reduction in the damage returned by <see cref="CalculateLavaPhysicsDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
@@ -609,30 +397,6 @@ namespace sm_json_data_framework.Rules
         {
             // Gravity turned off
             return GetDamageReducingItemsWhenGravityTurnedOff(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in acid, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateAcidDamage(ReadOnlyUnfinalizedInGameState inGameState, int acidFrames)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return acidFrames * 3 / 8;
-            }
-            else if (hasVaria)
-            {
-                return acidFrames * 3 / 4;
-            }
-            else
-            {
-                return acidFrames * 6 / 4;
-            }
         }
 
         /// <summary>
@@ -661,20 +425,6 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateAcidDamage(ReadOnlyUnfinalizedInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetAcidDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
         /// for a reduction in the damage returned by <see cref="CalculateAcidDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
@@ -685,30 +435,6 @@ namespace sm_json_data_framework.Rules
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration grappled to a broken Draygon turret, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateElectricityGrappleDamage(ReadOnlyUnfinalizedInGameState inGameState, int electricityFrames)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return electricityFrames / 4;
-            }
-            else if (hasVaria)
-            {
-                return electricityFrames / 2;
-            }
-            else
-            {
-                return electricityFrames;
-            }
         }
 
         /// <summary>
@@ -737,20 +463,6 @@ namespace sm_json_data_framework.Rules
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateElectricityGrappleDamage(ReadOnlyUnfinalizedInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetElectricityGrappleDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
         /// for a reduction in the damage returned by <see cref="CalculateElectricityGrappleDamage(ReadOnlyInGameState, int)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
@@ -761,18 +473,6 @@ namespace sm_json_data_framework.Rules
         {
             // Gravity supercedes Varia
             return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for executing a shinespark of the provided duration n times, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
-        /// <param name="times">The number of times the shinespark will be performed.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateShinesparkDamage(ReadOnlyUnfinalizedInGameState inGameState, int shinesparkFrames, int times = 1)
-        {
-            return shinesparkFrames * times;
         }
 
         /// <summary>
@@ -806,31 +506,6 @@ namespace sm_json_data_framework.Rules
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <param name="attack">The enemy attack whose damage to calculate</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateEnemyDamage(ReadOnlyUnfinalizedInGameState inGameState, UnfinalizedEnemyAttack attack)
-        {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-
-            if (hasGravity && attack.AffectedByGravity)
-            {
-                return attack.BaseDamage / 4;
-            }
-            else if (hasVaria && attack.AffectedByVaria)
-            {
-                return attack.BaseDamage / 2;
-            }
-            else
-            {
-                return attack.BaseDamage;
-            }
-        }
-
-        /// <summary>
-        /// Calculates and returns how much damage the provided enemy attack would do to Samus, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="attack">The enemy attack whose damage to calculate</param>
-        /// <returns>The calculated damage</returns>
         public virtual int CalculateEnemyDamage(ReadOnlyInGameState inGameState, EnemyAttack attack)
         {
             bool hasVaria = inGameState.Inventory.HasVariaSuit();
@@ -848,35 +523,6 @@ namespace sm_json_data_framework.Rules
             {
                 return attack.BaseDamage;
             }
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateEnemyDamage(ReadOnlyUnfinalizedInGameState, UnfinalizedEnemyAttack)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<UnfinalizedItem> GetEnemyDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, UnfinalizedEnemyAttack enemyAttack)
-        {
-            // What we return depends not only on the suits available, but also on the attack
-            if(enemyAttack.AffectedByGravity && enemyAttack.AffectedByVaria)
-            {
-                return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-            }
-
-            if (enemyAttack.AffectedByGravity && inGameState.Inventory.HasGravitySuit())
-            {
-                return new UnfinalizedItem[] { model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME] };
-            }
-
-            if (enemyAttack.AffectedByVaria && inGameState.Inventory.HasVariaSuit())
-            {
-                return new UnfinalizedItem[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
-            }
-
-            return new UnfinalizedItem[] { };
         }
 
         /// <summary>

@@ -81,20 +81,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // No properties need to be handled here
             return Enumerable.Empty<string>();
         }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            int ammoCost = Count * times;
-            if (inGameState.IsResourceAvailable(AmmoType.GetConsumableResourceEnum(), ammoCost))
-            {
-                var resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(AmmoType.GetConsumableResourceEnum(), ammoCost);
-                return new UnfinalizedExecutionResult(resultingState);
-            }
-            else
-            {
-                return null;
-            }
-        }
     }
 }

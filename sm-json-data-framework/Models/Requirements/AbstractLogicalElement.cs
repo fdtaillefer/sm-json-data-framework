@@ -90,28 +90,6 @@ namespace sm_json_data_framework.Models.Requirements
 
         public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room);
 
-        // Inherited from IExecutable
-        public UnfinalizedExecutionResult Execute(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            if (UselessByLogicalOptions) {
-                return null;
-            }
-            return ExecuteUseful(model, inGameState, times, previousRoomCount);
-        }
-
-        /// <summary>
-        /// Has the same purpose as <see cref="Execute(UnfinalizedSuperMetroidModel, ReadOnlyUnfinalizedInGameState, int, int)"/>, but will only be called if this logical element
-        /// has not be rendered impossible by logical options, meaning implementations don't need to test for it.
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
-        /// <param name="times">The number of consecutive times that this should be executed.
-        /// Only really impacts resource cost, since most items are non-consumable.</param>
-        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
-        /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
-        protected abstract UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0);
-
         public abstract bool IsNever();
 
         // STITCHME could be nice to ask for always? As in isAlwaysFree()
@@ -120,7 +98,7 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// The untyped interface portion of <see cref="AbstractUnfinalizedLogicalElement{ConcreteType, TargetType}"/>.
     /// </summary>
-    public interface IUnfinalizedLogicalElement: IUnfinalizedModelElement, IExecutableUnfinalized
+    public interface IUnfinalizedLogicalElement: IUnfinalizedModelElement
     {
         /// <summary>
         /// An untyped version of <see cref="AbstractUnfinalizedModelElement{ConcreteType, TargetType}.Finalize(ModelFinalizationMappings)"/>, specifically for

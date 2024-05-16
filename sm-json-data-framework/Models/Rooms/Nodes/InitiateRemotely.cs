@@ -36,7 +36,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// Indicates whether the door at <see cref="ExitNode"/> needs to be opened before doing the remove initiation.
         /// For the door to be considered opened, it must have no active locks and its node must have been visited during the current room visit.
         /// </summary>
-        public bool MustOpenDoorFirst { get; }
+        public bool MustOpenDoorFirst { get { return InnerElement.MustOpenDoorFirst; } }
 
         /// <summary>
         /// <para>A path that must be followed by Samus to execute the remote CanLeaveCharged, represented as links to follow and appropriate strats(that are mapped by name).</para>

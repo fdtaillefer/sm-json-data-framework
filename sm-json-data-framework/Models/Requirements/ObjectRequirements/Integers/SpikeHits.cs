@@ -51,15 +51,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             // Nothing in logical options can alter this
             return false;
         }
-
-        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.SpikeDamage) * Value * times;
-        }
-
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            return model.Rules.GetEnvironmentalDamageReducingItems(model, inGameState);
-        }
     }
 }

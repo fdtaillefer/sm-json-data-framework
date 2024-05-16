@@ -72,20 +72,5 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         {
             return false;
         }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            if (inGameState.Inventory.HasItem(Item))
-            {
-                // Clone the In-game state to fulfill method contract
-                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(inGameState.Clone());
-                result.AddItemsInvolved(new[] { Item });
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
     }
 }

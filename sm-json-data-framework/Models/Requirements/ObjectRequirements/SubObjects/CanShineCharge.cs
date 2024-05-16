@@ -165,39 +165,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // No properties need to be handled here
             return Enumerable.Empty<string>();
         }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            // Always need the SpeedBooster to charge a bluesuit
-            if (!inGameState.Inventory.HasSpeedBooster())
-            {
-                return null;
-            }
-
-            // The runway must be long enough to charge
-            if (model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter) < TilesToShineCharge)
-            {
-                return null;
-            }
-
-            // If we have enough energy for the shinespark to go through, consume the energy cost and return the result
-            int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
-
-            // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
-            if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
-            {
-                int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
-                UnfinalizedInGameState resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, energyCost);
-                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(resultingState);
-                result.AddItemsInvolved(new UnfinalizedItem[] { model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME] });
-                return result;
-            }
-            // If we don't have enough for the shinespark, we cannot do this
-            else
-            {
-                return null;
-            }
-        }
     }
 }

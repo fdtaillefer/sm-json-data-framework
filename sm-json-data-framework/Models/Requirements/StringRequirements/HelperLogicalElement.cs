@@ -72,10 +72,5 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         {
             return Helper.Requires.IsNever();
         }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            return Helper.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
-        }
     }
 }

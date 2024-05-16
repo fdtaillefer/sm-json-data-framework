@@ -73,16 +73,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
             return false;
         }
-
-        public override int CalculateDamage(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            int baseDamage = model.Rules.CalculateAcidDamage(inGameState, Value) * times;
-            return (int)(baseDamage * AcidLeniencyMultiplier);
-        }
-
-        public override IEnumerable<UnfinalizedItem> GetDamageReducingItems(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState)
-        {
-            return model.Rules.GetAcidDamageReducingItems(model, inGameState);
-        }
     }
 }

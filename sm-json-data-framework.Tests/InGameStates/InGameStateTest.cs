@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models;
+﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
+using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.InGameStates;
@@ -47,7 +48,7 @@ namespace sm_json_data_framework.InGameStates
         }
 
         // Use a static model to build it only once.
-        private static UnfinalizedSuperMetroidModel Model { get; set; } = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
+        private static SuperMetroidModel Model { get; set; } = StaticTestObjects.UnmodifiableModel;
 
         #region Tests for ctor(StartConditions)
         [Fact]
@@ -59,19 +60,19 @@ namespace sm_json_data_framework.InGameStates
             string startingLockName = "Business Center Top Left Green Lock (to Ice Beam Gate)";
             int startingEnergy = 50;
             string maridiaTubeFlag = "f_MaridiaTubeBroken";
-            UnfinalizedRoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
-            UnfinalizedStartConditions startConditions = new UnfinalizedStartConditions
-            {
-                StartingGameFlags = new UnfinalizedGameFlag[] { Model.GameFlags[maridiaTubeFlag] },
-                StartingInventory = UnfinalizedItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]),
-                StartingNode = Model.GetNodeInRoom(startingRoomName, startingNodeId),
-                StartingOpenLocks = new UnfinalizedNodeLock[] { Model.Locks[startingLockName] },
-                StartingTakenItemLocations = new UnfinalizedRoomNode[] { variaNode },
-                StartingResources = new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
-            };
+            RoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
+            StartConditions startConditions = new StartConditions
+            (
+                startingGameFlags: new GameFlag[] { Model.GameFlags[maridiaTubeFlag] },
+                startingInventory: ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]),
+                startingNode: Model.GetNodeInRoom(startingRoomName, startingNodeId),
+                startingOpenLocks: new NodeLock[] { Model.Locks[startingLockName] },
+                startingTakenItemLocations: new RoomNode[] { variaNode },
+                startingResources: new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
+            );
 
             // When
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            InGameState inGameState = new InGameState(startConditions);
 
             // Expect
             Assert.Equal(startingRoomName, inGameState.CurrentRoom.Name);
@@ -93,10 +94,11 @@ namespace sm_json_data_framework.InGameStates
         {
             // Given
             ResourceCount resourceCount = new ResourceCount();
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(resource, 0);
@@ -115,10 +117,11 @@ namespace sm_json_data_framework.InGameStates
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(resource.ToConsumableResource(), amount);
@@ -134,10 +137,11 @@ namespace sm_json_data_framework.InGameStates
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amount);
@@ -157,10 +161,11 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest + 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest);
@@ -176,10 +181,11 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest + 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
@@ -195,10 +201,11 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 3);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, 5);
@@ -217,10 +224,11 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest - 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest);
@@ -236,10 +244,11 @@ namespace sm_json_data_framework.InGameStates
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest - 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceCount);
-            startConditions.StartingResources = resourceCount;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceCount)
+                .StartingResources(resourceCount)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
@@ -265,10 +274,11 @@ namespace sm_json_data_framework.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyAddResource(resource, addedAmount);
@@ -300,10 +310,11 @@ namespace sm_json_data_framework.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyAddResource(resource, addedAmount);
@@ -339,10 +350,11 @@ namespace sm_json_data_framework.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyConsumeResource(resource.ToConsumableResource(), removedAmount);
@@ -377,10 +389,11 @@ namespace sm_json_data_framework.InGameStates
                 }
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, removedAmount);
@@ -415,10 +428,11 @@ namespace sm_json_data_framework.InGameStates
                 }
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, removedAmount);
@@ -450,10 +464,11 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, reductionAmount);
@@ -479,10 +494,11 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, reductionAmount);
@@ -508,10 +524,11 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, reductionAmount);
@@ -534,10 +551,11 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAmount(resource, initialAmount);
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(resource, maxAmount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyRefillResource(resource);
@@ -561,10 +579,11 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAmount(resource, initialAmount);
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(resource, maxAmount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyRefillResource(resource.ToConsumableResource());
@@ -585,10 +604,11 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyRefillResource(ConsumableResourceEnum.Energy);
@@ -628,15 +648,19 @@ namespace sm_json_data_framework.InGameStates
             resources1.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
             resources2.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
 
-            UnfinalizedStartConditions startConditions1 = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions1.StartingInventory = startConditions1.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
-            startConditions1.StartingResources = resources1;
-            UnfinalizedInGameState inGameState1 = new UnfinalizedInGameState(startConditions1);
+            StartConditions startConditions1 = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceMaximums)
+                .StartingResources(resources1)
+                .Build();
 
-            UnfinalizedStartConditions startConditions2 = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions2.StartingInventory = startConditions2.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
-            startConditions2.StartingResources = resources2;
-            UnfinalizedInGameState inGameState2 = new UnfinalizedInGameState(startConditions2);
+            InGameState inGameState1 = new InGameState(startConditions1);
+
+            StartConditions startConditions2 = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceMaximums)
+                .StartingResources(resources2)
+                .Build();
+
+            InGameState inGameState2 = new InGameState(startConditions2);
 
             // When
             ResourceCount result = inGameState1.GetResourceVariationWith(inGameState2);
@@ -663,10 +687,12 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount resources = new ResourceCount()
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
-            startConditions.StartingResources = resources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceMaximums)
+                .StartingResources(resources)
+                .Build();
+
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             IEnumerable<RechargeableResourceEnum> result = inGameState.GetFullRechargeableResources();
@@ -692,10 +718,11 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 100);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
-            startConditions.StartingResources = resources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceMaximums)
+                .StartingResources(resources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             IEnumerable<ConsumableResourceEnum> result = inGameState.GetFullConsumableResources();
@@ -718,10 +745,11 @@ namespace sm_json_data_framework.InGameStates
             ResourceCount resources = new ResourceCount()
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(resourceMaximums);
-            startConditions.StartingResources = resources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(resourceMaximums)
+                .StartingResources(resources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             IEnumerable<ConsumableResourceEnum> result = inGameState.GetFullConsumableResources();
@@ -737,7 +765,7 @@ namespace sm_json_data_framework.InGameStates
         public void GetUnneededDrops_SamusIsFull_ReturnsAllButNoDrops()
         {
             // Given
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model));
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
 
             // When
             IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
@@ -764,10 +792,11 @@ namespace sm_json_data_framework.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
@@ -798,10 +827,11 @@ namespace sm_json_data_framework.InGameStates
                 }
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = startConditions.StartingInventory.WithBaseResourceMaximums(maxResources);
-            startConditions.StartingResources = startResources;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops(Model);
@@ -818,9 +848,9 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyAddGameFlag_AddsIt()
         {
             // Given
-            UnfinalizedGameFlag flag1 = Model.GameFlags["f_ZebesAwake"];
-            UnfinalizedGameFlag flag2 = Model.GameFlags["f_DefeatedBombTorizo"];
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model));
+            GameFlag flag1 = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flag2 = Model.GameFlags["f_DefeatedBombTorizo"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
 
             // When
             inGameState
@@ -829,8 +859,8 @@ namespace sm_json_data_framework.InGameStates
 
             // Expect
             Assert.Equal(2, inGameState.ActiveGameFlags.Count);
-            Assert.Contains(flag1, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<UnfinalizedGameFlag>.Default);
-            Assert.Contains(flag2, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<UnfinalizedGameFlag>.Default);
+            Assert.Contains(flag1, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<GameFlag>.Default);
+            Assert.Contains(flag2, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<GameFlag>.Default);
         }
         #endregion
 
@@ -839,18 +869,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetActiveGameFlagsExceptIn_ReturnsDifference()
         {
             // Given
-            UnfinalizedGameFlag flagIn1 = Model.GameFlags["f_ZebesAwake"];
-            UnfinalizedGameFlag flagIn2 = Model.GameFlags["f_DefeatedBombTorizo"];
-            UnfinalizedGameFlag flagInBoth = Model.GameFlags["f_DefeatedCeresRidley"];
-            UnfinalizedInGameState inGameState1 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            GameFlag flagIn1 = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flagIn2 = Model.GameFlags["f_DefeatedBombTorizo"];
+            GameFlag flagInBoth = Model.GameFlags["f_DefeatedCeresRidley"];
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyAddGameFlag(flagIn1)
                 .ApplyAddGameFlag(flagInBoth);
-            UnfinalizedInGameState inGameState2 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyAddGameFlag(flagIn2)
                 .ApplyAddGameFlag(flagInBoth);
 
             // When
-            Dictionary<string, UnfinalizedGameFlag> result = inGameState1.GetActiveGameFlagsExceptIn(inGameState2);
+            Dictionary<string, GameFlag> result = inGameState1.GetActiveGameFlagsExceptIn(inGameState2);
 
             // Expect
             Assert.Single(result);
@@ -863,9 +893,9 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyOpenLock_AddsIt()
         {
             // Given
-            UnfinalizedNodeLock lock1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedNodeLock lock2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model));
+            NodeLock lock1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lock2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
 
             // When
             inGameState
@@ -874,8 +904,8 @@ namespace sm_json_data_framework.InGameStates
 
             // Expect
             Assert.Equal(2, inGameState.OpenedLocks.Count);
-            Assert.Contains(lock1, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
-            Assert.Contains(lock2, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
+            Assert.Contains(lock1, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(lock2, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
             Assert.Empty(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
         }
 
@@ -883,8 +913,8 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyOpenLock_ApplyingToRoomStateWhileNotOnNode_ThrowsArgumentException()
         {
             // Given
-            UnfinalizedNodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model));
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyOpenLock(nodeLock, applyToRoomState: true));
@@ -894,19 +924,20 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyOpenLock_ApplyingToRoomStateWhileOnNode_SucceedsAndAltersNodeState()
         {
             // Given
-            UnfinalizedNodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyOpenLock(nodeLock, applyToRoomState: true);
 
             // Expect
             Assert.Single(inGameState.OpenedLocks);
-            Assert.Contains(nodeLock, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
+            Assert.Contains(nodeLock, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
             Assert.Single(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
-            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.OpenedLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
+            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.OpenedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
         #endregion
 
@@ -915,18 +946,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetOpenedNodeLocksExceptIn_ReturnsDifference()
         {
             // Given
-            UnfinalizedNodeLock lockIn1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedNodeLock lockIn2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            UnfinalizedNodeLock lockInBoth = Model.Locks["Parlor Bottom Right Red Lock (to Pre-Map)"];
-            UnfinalizedInGameState inGameState1 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            NodeLock lockIn1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lockIn2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            NodeLock lockInBoth = Model.Locks["Parlor Bottom Right Red Lock (to Pre-Map)"];
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyOpenLock(lockIn1, applyToRoomState: false)
                 .ApplyOpenLock(lockInBoth, applyToRoomState: false);
-            UnfinalizedInGameState inGameState2 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyOpenLock(lockIn2, applyToRoomState: false)
                 .ApplyOpenLock(lockInBoth, applyToRoomState: false);
 
             // When
-            Dictionary<string, UnfinalizedNodeLock> result = inGameState1.GetOpenedNodeLocksExceptIn(inGameState2);
+            Dictionary<string, NodeLock> result = inGameState1.GetOpenedNodeLocksExceptIn(inGameState2);
 
             // Expect
             Assert.Single(result);
@@ -939,25 +970,26 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyBypassLock_NotOnNode_AltersInNodeState()
         {
             // Given
-            UnfinalizedNodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyBypassLock(nodeLock);
 
             // Expect
             Assert.Single(inGameState.InRoomState.CurrentNodeState.BypassedLocks);
-            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.BypassedLocks, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
+            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.BypassedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
 
         [Fact]
         public void ApplyBypassLock_NotOnNode_ThrowsArgumentException()
         {
             // Given
-            UnfinalizedNodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model));
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyBypassLock(nodeLock));
@@ -969,40 +1001,42 @@ namespace sm_json_data_framework.InGameStates
         public void GetBypassedExitLocks_CurrentRoom_ReturnsBypassedLocks()
         {
             // Given
-            UnfinalizedNodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(nodeLock);
 
             // When
-            IEnumerable<UnfinalizedNodeLock> result = inGameState.GetBypassedExitLocks();
+            IEnumerable<NodeLock> result = inGameState.GetBypassedExitLocks();
 
             // Expect
             Assert.Single(result);
-            Assert.Contains(nodeLock, result, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
+            Assert.Contains(nodeLock, result, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
 
         [Fact]
         public void GetBypassedExitLocks_PreviousRoom_ReturnsBypassedLocksOnlyFromCorrectRoom()
         {
             // Given
-            UnfinalizedNodeLock previousRoomLock = Model.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
-            UnfinalizedNodeLock currentRoomLock = Model.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            NodeLock previousRoomLock = Model.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            NodeLock currentRoomLock = Model.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Red Brinstar Elevator Room", 1))
+                .Build();
 
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(previousRoomLock);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crateria Kihunter Room", 3));
             inGameState.ApplyBypassLock(currentRoomLock);
 
             // When
-            IEnumerable<UnfinalizedNodeLock> result = inGameState.GetBypassedExitLocks(1);
+            IEnumerable<NodeLock> result = inGameState.GetBypassedExitLocks(1);
 
             // Expect
             Assert.Single(result);
-            Assert.Contains(previousRoomLock, result, ObjectReferenceEqualityComparer<UnfinalizedNodeLock>.Default);
+            Assert.Contains(previousRoomLock, result, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
         #endregion
 
@@ -1011,9 +1045,9 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyTakeLocation_AddsIt()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Varia Suit Room", 2);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Spazer Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model));
+            RoomNode node1 = Model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Spazer Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
 
             // When
             inGameState
@@ -1022,8 +1056,8 @@ namespace sm_json_data_framework.InGameStates
 
             // Expect
             Assert.Equal(2, inGameState.TakenItemLocations.Count);
-            Assert.Contains(node1, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<UnfinalizedRoomNode>.Default);
-            Assert.Contains(node2, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<UnfinalizedRoomNode>.Default);
+            Assert.Contains(node1, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
+            Assert.Contains(node2, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
         }
         #endregion
 
@@ -1032,19 +1066,19 @@ namespace sm_json_data_framework.InGameStates
         public void GetTakenItemLocationsExceptIn_ReturnsDifference()
         {
             // Given
-            UnfinalizedRoomNode nodeIn1 = Model.GetNodeInRoom("Varia Suit Room", 2);
-            UnfinalizedRoomNode nodeIn2 = Model.GetNodeInRoom("Spazer Room", 2);
-            UnfinalizedRoomNode nodeInBoth = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
+            RoomNode nodeIn1 = Model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode nodeIn2 = Model.GetNodeInRoom("Spazer Room", 2);
+            RoomNode nodeInBoth = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
 
-            UnfinalizedInGameState inGameState1 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyTakeLocation(nodeIn1)
                 .ApplyTakeLocation(nodeInBoth);
-            UnfinalizedInGameState inGameState2 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyTakeLocation(nodeIn2)
                 .ApplyTakeLocation(nodeInBoth);
 
             // When
-            Dictionary<string, UnfinalizedRoomNode> result = inGameState1.GetTakenItemLocationsExceptIn(inGameState2);
+            Dictionary<string, RoomNode> result = inGameState1.GetTakenItemLocationsExceptIn(inGameState2);
 
             // Expect
             Assert.Single(result);
@@ -1057,11 +1091,12 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyAddItem_NonConsumableItem_AddsIt()
         {
             // Given
-            UnfinalizedItem item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState
@@ -1078,11 +1113,12 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyAddItem_ExpansionItem_AddsItAndIncreasesCount()
         {
             // Given
-            UnfinalizedItem item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItem item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState
@@ -1104,12 +1140,13 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyDisableItem_NonConsumableItem_DisablesIt()
         {
             // Given
-            UnfinalizedItem item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            UnfinalizedItem notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState
                 .ApplyAddItem(item1)
                 .ApplyAddItem(item2);
@@ -1131,12 +1168,13 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyDisableItem_ExpansionItem_DoesNothing()
         {
             // Given
-            UnfinalizedItem item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItem item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            UnfinalizedItem notPresentItem = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState
                 .ApplyAddItem(item1)
                 .ApplyAddItem(item2);
@@ -1160,10 +1198,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyEnableItem_NonConsumableItem_EnablesIt()
         {
             // Given
-            UnfinalizedItem item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyAddItem(item);
             inGameState.ApplyDisableItem(item);
 
@@ -1181,17 +1220,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetInventoryExceptIn_ReturnsDifference()
         {
             // Given
-            UnfinalizedItem nonConsumableItemIn1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem nonConsumableItemIn2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            UnfinalizedItem nonConsumableItemInBoth = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item nonConsumableItemIn1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item nonConsumableItemIn2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item nonConsumableItemInBoth = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
 
-            UnfinalizedItem expansionItemIn1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItem expansionItemIn2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            UnfinalizedItem expansionItemInBoth = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
-            UnfinalizedItem expansionItemMoreIn1 = Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
-            UnfinalizedItem expansionItemMoreIn2 = Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
+            Item expansionItemIn1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item expansionItemIn2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            Item expansionItemInBoth = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            Item expansionItemMoreIn1 = Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
+            Item expansionItemMoreIn2 = Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
 
-            UnfinalizedInGameState inGameState1 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyAddItem(nonConsumableItemIn1)
                 .ApplyAddItem(nonConsumableItemInBoth)
                 .ApplyAddItem(expansionItemIn1)
@@ -1200,7 +1239,7 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAddItem(expansionItemMoreIn1)
                 .ApplyAddItem(expansionItemMoreIn1)
                 .ApplyAddItem(expansionItemMoreIn2);
-            UnfinalizedInGameState inGameState2 = new UnfinalizedInGameState(UnfinalizedStartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
                 .ApplyAddItem(nonConsumableItemIn2)
                 .ApplyAddItem(nonConsumableItemInBoth)
                 .ApplyAddItem(expansionItemIn2)
@@ -1211,7 +1250,7 @@ namespace sm_json_data_framework.InGameStates
                 .ApplyAddItem(expansionItemMoreIn2);
 
             // When
-            UnfinalizedItemInventory result = inGameState1.GetInventoryExceptIn(inGameState2);
+            ItemInventory result = inGameState1.GetInventoryExceptIn(inGameState2);
 
             // Expect
             Assert.True(result.HasItem(nonConsumableItemIn1));
@@ -1232,9 +1271,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyDestroyObstacle_AddsItToDestroyedObstacles()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 5))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
@@ -1248,9 +1288,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyDestroyObstacle_ObstacleNotInRoom_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Parlor and Alcatraz", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
@@ -1262,10 +1303,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyEnterRoom_ChangesCurrentNode()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyEnterRoom(expectedNode);
@@ -1278,9 +1320,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyEnterRoom_ClearsPreviousRoomState()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 5))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
@@ -1296,10 +1339,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyEnterRoom_AddsCurrentRoomStateCopyToRememberedRooms()
         {
             // Given
-            UnfinalizedRoom initialRoom = Model.Rooms["Sloaters Refill"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom(initialRoom.Name, 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Room initialRoom = Model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom(initialRoom.Name, 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
@@ -1313,10 +1357,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyEnterRoom_SpawnsAtDifferentNode_GoesToCorrectNode()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Ice Beam Tutorial Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Ice Beam Tutorial Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 1));
@@ -1330,19 +1375,20 @@ namespace sm_json_data_framework.InGameStates
         {
             // Given
             string initialRoomName = "Sloaters Refill";
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom(initialRoomName, 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom(initialRoomName, 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
             inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
 
             // When
-            for (int i = 0; i < UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i < InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
@@ -1356,10 +1402,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_ChangesCurrentNode()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyExitRoom(Model);
@@ -1372,9 +1419,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_ClearsPreviousRoomState()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 5))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
@@ -1390,10 +1438,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_AddsCurrentRoomStateCopyToRememberedRooms()
         {
             // Given
-            UnfinalizedRoom initialRoom = Model.Rooms["Sloaters Refill"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom(initialRoom.Name, 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            Room initialRoom = Model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom(initialRoom.Name, 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyExitRoom(Model);
@@ -1407,10 +1456,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_SpawnsAtDifferentNode_GoesToCorrectNode()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Ice Beam Tutorial Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Ice Beam Tutorial Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyExitRoom(Model);
@@ -1424,15 +1474,16 @@ namespace sm_json_data_framework.InGameStates
         {
             // Given
             string initialRoomName = "Sloaters Refill";
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom(initialRoomName, 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom(initialRoomName, 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
 
             // When
-            for (int i = 0; i < UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i < InGameState.MaxPreviousRooms; i++)
             {
                 inGameState.ApplyExitRoom(Model);
             }
@@ -1440,13 +1491,15 @@ namespace sm_json_data_framework.InGameStates
             // Expect
             Assert.NotEqual(initialRoomName, inGameState.PreviousRoomStates.Last().CurrentRoom.Name);
         }
+
         [Fact]
         public void ApplyExitRoom_NonDoorNode_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 7);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 7))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
             Assert.Throws<InvalidOperationException>(() => inGameState.ApplyExitRoom(Model));
@@ -1456,9 +1509,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_OneWayEntranceDoorNode_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("West Sand Hall", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("West Sand Hall", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
             Assert.Throws<InvalidOperationException>(() => inGameState.ApplyExitRoom(Model));
@@ -1468,9 +1522,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_LockedDoorNode_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
             Assert.Throws<InvalidOperationException>(() => inGameState.ApplyExitRoom(Model));
@@ -1480,10 +1535,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_UnlockedDoorNode_Succeeds()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
 
             // When
@@ -1497,10 +1553,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyExitRoom_BypassedLock_Succeeds()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
 
             // When
@@ -1516,9 +1573,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Parlor and Alcatraz", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"])
@@ -1544,9 +1602,10 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyVisitNode_LinkDoesntExist_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Parlor and Alcatraz", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.LinksTo[8].Strats["Base"]));
@@ -1556,10 +1615,11 @@ namespace sm_json_data_framework.InGameStates
         public void ApplyVisitNode_StratNotOnOriginLink_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            UnfinalizedStrat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).LinksTo[1].Strats["Base"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Parlor and Alcatraz", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            Strat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).LinksTo[1].Strats["Base"];
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
@@ -1571,14 +1631,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetInRoomState_CurrentRoom_ReturnsCurrentRoomState()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(expectedNode);
 
             // When
-            ReadOnlyUnfinalizedInRoomState result = inGameState.GetInRoomState(0);
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(0);
 
             // Expect
             Assert.Same(expectedNode.Room, result.CurrentRoom);
@@ -1588,14 +1649,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetInRoomState_PreviousRoom_ReturnsPreviousRoomState()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When
-            ReadOnlyUnfinalizedInRoomState result = inGameState.GetInRoomState(1);
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(1);
 
             // Expect
             Assert.Same(expectedNode.Room, result.CurrentRoom);
@@ -1605,17 +1667,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetInRoomState_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            ReadOnlyUnfinalizedInRoomState result = inGameState.GetInRoomState(1);
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(1);
 
             // Expect
             Assert.Same(expectedNode.Room, result.CurrentRoom);
@@ -1625,9 +1688,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetInRoomState_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -1638,19 +1702,20 @@ namespace sm_json_data_framework.InGameStates
         public void GetInRoomState_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for(int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for(int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            ReadOnlyUnfinalizedInRoomState result = inGameState.GetInRoomState(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            ReadOnlyInRoomState result = inGameState.GetInRoomState(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -1662,14 +1727,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoom_CurrentRoom_ReturnsCurrentRoom()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(expectedNode);
 
             // When
-            UnfinalizedRoom result = inGameState.GetCurrentOrPreviousRoom(0);
+            Room result = inGameState.GetCurrentOrPreviousRoom(0);
 
             // Expect
             Assert.Same(expectedNode.Room, result);
@@ -1679,14 +1745,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoom_PreviousRoom_ReturnsPreviousRoom()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When
-            UnfinalizedRoom result = inGameState.GetCurrentOrPreviousRoom(1);
+            Room result = inGameState.GetCurrentOrPreviousRoom(1);
 
             // Expect
             Assert.Same(expectedNode.Room, result);
@@ -1696,17 +1763,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoom_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            UnfinalizedRoom result = inGameState.GetCurrentOrPreviousRoom(1);
+            Room result = inGameState.GetCurrentOrPreviousRoom(1);
 
             // Expect
             Assert.Same(expectedNode.Room, result);
@@ -1716,9 +1784,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoom_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -1729,19 +1798,20 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoom_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            UnfinalizedRoom result = inGameState.GetCurrentOrPreviousRoom(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            Room result = inGameState.GetCurrentOrPreviousRoom(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -1753,14 +1823,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_CurrentRoom_ReturnsCurrentRoomEnvironment()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 6))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(expectedNode);
 
             // When
-            UnfinalizedRoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(0);
+            RoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(0);
 
             // Expect
             Assert.Same(expectedNode.Room, result.Room);
@@ -1771,14 +1842,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_PreviousRoom_ReturnsPreviousRoomEnvironment()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Business Center", 6);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Business Center", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
             // When
-            UnfinalizedRoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(1);
+            RoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(1);
 
             // Expect
             Assert.Same(expectedNode.Room, result.Room);
@@ -1789,17 +1861,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            UnfinalizedRoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(1);
+            RoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(1);
 
             // Expect
             Assert.Same(expectedNode.Room, result.Room);
@@ -1809,9 +1882,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -1822,19 +1896,20 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            UnfinalizedRoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            RoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -1846,16 +1921,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetLastStrat_CurrentRoom_ReturnsCurrentRoomLastStrat()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
-            UnfinalizedStrat expectedStrat = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
+            Strat expectedStrat = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), expectedStrat);
 
             // Expect
-            UnfinalizedStrat result = inGameState.GetLastStrat(0);
+            Strat result = inGameState.GetLastStrat(0);
 
             // When
             Assert.Same(expectedStrat, result);
@@ -1865,13 +1941,14 @@ namespace sm_json_data_framework.InGameStates
         public void GetLastStrat_NoLastStrat_ReturnsNull()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When
-            UnfinalizedStrat result = inGameState.GetLastStrat(0);
+            Strat result = inGameState.GetLastStrat(0);
 
             // Expect
             Assert.Null(result);
@@ -1881,15 +1958,16 @@ namespace sm_json_data_framework.InGameStates
         public void GetLastStrat_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 8);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            UnfinalizedStrat expectedStrat = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 8))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            Strat expectedStrat = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), expectedStrat);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
             // When
-            UnfinalizedStrat result = inGameState.GetLastStrat(1);
+            Strat result = inGameState.GetLastStrat(1);
 
             // Expect
             Assert.Same(expectedStrat, result);
@@ -1899,16 +1977,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetLastStrat_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            UnfinalizedStrat expectedStrat = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Oasis", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            Strat expectedStrat = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), expectedStrat);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            UnfinalizedStrat result = inGameState.GetLastStrat(1);
+            Strat result = inGameState.GetLastStrat(1);
 
             // Expect
             Assert.Same(expectedStrat, result);
@@ -1918,9 +1997,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetLastStrat_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -1931,25 +2011,26 @@ namespace sm_json_data_framework.InGameStates
         public void GetLastStrat_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
-            UnfinalizedRoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedRoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = room1OtherNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(room1OtherNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.LinksTo[room1DoorNode.Id].Strats["Base"]);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode doorNode = i % 2 == 0 ? room2DoorNode : room1DoorNode;
-                UnfinalizedRoomNode otherNode = i % 2 == 0 ? room2OtherNode : room1OtherNode;
+                RoomNode doorNode = i % 2 == 0 ? room2DoorNode : room1DoorNode;
+                RoomNode otherNode = i % 2 == 0 ? room2OtherNode : room1OtherNode;
                 inGameState.ApplyEnterRoom(doorNode);
                 inGameState.ApplyVisitNode(otherNode, inGameState.CurrentNode.LinksTo[otherNode.Id].Strats["Base"]);
                 inGameState.ApplyVisitNode(doorNode, inGameState.CurrentNode.LinksTo[doorNode.Id].Strats["Base"]);
             }
 
             // When
-            UnfinalizedStrat result = inGameState.GetLastStrat(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            Strat result = inGameState.GetLastStrat(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -1961,9 +2042,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedNodeIds_CurrentRoom_ReturnsCurrentRoomVisitedNodeIds()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
@@ -1982,9 +2064,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedNodeIds_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 8);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 8))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), inGameState.CurrentNode.LinksTo[6].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
@@ -2001,9 +2084,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedNodeIds_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Oasis", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), inGameState.CurrentNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
@@ -2021,9 +2105,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedNodeIds_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2034,25 +2119,26 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedNodeIds_GoingBeyondRememberedRooms_ReturnsEmpty()
         {
             // Given
-            UnfinalizedRoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
-            UnfinalizedRoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedRoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = room1OtherNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(room1OtherNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.LinksTo[room1DoorNode.Id].Strats["Base"]);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode doorNode = i % 2 == 0 ? room2DoorNode : room1DoorNode;
-                UnfinalizedRoomNode otherNode = i % 2 == 0 ? room2OtherNode : room1OtherNode;
+                RoomNode doorNode = i % 2 == 0 ? room2DoorNode : room1DoorNode;
+                RoomNode otherNode = i % 2 == 0 ? room2OtherNode : room1OtherNode;
                 inGameState.ApplyEnterRoom(doorNode);
                 inGameState.ApplyVisitNode(otherNode, inGameState.CurrentNode.LinksTo[otherNode.Id].Strats["Base"]);
                 inGameState.ApplyVisitNode(doorNode, inGameState.CurrentNode.LinksTo[doorNode.Id].Strats["Base"]);
             }
 
             // When
-            IReadOnlyList<int> result = inGameState.GetVisitedNodeIds(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            IReadOnlyList<int> result = inGameState.GetVisitedNodeIds(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Empty(result);
@@ -2064,16 +2150,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedPath_CurrentRoom_ReturnsCurrentRoomVisitedPath()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            UnfinalizedRoomNode expectedNode1 = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            RoomNode expectedNode1 = Model.GetNodeInRoom("Red Tower", 3);
             inGameState.ApplyEnterRoom(expectedNode1);
-            UnfinalizedRoomNode expectedNode2 = Model.GetNodeInRoom("Red Tower", 8);
-            UnfinalizedStrat expectedStrat2 = inGameState.CurrentNode.LinksTo[8].Strats["Base"];
+            RoomNode expectedNode2 = Model.GetNodeInRoom("Red Tower", 8);
+            Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[8].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
-            UnfinalizedRoomNode expectedNode3 = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedStrat expectedStrat3 = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
+            RoomNode expectedNode3 = Model.GetNodeInRoom("Red Tower", 4);
+            Strat expectedStrat3 = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode3, expectedStrat3);
 
             // When
@@ -2093,12 +2180,13 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedPath_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            UnfinalizedRoomNode expectedNode1 = Model.GetNodeInRoom("Business Center", 8);
-            startConditions.StartingNode = expectedNode1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            UnfinalizedRoomNode expectedNode2 = Model.GetNodeInRoom("Business Center", 6);
-            UnfinalizedStrat expectedStrat2 = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
+            RoomNode expectedNode1 = Model.GetNodeInRoom("Business Center", 8);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            RoomNode expectedNode2 = Model.GetNodeInRoom("Business Center", 6);
+            Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
@@ -2117,12 +2205,13 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedPath_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            UnfinalizedRoomNode expectedNode1 = Model.GetNodeInRoom("Oasis", 4);
-            startConditions.StartingNode = expectedNode1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            UnfinalizedRoomNode expectedNode2 = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStrat expectedStrat2 = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
+            RoomNode expectedNode1 = Model.GetNodeInRoom("Oasis", 4);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            RoomNode expectedNode2 = Model.GetNodeInRoom("Oasis", 3);
+            Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
@@ -2142,9 +2231,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedPath_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2155,25 +2245,26 @@ namespace sm_json_data_framework.InGameStates
         public void GetVisitedPath_GoingBeyondRememberedRooms_ReturnsEmpty()
         {
             // Given
-            UnfinalizedRoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
-            UnfinalizedRoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedRoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = room1OtherNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(room1OtherNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(room1DoorNode, inGameState.CurrentNode.LinksTo[room1DoorNode.Id].Strats["Base"]);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode doorNode = i % 2 == 0 ? room2DoorNode : room1DoorNode;
-                UnfinalizedRoomNode otherNode = i % 2 == 0 ? room2OtherNode : room1OtherNode;
+                RoomNode doorNode = i % 2 == 0 ? room2DoorNode : room1DoorNode;
+                RoomNode otherNode = i % 2 == 0 ? room2OtherNode : room1OtherNode;
                 inGameState.ApplyEnterRoom(doorNode);
                 inGameState.ApplyVisitNode(otherNode, inGameState.CurrentNode.LinksTo[otherNode.Id].Strats["Base"]);
                 inGameState.ApplyVisitNode(doorNode, inGameState.CurrentNode.LinksTo[doorNode.Id].Strats["Base"]);
             }
 
             // When
-            var result = inGameState.GetVisitedPath(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            var result = inGameState.GetVisitedPath(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Empty(result);
@@ -2185,9 +2276,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetDestroyedObstacleIds_CurrentRoom_ReturnsCurrentRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Hellway", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Hellway", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Caterpillar Room", 2));
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
 
@@ -2203,9 +2295,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetDestroyedObstacleIds_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Caterpillar Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Caterpillar Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Hellway", 2));
 
@@ -2221,9 +2314,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetDestroyedObstacleIds_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Caterpillar Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Caterpillar Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
             //Note: This is an invalid connection, but it's not ApplyEnterRoom()'s job to validate that
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
@@ -2241,9 +2335,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetDestroyedObstacleIds_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2254,24 +2349,25 @@ namespace sm_json_data_framework.InGameStates
         public void GetDestroyedObstacleIds_GoingBeyondRememberedRooms_ReturnsEmpty()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Caterpillar Room", 2);
-            UnfinalizedRoomObstacle obstacle1 = node1.Room.Obstacles["A"];
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Beta Power Bomb Room", 1);
-            UnfinalizedRoomObstacle obstacle2 = node2.Room.Obstacles["B"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode node1 = Model.GetNodeInRoom("Caterpillar Room", 2);
+            RoomObstacle obstacle1 = node1.Room.Obstacles["A"];
+            RoomNode node2 = Model.GetNodeInRoom("Beta Power Bomb Room", 1);
+            RoomObstacle obstacle2 = node2.Room.Obstacles["B"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(obstacle1);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
-                UnfinalizedRoomObstacle obstacle = i % 2 == 0 ? obstacle2 : obstacle1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomObstacle obstacle = i % 2 == 0 ? obstacle2 : obstacle1;
                 inGameState.ApplyEnterRoom(node);
                 inGameState.ApplyDestroyObstacle(obstacle);
             }
 
             // When
-            IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Empty(result);
@@ -2283,9 +2379,10 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_CurrentRoom_ReturnsCurrentRoom()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 6))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
             // When
@@ -2299,9 +2396,10 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_ConditionalEnteringFromHeatedNode_ReturnsTrue()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Volcano Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsHeatedRoom(0);
@@ -2314,9 +2412,10 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_ConditionalEnteringFromNonHeatedNode_ReturnsTrue()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Volcano Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.IsHeatedRoom(0);
@@ -2329,9 +2428,10 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_PreviousRoom_ReturnsPreviousRoom()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 6))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
             // When
@@ -2345,9 +2445,10 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Cathedral Entrance", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             // Not a valid connection but it's not ApplyEnterRoom()'s job to know that
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
@@ -2363,9 +2464,10 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2376,19 +2478,20 @@ namespace sm_json_data_framework.InGameStates
         public void IsHeatedRoom_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Bat Cave", 2);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Speed Booster Hall", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Bat Cave", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Speed Booster Hall", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            bool result = inGameState.IsHeatedRoom(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            bool result = inGameState.IsHeatedRoom(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.False(result);
@@ -2400,14 +2503,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_CurrentRoom_ReturnsCurrentRoomData()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 6);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 6))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(expectedNode);
 
             // When
-            UnfinalizedDoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
 
             // Expect
             Assert.Same(expectedNode, result.Node);
@@ -2417,12 +2521,13 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_ConditionalFromSameEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Volcano Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
-            UnfinalizedDoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
 
             // Expect
             Assert.Equal(PhysicsEnum.Normal, result.Physics);
@@ -2432,14 +2537,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_ConditionalFromDifferentEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Volcano Room", 2), startNode.LinksTo[2].Strats["Base"]);
 
             // When
-            UnfinalizedDoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
 
             // Expect
             Assert.Equal(PhysicsEnum.Lava, result.Physics);
@@ -2449,14 +2555,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Crab Hole", 2);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Crab Hole", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Boyon Gate Hall", 3));
 
             // When
-            UnfinalizedDoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
 
             // Expect
             Assert.Same(expectedNode, result.Node);
@@ -2467,17 +2574,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            UnfinalizedDoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
 
             // Expect
             Assert.Same(expectedNode, result.Node);
@@ -2488,9 +2596,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2501,19 +2610,20 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorEnvironment_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            UnfinalizedDoorEnvironment result = inGameState.GetCurrentDoorEnvironment(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -2525,9 +2635,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_CurrentRoom_ReturnsCurrentRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Boyon Gate Hall", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Boyon Gate Hall", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crab Hole", 2));
 
             // When
@@ -2541,9 +2652,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_ConditionalFromSameEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Volcano Room", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Volcano Room", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(0);
@@ -2556,10 +2668,11 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_ConditionalFromDifferentEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Volcano Room", 2), startNode.LinksTo[2].Strats["Base"]);
 
             // When
@@ -2573,9 +2686,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Crab Hole", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Crab Hole", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Boyon Gate Hall", 3));
 
             // When
@@ -2589,10 +2703,11 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
@@ -2608,9 +2723,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2621,19 +2737,20 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentDoorPhysics_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -2645,14 +2762,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentNode_CurrentRoom_ReturnsCurrentNode()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(expectedNode);
 
             // When
-            UnfinalizedRoomNode result = inGameState.GetCurrentNode(0);
+            RoomNode result = inGameState.GetCurrentNode(0);
 
             // Expect
             Assert.Same(expectedNode, result);
@@ -2662,14 +2780,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentNode_PreviousRoom_ReturnsLastNodeOfPreviousRoom()
         {
             // Given
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = expectedNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(expectedNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When
-            UnfinalizedRoomNode result = inGameState.GetCurrentNode(1);
+            RoomNode result = inGameState.GetCurrentNode(1);
 
             // Expect
             Assert.Same(expectedNode, result);
@@ -2679,17 +2798,18 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentNode_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            UnfinalizedRoomNode result = inGameState.GetCurrentNode(1);
+            RoomNode result = inGameState.GetCurrentNode(1);
 
             // Expect
             Assert.Same(expectedNode, result);
@@ -2699,9 +2819,10 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentNode_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2712,19 +2833,20 @@ namespace sm_json_data_framework.InGameStates
         public void GetCurrentNode_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
             }
 
             // When
-            UnfinalizedRoomNode result = inGameState.GetCurrentNode(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            RoomNode result = inGameState.GetCurrentNode(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);
@@ -2736,9 +2858,10 @@ namespace sm_json_data_framework.InGameStates
         public void BypassingExitLock_CurrentRoomNotBypassing_ReturnsFalse()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.BypassingExitLock(0);
@@ -2751,10 +2874,11 @@ namespace sm_json_data_framework.InGameStates
         public void BypassingExitLock_CurrentRoomBypassing_ReturnsTrue()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
 
             // When
@@ -2768,10 +2892,11 @@ namespace sm_json_data_framework.InGameStates
         public void BypassingExitLock_PreviousRoom_ReturnsLastRoomData()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 4));
 
@@ -2786,11 +2911,12 @@ namespace sm_json_data_framework.InGameStates
         public void BypassingExitLock_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(exitNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyBypassLock(exitNode.Locks["Oasis Green Lock (to Toilet)"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
@@ -2807,9 +2933,10 @@ namespace sm_json_data_framework.InGameStates
         public void BypassingExitLock_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2820,24 +2947,25 @@ namespace sm_json_data_framework.InGameStates
         public void BypassingExitLock_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
-            UnfinalizedNodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
-            UnfinalizedNodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            NodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            RoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
+            NodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(lock1);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
-                UnfinalizedNodeLock nodeLock = i % 2 == 0 ? lock2 : lock1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
+                NodeLock nodeLock = i % 2 == 0 ? lock2 : lock1;
                 inGameState.ApplyEnterRoom(node);
                 inGameState.ApplyBypassLock(nodeLock);
             }
 
             // When
-            bool result = inGameState.BypassingExitLock(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            bool result = inGameState.BypassingExitLock(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.False(result);
@@ -2849,9 +2977,10 @@ namespace sm_json_data_framework.InGameStates
         public void OpeningExitLock_CurrentRoomNotOpening_ReturnsFalse()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Business Center", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Business Center", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
             bool result = inGameState.OpeningExitLock(0);
@@ -2864,10 +2993,11 @@ namespace sm_json_data_framework.InGameStates
         public void OpeningExitLock_CurrentRoomOpening_ReturnsTrue()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyOpenLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
 
             // When
@@ -2881,10 +3011,11 @@ namespace sm_json_data_framework.InGameStates
         public void OpeningExitLock_PreviousRoom_ReturnsLastRoomData()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyOpenLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 4));
 
@@ -2899,11 +3030,12 @@ namespace sm_json_data_framework.InGameStates
         public void OpeningExitLock_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            UnfinalizedRoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            UnfinalizedRoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = startNode;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
+            RoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(startNode)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(exitNode, startNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyOpenLock(exitNode.Locks["Oasis Green Lock (to Toilet)"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
@@ -2920,9 +3052,10 @@ namespace sm_json_data_framework.InGameStates
         public void OpeningExitLock_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Sloaters Refill", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
@@ -2933,24 +3066,25 @@ namespace sm_json_data_framework.InGameStates
         public void OpeningExitLock_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             // Given
-            UnfinalizedRoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
-            UnfinalizedNodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
-            UnfinalizedRoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
-            UnfinalizedNodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = node1;
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            RoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            NodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            RoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
+            NodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(node1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyOpenLock(lock1);
-            for (int i = 0; i <= UnfinalizedInGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
-                UnfinalizedRoomNode node = i % 2 == 0 ? node2 : node1;
-                UnfinalizedNodeLock nodeLock = i % 2 == 0 ? lock2 : lock1;
+                RoomNode node = i % 2 == 0 ? node2 : node1;
+                NodeLock nodeLock = i % 2 == 0 ? lock2 : lock1;
                 inGameState.ApplyEnterRoom(node);
                 inGameState.ApplyOpenLock(nodeLock);
             }
 
             // When
-            bool result = inGameState.OpeningExitLock(UnfinalizedInGameState.MaxPreviousRooms + 1);
+            bool result = inGameState.OpeningExitLock(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.False(result);
@@ -2962,12 +3096,13 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveRunways_NoPreviousRoom_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 5))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { 5 }, acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { 5 }, acceptablePhysics: null);
 
             // Expect
             Assert.Empty(result);
@@ -2977,31 +3112,33 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveRunways_ReturnsRunways()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            IEnumerable<UnfinalizedRunway> expected = inGameState.CurrentNode.Runways.Values;
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Seaweed Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
 
             // Expect
             Assert.Equal(expected.Count(), result.Count());
-            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<UnfinalizedRunway>.Default).Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<Runway>.Default).Count());
         }
 
         [Fact]
         public void GetRetroactiveRunways_PreviousRoomNodeUnconnected_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Seaweed Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 2));
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
 
             // Expect
             Assert.Empty(result);
@@ -3011,14 +3148,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveRunways_VisitedPathMismatch_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Seaweed Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.GetVisitedNodeIds()[0]}, acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.GetVisitedNodeIds()[0]}, acceptablePhysics: null);
 
             // Expect
             Assert.Empty(result);
@@ -3028,50 +3166,53 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveRunways_MultiNodePathMatch_ReturnsRunways()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            IEnumerable<UnfinalizedRunway> expected = inGameState.CurrentNode.Runways.Values;
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Seaweed Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(inGameState.GetVisitedNodeIds(), acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(inGameState.GetVisitedNodeIds(), acceptablePhysics: null);
 
             // Expect
             Assert.Equal(expected.Count(), result.Count());
-            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<UnfinalizedRunway>.Default).Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<Runway>.Default).Count());
         }
 
         [Fact]
         public void GetRetroactiveRunways_PhysicsMatch_ReturnsRunways()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            IEnumerable<UnfinalizedRunway> expected = inGameState.CurrentNode.Runways.Values;
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Seaweed Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Normal });
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Normal });
 
             // Expect
             Assert.Equal(expected.Count(), result.Count());
-            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<UnfinalizedRunway>.Default).Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<Runway>.Default).Count());
         }
 
         [Fact]
         public void GetRetroactiveRunways_PhysicsMismatch_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Seaweed Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Seaweed Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Water });
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Water });
 
             // Expect
             Assert.Empty(result);
@@ -3081,14 +3222,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveRunways_BypassingLock_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 4);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 4))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crateria Tube", 1));
 
             // When
-            IEnumerable<UnfinalizedRunway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
 
             // Expect
             Assert.Empty(result);
@@ -3100,12 +3242,13 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_NoPreviousRoom_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 5);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 5))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { 5 });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { 5 });
 
             // Expect
             Assert.Empty(result);
@@ -3115,31 +3258,33 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_ReturnsCanLeaveChargeds()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            IEnumerable<UnfinalizedCanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Green Hill Zone", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Equal(expected.Count(), result.Count());
-            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<UnfinalizedCanLeaveCharged>.Default).Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<CanLeaveCharged>.Default).Count());
         }
 
         [Fact]
         public void GetRetroactiveCanLeaveChargeds_PreviousRoomNodeUnconnected_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Green Hill Zone", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2));
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result);
@@ -3149,14 +3294,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_VisitedPathMismatch_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Green Hill Zone", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.GetVisitedNodeIds()[0] });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.GetVisitedNodeIds()[0] });
 
             // Expect
             Assert.Empty(result);
@@ -3166,33 +3312,35 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_MultiNodePathMatch_ReturnsCanLeaveChargeds()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Green Hill Zone", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
-            IEnumerable<UnfinalizedCanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Green Hill Zone", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, inGameState.GetVisitedNodeIds());
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, inGameState.GetVisitedNodeIds());
 
             // Expect
             Assert.Equal(expected.Count(), result.Count());
-            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<UnfinalizedCanLeaveCharged>.Default).Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<CanLeaveCharged>.Default).Count());
         }
 
         [Fact]
         public void GetRetroactiveCanLeaveChargeds_BypassingLock_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Crab Shaft", 2);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Crab Shaft", 2))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Crab Shaft Green Lock (to Aqueduct)"]);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Aqueduct", 1));
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result);
@@ -3202,34 +3350,36 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoor_ReturnsCanLeaveCharged()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Early Supers Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Speed Through"]);
-            IEnumerable<UnfinalizedCanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
+            IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Equal(expected.Count(), result.Count());
-            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<UnfinalizedCanLeaveCharged>.Default).Count());
+            Assert.Equal(expected.Count(), result.Intersect(expected, ObjectReferenceEqualityComparer<CanLeaveCharged>.Default).Count());
         }
 
         [Fact]
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoor_BypassingLock_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Early Supers Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Speed Through"]);
             inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Early Supers Red Lock (to Brinstar Reserve)"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result);
@@ -3239,16 +3389,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_NotFollowingPathToDoor_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Early Supers Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Speed Through"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 4), inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result);
@@ -3258,14 +3409,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoorWithWrongStrat_ReturnsEmpty()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Early Supers Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Early Supers Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Early Supers Mockball"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result);
@@ -3275,14 +3427,15 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorButNotVisited_ExcludesCanLeaveCharged()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 3);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 3))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 1), inGameState.CurrentNode.LinksTo[1].Strats["Shinespark"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
@@ -3292,16 +3445,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorAndWasVisited_IncludesCanLeaveCharged()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Landing Site", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Landing Site", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 4), inGameState.CurrentNode.LinksTo[4].Strats["Shinespark"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 3), inGameState.CurrentNode.LinksTo[3].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 1), inGameState.CurrentNode.LinksTo[1].Strats["Shinespark"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Single(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
@@ -3311,15 +3465,16 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenLockedDoorAndWasVisitedButNotUnlocked_ExcludesCanLeaveCharged()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.LinksTo[1].Strats["In-Room Shinespark"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
@@ -3329,16 +3484,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenLockedDoorAndWasVisitedButNotUnlockedUntilLeaving_ExcludesCanLeaveCharged()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.LinksTo[1].Strats["In-Room Shinespark"]);
             inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Red Firefleas Red Lock (to X-Ray)"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Empty(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
@@ -3348,16 +3504,17 @@ namespace sm_json_data_framework.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorLockedAndWasUnlocked_IncludesCanLeaveCharged()
         {
             // Given
-            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(Model);
-            startConditions.StartingNode = Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1);
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Red Firefleas Red Lock (to X-Ray)"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.LinksTo[1].Strats["In-Room Shinespark"]);
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
-            IEnumerable<UnfinalizedCanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
+            IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(Model, new int[] { inGameState.CurrentNode.Id });
 
             // Expect
             Assert.Single(result.Where(clc => clc.InitiateRemotely.MustOpenDoorFirst));
@@ -3374,19 +3531,18 @@ namespace sm_json_data_framework.InGameStates
             string startingLockName = "Business Center Top Left Green Lock (to Ice Beam Gate)";
             int startingEnergy = 50;
             string maridiaTubeFlag = "f_MaridiaTubeBroken";
-            UnfinalizedRoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
-            UnfinalizedStartConditions startConditions = new UnfinalizedStartConditions
-            {
-                StartingGameFlags = new UnfinalizedGameFlag[] { Model.GameFlags[maridiaTubeFlag] },
-                StartingInventory = UnfinalizedItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]),
-                StartingNode = Model.GetNodeInRoom(startingRoomName, startingNodeId),
-                StartingOpenLocks = new UnfinalizedNodeLock[] { Model.Locks[startingLockName] },
-                StartingTakenItemLocations = new UnfinalizedRoomNode[] { variaNode },
-                StartingResources = new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
-            };
+            RoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
+            StartConditions startConditions = new StartConditionsBuilder()
+                .StartingGameFlags(new GameFlag[] { Model.GameFlags[maridiaTubeFlag] })
+                .StartingInventory(ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]))
+                .StartingNode(Model.GetNodeInRoom(startingRoomName, startingNodeId))
+                .StartingOpenLocks(new NodeLock[] { Model.Locks[startingLockName] })
+                .StartingTakenItemLocations(new RoomNode[] { variaNode })
+                .StartingResources(new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy))
+                .Build();
 
             // When
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions).Clone();
+            InGameState inGameState = new InGameState(startConditions).Clone();
 
             // Expect
             Assert.Equal(startingRoomName, inGameState.CurrentRoom.Name);
@@ -3410,20 +3566,19 @@ namespace sm_json_data_framework.InGameStates
             string secondLockName = "Business Center Bottom Left Red Lock (to HiJump E-Tank)";
             int startingEnergy = 50;
             string maridiaTubeFlag = "f_MaridiaTubeBroken";
-            UnfinalizedRoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
-            UnfinalizedStartConditions startConditions = new UnfinalizedStartConditions
-            {
-                StartingInventory = UnfinalizedItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items["Missile"]),
-                StartingNode = Model.GetNodeInRoom(startingRoomName, startingNodeId),
-                StartingOpenLocks = new UnfinalizedNodeLock[] { Model.Locks[startingLockName] },
-                StartingResources = new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
-                    .ApplyAmount(RechargeableResourceEnum.Missile, 5)
-            };
+            RoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
+            StartConditions startConditions = new StartConditionsBuilder()
+                .StartingInventory(ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items["Missile"]))
+                .StartingNode(Model.GetNodeInRoom(startingRoomName, startingNodeId))
+                .StartingOpenLocks(new NodeLock[] { Model.Locks[startingLockName] })
+                .StartingResources(new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
+                    .ApplyAmount(RechargeableResourceEnum.Missile, 5))
+                .Build();
 
-            UnfinalizedInGameState inGameState = new UnfinalizedInGameState(startConditions);
+            InGameState inGameState = new InGameState(startConditions);
 
             // When
-            UnfinalizedInGameState clone = inGameState.Clone();
+            InGameState clone = inGameState.Clone();
 
             // Subsequently given
             // Modify the clone

@@ -78,32 +78,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
             return false;
         }
-
-        /// <summary>
-        /// Returns whether the provided InGameState fulfills this PreviousNode element.
-        /// </summary>
-        /// <param name="inGameState">The in-game state to evaluate</param>
-        /// <param name="previousRoomCount">The number of playable rooms to go back by. 
-        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
-        /// <returns></returns>
-        public bool IsFulfilled(ReadOnlyUnfinalizedInGameState inGameState, int previousRoomCount = 0)
-        {
-            // Look at second-to-last visited node (last node is the current node)
-            IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
-            return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count -2) == Value;
-        }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            if (IsFulfilled(inGameState, previousRoomCount))
-            {
-                // Clone the InGameState to fulfill method contract
-                return new UnfinalizedExecutionResult(inGameState.Clone());
-            }
-            else
-            {
-                return null;
-            }
-        }
     }
 }

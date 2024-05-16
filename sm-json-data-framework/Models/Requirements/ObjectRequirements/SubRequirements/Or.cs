@@ -61,10 +61,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             // This is only never if all inner logical elements are never, since fulfilling this requires only one of the inner logical elements
             return LogicalRequirements.LogicalElements.All(element => element.IsNever());
         }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            return LogicalRequirements.ExecuteOne(model, inGameState, times: times, previousRoomCount: previousRoomCount);
-        }
     }
 }

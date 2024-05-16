@@ -18,6 +18,42 @@ namespace sm_json_data_framework.Rules
     /// </summary>
     public class StartConditions
     {
+        /// <summary>
+        /// Creates and returns a StartConditionsBuilder primed to build a StartConditions representing the vanilla starting conditions.
+        /// Calling is free to alter this before building.
+        /// </summary>
+        /// <param name="model">Model from which any needed Item/GameFlag/etc. instances will be obtained.</param>
+        /// <returns>The StartConditionsBuilder</returns>
+        public static StartConditionsBuilder CreateVanillaStartConditionsBuilder(SuperMetroidModel model)
+        {
+            ItemInventory startingInventory = ItemInventory.CreateVanillaStartingInventory(model);
+            // Start with no open locks, taken items, or active game flags, so we can leave those as their empty defaults
+            StartConditionsBuilder vanillaStartConditions = new StartConditionsBuilder()
+                .StartingInventory(startingInventory)
+                .StartingResources(startingInventory.BaseResourceMaximums.Clone())
+                .StartingNode(model.GetNodeInRoom("Ceres Elevator Room", 1));
+
+            return vanillaStartConditions;
+        }
+
+        /// <summary>
+        /// Creates and returns StartConditions representing the vanilla starting conditions.
+        /// </summary>
+        /// <param name="model">Model from which any needed Item/GameFlag/etc. instances will be obtained.</param>
+        /// <returns>The StartConditions</returns>
+        public static StartConditions CreateVanillaStartConditions(SuperMetroidModel model)
+        {
+            ItemInventory startingInventory = ItemInventory.CreateVanillaStartingInventory(model);
+            // Start with no open locks, taken items, or active game flags, so we can leave those as their empty defaults
+            StartConditions vanillaStartConditions = new StartConditions(
+                startingInventory: startingInventory,
+                startingResources: startingInventory.BaseResourceMaximums.Clone(),
+                startingNode: model.GetNodeInRoom("Ceres Elevator Room", 1)
+                );
+
+            return vanillaStartConditions;
+        }
+
         public RoomNode StartingNode { get; }
 
         public ReadOnlyItemInventory StartingInventory { get; }
@@ -40,6 +76,95 @@ namespace sm_json_data_framework.Rules
             StartingGameFlags = sourceElement.StartingGameFlags.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
             StartingOpenLocks = sourceElement.StartingOpenLocks.Select(nodeLock => nodeLock.Finalize(mappings)).ToList().AsReadOnly();
             StartingTakenItemLocations = sourceElement.StartingTakenItemLocations.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+        }
+
+        public StartConditions(RoomNode startingNode, ReadOnlyItemInventory startingInventory, ReadOnlyResourceCount startingResources,
+            ICollection<GameFlag> startingGameFlags = null, ICollection<NodeLock> startingOpenLocks = null, ICollection<RoomNode> startingTakenItemLocations = null)
+        {
+            StartingNode = startingNode;
+            StartingInventory = startingInventory;
+            StartingResources = startingResources;
+            StartingGameFlags = startingGameFlags?.ToList().AsReadOnly() ?? new List<GameFlag>().AsReadOnly();
+            StartingOpenLocks = startingOpenLocks?.ToList().AsReadOnly() ?? new List<NodeLock>().AsReadOnly();
+            StartingTakenItemLocations = startingTakenItemLocations?.ToList().AsReadOnly() ?? new List<RoomNode>().AsReadOnly();
+        }
+    }
+
+    public class StartConditionsBuilder
+    {
+        private RoomNode _startingNode;
+
+        private ItemInventory _startingInventory;
+
+        private ResourceCount _startingResources;
+
+        private IList<GameFlag> _startingGameFlags = new List<GameFlag>();
+
+        private IList<NodeLock> _startingOpenLocks = new List<NodeLock>();
+
+        private IList<RoomNode> _startingTakenItemLocations = new List<RoomNode>();
+
+        public StartConditionsBuilder StartingNode(RoomNode startingNode)
+        {
+            _startingNode = startingNode;
+            return this;
+        }
+
+        public StartConditionsBuilder StartingInventory(ItemInventory startingInventory)
+        {
+            _startingInventory = startingInventory;
+            return this;
+        }
+
+        public StartConditionsBuilder StartingResources(ResourceCount startingResources)
+        {
+            _startingResources = startingResources;
+            return this;
+        }
+
+        public StartConditionsBuilder StartingGameFlags(ICollection<GameFlag> startingGameFlags)
+        {
+            _startingGameFlags = new List<GameFlag>(startingGameFlags);
+            return this;
+        }
+
+        public StartConditionsBuilder StartingOpenLocks(ICollection<NodeLock> startingOpenLocks)
+        {
+            _startingOpenLocks = new List<NodeLock>(startingOpenLocks);
+            return this;
+        }
+
+        public StartConditionsBuilder StartingTakenItemLocations(ICollection<RoomNode> startingTakenItemLocation)
+        {
+            _startingTakenItemLocations = new List<RoomNode>(startingTakenItemLocation);
+            return this;
+        }
+
+        /// <summary>
+        /// Assigns base resource maximums. Because this data is in the inventory, this will do nothing if there is not
+        /// inventory in this builder
+        /// </summary>
+        /// <param name="baseResourceMaximums"></param>
+        /// <returns></returns>
+        public StartConditionsBuilder BaseResourceMaximums(ResourceCount baseResourceMaximums)
+        {
+            if(_startingInventory != null)
+            {
+                _startingInventory = _startingInventory.WithBaseResourceMaximums(baseResourceMaximums);
+            }
+            return this;
+        }
+
+        public StartConditions Build()
+        {
+            return new StartConditions(
+                startingNode: _startingNode,
+                startingInventory: _startingInventory.AsReadOnly(),
+                startingResources: _startingResources.AsReadOnly(),
+                startingGameFlags: _startingGameFlags.AsReadOnly(),
+                startingOpenLocks: _startingOpenLocks.AsReadOnly(),
+                startingTakenItemLocations: _startingTakenItemLocations.AsReadOnly()
+            );
         }
     }
 

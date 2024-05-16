@@ -129,23 +129,5 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             return Enumerable.Empty<string>();
         }
-
-        protected override UnfinalizedExecutionResult ExecuteUseful(UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState inGameState, int times = 1, int previousRoomCount = 0)
-        {
-            int damage = model.Rules.CalculateEnemyDamage(inGameState, Attack) * Hits * times;
-
-            if (inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, damage))
-            {
-                UnfinalizedInGameState resultingState = inGameState.Clone();
-                resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
-                UnfinalizedExecutionResult result = new UnfinalizedExecutionResult(resultingState);
-                result.AddDamageReducingItemsInvolved(model.Rules.GetEnemyDamageReducingItems(model, inGameState, Attack));
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-        }
     }
 }
