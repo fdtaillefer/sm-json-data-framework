@@ -20,32 +20,6 @@ namespace sm_json_data_framework.Models.Navigation
     /// </summary>
     public class GameNavigator
     {
-        // Ok so how do I want this to work? We'll have operations that will have results.
-        // What are things you can do:
-        // - Follow a link
-        // - Interact with current node
-        //   - Remember that interacting with a door means you change rooms
-        // - Needs some kind of support for a remote exit.
-        // - In the case of door locks, you could absolutely attempt to open the lock without interacting with it
-        // - Farm enemies
-        //   - Optionally you could provide a door to use to reset the room and keep farming (mandatory if the enemies don't respawn)
-        //   - Optionally you could indicate specific enemies you want to farm
-        //   - Optionally you could indicate a weapon to use (only worth doing if no effective free weapon available)
-        // Anything else?
-        // - There could be some more complex operations like "go to THIS node", but then that can lead to evaluating a lot of things to find the cheapest option.
-        //   Still, I'm sure it could be worth.
-        // 
-        // Failure to do an action would leave the state unchanged and return something to indicate failure.
-        //
-        // Some kind of system to customize/override the items at in-game locations could be good, to navigate an actual randomized seed and grab items.
-        // Though this one might be out of scope for GameNavigator. It should probably happen upstream.
-
-
-
-
-
-
-
         /// <summary>
         /// Constructor that initializes a GameNavigator with the provided initial state.
         /// </summary>
@@ -53,7 +27,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="initialState">The starting inGameState for this navigator. A clone of this will be used.</param>
         /// <param name="maxPreviousStatesSize">The maximum number of previous states that this navigator should keep in memory.</param>
         /// <param name="options">Optional game navigation options. If left null, default options will be used.</param>
-        public GameNavigator(UnfinalizedSuperMetroidModel model, UnfinalizedInGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
+        public GameNavigator(SuperMetroidModel model, InGameState initialState, int maxPreviousStatesSize, GameNavigatorOptions options = null)
         {
             GameModel = model;
             InternalInGameState = initialState.Clone();
@@ -70,14 +44,14 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// The InGameState describing the current in-game situation of this GameNavigator.
         /// </summary>
-        protected UnfinalizedInGameState InternalInGameState {get; set;}
+        protected InGameState InternalInGameState {get; set;}
 
-        public ReadOnlyUnfinalizedInGameState CurrentInGameState { get { return InternalInGameState.AsReadOnly(); } }
+        public ReadOnlyInGameState CurrentInGameState { get { return InternalInGameState.AsReadOnly(); } }
 
         /// <summary>
         /// A model that can be used to obtain data about the current game configuration.
         /// </summary>
-        public UnfinalizedSuperMetroidModel GameModel { get; private set; }
+        public SuperMetroidModel GameModel { get; private set; }
 
         private int MaxPreviousStatesSize { get; set; }
 
@@ -85,12 +59,12 @@ namespace sm_json_data_framework.Models.Navigation
         /// Contains previous in-game states, paired with the action that was performed on them to obtain the next state.
         /// More recent actions are at the front of the Deque.
         /// </summary>
-        private Deque<(AbstractNavigationAction action, UnfinalizedInGameState initialState)> PreviousStates { get; } = new Deque<(AbstractNavigationAction action, UnfinalizedInGameState inGameState)>();
+        private Deque<(AbstractNavigationAction action, InGameState initialState)> PreviousStates { get; } = new Deque<(AbstractNavigationAction action, InGameState inGameState)>();
 
         /// <summary>
         /// Contains actions that have been undone, paired with the in-game state that resulted from the action.
         /// </summary>
-        private Stack<(AbstractNavigationAction action, UnfinalizedInGameState resultingState)> UndoneActions { get; } = new Stack<(AbstractNavigationAction action, UnfinalizedInGameState inGameState)>();
+        private Stack<(AbstractNavigationAction action, InGameState resultingState)> UndoneActions { get; } = new Stack<(AbstractNavigationAction action, InGameState inGameState)>();
 
         #region Action methods
 
@@ -100,7 +74,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         /// <param name="action">The action that was performed</param>
         /// <param name="resultingState">The InGameState that resulted from performing the action</param>
-        private void DoAction(AbstractNavigationAction action, UnfinalizedInGameState resultingState)
+        private void DoAction(AbstractNavigationAction action, InGameState resultingState)
         {
             // Can't move forward on a failure
             if(!action.Succeeded)
@@ -180,14 +154,14 @@ namespace sm_json_data_framework.Models.Navigation
             string intent = $"Move from node {CurrentInGameState.CurrentNode.Id} to node {nodeId}{intentFiltersSuffix} in room '{CurrentInGameState.CurrentRoom.Name}'";
 
             // Does that node exist?
-            if (!InternalInGameState.CurrentRoom.Nodes.TryGetValue(nodeId, out UnfinalizedRoomNode destinationNode))
+            if (!InternalInGameState.CurrentRoom.Nodes.TryGetValue(nodeId, out RoomNode destinationNode))
             {
                 intent = intent + $", but that node doesn't exist in {InternalInGameState.CurrentRoom.Name}";
                 return new Failure(intent);
             }
 
             // Find a link from current node to that node
-            UnfinalizedLinkTo linkTo = InternalInGameState.InRoomState.GetLinkToNode(nodeId);
+            LinkTo linkTo = InternalInGameState.InRoomState.GetLinkToNode(nodeId);
             if (linkTo == null)
             {
                 intent = intent + $", but no links found in {InternalInGameState.CurrentRoom.Name} from node {InternalInGameState.GetCurrentNode().Id} to {nodeId}";
@@ -195,7 +169,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // We found a link, try to follow it
-            IEnumerable<KeyValuePair<string, UnfinalizedStrat>> potentialStrats = linkTo.Strats;
+            IEnumerable<KeyValuePair<string, Strat>> potentialStrats = linkTo.Strats;
             if (stratFilters != null && stratFilters.Any())
             {
                 foreach (StratFilter filter in stratFilters)
@@ -229,7 +203,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The resulting action. If interaction fails, returns a failure action.</returns>
         public AbstractNavigationAction InteractWithNode()
         {
-            UnfinalizedRoomNode node = InternalInGameState.GetCurrentNode();
+            RoomNode node = InternalInGameState.GetCurrentNode();
 
             string intent = node.NodeType switch
             {
@@ -281,7 +255,7 @@ namespace sm_json_data_framework.Models.Navigation
 
 
             // If an item was picked up, we may want to adjust resources according to normal game behavior
-            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is UnfinalizedExpansionItem expansionItem && !InternalInGameState.TakenItemLocations.ContainsNode(node))
+            if(Options.AddResourcesOnExpansionPickup && node.NodeItem != null && node.NodeItem is ExpansionItem expansionItem && !InternalInGameState.TakenItemLocations.ContainsNode(node))
             {
                 switch (GameModel.Rules.GetExpansionPickupRestoreBehavior(expansionItem.Resource))
                 {
@@ -312,7 +286,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The resulting action. If unlocking fails, returns a failure action.</returns>
         public AbstractNavigationAction UnlockNode()
         {
-            UnfinalizedRoomNode node = InternalInGameState.GetCurrentNode();
+            RoomNode node = InternalInGameState.GetCurrentNode();
 
             string intent = $"Unlock node {node.Name}";
 
@@ -351,18 +325,18 @@ namespace sm_json_data_framework.Models.Navigation
         /// <param name="attemptOpen">Whether to attempt to open locks</param>
         /// <param name="attemptBypass">Whether to attempt to bypass locks</param>
         /// <returns></returns>
-        private (List<UnfinalizedNodeLock> failedLocks, List<UnfinalizedNodeLock> openedLocks, List<UnfinalizedNodeLock> bypassedLocks, UnfinalizedExecutionResult result)
-            DealWithLocks(UnfinalizedRoomNode node, bool attemptOpen, bool attemptBypass)
+        private (List<NodeLock> failedLocks, List<NodeLock> openedLocks, List<NodeLock> bypassedLocks, ExecutionResult result)
+            DealWithLocks(RoomNode node, bool attemptOpen, bool attemptBypass)
         {
-            UnfinalizedExecutionResult result = null;
+            ExecutionResult result = null;
 
-            List<UnfinalizedNodeLock> failedLocks = new List<UnfinalizedNodeLock>();
-            List<UnfinalizedNodeLock> openedLocks = new List<UnfinalizedNodeLock>();
-            List<UnfinalizedNodeLock> bypassedLocks = new List<UnfinalizedNodeLock>();
-            IEnumerable<UnfinalizedNodeLock> activeLocks = node.Locks.Values.Where(l => l.IsActive(GameModel, CurrentInGameState));
-            foreach (UnfinalizedNodeLock currentLock in activeLocks)
+            List<NodeLock> failedLocks = new List<NodeLock>();
+            List<NodeLock> openedLocks = new List<NodeLock>();
+            List<NodeLock> bypassedLocks = new List<NodeLock>();
+            IEnumerable<NodeLock> activeLocks = node.Locks.Values.Where(l => l.IsActive(GameModel, CurrentInGameState));
+            foreach (NodeLock currentLock in activeLocks)
             {
-                UnfinalizedExecutionResult currentResult = null;
+                ExecutionResult currentResult = null;
 
                 // Try to open lock
                 if(attemptOpen)
@@ -424,7 +398,7 @@ namespace sm_json_data_framework.Models.Navigation
             string intent = $"Farm enemy spawner of enemy {roomEnemyId}";
 
             // Does that enemy exist?
-            if (!InternalInGameState.CurrentRoom.Enemies.TryGetValue(roomEnemyId, out UnfinalizedRoomEnemy enemyToFarm))
+            if (!InternalInGameState.CurrentRoom.Enemies.TryGetValue(roomEnemyId, out RoomEnemy enemyToFarm))
             {
                 intent = intent + $", but that enemy doesn't exist in {InternalInGameState.CurrentRoom.Name}";
                 return new Failure(intent);
@@ -438,11 +412,11 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Is that enemy reachable?
-            if (!enemyToFarm.HomeNodeIds.Contains(InternalInGameState.CurrentNode.Id))
+            if (!enemyToFarm.HomeNodes.ContainsKey(InternalInGameState.CurrentNode.Id))
             {
-                string enemyResides = enemyToFarm.HomeNodeIds.Any()?
-                    $"at node{(enemyToFarm.HomeNodeIds.Count() > 1? "s": "")} {string.Join(", ", enemyToFarm.HomeNodeIds.Select(i => i.ToString()))}":
-                    $"between two nodes ({enemyToFarm.BetweenNodeIds.First()} and {enemyToFarm.BetweenNodeIds.ElementAt(1)})";
+                string enemyResides = enemyToFarm.HomeNodes.Any()?
+                    $"at node{(enemyToFarm.HomeNodes.Count() > 1? "s": "")} {string.Join(", ", enemyToFarm.HomeNodes.Keys.Select(i => i.ToString()))}":
+                    $"between two nodes ({enemyToFarm.HomeNodes.Keys.First()} and {enemyToFarm.HomeNodes.Keys.Last()})";
                 intent = intent + $", but that enemy is found {enemyResides} which isn't accessible while standing at node {InternalInGameState.GetCurrentNode().Id}";
                 return new Failure(intent);
             }
@@ -455,7 +429,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Try to farm
-            UnfinalizedExecutionResult result = enemyToFarm.SpawnerFarmExecution.Execute(GameModel, CurrentInGameState);
+            ExecutionResult result = enemyToFarm.SpawnerFarmExecution.Execute(GameModel, CurrentInGameState);
             // If execution fails
             if(result == null)
             {
@@ -492,11 +466,11 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Item is present and enabled, create new in-game state with item disabled
-            UnfinalizedInGameState newState = InternalInGameState.Clone();
+            InGameState newState = InternalInGameState.Clone();
             newState.ApplyDisableItem(itemName);
 
             // Create an action to return
-            DisableItemAction action = new DisableItemAction(intent, GameModel, CurrentInGameState, new UnfinalizedExecutionResult(newState));
+            DisableItemAction action = new DisableItemAction(intent, GameModel, CurrentInGameState, new ExecutionResult(newState));
 
             // Register the action as done and return it
             DoAction(action, newState);
@@ -524,11 +498,11 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Item is present and enabled, create new in-game state with item enabled
-            UnfinalizedInGameState newState = InternalInGameState.Clone();
+            InGameState newState = InternalInGameState.Clone();
             newState.ApplyEnableItem(itemName);
 
             // Create an action to return
-            EnableItemAction action = new EnableItemAction(intent, GameModel, CurrentInGameState, new UnfinalizedExecutionResult(newState));
+            EnableItemAction action = new EnableItemAction(intent, GameModel, CurrentInGameState, new ExecutionResult(newState));
 
             // Register the action as done and return it
             DoAction(action, newState);

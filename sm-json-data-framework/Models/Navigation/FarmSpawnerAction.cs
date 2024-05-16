@@ -16,13 +16,13 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public FarmSpawnerAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState initialInGameState, UnfinalizedExecutionResult executionResult) :
+        public FarmSpawnerAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
             
         }
 
-        public override AbstractNavigationAction Reverse(UnfinalizedSuperMetroidModel model)
+        public override AbstractNavigationAction Reverse(SuperMetroidModel model)
         {
             FarmSpawnerAction reverseAction = new FarmSpawnerAction($"Undo action '{this.IntentDescription}'");
             TransferDataToReverseAbstractAction(reverseAction);

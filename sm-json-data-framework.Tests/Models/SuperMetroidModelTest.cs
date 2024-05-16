@@ -30,11 +30,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_AssignsAllData()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect
             // Room counts
@@ -118,11 +115,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedRoom()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a room, to have the same instance as the one in the main model
             Room arbitraryRoom = model.Rooms["Climb"];
@@ -142,11 +136,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedNode()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a node, to have the same instance as the one in the Room model
             // Nodes in models
@@ -246,11 +237,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedStrat()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a strat, to have the same instance as the one in the Room model
             Strat arbitraryStrat = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"];
@@ -286,11 +274,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedWeapon()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a weapon, to have the same instance as the one in the main model
             Weapon arbitraryWeapon = model.Weapons["Missile"];
@@ -319,11 +304,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedWeaponMultiplier()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a weaponMultiplier, to have the same instance as the one in the enemy
             WeaponMultiplier arbitraryWeaponMultiplier = model.Enemies["Alcoon"].WeaponMultipliers["Missile"];
@@ -334,11 +316,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedTech()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a tech, to have the same instance as the one in the main model
             Tech arbitraryTech = model.Techs["canDelayedWalljump"];
@@ -353,11 +332,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedHelper()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a helper, to have the same instance as the one in the main model
             Helper arbitraryHelper = model.Helpers["h_canDestroyBombWalls"];
@@ -370,11 +346,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedItem()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference an item, to have the same instance as the one in the main model
             Item arbitraryItem = model.Items["Morph"];
@@ -390,11 +363,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedGameFlag()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a game flag, to have the same instance as the one in the main model
             GameFlag arbitraryGameFlag = model.GameFlags["f_ZebesAwake"];
@@ -414,11 +384,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedRoomEnemy()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a room enemy, to have the same instance as the one in the room
             RoomEnemy arbitraryRoomEnemy = model.Rooms["West Ocean"].Enemies["e1"];
@@ -431,11 +398,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedRoomObstacle()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a room obstacle, to have the same instance as the one in the room
             RoomObstacle arbitraryObstacle = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Obstacles["A"];
@@ -455,11 +419,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedConnection()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a connection, to have the same instance as the one in the main model
             Connection arbitraryConnection = model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString];
@@ -470,11 +431,8 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedLinkTo()
         {
-            // Given
-            UnfinalizedSuperMetroidModel unfinalizedModel = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
-
-            // When
-            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel);
+            // Given  When
+            SuperMetroidModel model = StaticTestObjects.UnmodifiableModel;
 
             // Expect all properties that reference a LinkTo, to have the same instance as the one in the parent Link
             LinkTo arbitraryLinkTo = model.Rooms["Landing Site"].Links[3].To[1];

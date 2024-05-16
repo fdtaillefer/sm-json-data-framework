@@ -97,6 +97,7 @@ namespace sm_json_data_framework.Models
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
             Rules = sourceModel.Rules;
             StartConditions = sourceModel.StartConditions.Finalize(mappings);
+            InitialGameState = new InGameState(StartConditions);
         }
 
         /// <summary>
@@ -383,9 +384,7 @@ namespace sm_json_data_framework.Models
         /// <returns></returns>
         public GameNavigator CreateInitialGameNavigator(int maxPreviousStatesSize)
         {
-            // TODO This likely requires moving a lot of code to finalized models and replacing unfinalized models in all InGameState things.
-            // Will do in a later commit.
-            throw new NotSupportedException();
+            return new GameNavigator(this, CreateInitialGameStateCopy(), maxPreviousStatesSize);
         }
     }
 
@@ -885,18 +884,6 @@ namespace sm_json_data_framework.Models
         public UnfinalizedInGameState CreateInitialGameStateCopy()
         {
             return InitialGameState.Clone();
-        }
-
-        /// <summary>
-        /// Creates and returns a game navigator at the starting location and with starting resources.
-        /// Requires this model to have been initialized.
-        /// </summary>
-        /// <param name="maxPreviousStatesSize">The maximum number of previous states that the created navigator
-        /// should keep in memory.</param>
-        /// <returns></returns>
-        public GameNavigator CreateInitialGameNavigator(int maxPreviousStatesSize)
-        {
-            return new GameNavigator(this, CreateInitialGameStateCopy(), maxPreviousStatesSize);
         }
     }
 }

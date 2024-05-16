@@ -10,7 +10,7 @@ namespace sm_json_data_framework.Models.Navigation
     // A filter that can be applied when moving nodes, to limit allowedstrats to a ubset of the existing ones.
     public class StratFilter
     {
-        private Predicate<UnfinalizedStrat> Predicate { get; }
+        private Predicate<Strat> Predicate { get; }
 
         /// <summary>
         /// Keys to obtain from a dictionary, as a potentially faster way to get values out of a dictionary.
@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Navigation
 
         public string Description { get; }
 
-        public StratFilter(Predicate<UnfinalizedStrat> predicate, string description)
+        public StratFilter(Predicate<Strat> predicate, string description)
         {
             Predicate = predicate;
             Description = description;
@@ -38,7 +38,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         /// <param name="strats"></param>
         /// <returns></returns>
-        public IEnumerable<UnfinalizedStrat> Apply(IEnumerable<UnfinalizedStrat> strats) {
+        public IEnumerable<Strat> Apply(IEnumerable<Strat> strats) {
             return strats.Where(Predicate.Invoke);
         }
 
@@ -47,9 +47,9 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         /// <param name="strats"></param>
         /// <returns></returns>
-        public IEnumerable<KeyValuePair<string, UnfinalizedStrat>> Apply(IEnumerable<KeyValuePair<string, UnfinalizedStrat>> strats)
+        public IEnumerable<KeyValuePair<string, Strat>> Apply(IEnumerable<KeyValuePair<string, Strat>> strats)
         {
-            if(strats is IDictionary<string, UnfinalizedStrat> dictionary && Keys != null)
+            if(strats is IDictionary<string, Strat> dictionary && Keys != null)
             {
                 return Keys.Select(key => dictionary[key]).ToDictionary(strat => strat.Name);
             }
@@ -63,7 +63,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The StratFilter</returns>
         public static StratFilter NameStartsWith(string prefix)
         {
-            Predicate<UnfinalizedStrat> predicate = strat => strat.Name?.StartsWith(prefix, ignoreCase: true, CultureInfo.InvariantCulture) is true;
+            Predicate<Strat> predicate = strat => strat.Name?.StartsWith(prefix, ignoreCase: true, CultureInfo.InvariantCulture) is true;
             string description = $"Starts with '{prefix}'";
 
             return new StratFilter(predicate, description);
@@ -87,9 +87,9 @@ namespace sm_json_data_framework.Models.Navigation
         /// <returns>The StratFilter</returns>
         public static StratFilter BreaksObstacle(string obstacleId)
         {
-            Predicate<UnfinalizedStrat> predicate = strat => strat.Obstacles.Values.Any(
-                obstacle => (obstacle?.ObstacleId?.Equals(obstacleId, StringComparison.InvariantCultureIgnoreCase) is true)
-                || (obstacle?.AdditionalObstacleIds.Any(additionalId => additionalId?.Equals(obstacleId, StringComparison.InvariantCultureIgnoreCase) is true) is true)
+            Predicate<Strat> predicate = strat => strat.Obstacles.Values.Any(
+                obstacle => (obstacle?.Obstacle.Id.Equals(obstacleId, StringComparison.InvariantCultureIgnoreCase) is true)
+                || (obstacle?.AdditionalObstacles.Keys.Any(additionalId => additionalId?.Equals(obstacleId, StringComparison.InvariantCultureIgnoreCase) is true) is true)
                 );
             string description = $"Breaks obstacle '{obstacleId}'";
 

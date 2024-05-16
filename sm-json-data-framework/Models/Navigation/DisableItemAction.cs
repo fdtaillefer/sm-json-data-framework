@@ -18,15 +18,15 @@ namespace sm_json_data_framework.Models.Navigation
 
         }
 
-        public DisableItemAction(string intent, UnfinalizedSuperMetroidModel model, ReadOnlyUnfinalizedInGameState initialInGameState, UnfinalizedExecutionResult executionResult) :
+        public DisableItemAction(string intent, SuperMetroidModel model, ReadOnlyInGameState initialInGameState, ExecutionResult executionResult) :
             base(intent, model, initialInGameState, executionResult)
         {
 
         }
 
-        public override AbstractNavigationAction Reverse(UnfinalizedSuperMetroidModel model)
+        public override AbstractNavigationAction Reverse(SuperMetroidModel model)
         {
-            DisableItemAction reverseAction = new DisableItemAction($"Undo action '{this.IntentDescription}'");
+            DisableItemAction reverseAction = new DisableItemAction($"Undo action '{IntentDescription}'");
             TransferDataToReverseAbstractAction(reverseAction);
 
             return reverseAction;

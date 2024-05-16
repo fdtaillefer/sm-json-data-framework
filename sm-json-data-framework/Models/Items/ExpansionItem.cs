@@ -14,7 +14,7 @@ namespace sm_json_data_framework.Models.Items
 
         public ExpansionItem(UnfinalizedExpansionItem innerElement, Action<Item> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = InnerElement;
+            InnerElement = innerElement;
         }
 
         /// <summary>

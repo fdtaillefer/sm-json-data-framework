@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
                     Console.WriteLine($"Has item '{item.Name}' X {count}");
                 }
                 // Output non consumable items
-                foreach (UnfinalizedItem item in navigator.CurrentInGameState.Inventory.NonConsumableItems.Values)
+                foreach (Item item in navigator.CurrentInGameState.Inventory.NonConsumableItems.Values)
                 {
                     Console.WriteLine($"Has item '{item.Name}'{(navigator.CurrentInGameState.Inventory.IsItemDisabled(item.Name) ? " (disabled)" : "")}");
                 }

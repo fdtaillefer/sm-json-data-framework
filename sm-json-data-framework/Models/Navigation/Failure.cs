@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Navigation
             Succeeded = false;
         }
 
-        public override AbstractNavigationAction Reverse(UnfinalizedSuperMetroidModel model)
+        public override AbstractNavigationAction Reverse(SuperMetroidModel model)
         {
             // Failures have no reverse, they just fail.
             return this;

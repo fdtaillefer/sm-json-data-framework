@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models
             mappingsInsertionCallback.Invoke((ConcreteType)this);
         }
 
-        public bool UselessByLogicalOptions { get { return InnerElement.UselessByLogicalOptions; } }
+        public bool UselessByLogicalOptions { get { return InnerElement?.UselessByLogicalOptions ?? false; } }
 
         public ReadOnlyLogicalOptions AppliedLogicalOptions { get { return InnerElement?.AppliedLogicalOptions; } }
 
