@@ -60,13 +60,8 @@ namespace sm_json_data_framework.Models.Raw.Requirements
                 UnfinalizedGameFlagLogicalElement logicalElement = (UnfinalizedGameFlagLogicalElement)Activator.CreateInstance(gameFlagType, gameFlag);
                 return logicalElement;
             }
-            // If the string matched nothing that's in the model maybe it's referencing something that's
-            // not been read and put in the model yet.
-            // Return an uninterpreted string logical element. This will need to be replaced before initialization is done.
-            else if (knowledgeBase.AllowUninterpretedStringLogicalElements)
-            {
-                return new UnfinalizedUninterpretedStringLogicalElement(Value);
-            }
+            // Since all raw elements have already been read and are in the knowledge base, having no match by now means
+            // we will not be able to interpret this logical element. Return an error.
             else
             {
                 throw new JsonException($"Logical element string {Value} could not be matched to anything.");

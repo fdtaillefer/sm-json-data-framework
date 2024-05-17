@@ -123,19 +123,15 @@ namespace sm_json_data_framework.Models.Requirements
         /// Creates and returns a LogicalElementCreationKnowledgeBase based on the provided parameters
         /// </summary>
         /// <param name="model">A SuperMetroidModel containing helpers, items, helpers and techs</param>
-        /// <param name="allowUninterpretedStringLogicalElements">Indicates whether it's ok to have string logical elements we are unable to interpret.
-        /// If false, those will result in an exception instead</param>
         /// <param name="overrideObjectTypes">Overrides types to apply for object logical elements. May be null.</param>
         /// <param name="overrideStringTypes">Overrides types to apply for string logical elements. May be null.</param>
         /// <returns></returns>
         public static LogicalElementCreationKnowledgeBase CreateLogicalElementCreationKnowledgeBase(UnfinalizedSuperMetroidModel model, 
-            bool allowUninterpretedStringLogicalElements = false,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
             return new LogicalElementCreationKnowledgeBase
             {
-                AllowUninterpretedStringLogicalElements = allowUninterpretedStringLogicalElements,
                 GameFlags = model.GameFlags,
                 Helpers = model.Helpers,
                 Items = model.Items,

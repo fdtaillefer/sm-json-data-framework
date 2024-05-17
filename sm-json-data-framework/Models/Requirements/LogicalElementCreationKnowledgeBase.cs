@@ -18,14 +18,6 @@ namespace sm_json_data_framework.Models.Requirements
     public class LogicalElementCreationKnowledgeBase
     {
         /// <summary>
-        /// If true, a string logical element with an unrcognized String value should result in a <see cref="UnfinalizedUninterpretedStringLogicalElement"/>.
-        /// If false, it should instead result in an exception.
-        /// The reason this could be true is if to use the RawStringLogicalElement temporarily while trying to create logical elements in the requirements of techs and helpers,
-        /// in which case some techs and helpers may not have been processed yet.
-        /// </summary>
-        public bool AllowUninterpretedStringLogicalElements { get; set; }
-
-        /// <summary>
         /// A dictionary containing the logical element types to create, per ObjectLogicalElementTypeEnum.
         /// </summary>
         public IDictionary<ObjectLogicalElementTypeEnum, Type> ObjectLogicalElementTypes { get; set; }
