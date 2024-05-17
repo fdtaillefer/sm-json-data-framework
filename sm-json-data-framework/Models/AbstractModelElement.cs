@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace sm_json_data_framework.Models
 {
     /// <summary>
-    /// A an abstract base class for all model elements in the <see cref="UnfinalizedSuperMetroidModel"/> hierarchy.
+    /// A an abstract base class for all model elements in the <see cref="SuperMetroidModel"/> hierarchy.
     /// A notable feature of this is the ability to be altered by applying <see cref="LogicalOptions"/>.
     /// </summary>
     /// <typeparam name="SourceType">The unfinalized type that finalizes into this type</typeparam>
