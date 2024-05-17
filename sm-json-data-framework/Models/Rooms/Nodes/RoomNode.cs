@@ -298,7 +298,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>A string that identifies this node, often used as a key in Dictionaries.</para>
         /// </summary>
-        [JsonIgnore]
         public string IdentifyingString { get => SuperMetroidUtils.BuildNodeIdentifyingString(Room.Name, Id); }
 
         public string Name { get; set; }
@@ -307,14 +306,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public NodeSubTypeEnum NodeSubType { get; set; }
 
-        [JsonPropertyName("nodeItem")]
         public string NodeItemName { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The item that can be obtained by interacting with this node (if any).</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedItem NodeItem { get; set; }
 
         public string NodeAddress { get; set; }
@@ -331,27 +328,23 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IList<UnfinalizedCanLeaveCharged> CanLeaveCharged { get; set; } = new List<UnfinalizedCanLeaveCharged>();
 
         // Decide who should handle null here
-        [JsonPropertyName("spawnAt")]
         public int? OverrideSpawnAtNodeId { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The node referenced by the <see cref="OverrideSpawnAtNodeId"/> property, if any.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode OverrideSpawnAtNode { get; set; }
 
         /// <summary>
         /// <para>Not reliable before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode SpawnAtNode { get { return OverrideSpawnAtNode ?? this; } }
 
         /// <summary>
         /// Whether entering a room at this node effectively spawns Samus at a different node.
         /// </summary>
-        [JsonIgnore]
         public bool SpawnsAtDifferentNode { get { return SpawnAtNode != this; } }
 
         /// <summary>
@@ -363,45 +356,38 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public IList<UnfinalizedViewableNode> ViewableNodes { get; set; } = new List<UnfinalizedViewableNode>();
 
-        [JsonPropertyName("yields")]
         public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The game flags that are activated by interacting with this node.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedGameFlag> Yields { get; set; }
 
-        [JsonIgnore]
         public IList<string> Note { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The room in which this node is.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoom Room { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the one-way connection that connects this node to its destination.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedConnection OutConnection { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>If this node is a way out of the room, this is the node that leaving the room via this node leads to.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode OutNode { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>Contains all in-room links from this node to another, mapped by the destination node ID.</para>
         /// </summary>
-        [JsonIgnore]
         public IDictionary<int, UnfinalizedLinkTo> LinksTo { 
             get 
             {

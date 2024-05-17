@@ -411,7 +411,6 @@ namespace sm_json_data_framework.Models.Rooms
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomEnemy)"/> has been called.</para>
         /// <para>The RoomEnemy to which this FarmCycle applies</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomEnemy RoomEnemy { get; set; }
 
         public UnfinalizedFarmCycle()

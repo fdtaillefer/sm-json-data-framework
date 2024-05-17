@@ -156,31 +156,26 @@ namespace sm_json_data_framework.Models.Enemies
 
         public EnemyDrops FarmableDrops { get; set; }
 
-        [JsonPropertyName("dims")]
         public UnfinalizedEnemyDimensions Dimensions { get; set; }
 
         public bool Freezable { get; set; }
 
         public bool Grapplable { get; set; }
 
-        [JsonPropertyName("invul")]
         public ISet<string> InvulnerabilityStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The sequence of all weapons this enemy is invulnerable to.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedWeapon> InvulnerableWeapons { get; private set; }
 
-        [JsonPropertyName("damageMultipliers")]
         public IList<RawEnemyDamageMultiplier> RawDamageMultipliers { get; set; } = new List<RawEnemyDamageMultiplier>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>Contains damage multipliers for all weapons this enemy takes damage from, mapped by weapon name.</para>
         /// </summary>
-        [JsonIgnore]
         public Dictionary<string, UnfinalizedWeaponMultiplier> WeaponMultipliers { get; private set; }
 
         public ISet<string> Areas { get; set; } = new HashSet<string>();
@@ -189,7 +184,6 @@ namespace sm_json_data_framework.Models.Enemies
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>A dictionary containing all weapons this enemy takes damage from, alongside the number of shots needed to kill it. Mapped by weapon name.</para>
         /// </summary>
-        [JsonIgnore]
         public IDictionary<string, UnfinalizedWeaponSusceptibility> WeaponSusceptibilities { get; set; }
 
         public UnfinalizedEnemy()

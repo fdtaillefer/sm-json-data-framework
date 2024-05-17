@@ -33,10 +33,8 @@ namespace sm_json_data_framework.Models.Enemies
 
     public class UnfinalizedEnemyDimensions :AbstractUnfinalizedModelElement<UnfinalizedEnemyDimensions, EnemyDimensions>
     {
-        [JsonPropertyName("h")]
         public int Height { get; set; }
 
-        [JsonPropertyName("w")]
         public int Width { get; set; }
 
         public UnfinalizedEnemyDimensions()

@@ -140,7 +140,6 @@ namespace sm_json_data_framework.Models.Rooms
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The SuperMetroidModel that this room is a part of.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedSuperMetroidModel SuperMetroidModel { get; set; }
 
         public UnfinalizedRoom()

@@ -39,14 +39,12 @@ namespace sm_json_data_framework.Models.Rooms
 
     public class UnfinalizedLinkTo : AbstractUnfinalizedModelElement<UnfinalizedLinkTo, LinkTo>, InitializablePostDeserializeInRoom
     {
-        [JsonPropertyName("id")]
         public int TargetNodeId { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The node that this link leads to</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode TargetNode { get; set; }
 
         /// <summary>

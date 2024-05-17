@@ -48,21 +48,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     {
         public PhysicsEnum Physics { get; set; }
 
-        [JsonPropertyName("entranceNodes")]
         public ISet<int> EntranceNodeIds { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The nodes that Samus must have entered from for this environment to be applicable. Or, if null, the environment is always applicable.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedRoomNode> EntranceNodes { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The RoomNode on which this environment is.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode Node { get; set; }
 
         public UnfinalizedDoorEnvironment()

@@ -165,10 +165,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The node to which this runway is tied.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode Node { get; set; }
 
-        [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
 
         public UnfinalizedRunway()

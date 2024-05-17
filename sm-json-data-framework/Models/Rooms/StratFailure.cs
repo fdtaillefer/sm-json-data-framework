@@ -55,14 +55,12 @@ namespace sm_json_data_framework.Models.Rooms
     {
         public string Name { get; set; }
 
-        [JsonPropertyName("leadsToNode")]
         public int? LeadsToNodeId { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The node that this strat failure leads to, if it leads to a node</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode LeadsToNode { get; set; }
 
         public UnfinalizedLogicalRequirements Cost { get; set; } = new UnfinalizedLogicalRequirements();

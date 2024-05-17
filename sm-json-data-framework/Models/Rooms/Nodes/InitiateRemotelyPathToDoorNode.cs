@@ -16,10 +16,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class InitiateRemotelyPathToDoorNode
     {
-        [JsonPropertyName("destinationNode")]
         public int DestinationNodeId { get; set; }
 
-        [JsonPropertyName("strats")]
         public ISet<string> StratNames { get; set; } = new HashSet<string>();
 
         public InitiateRemotelyPathToDoorNode()

@@ -216,21 +216,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IDictionary<string, UnfinalizedStrat> BypassStrats { get; set; } = new Dictionary<string, UnfinalizedStrat>();
 
-        [JsonPropertyName("yields")]
         public ISet<string> YieldsStrings { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The game flags that are activated by unlocking this lock.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedGameFlag> Yields { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The RoomNode on which this lock is.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode Node { get; set; }
 
         public UnfinalizedNodeLock()

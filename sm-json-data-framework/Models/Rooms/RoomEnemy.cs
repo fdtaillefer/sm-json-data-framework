@@ -217,29 +217,24 @@ namespace sm_json_data_framework.Models.Rooms
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The actual Enemy this RoomEnemy represents.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedEnemy Enemy { get; set; }
 
         public int Quantity { get; set; }
 
-        [JsonPropertyName("homeNodes")]
         public ISet<int> HomeNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The nodes in which this enemy roams, mapped by their node ID. Mutually-exclusive with <see cref="BetweenNodes"/>.</para>
         /// </summary>
-        [JsonIgnore]
         public Dictionary<int, UnfinalizedRoomNode> HomeNodes { get; set; }
 
-        [JsonPropertyName("betweenNodes")]
         public ISet<int> BetweenNodeIds { get; set; } = new HashSet<int>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>Contains two nodes between which this enemy roams (without ever actually being in either), mapped by their node ID. Mutually-exclusive with <see cref="HomeNodes"/>.</para>
         /// </summary>
-        [JsonIgnore]
         public Dictionary<int, UnfinalizedRoomNode> BetweenNodes { get; set; }
 
         public UnfinalizedLogicalRequirements Spawn { get; set; } = new UnfinalizedLogicalRequirements();
@@ -259,10 +254,8 @@ namespace sm_json_data_framework.Models.Rooms
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The Room in which this enemy group is.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoom Room { get; set; }
 
-        [JsonIgnore]
         public bool IsSpawner { get => FarmCycles.Any(); }
 
         public UnfinalizedRoomEnemy()

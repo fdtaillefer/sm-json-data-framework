@@ -66,7 +66,6 @@ namespace sm_json_data_framework.Models.Rooms
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The room in which this obstacle is.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoom Room { get; set; }
 
         public UnfinalizedRoomObstacle()

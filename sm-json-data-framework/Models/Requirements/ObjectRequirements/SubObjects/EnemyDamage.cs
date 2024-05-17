@@ -70,24 +70,20 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
     public class UnfinalizedEnemyDamage : AbstractUnfinalizedObjectLogicalElement<UnfinalizedEnemyDamage, EnemyDamage>
     {
-        [JsonPropertyName("enemy")]
         public string EnemyName { get; set; }
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemy that this element's EnemyName references. </para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedEnemy Enemy { get; set; }
 
-        [JsonPropertyName("type")]
         public string AttackName { get; set; }
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The enemy attack that this element's AttackName references. </para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedEnemyAttack Attack { get; set; }
 
         public int Hits { get; set; }

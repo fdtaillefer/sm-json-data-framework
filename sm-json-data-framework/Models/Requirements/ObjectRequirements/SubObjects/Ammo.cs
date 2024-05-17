@@ -55,7 +55,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
     public class UnfinalizedAmmo : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmo, Ammo>
     {
-        [JsonPropertyName("type")]
         public AmmoEnum AmmoType { get; set; }
         
         public int Count { get; set; }

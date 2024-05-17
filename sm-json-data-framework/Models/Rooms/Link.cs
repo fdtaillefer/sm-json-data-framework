@@ -34,7 +34,6 @@ namespace sm_json_data_framework.Models.Rooms
 
     public class UnfinalizedLink : AbstractUnfinalizedModelElement<UnfinalizedLink, Link>, InitializablePostDeserializeInRoom
     {
-        [JsonPropertyName("from")]
         public int FromNodeId { get; set; }
 
         /// <summary>

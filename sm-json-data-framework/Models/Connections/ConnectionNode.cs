@@ -104,7 +104,6 @@ namespace sm_json_data_framework.Models.Connections
         /// <summary>
         /// <para>A string that identifies this node, often used as a key in Dictionaries.</para>
         /// </summary>
-        [JsonIgnore]
         public string IdentifyingString { get => SuperMetroidUtils.BuildNodeIdentifyingString(RoomName, Nodeid); }
     }
 }

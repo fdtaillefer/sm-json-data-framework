@@ -38,14 +38,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
     public class UnfinalizedViewableNode : AbstractUnfinalizedModelElement<UnfinalizedViewableNode, ViewableNode>, InitializablePostDeserializeInNode
     {
-        [JsonPropertyName("id")]
         public int NodeId { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The node that is viewable</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode Node { get; set; }
 
         /// <summary>

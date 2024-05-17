@@ -56,14 +56,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class UnfinalizedInitiateRemotely : AbstractUnfinalizedModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>, InitializablePostDeserializableInCanLeaveCharged
     {
-        [JsonPropertyName("initiateAt")]
         public int InitiateAtNodeId { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The node referenced by the <see cref="InitiateAtNodeId"/> property.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode InitiateAtNode { get; set; }
 
         /// <summary>
@@ -72,7 +70,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public bool MustOpenDoorFirst { get; set; }
 
-        [JsonPropertyName("pathToDoor")]
         public IList<InitiateRemotelyPathToDoorNode> PathToDoorNodes { get; set; } = new List<InitiateRemotelyPathToDoorNode>();
 
         /// <summary>
@@ -80,14 +77,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>The path referenced by the <see cref="PathToDoorNodes"/> property, represented as links to follow and appropriate strats.</para>
         /// <para>This is the path that Samus must take through the room, from <see cref="InitiateAtNode"/> to <see cref="ExitNode"/>.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)> PathToDoor { get; set; } = new List<(UnfinalizedLinkTo link, IList<UnfinalizedStrat> strats)>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom, UnfinalizedRoomNode, UnfinalizedCanLeaveCharged)"/> has been called.</para>
         /// <para>The node through which this remote initiation ultimately exits the room charged.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode ExitNode { get; set; }
 
         public UnfinalizedInitiateRemotely()

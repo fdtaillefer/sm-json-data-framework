@@ -90,34 +90,28 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
     public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
     {
-        [JsonPropertyName("nodes")]
         public IList<int> NodeIds { get; set; } = new List<int>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The nodes that this element's NodeIds reference. </para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedRoomNode> Nodes { get; set; }
 
-        [JsonPropertyName("nodesToAvoid")]
         public ISet<int> NodeIdsToAvoid { get; set; } = new HashSet<int>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The nodes that this element's NodeIdToAvoids reference. </para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedRoomNode> NodesToAvoid { get; set; }
 
-        [JsonPropertyName("obstaclesToAvoid")]
         public ISet<string> ObstaclesIdsToAvoid { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The obstacles that this element's ObstaclesIdsToAvoid reference. </para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedRoomObstacle> ObstaclesToAvoid { get; set; }
 
         public bool MustStayPut { get; set; } = false;

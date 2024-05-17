@@ -50,7 +50,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// The weapons that Samus may attempt to use to resolve this EnemyKill, mapped by name. This is built based on ExplicitWeapons, ExcludedWeapons,
         /// and the list of all existing weapons.
         /// </summary>
-        [JsonIgnore]
         public IReadOnlyDictionary<string, Weapon> ValidWeapons { get; }
 
         /// <summary>
@@ -335,7 +334,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class UnfinalizedEnemyKill : AbstractUnfinalizedObjectLogicalElement<UnfinalizedEnemyKill, EnemyKill>
     {
-        [JsonPropertyName("enemies")]
         public IList<IList<string>> GroupedEnemyNames { get; set; } = new List<IList<string>>();
 
         /// <summary>
@@ -343,10 +341,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <para>The enemies that this element's GroupedEnemyNames reference. These enemies are the enemies that must be killed,
         /// separated into groups that can be entirely hit by a single shot from a weapon that hits groups.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<IList<UnfinalizedEnemy>> GroupedEnemies { get; set; }
 
-        [JsonPropertyName("explicitWeapons")]
         public ISet<string> ExplicitWeaponNames { get; set; } = new HashSet<string>();
 
         /// <summary>
@@ -354,17 +350,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <para>The weapons that this element's ExplicitWeapons reference. These weapons are the only ones that are allowed for this enemy kill,
         /// overriding the default behavior of allowing all non-situational weapons.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedWeapon> ExplicitWeapons { get; set; }
 
-        [JsonPropertyName("excludedWeapons")]
         public ISet<string> ExcludedWeaponNames { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The weapons that this element's ExcludedWeapons reference. These weapons are not allowed for this enemy kill.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedWeapon> ExcludedWeapons { get; set; }
 
         /// <summary>
@@ -372,7 +365,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <para>The weapons that Samus may attempt to use to resolve this EnemyKill. This is built based on ExplicitWeapons, ExcludedWeapons,
         /// and the list of all existing weapons.</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedWeapon> ValidWeapons { get; set; }
 
         public ISet<AmmoEnum> FarmableAmmo { get; set; } = new HashSet<AmmoEnum>();

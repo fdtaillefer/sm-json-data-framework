@@ -271,14 +271,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
     public class UnfinalizedCanComeInCharged : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanComeInCharged, CanComeInCharged>
     {
-        [JsonPropertyName("fromNode")]
         public int FromNodeId { get; set; }
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The node that this element's FromNodeId references.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode FromNode { get; set; }
 
         public IList<int> InRoomPath { get; set; } = new List<int>();

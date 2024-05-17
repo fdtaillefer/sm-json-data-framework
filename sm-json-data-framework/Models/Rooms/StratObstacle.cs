@@ -150,14 +150,12 @@ namespace sm_json_data_framework.Models.Rooms
 
     public class UnfinalizedStratObstacle : AbstractUnfinalizedModelElement<UnfinalizedStratObstacle, StratObstacle>, InitializablePostDeserializeInRoom
     {
-        [JsonPropertyName("id")]
         public string ObstacleId { get; set; }
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The RoomObstacle that this StratObstacle indicates must be passed through</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomObstacle Obstacle { get; set; }
 
         public UnfinalizedLogicalRequirements Requires { get; set; } = new UnfinalizedLogicalRequirements();
@@ -167,14 +165,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public UnfinalizedLogicalRequirements Bypass { get; set; }
 
-        [JsonPropertyName("additionalObstacles")]
         public ISet<string> AdditionalObstacleIds { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
         /// <para>The additional RoomObstacles that are destroyed alongside this StratObstacle</para>
         /// </summary>
-        [JsonIgnore]
         public IList<UnfinalizedRoomObstacle> AdditionalObstacles { get; set; }
 
         public UnfinalizedStratObstacle()

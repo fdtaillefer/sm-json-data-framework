@@ -142,10 +142,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
     public class UnfinalizedCanLeaveCharged : AbstractUnfinalizedModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, InitializablePostDeserializeInNode, IRunway
     {
-        [JsonIgnore]
         public int Length { get => UsedTiles; }
 
-        [JsonIgnore]
         public int EndingUpTiles { get => 0; }
 
         public int UsedTiles { get; set; }
@@ -174,7 +172,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Returns whether this CanLeaveCharged is initiated at a different node than the door it exits through.
         /// </summary>
-        [JsonIgnore]
         public bool IsInitiatedRemotely { get { return InitiateRemotely != null; } }
 
         /// <summary>
@@ -182,7 +179,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IDictionary<string, UnfinalizedStrat> Strats { get; set; } = new Dictionary<string, UnfinalizedStrat>();
 
-        [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
 
         public int GentleUpTiles { get; set; } = 0;
@@ -199,7 +195,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>Not available before <see cref="Initialize(UnfinalizedSuperMetroidModel, UnfinalizedRoomNode)"/> has been called.</para>
         /// <para>The node in which this CanLeaveCharged is.</para>
         /// </summary>
-        [JsonIgnore]
         public UnfinalizedRoomNode Node { get; set; }
 
         public UnfinalizedCanLeaveCharged()

@@ -91,10 +91,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
     public class UnfinalizedCanShineCharge : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanShineCharge, CanShineCharge>, IRunway
     {
-        [JsonIgnore]
         public int Length { get => UsedTiles; }
 
-        [JsonIgnore]
         public int EndingUpTiles { get => 0; }
 
         public int UsedTiles { get; set; }
@@ -109,7 +107,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         public int StartingDownTiles { get; set; } = 0;
 
-        [JsonPropertyName("openEnd")]
         public int OpenEnds { get; set; } = 0;
 
         public int ShinesparkFrames { get; set; }
