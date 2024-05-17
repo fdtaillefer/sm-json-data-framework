@@ -40,49 +40,49 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// The in-game state that resulted from the execution.
         /// </summary>
-        public InGameState ResultingState { get; set; }
+        public InGameState ResultingState { get; protected set; }
 
         /// <summary>
         /// A sequence of runways that were used (possibly retroactively) along with the accompanying runway strat.
         /// </summary>
-        public IEnumerable<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; set; } = Enumerable.Empty<(Runway, Strat)>();
+        public ICollection<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; protected set; } = new List<(Runway, Strat)>();
 
         /// <summary>
         /// A sequence of canLeaveCharged that were executed (possibly retroactively) along with the accompanying canLeaveCharged strat.
         /// </summary>
-        public IEnumerable<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(CanLeaveCharged, Strat)>();
+        public ICollection<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; protected set; } = new List<(CanLeaveCharged, Strat)>();
 
         /// <summary>
         /// A sequence of node locks that were opened along with the open strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(NodeLock openedLock, Strat stratUsed)>();
+        public ICollection<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; protected set; } = new List<(NodeLock openedLock, Strat stratUsed)>();
 
         /// <summary>
         /// A sequence of node locks that were bypassed along with the bypass strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(NodeLock bypassedLock, Strat stratUsed)>();
+        public ICollection<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; protected set; } = new List<(NodeLock bypassedLock, Strat stratUsed)>();
 
         /// <summary>
         /// A sequence of game flags that were activated.
         /// </summary>
-        public IEnumerable<GameFlag> ActivatedGameFlags { get; set; } = Enumerable.Empty<GameFlag>();
+        public ICollection<GameFlag> ActivatedGameFlags { get; protected set; } = new List<GameFlag>();
 
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
         /// </summary>
-        public IEnumerable<IndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<IndividualEnemyKillResult>();
+        public ICollection<IndividualEnemyKillResult> KilledEnemies { get; protected set; } = new List<IndividualEnemyKillResult>();
 
         /// <summary>
-        /// A sequence of items that were involved in some way. 
+        /// A sequence of items that were involved in some way, mapped by name. 
         /// This excludes items needed to operate weapons described in <see cref="KilledEnemies"/>.
         /// This also excludes items whose only contribution was reducing damage (they are in <see cref="DamageReducingItemsInvolved"/>).
         /// </summary>
-        public ISet<Item> ItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public IDictionary<string, Item> ItemsInvolved { get; protected set; } = new Dictionary<string, Item>();
 
         /// <summary>
-        /// A sequence of items that were involved in reducing incoming damage.
+        /// A sequence of items that were involved in reducing incoming damage, mapped by name.
         /// </summary>
-        public ISet<Item> DamageReducingItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public IDictionary<string, Item> DamageReducingItemsInvolved { get; protected set; } = new Dictionary<string, Item>();
 
         /// <summary>
         /// Given the result of an execution done on this result's resulting state, updates this result to represent
@@ -93,14 +93,14 @@ namespace sm_json_data_framework.Models.Requirements
         public ExecutionResult ApplySubsequentResult(ExecutionResult subsequentResult)
         {
             ResultingState = subsequentResult.ResultingState;
-            RunwaysUsed = RunwaysUsed.Concat(subsequentResult.RunwaysUsed);
-            CanLeaveChargedExecuted = CanLeaveChargedExecuted.Concat(subsequentResult.CanLeaveChargedExecuted);
-            OpenedLocks = OpenedLocks.Concat(subsequentResult.OpenedLocks);
-            BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks);
-            ActivatedGameFlags = ActivatedGameFlags.Concat(subsequentResult.ActivatedGameFlags);
-            KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies);
-            ItemsInvolved.UnionWith(subsequentResult.ItemsInvolved);
-            DamageReducingItemsInvolved.UnionWith(subsequentResult.DamageReducingItemsInvolved);
+            RunwaysUsed = RunwaysUsed.Concat(subsequentResult.RunwaysUsed).ToList();
+            CanLeaveChargedExecuted = CanLeaveChargedExecuted.Concat(subsequentResult.CanLeaveChargedExecuted).ToList();
+            OpenedLocks = OpenedLocks.Concat(subsequentResult.OpenedLocks).ToList();
+            BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks).ToList();
+            ActivatedGameFlags = ActivatedGameFlags.Concat(subsequentResult.ActivatedGameFlags).ToList();
+            KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies).ToList();
+            ItemsInvolved = ItemsInvolved.Concat(subsequentResult.ItemsInvolved).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            DamageReducingItemsInvolved = DamageReducingItemsInvolved.Concat(subsequentResult.DamageReducingItemsInvolved).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return this;
         }
@@ -131,7 +131,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to open the lock</param>
         public void ApplyOpenedLock(NodeLock nodeLock, Strat strat)
         {
-            OpenedLocks = OpenedLocks.Append((nodeLock, strat));
+            OpenedLocks = OpenedLocks.Append((nodeLock, strat)).ToList();
             ResultingState.ApplyOpenLock(nodeLock);
         }
 
@@ -142,7 +142,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to bypass the lock</param>
         public void ApplyBypassedLock(NodeLock nodeLock, Strat strat)
         {
-            BypassedLocks = BypassedLocks.Append((nodeLock, strat));
+            BypassedLocks = BypassedLocks.Append((nodeLock, strat)).ToList();
             ResultingState.ApplyBypassLock(nodeLock);
         }
 
@@ -154,7 +154,7 @@ namespace sm_json_data_framework.Models.Requirements
         {
             if (!ResultingState.ActiveGameFlags.ContainsFlag(gameFlag))
             {
-                ActivatedGameFlags = ActivatedGameFlags.Append(gameFlag);
+                ActivatedGameFlags = ActivatedGameFlags.Append(gameFlag).ToList();
                 ResultingState.ApplyAddGameFlag(gameFlag);
             }
         }
@@ -166,7 +166,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used on that runway</param>
         public void AddUsedRunway(Runway runway, Strat strat)
         {
-            RunwaysUsed = RunwaysUsed.Append((runway, strat));
+            RunwaysUsed = RunwaysUsed.Append((runway, strat)).ToList();
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to execute that canLeaveCharged</param>
         public void AddExecutedCanLeaveCharged(CanLeaveCharged canLeaveCharged, Strat strat)
         {
-            CanLeaveChargedExecuted = CanLeaveChargedExecuted.Append((canLeaveCharged, strat));
+            CanLeaveChargedExecuted = CanLeaveChargedExecuted.Append((canLeaveCharged, strat)).ToList();
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="shots">The number of shots the kill took</param>
         public void AddKilledEnemy(Enemy enemy, Weapon weapon, int shots)
         {
-            KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, new[] { (weapon, shots) }));
+            KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, new[] { (weapon, shots) })).ToList();
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="killMethod">An enumeration of weapons alongside their number of shots fired</param>
         public void AddKilledEnemy(Enemy enemy, IEnumerable<(Weapon weapon, int shots)> killMethod)
         {
-            KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, killMethod));
+            KilledEnemies = KilledEnemies.Append(new IndividualEnemyKillResult(enemy, killMethod)).ToList();
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="items">The items</param>
         public void AddItemsInvolved(IEnumerable<Item> items)
         {
-            ItemsInvolved.UnionWith(items);
+            ItemsInvolved = ItemsInvolved.Values.Concat(items).ToDictionary(item => item.Name);
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="items">The items</param>
         public void AddDamageReducingItemsInvolved(IEnumerable<Item> items)
         {
-            DamageReducingItemsInvolved.UnionWith(items);
+            DamageReducingItemsInvolved = DamageReducingItemsInvolved.Values.Concat(items).ToDictionary(item => item.Name);
         }
 
         /// <summary>

@@ -73,8 +73,8 @@ namespace sm_json_data_framework.Models.Navigation
             BypassedLocks = executionResult.BypassedLocks.ToList();
             KilledEnemies = executionResult.KilledEnemies.ToList();
 
-            ItemsInvolved = executionResult.ItemsInvolved.ToDictionary(item => item.Name);
-            DamageReducingItemsInvolved = executionResult.DamageReducingItemsInvolved.ToDictionary(item => item.Name);
+            ItemsInvolved = new Dictionary<string, Item>(executionResult.ItemsInvolved);
+            DamageReducingItemsInvolved = new Dictionary<string, Item> (executionResult.DamageReducingItemsInvolved);
         }
 
         /// <summary>
