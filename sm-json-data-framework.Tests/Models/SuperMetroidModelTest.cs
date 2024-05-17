@@ -146,6 +146,9 @@ namespace sm_json_data_framework.Tests.Models
             RoomNode node = model.GetNodeInRoom("Big Pink", 5);
             Assert.Same(arbitraryNode, node.SpawnAtNode);
 
+            Link link = model.Rooms["Big Pink"].Links[14];
+            Assert.Same(arbitraryNode, link.FromNode);
+
             LinkTo linkTo = model.Rooms["Big Pink"].Links[5].To[14];
             Assert.Same(arbitraryNode, linkTo.TargetNode);
 

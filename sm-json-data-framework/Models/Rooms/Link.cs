@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
 using System;
@@ -21,10 +22,11 @@ namespace sm_json_data_framework.Models.Rooms
             : base(innerElement, mappingsInsertionCallback)
         {
             InnerElement = innerElement;
+            FromNode = InnerElement.FromNode.Finalize(mappings);
             To = InnerElement.To.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
         }
 
-        public int FromNodeId => InnerElement.FromNodeId;
+        public RoomNode FromNode { get; }
 
         /// <summary>
         /// The details of how this Link links to different nodes, mapped by target node ID.
@@ -35,6 +37,12 @@ namespace sm_json_data_framework.Models.Rooms
     public class UnfinalizedLink : AbstractUnfinalizedModelElement<UnfinalizedLink, Link>, InitializablePostDeserializeInRoom
     {
         public int FromNodeId { get; set; }
+
+        /// <summary>
+        /// <para>Not available before <see cref="InitializeProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/> has been called.</para>
+        /// <para>The node that this link initiates from</para>
+        /// </summary>
+        public UnfinalizedRoomNode FromNode { get; set; }
 
         /// <summary>
         /// The details of how this Link links to different nodes, mapped by target node ID.
@@ -79,6 +87,8 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 linkTo.InitializeProperties(model, room);
             }
+
+            FromNode = room.Nodes[FromNodeId];
         }
 
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Models.Rooms
             InnerElement = innerElement;
             RoomEnvironments = InnerElement.RoomEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
             Nodes = InnerElement.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Links = InnerElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNodeId).AsReadOnly();
+            Links = InnerElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNode.Id).AsReadOnly();
             Obstacles = InnerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
             Enemies = InnerElement.Enemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.Id).AsReadOnly();
         }
