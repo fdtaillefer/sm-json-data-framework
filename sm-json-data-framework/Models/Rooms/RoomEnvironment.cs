@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Whether the environment is geated, making Samus take damage unless she has something to mitigate the heat.
         /// </summary>
-        public bool Heated { get { return InnerElement.Heated; } }
+        public bool Heated => InnerElement.Heated;
 
         /// <summary>
         /// The nodes that enable this environment if Samus has entered the room from one of them, mapped by in-room ID. Or, if null, the environment is always applicable.

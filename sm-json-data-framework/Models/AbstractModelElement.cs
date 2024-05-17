@@ -30,9 +30,9 @@ namespace sm_json_data_framework.Models
             mappingsInsertionCallback.Invoke((ConcreteType)this);
         }
 
-        public bool UselessByLogicalOptions { get { return InnerElement?.UselessByLogicalOptions ?? false; } }
+        public bool UselessByLogicalOptions => InnerElement?.UselessByLogicalOptions ?? false;
 
-        public ReadOnlyLogicalOptions AppliedLogicalOptions { get { return InnerElement?.AppliedLogicalOptions; } }
+        public ReadOnlyLogicalOptions AppliedLogicalOptions => InnerElement?.AppliedLogicalOptions;
 
         public virtual void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {

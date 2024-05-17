@@ -25,7 +25,7 @@ namespace sm_json_data_framework.Models.Helpers
         /// <summary>
         /// A unique name that identifies this helper.
         /// </summary>
-        public string Name { get { return InnerElement.Name;  } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The logical requirements that this helper represents.

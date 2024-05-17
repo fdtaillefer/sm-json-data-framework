@@ -32,34 +32,34 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// An arbitrary, numerical ID that can be used to identify this Room.
         /// </summary>
-        public int Id { get { return InnerElement.Id; } }
+        public int Id => InnerElement.Id;
 
         /// <summary>
         /// A human-legible name that uniquely identifies this Room. 
         /// Room names typically come from the community and not any official source.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The name of the in-game area this Room is in, e.g. Brinstar.
         /// </summary>
-        public string Area { get { return InnerElement.Area; } }
+        public string Area => InnerElement.Area;
 
         /// <summary>
         /// The name of the sub-area (within the <see cref="Area"/>) that this Room is in. 
         /// Sub-areas are not officially defined in-game.
         /// </summary>
-        public string Subarea { get { return InnerElement.Subarea; } }
+        public string Subarea => InnerElement.Subarea;
 
         /// <summary>
         /// Whether player inputs work while in this room. 
         /// </summary>
-        public bool Playable { get { return InnerElement.Playable; } }
+        public bool Playable => InnerElement.Playable;
 
         /// <summary>
         /// The in-game address of this Room.
         /// </summary>
-        public string RoomAddress { get { return InnerElement.RoomAddress; } }
+        public string RoomAddress => InnerElement.RoomAddress;
 
         /// <summary>
         /// The list of RoomEnvironments that can affect this Room.

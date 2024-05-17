@@ -41,7 +41,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected InNodeState InternalCurrentNodeState { get => InternalVisitedRoomPath.Any() ? InternalVisitedRoomPath.Last().nodeState : null; }
 
-        public ReadOnlyInNodeState CurrentNodeState { get { return InternalCurrentNodeState?.AsReadOnly(); } }
+        public ReadOnlyInNodeState CurrentNodeState => InternalCurrentNodeState?.AsReadOnly();
 
         public RoomNode CurrentNode { get => InternalCurrentNodeState?.Node; }
 
@@ -72,7 +72,7 @@ namespace sm_json_data_framework.Models.InGameStates
             get
             {
                 return InternalVisitedRoomPath.Select<(InNodeState nodeState, Strat strat), (ReadOnlyInNodeState nodeState, Strat strat)>
-                    (pair => (pair.nodeState.AsReadOnly(), pair.strat)).ToList().AsReadOnly();
+                    (pair => (nodeState: pair.nodeState.AsReadOnly(), pair.strat)).ToList().AsReadOnly();
             }
         }
 
@@ -81,13 +81,13 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected HashSet<string> InternalDestroyedObstacleIds { get; } = new HashSet<string>();
 
-        public ReadOnlySet<string> DestroyedObstacleIds { get { return InternalDestroyedObstacleIds.AsReadOnly(); } }
+        public ReadOnlySet<string> DestroyedObstacleIds => InternalDestroyedObstacleIds.AsReadOnly();
 
         /// <summary>
         /// The strat that was used to reach to current node, if any. Can be null if there is no current node 
         /// or current node was reached during the process of spawning in the room.
         /// </summary>
-        public Strat LastStrat { get { return VisitedRoomPath.LastOrDefault().strat; } }
+        public Strat LastStrat => VisitedRoomPath.LastOrDefault().strat;
 
         /// <summary>
         /// Sets this InRoomState's state to that of immediate entry of a room via the provided entry node.

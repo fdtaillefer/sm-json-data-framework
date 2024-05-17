@@ -46,7 +46,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// </summary>
         protected InGameState InternalInGameState {get; set;}
 
-        public ReadOnlyInGameState CurrentInGameState { get { return InternalInGameState.AsReadOnly(); } }
+        public ReadOnlyInGameState CurrentInGameState => InternalInGameState.AsReadOnly();
 
         /// <summary>
         /// A model that can be used to obtain data about the current game configuration.

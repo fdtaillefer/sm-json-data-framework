@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             Physics = InnerElement.Physics.AsReadOnly();
         }
 
-        public int FromNodeId { get { return InnerElement.FromNodeId; } }
+        public int FromNodeId => InnerElement.FromNodeId;
 
         /// <summary>
         /// The node that this element's FromNodeId references.
@@ -44,7 +44,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// The number of tiles Samus needs to use to gain enough momentum at the adjacent runway.
         /// </summary>
-        public decimal UsedTiles { get { return InnerElement.UsedTiles; } }
+        public decimal UsedTiles => InnerElement.UsedTiles;
 
         /// <summary>
         /// The set of acceptable physics at the adjacent door. If the physics at the adjacent door is not in this set, this AdjacentRunway cannot be executed.
@@ -54,12 +54,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// The number of frames that Samus should expect to spend at the adjacent door, being subjected to the door environment.
         /// </summary>
-        public int UseFrames { get { return InnerElement.UseFrames; } }
+        public int UseFrames => InnerElement.UseFrames;
 
         /// <summary>
         /// Indicates whether the requirements on the Runway itself should be ignored.
         /// </summary>
-        public bool OverrideRunwayRequirements { get { return InnerElement.OverrideRunwayRequirements; } }
+        public bool OverrideRunwayRequirements => InnerElement.OverrideRunwayRequirements;
 
         public override bool IsNever()
         {

@@ -38,12 +38,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// A short identifier for this RoomEnemy that is only unique within the room.
         /// </summary>
-        public string Id { get { return InnerElement.Id; } }
+        public string Id => InnerElement.Id;
 
         /// <summary>
         /// A name for this roomEnemy, that is unique across the entire model.
         /// </summary>
-        public string GroupName { get { return InnerElement.GroupName; } }
+        public string GroupName => InnerElement.GroupName;
 
         /// <summary>
         /// The actual Enemy this RoomEnemy represents a number of.
@@ -53,7 +53,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// The number of enemies repersented by this RoomEnemy.
         /// </summary>
-        public int Quantity { get { return InnerElement.Quantity; } }
+        public int Quantity => InnerElement.Quantity;
 
         /// <summary>
         /// The nodes in which this enemy roams, mapped by their node ID. Mutually-exclusive with <see cref="BetweenNodes"/>.
@@ -93,7 +93,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Whether this RoomEnemy is an enemy spawner, causing new enemies to spawn to replace those that are killed.
         /// </summary>
-        public bool IsSpawner { get { return InnerElement.IsSpawner; } }
+        public bool IsSpawner => InnerElement.IsSpawner;
 
         /// <summary>
         /// Indicates whether this room enemy will spawn, given the provided model and inGameState.

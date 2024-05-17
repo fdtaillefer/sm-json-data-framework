@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Options
         }
 
         public IDictionary<ConsumableResourceEnum, decimal> InternalMinimumRatesPerSecond { get; set; }
-        public IReadOnlyDictionary<ConsumableResourceEnum, decimal> MinimumRatesPerSecond { get { return InternalMinimumRatesPerSecond.AsReadOnly(); } }
+        public IReadOnlyDictionary<ConsumableResourceEnum, decimal> MinimumRatesPerSecond => InternalMinimumRatesPerSecond.AsReadOnly();
 
         public decimal SafetyMarginPercent { get; set; } = DefaultSafetyMarginPercent;
     }

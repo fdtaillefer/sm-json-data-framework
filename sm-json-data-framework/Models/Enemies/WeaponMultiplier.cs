@@ -28,12 +28,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The value by which to multiply base weapon damage
         /// </summary>
-        public decimal Multiplier { get { return InnerElement.Multiplier; } }
+        public decimal Multiplier => InnerElement.Multiplier;
 
         /// <summary>
         /// The damage this WeaponMultiplier's weapon will inflict with each shot.
         /// </summary>
-        public int DamagePerShot { get { return InnerElement.DamagePerShot; } }
+        public int DamagePerShot => InnerElement.DamagePerShot;
 
         /// <summary>
         /// Calculates the number of hits an enemy with the provided hp will take to die if this WeaponMultiplier is applied to it.

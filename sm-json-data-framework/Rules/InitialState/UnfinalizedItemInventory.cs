@@ -43,10 +43,10 @@ namespace sm_json_data_framework.Rules.InitialState
         }
 
         protected IDictionary<string, UnfinalizedItem> InternalNonConsumableItems { get; } = new Dictionary<string, UnfinalizedItem>();
-        public ReadOnlyDictionary<string, UnfinalizedItem> NonConsumableItems { get { return InternalNonConsumableItems.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, UnfinalizedItem> NonConsumableItems => InternalNonConsumableItems.AsReadOnly();
 
         protected IDictionary<string, (UnfinalizedExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (UnfinalizedExpansionItem item, int count)>();
-        public ReadOnlyDictionary<string, (UnfinalizedExpansionItem item, int count)> ExpansionItems { get { return InternalExpansionItems.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, (UnfinalizedExpansionItem item, int count)> ExpansionItems => InternalExpansionItems.AsReadOnly();
 
         /// <summary>
         /// Adds the provided item to this inventory.

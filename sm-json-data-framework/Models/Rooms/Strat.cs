@@ -33,12 +33,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// The name of this Strat. This is only unique for strats that are notable.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// Whether this strat is notable. A strat being notable usually means it requires specific knowledge beyond the ability to fulfill the logical requirements.
         /// </summary>
-        public bool Notable { get { return InnerElement.Notable; } }
+        public bool Notable => InnerElement.Notable;
 
         /// <summary>
         /// The logical requirements that must be fulfilled to execute this Strat.

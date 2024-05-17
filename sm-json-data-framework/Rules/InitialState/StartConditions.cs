@@ -58,7 +58,7 @@ namespace sm_json_data_framework.Rules.InitialState
 
         public ReadOnlyItemInventory StartingInventory { get; }
 
-        public ReadOnlyResourceCount BaseResourceMaximums { get { return StartingInventory?.BaseResourceMaximums; } }
+        public ReadOnlyResourceCount BaseResourceMaximums => StartingInventory?.BaseResourceMaximums;
 
         public ReadOnlyResourceCount StartingResources { get; }
 

@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// If true, this is equivalent to <see cref="NodesToAvoid"/> containing all nodes in the room.
         /// </summary>
-        public bool MustStayPut { get { return InnerElement.MustStayPut; } }
+        public bool MustStayPut => InnerElement.MustStayPut;
 
         public override bool IsNever()
         {

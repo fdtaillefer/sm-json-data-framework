@@ -43,17 +43,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// Minimum number of frames that must be remaining in the shine charge when coming in the room in order to satisgy this CanComeInCharged.
         /// </summary>
-        public int FramesRemaining { get { return InnerElement.FramesRemaining; } }
+        public int FramesRemaining => InnerElement.FramesRemaining;
 
         /// <summary>
         /// The duration (in frames) of the shinespark that goes alongside this CanComeInCharged, if any. Can be 0 if no shinespark is involved.
         /// </summary>
-        public int ShinesparkFrames { get { return InnerElement.ShinesparkFrames; } }
+        public int ShinesparkFrames => InnerElement.ShinesparkFrames;
 
         /// <summary>
         /// Indicates whether this CanComeInCharged involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark { get { return InnerElement.MustShinespark; } }
+        public bool MustShinespark => InnerElement.MustShinespark;
 
         public override bool IsNever()
         {
@@ -288,7 +288,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// Indicates whether this CanComeInCharged involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark { get { return ShinesparkFrames > 0; } }
+        public bool MustShinespark => ShinesparkFrames > 0;
 
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.

@@ -25,14 +25,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             Attack = innerElement.Attack.Finalize(mappings);
         }
 
-        public string EnemyName { get { return InnerElement.EnemyName; } }
+        public string EnemyName => InnerElement.EnemyName; 
 
         /// <summary>
         /// The enemy that this element's EnemyName references.
         /// </summary>
         public Enemy Enemy { get; }
 
-        public string AttackName { get { return InnerElement.AttackName; } }
+        public string AttackName => InnerElement.AttackName;
 
         /// <summary>
         /// The enemy attack that this element's AttackName references.
@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// The number of hits if the enemy attack Samus must take.
         /// </summary>
-        public int Hits { get { return InnerElement.Hits; } }
+        public int Hits => InnerElement.Hits;
 
         public override bool IsNever()
         {

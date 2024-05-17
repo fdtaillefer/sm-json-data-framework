@@ -682,7 +682,7 @@ namespace sm_json_data_framework.Models
         /// The weapons in this model, mapped by name.
         /// </summary>
         public IDictionary<string, UnfinalizedWeapon> Weapons {
-            get { return _weapons; }
+            get => _weapons;
             set
             {
                 _weapons = value;

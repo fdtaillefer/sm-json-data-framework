@@ -27,7 +27,7 @@ namespace sm_json_data_framework.Models.Techs
         /// <summary>
         /// A unique name that identifies this Tech.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// Logical requirements that must be fulfilled to execute this Tech.

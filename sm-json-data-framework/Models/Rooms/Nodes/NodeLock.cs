@@ -35,7 +35,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The type of this lock.
         /// </summary>
-        public LockTypeEnum LockType { get { return InnerElement.LockType; } }
+        public LockTypeEnum LockType => InnerElement.LockType;
 
         /// <summary>
         /// Logical requirements that must be met for this lock to be active.
@@ -46,7 +46,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// A name that identifies this lock. Unique across the entire model.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// Strats that can be executed to unlock this lock, mapped by name.

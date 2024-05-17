@@ -28,7 +28,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// A name given to this StratFailure. This is only unique within the strat.
         /// </summary>
-        public string Name { get { return InnerElement.Name; }  }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The node that this strat failure leads to, if it leads to a node. Null otherwise.
@@ -43,12 +43,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Whether this failure is systematically a softlock.
         /// </summary>
-        public bool Softlock { get { return InnerElement.Softlock; } }
+        public bool Softlock => InnerElement.Softlock;
 
         /// <summary>
         /// Whether this failure means Samus should no longer be seen as arriving from the previous node.
         /// </summary>
-        public bool ClearsPreviousNode { get { return InnerElement.ClearsPreviousNode; }  }
+        public bool ClearsPreviousNode => InnerElement.ClearsPreviousNode;
     }
 
     public class UnfinalizedStratFailure : AbstractUnfinalizedModelElement<UnfinalizedStratFailure, StratFailure>, InitializablePostDeserializeInRoom

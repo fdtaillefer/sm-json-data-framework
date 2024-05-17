@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Items
         /// <summary>
         /// The unique name of this item.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
     }
 
     public class UnfinalizedItem: AbstractUnfinalizedModelElement<UnfinalizedItem, Item>

@@ -28,17 +28,17 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// An arbitrary ID that identifies this obstacle. It is only unique within this obstacle's room.
         /// </summary>
-        public string Id { get { return InnerElement.Id; } }
+        public string Id => InnerElement.Id;
 
         /// <summary>
         /// A human-legible name that identifies this obstacle.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The type of obstacle this is.
         /// </summary>
-        public ObstacleTypeEnum ObstacleType { get { return InnerElement.ObstacleType; } }
+        public ObstacleTypeEnum ObstacleType => InnerElement.ObstacleType;
 
         /// <summary>
         /// Logical requirements that must systematically be fulfilled in order to destroy this obstacle, regardless of any other context.

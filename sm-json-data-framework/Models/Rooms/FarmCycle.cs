@@ -32,12 +32,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// A name to identify this FarmCycle. This is unique ONLY within a <see cref="RoomEnemy"/>.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The number of frames it takes to wait for the enemies to spawn, kill them, and grab their drops
         /// </summary>
-        public int CycleFrames { get { return InnerElement.CycleFrames; } }
+        public int CycleFrames => InnerElement.CycleFrames;
 
         /// <summary>
         /// The LogicalRequirements that must be fulfilled in order to execute a cycle of farming on the enemies.

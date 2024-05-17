@@ -28,22 +28,22 @@ namespace sm_json_data_framework.Models.Weapons
         /// <summary>
         /// A unique, arbitrary numerical ID that can identify this Weapon.
         /// </summary>
-        public int Id { get { return InnerElement.Id; }  }
+        public int Id => InnerElement.Id;
 
         /// <summary>
         /// A unique, human-legible name that can identify this Weapon.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The amount of damage one shot of this weapon does.
         /// </summary>
-        public int Damage { get { return InnerElement.Damage; } }
+        public int Damage => InnerElement.Damage;
 
         /// <summary>
         /// The amount of time (in frames) that must pass between two shots of this Weapon.
         /// </summary>
-        public int CooldownFrames { get { return InnerElement.CooldownFrames; } }
+        public int CooldownFrames => InnerElement.CooldownFrames;
 
         /// <summary>
         /// Logical requirements to fulfill in order to be able to ever use this Weapon.
@@ -59,12 +59,12 @@ namespace sm_json_data_framework.Models.Weapons
         /// <summary>
         /// Indicates whether this is a weapon that can be use only when explicitly referenced by logic.
         /// </summary>
-        public bool Situational { get { return InnerElement.Situational; } }
+        public bool Situational => InnerElement.Situational;
 
         /// <summary>
         /// Indicates whether a shot of this Weapon hits all enemies in an enemy group.
         /// </summary>
-        public bool HitsGroup { get { return InnerElement.HitsGroup; } }
+        public bool HitsGroup => InnerElement.HitsGroup;
 
         /// <summary>
         /// The set of all weapon categories this Weapon is part of.

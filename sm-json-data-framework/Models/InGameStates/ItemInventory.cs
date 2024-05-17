@@ -120,18 +120,18 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         protected IDictionary<string, Item> InternalNonConsumableItems { get; } = new Dictionary<string, Item>();
-        public ReadOnlyDictionary<string, Item> NonConsumableItems { get { return InternalNonConsumableItems.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, Item> NonConsumableItems => InternalNonConsumableItems.AsReadOnly();
 
         protected ISet<string> InternalDisabledItemNames { get; } = new HashSet<string>();
-        public IReadOnlySet<string> DisabledItemNames { get { return InternalDisabledItemNames.AsReadOnly(); } }
+        public IReadOnlySet<string> DisabledItemNames => InternalDisabledItemNames.AsReadOnly();
 
 
         protected IDictionary<string, (ExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (ExpansionItem item, int count)>();
-        public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems { get { return InternalExpansionItems.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems => InternalExpansionItems.AsReadOnly();
 
         protected ResourceCount InternalBaseResourceMaximums { get; }
 
-        public ReadOnlyResourceCount BaseResourceMaximums { get { return InternalBaseResourceMaximums.AsReadOnly(); } }
+        public ReadOnlyResourceCount BaseResourceMaximums => InternalBaseResourceMaximums.AsReadOnly();
 
         /// <summary>
         /// Expresses the change that this inventory applies on maximum resource counts.

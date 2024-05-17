@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Models.Rooms
             To = InnerElement.To.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
         }
 
-        public int FromNodeId { get { return InnerElement.FromNodeId; } }
+        public int FromNodeId => InnerElement.FromNodeId;
 
         /// <summary>
         /// The details of how this Link links to different nodes, mapped by target node ID.

@@ -17,11 +17,11 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected List<NodeLock> InternalOpenedLocks { get; } = new List<NodeLock>();
 
-        public IReadOnlyCollection<NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
+        public IReadOnlyCollection<NodeLock> OpenedLocks => InternalOpenedLocks.AsReadOnly();
 
         protected List<NodeLock> InternalBypassedLocks { get; } = new List<NodeLock>();
 
-        public IReadOnlyCollection<NodeLock> BypassedLocks { get { return InternalBypassedLocks.AsReadOnly(); } }
+        public IReadOnlyCollection<NodeLock> BypassedLocks => InternalBypassedLocks.AsReadOnly();
 
         public InNodeState(RoomNode node)
         {

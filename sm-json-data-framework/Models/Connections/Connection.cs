@@ -26,7 +26,7 @@ namespace sm_json_data_framework.Models.Connections
         /// <summary>
         /// The type of connection this is.
         /// </summary>
-        public ConnectionTypeEnum ConnectionType { get { return InnerElement.ConnectionType; } }
+        public ConnectionTypeEnum ConnectionType => InnerElement.ConnectionType;
 
         /// <summary>
         /// Details about the origin node of this Connection.

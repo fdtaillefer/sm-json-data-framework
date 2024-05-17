@@ -106,7 +106,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected ResourceCount InternalResources { get; set; }
 
-        public ReadOnlyResourceCount Resources { get { return InternalResources.AsReadOnly(); } }
+        public ReadOnlyResourceCount Resources => InternalResources.AsReadOnly();
 
         public bool IsResourceAvailable(ConsumableResourceEnum resource, int quantity)
         {
@@ -207,7 +207,7 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         protected IDictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
-        public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags { get { return InternalActiveGameFlags.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags => InternalActiveGameFlags.AsReadOnly();
 
         public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other)
         {
@@ -240,7 +240,7 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         protected Dictionary<string, NodeLock> InternalOpenedLocks { get; set; } = new Dictionary<string, NodeLock>();
-        public ReadOnlyDictionary<string, NodeLock> OpenedLocks { get { return InternalOpenedLocks.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, NodeLock> OpenedLocks => InternalOpenedLocks.AsReadOnly();
 
         public Dictionary<string, NodeLock> GetOpenedNodeLocksExceptIn(ReadOnlyInGameState other)
         {
@@ -306,7 +306,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected Dictionary<string, RoomNode> InternalTakenItemLocations { get; set; } = new Dictionary<string, RoomNode>();
 
-        public ReadOnlyDictionary<string, RoomNode> TakenItemLocations { get { return InternalTakenItemLocations.AsReadOnly(); } }
+        public ReadOnlyDictionary<string, RoomNode> TakenItemLocations => InternalTakenItemLocations.AsReadOnly();
 
         public Dictionary<string, RoomNode> GetTakenItemLocationsExceptIn(ReadOnlyInGameState other)
         {
@@ -341,11 +341,11 @@ namespace sm_json_data_framework.Models.InGameStates
 
         protected ItemInventory InternalInventory { get; set; }
 
-        public ReadOnlyItemInventory Inventory { get { return InternalInventory.AsReadOnly(); } }
+        public ReadOnlyItemInventory Inventory => InternalInventory.AsReadOnly();
 
-        public ReadOnlyResourceCount BaseResourceMaximums { get { return InternalInventory.BaseResourceMaximums; } }
+        public ReadOnlyResourceCount BaseResourceMaximums => InternalInventory.BaseResourceMaximums;
 
-        public ReadOnlyResourceCount ResourceMaximums { get { return InternalInventory.ResourceMaximums; } }
+        public ReadOnlyResourceCount ResourceMaximums => InternalInventory.ResourceMaximums;
 
         public ItemInventory GetInventoryExceptIn(ReadOnlyInGameState other)
         {
@@ -428,7 +428,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected InRoomState InternalInRoomState { get; set; }
 
-        public ReadOnlyInRoomState InRoomState { get { return InternalInRoomState.AsReadOnly(); } }
+        public ReadOnlyInRoomState InRoomState => InternalInRoomState.AsReadOnly();
 
         /// <summary>
         /// In-room state of the last few rooms when they were left. This list remembers no more room states than the PreviousRooms constant.
@@ -436,7 +436,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         protected List<InRoomState> InternalPreviousRoomStates { get; } = new List<InRoomState>();
 
-        public IReadOnlyList<ReadOnlyInRoomState> PreviousRoomStates { get { return InternalPreviousRoomStates.Select(state => state.AsReadOnly()).ToList().AsReadOnly(); } }
+        public IReadOnlyList<ReadOnlyInRoomState> PreviousRoomStates => InternalPreviousRoomStates.Select(state => state.AsReadOnly()).ToList().AsReadOnly();
 
         /// <summary>
         /// Returns the in-room state that corresponds to the provided previousRoomCount, for this in-game state.
@@ -500,7 +500,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return roomState?.CurrentNode;
         }
 
-        public RoomNode CurrentNode { get { return GetCurrentNode(0); } }
+        public RoomNode CurrentNode => GetCurrentNode(0);
 
         public bool BypassingExitLock(int previousRoomCount = 0)
         {
@@ -514,7 +514,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return roomState?.OpenedExitLock ?? false;
         }
 
-        public Room CurrentRoom { get { return GetCurrentOrPreviousRoom(0); } }
+        public Room CurrentRoom => GetCurrentOrPreviousRoom(0);
 
         public Room GetCurrentOrPreviousRoom(int previousRoomCount)
         {

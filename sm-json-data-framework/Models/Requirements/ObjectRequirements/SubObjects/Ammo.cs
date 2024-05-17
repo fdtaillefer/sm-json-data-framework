@@ -25,12 +25,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// The type of ammo that is being consumed by this.
         /// </summary>
-        public AmmoEnum AmmoType { get { return InnerElement.AmmoType; } }
+        public AmmoEnum AmmoType => InnerElement.AmmoType;
 
         /// <summary>
         /// The amount of ammo that is being consumed by this.
         /// </summary>
-        public int Count { get { return InnerElement.Count; } }
+        public int Count => InnerElement.Count;
 
         public override bool IsNever()
         {

@@ -51,27 +51,27 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// An in-room ID to identify the node. This is unique ONLY within the room!
         /// </summary>
-        public int Id { get { return InnerElement.Id; } }
+        public int Id => InnerElement.Id;
 
         /// <summary>
         /// A string that identifies this node, often used as a key in Dictionaries. This is unique across the entire model.
         /// </summary>
-        public string IdentifyingString { get { return InnerElement.IdentifyingString; } }
+        public string IdentifyingString => InnerElement.IdentifyingString;
 
         /// <summary>
         /// A human-legible name that identifies the node. This is unique across the entire model, but is long and unwieldy.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The type of node this is.
         /// </summary>
-        public NodeTypeEnum NodeType { get { return InnerElement.NodeType; } }
+        public NodeTypeEnum NodeType => InnerElement.NodeType;
 
         /// <summary>
         /// The subtype of this node. Which Value that make sense depends on the node type.
         /// </summary>
-        public NodeSubTypeEnum NodeSubType { get { return InnerElement.NodeSubType; } }
+        public NodeSubTypeEnum NodeSubType => InnerElement.NodeSubType;
 
         /// <summary>
         /// The item that can be obtained by interacting with this node (if any).
@@ -81,7 +81,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The in-game address of this node.
         /// </summary>
-        public string NodeAddress { get { return InnerElement.NodeAddress; } }
+        public string NodeAddress => InnerElement.NodeAddress;
 
         /// <summary>
         /// The possible environments for this node. 
@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Whether entering a room at this node effectively spawns Samus at a different node.
         /// </summary>
-        public bool SpawnsAtDifferentNode { get { return InnerElement.SpawnsAtDifferentNode; } }
+        public bool SpawnsAtDifferentNode => InnerElement.SpawnsAtDifferentNode;
 
         /// <summary>
         /// The locks that may prevent interaction with this node, mapped by name.
@@ -340,12 +340,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>Not reliable before <see cref="Initialize(UnfinalizedSuperMetroidModel)"/> has been called.</para>
         /// <para>The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.</para>
         /// </summary>
-        public UnfinalizedRoomNode SpawnAtNode { get { return OverrideSpawnAtNode ?? this; } }
+        public UnfinalizedRoomNode SpawnAtNode => OverrideSpawnAtNode ?? this;
 
         /// <summary>
         /// Whether entering a room at this node effectively spawns Samus at a different node.
         /// </summary>
-        public bool SpawnsAtDifferentNode { get { return SpawnAtNode != this; } }
+        public bool SpawnsAtDifferentNode => SpawnAtNode != this;
 
         /// <summary>
         /// The locks that may prevent interaction with this node, mapped by name.

@@ -20,7 +20,7 @@ namespace sm_json_data_framework.Models.Items
         /// <summary>
         /// Hex value that represents this item.
         /// </summary>
-        public string Data { get { return InnerElement.Data; } }
+        public string Data => InnerElement.Data;
     }
 
     public class UnfinalizedInGameItem : UnfinalizedItem

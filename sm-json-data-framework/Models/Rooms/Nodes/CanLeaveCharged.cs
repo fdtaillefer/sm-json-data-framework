@@ -31,30 +31,30 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             Node = innerElement.Node.Finalize(mappings);
         }
 
-        public int Length { get { return InnerElement.Length; }  }
+        public int Length => InnerElement.Length;
 
-        public int EndingUpTiles { get { return InnerElement.EndingUpTiles; } }
+        public int EndingUpTiles => InnerElement.EndingUpTiles;
 
         /// <summary>
         /// The number of tiles available to obtain a shine charge.
         /// </summary>
-        public int UsedTiles { get { return InnerElement.UsedTiles; } }
+        public int UsedTiles => InnerElement.UsedTiles;
 
         /// <summary>
         /// The number of frames remaining on the shine charge when exiting the room.
         /// </summary>
-        public int FramesRemaining { get { return InnerElement.FramesRemaining; }  }
+        public int FramesRemaining => InnerElement.FramesRemaining;
 
         /// <summary>
         /// The number of frames that Samus spends shinesparking while executing this.
         /// Anything more than 0 implies leaving via a shinespark, so <see cref="FramesRemaining"/> should be 0.
         /// </summary>
-        public int ShinesparkFrames { get { return InnerElement.ShinesparkFrames; } }
+        public int ShinesparkFrames => InnerElement.ShinesparkFrames;
 
         /// <summary>
         /// Indicates whether this CanLeavecharged involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark { get { return InnerElement.MustShinespark; } }
+        public bool MustShinespark => InnerElement.MustShinespark;
 
         /// <summary>
         /// If present, declares this CanLeaveCharged as one that is initiated remotely and contains details regarding that context.
@@ -66,24 +66,24 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Returns whether this CanLeaveCharged is initiated at a different node than the door it exits through.
         /// </summary>
-        public bool IsInitiatedRemotely { get { return InnerElement.IsInitiatedRemotely; } }
+        public bool IsInitiatedRemotely => InnerElement.IsInitiatedRemotely;
 
         /// <summary>
         /// The strats that can be used to execute this CanLeaveCharged, mapped by name.
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
 
-        public int OpenEnds { get { return InnerElement.OpenEnds; } }
+        public int OpenEnds => InnerElement.OpenEnds;
 
-        public int GentleUpTiles { get { return InnerElement.GentleUpTiles; } }
+        public int GentleUpTiles => InnerElement.GentleUpTiles;
 
-        public int GentleDownTiles { get { return InnerElement.GentleDownTiles; } }
+        public int GentleDownTiles => InnerElement.GentleDownTiles;
 
-        public int SteepUpTiles { get { return InnerElement.SteepUpTiles; } }
+        public int SteepUpTiles => InnerElement.SteepUpTiles;
 
-        public int SteepDownTiles { get { return InnerElement.SteepDownTiles; } }
+        public int SteepDownTiles => InnerElement.SteepDownTiles;
 
-        public int StartingDownTiles { get { return InnerElement.StartingDownTiles; } }
+        public int StartingDownTiles => InnerElement.StartingDownTiles;
 
         /// <summary>
         /// The node in which this CanLeaveCharged is.
@@ -155,7 +155,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Indicates whether this CanLeavecharged involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark { get { return ShinesparkFrames > 0; } }
+        public bool MustShinespark => ShinesparkFrames > 0;
 
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
@@ -172,7 +172,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Returns whether this CanLeaveCharged is initiated at a different node than the door it exits through.
         /// </summary>
-        public bool IsInitiatedRemotely { get { return InitiateRemotely != null; } }
+        public bool IsInitiatedRemotely => InitiateRemotely != null;
 
         /// <summary>
         /// The strats that can be used to execute this CanLeaveCharged, mapped by name.

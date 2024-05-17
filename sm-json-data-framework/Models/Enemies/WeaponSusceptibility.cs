@@ -26,17 +26,17 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The weapon the implicit enemy is susceptible to
         /// </summary>
-        public Weapon Weapon { get { return WeaponMultiplier.Weapon; } }
+        public Weapon Weapon => WeaponMultiplier.Weapon;
 
         /// <summary>
         /// The number of perfectly-aimed shots of the weapon it would take to kill the implicit enemy
         /// </summary>
-        public int Shots { get { return InnerElement.Shots; } }
+        public int Shots => InnerElement.Shots;
 
         /// <summary>
         /// The amount of damage done to the implicit enemy per successful shot of the weapon
         /// </summary>
-        public int DamagePerShot { get { return WeaponMultiplier.DamagePerShot; } }
+        public int DamagePerShot => WeaponMultiplier.DamagePerShot;
 
         /// <summary>
         /// Calculates the number of hits an enemy with the provided hp will take to die if this WeaponMultiplier is applicable to the attack.
@@ -71,7 +71,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The weapon the implicit enemy is susceptible to
         /// </summary>
-        public UnfinalizedWeapon Weapon { get { return WeaponMultiplier.Weapon; } }
+        public UnfinalizedWeapon Weapon => WeaponMultiplier.Weapon;
 
         /// <summary>
         /// The number of perfectly-aimed shots of the weapon it would take to kill the implicit enemy
@@ -81,7 +81,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The amount of damage done to the implicit enemy per successful shot of the weapon
         /// </summary>
-        public int DamagePerShot { get {return WeaponMultiplier.DamagePerShot; } }
+        public int DamagePerShot => WeaponMultiplier.DamagePerShot;
 
         /// <summary>
         /// Calculates the number of hits an enemy with the provided hp will take to die if this WeaponMultiplier is applicable to the attack.

@@ -25,7 +25,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <summary>
         /// The string value of this logical element.
         /// </summary>
-        public string Value { get { return InnerElement.Value; } }
+        public string Value => InnerElement.Value;
     }
 
     public abstract class AbstractUnfinalizedObjectLogicalElementWithString<ConcreteType, TargetType> : AbstractUnfinalizedObjectLogicalElement<ConcreteType, TargetType>

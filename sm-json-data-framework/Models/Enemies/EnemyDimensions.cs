@@ -23,12 +23,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The height of the enemy, in pixels.
         /// </summary>
-        public int Height { get { return InnerElement.Height; } }
+        public int Height => InnerElement.Height;
 
         /// <summary>
         /// The width of the enemy, in pixels.
         /// </summary>
-        public int Width { get { return InnerElement.Width; } }
+        public int Width => InnerElement.Width;
     }
 
     public class UnfinalizedEnemyDimensions :AbstractUnfinalizedModelElement<UnfinalizedEnemyDimensions, EnemyDimensions>

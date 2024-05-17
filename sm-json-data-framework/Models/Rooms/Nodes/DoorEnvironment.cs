@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The physics that are in effect in this DoorEnvironment
         /// </summary>
-        public PhysicsEnum Physics { get { return InnerElement.Physics; } }
+        public PhysicsEnum Physics => InnerElement.Physics;
 
         public IReadOnlySet<int> EntranceNodeIds { get; }
 

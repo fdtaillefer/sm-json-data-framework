@@ -80,22 +80,22 @@ namespace sm_json_data_framework.Options
         /// A sequence of tech names that are disabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is false.
         /// </summary>
         private ISet<string> InternalDisabledTechs { get; set; } = new HashSet<string>();
-        public IReadOnlySet<string> DisabledTechs { get { return InternalDisabledTechs.AsReadOnly(); } }
+        public IReadOnlySet<string> DisabledTechs => InternalDisabledTechs.AsReadOnly();
 
         /// <summary>
         /// A sequence of tech names that are enabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is true.
         /// </summary>
         private ISet<string> InternalEnabledTechs { get; set; } = new HashSet<string>();
-        public IReadOnlySet<string> EnabledTechs { get { return InternalEnabledTechs.AsReadOnly(); } }
+        public IReadOnlySet<string> EnabledTechs => InternalEnabledTechs.AsReadOnly();
 
         /// <summary>
         /// A sequence of strat names that are disabled, regardless of their requirements. Only notable strats can be disabled.
         /// </summary>
         private ISet<string> InternalDisabledStrats { get; set; } = new HashSet<string>();
-        public IReadOnlySet<string> DisabledStrats { get { return InternalDisabledStrats.AsReadOnly(); } }
+        public IReadOnlySet<string> DisabledStrats => InternalDisabledStrats.AsReadOnly();
 
         private ISet<string> InternalRemovedGameFlags { get; set; } = new HashSet<string>();
-        public IReadOnlySet<string> RemovedGameFlags { get { return InternalRemovedGameFlags.AsReadOnly(); } }
+        public IReadOnlySet<string> RemovedGameFlags => InternalRemovedGameFlags.AsReadOnly();
 
         public decimal TilesToShineCharge { get; set; } = DefaultTilesToShineCharge;
 
@@ -271,7 +271,7 @@ namespace sm_json_data_framework.Options
             }
         }
 
-        public bool CanShinespark { get { return IsTechEnabled("canShinespark"); } }
+        public bool CanShinespark => IsTechEnabled("canShinespark");
 
         /// <summary>
         /// Registers the provided strat name as a disabled strat.
@@ -321,7 +321,7 @@ namespace sm_json_data_framework.Options
         }
 
         public SpawnerFarmingOptions InternalSpawnerFarmingOptions { get; set; }
-        public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions  { get{return InternalSpawnerFarmingOptions.AsReadOnly(); } }
+        public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions => InternalSpawnerFarmingOptions.AsReadOnly();
     }
 
     /// <summary>

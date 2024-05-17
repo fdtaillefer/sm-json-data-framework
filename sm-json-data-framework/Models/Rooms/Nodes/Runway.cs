@@ -31,21 +31,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The name of the runway. This is unique across the entire model.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
-        public int Length { get { return InnerElement.Length; } }
+        public int Length => InnerElement.Length;
 
-        public int GentleUpTiles { get { return InnerElement.GentleUpTiles; } }
+        public int GentleUpTiles => InnerElement.GentleUpTiles;
 
-        public int GentleDownTiles { get { return InnerElement.GentleDownTiles; } }
+        public int GentleDownTiles => InnerElement.GentleDownTiles;
 
-        public int SteepUpTiles { get { return InnerElement.SteepUpTiles; } }
+        public int SteepUpTiles => InnerElement.SteepUpTiles;
 
-        public int SteepDownTiles { get { return InnerElement.SteepDownTiles; } }
+        public int SteepDownTiles => InnerElement.SteepDownTiles;
 
-        public int StartingDownTiles { get { return InnerElement.StartingDownTiles; } }
+        public int StartingDownTiles => InnerElement.StartingDownTiles;
 
-        public int EndingUpTiles { get { return InnerElement.EndingUpTiles; } }
+        public int EndingUpTiles => InnerElement.EndingUpTiles;
         
         /// <summary>
         /// The strats that can be executed to use this Runway, mapped by name.
@@ -55,14 +55,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Indicates whether this Runway can be used to continue gaining momentum after entering the room with some momentum.
         /// </summary>
-        public bool UsableComingIn { get { return InnerElement.UsableComingIn; } }
+        public bool UsableComingIn => InnerElement.UsableComingIn;
 
         /// <summary>
         /// The node to which this runway is tied.
         /// </summary>
         public RoomNode Node { get; }
 
-        public int OpenEnds { get { return InnerElement.OpenEnds; } }
+        public int OpenEnds => InnerElement.OpenEnds;
 
         /// <summary>
         /// Attempts to use this runway based on the provided in-game state (which will not be altered), 

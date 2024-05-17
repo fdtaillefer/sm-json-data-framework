@@ -20,12 +20,12 @@ namespace sm_json_data_framework.Models.Items
         /// <summary>
         /// The resource that this expansion item increases the capacity of.
         /// </summary>
-        public RechargeableResourceEnum Resource { get { return InnerElement.Resource; } }
+        public RechargeableResourceEnum Resource => InnerElement.Resource;
 
         /// <summary>
         /// The amount by which this item expands the capacity of its resource.
         /// </summary>
-        public int ResourceAmount { get { return InnerElement.ResourceAmount; }  }
+        public int ResourceAmount => InnerElement.ResourceAmount;
     }
 
     public class UnfinalizedExpansionItem : UnfinalizedInGameItem

@@ -22,22 +22,22 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The name of this enemy attack.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
 
         /// <summary>
         /// The amount of damage this attack does when unmitigated.
         /// </summary>
-        public int BaseDamage { get { return InnerElement.BaseDamage; } }
+        public int BaseDamage => InnerElement.BaseDamage;
 
         /// <summary>
         /// Indicates whether this attack is mitigated by Varia suit.
         /// </summary>
-        public bool AffectedByVaria { get { return InnerElement.AffectedByVaria; } }
+        public bool AffectedByVaria => InnerElement.AffectedByVaria;
 
         /// <summary>
         /// Indicates whether this attack is mitigated by Gravity suit.
         /// </summary>
-        public bool AffectedByGravity { get { return InnerElement.AffectedByGravity; } }
+        public bool AffectedByGravity => InnerElement.AffectedByGravity;
     }
 
     public class UnfinalizedEnemyAttack: AbstractUnfinalizedModelElement<UnfinalizedEnemyAttack, EnemyAttack>

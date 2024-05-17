@@ -23,12 +23,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The in-game address of the room in which this twin is found.
         /// </summary>
-        public string RoomAddress { get { return InnerElement.RoomAddress; } }
+        public string RoomAddress => InnerElement.RoomAddress;
 
         /// <summary>
         /// The in-game address of the this twin door.
         /// </summary>
-        public string DoorAddress { get { return InnerElement.DoorAddress; } }
+        public string DoorAddress => InnerElement.DoorAddress;
     }
 
     public class UnfinalizedTwinDoorAddress: AbstractUnfinalizedModelElement<UnfinalizedTwinDoorAddress, TwinDoorAddress>

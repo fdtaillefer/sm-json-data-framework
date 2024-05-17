@@ -23,31 +23,31 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             InnerElement = innerElement;
         }
 
-        public int Length { get { return InnerElement.Length; } }
+        public int Length => InnerElement.Length;
 
-        public int EndingUpTiles { get { return InnerElement.EndingUpTiles; } }
+        public int EndingUpTiles => InnerElement.EndingUpTiles;
 
-        public int GentleUpTiles { get { return InnerElement.GentleUpTiles; } }
+        public int GentleUpTiles => InnerElement.GentleUpTiles;
 
-        public int GentleDownTiles { get { return InnerElement.GentleDownTiles; } }
+        public int GentleDownTiles => InnerElement.GentleDownTiles;
 
-        public int SteepUpTiles { get { return InnerElement.SteepUpTiles; } }
+        public int SteepUpTiles => InnerElement.SteepUpTiles;
 
-        public int SteepDownTiles { get { return InnerElement.SteepDownTiles; } }
+        public int SteepDownTiles => InnerElement.SteepDownTiles;
 
-        public int StartingDownTiles { get { return InnerElement.StartingDownTiles; } }
+        public int StartingDownTiles => InnerElement.StartingDownTiles;
 
-        public int OpenEnds { get { return InnerElement.OpenEnds; } }
+        public int OpenEnds => InnerElement.OpenEnds;
 
         /// <summary>
         /// The duration (in frames) of the shinespark that goes alongside this CanShineCharge, if any. Can be 0 if no shinespark is involved.
         /// </summary>
-        public int ShinesparkFrames { get { return InnerElement.ShinesparkFrames; } }
+        public int ShinesparkFrames => InnerElement.ShinesparkFrames;
 
         /// <summary>
         /// Indicates whether this CanShineCharge involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark { get { return InnerElement.MustShinespark; } }
+        public bool MustShinespark => InnerElement.MustShinespark;
 
         public override bool IsNever()
         {
@@ -114,7 +114,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// Indicates whether this CanShineCharge involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark { get { return ShinesparkFrames > 0; } }
+        public bool MustShinespark => ShinesparkFrames > 0;
 
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.

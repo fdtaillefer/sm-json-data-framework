@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.GameFlags
         /// <summary>
         /// The unique name of the game flag. Game flag names are defined by the model and are not official names.
         /// </summary>
-        public string Name { get { return InnerElement.Name; } }
+        public string Name => InnerElement.Name;
     }
 
     public class UnfinalizedGameFlag : AbstractUnfinalizedModelElement<UnfinalizedGameFlag, GameFlag>
