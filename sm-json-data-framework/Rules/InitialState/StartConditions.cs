@@ -11,7 +11,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 
-namespace sm_json_data_framework.Rules
+namespace sm_json_data_framework.Rules.InitialState
 {
     /// <summary>
     /// A container for game start configuration.
@@ -71,7 +71,7 @@ namespace sm_json_data_framework.Rules
         public StartConditions(UnfinalizedStartConditions sourceElement, ModelFinalizationMappings mappings)
         {
             StartingNode = sourceElement.StartingNode.Finalize(mappings);
-            StartingInventory = new ItemInventory(sourceElement.StartingInventory, mappings).AsReadOnly();
+            StartingInventory = new ItemInventory(sourceElement, mappings).AsReadOnly();
             StartingResources = sourceElement.StartingResources.Clone().AsReadOnly();
             StartingGameFlags = sourceElement.StartingGameFlags.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
             StartingOpenLocks = sourceElement.StartingOpenLocks.Select(nodeLock => nodeLock.Finalize(mappings)).ToList().AsReadOnly();
@@ -148,7 +148,7 @@ namespace sm_json_data_framework.Rules
         /// <returns></returns>
         public StartConditionsBuilder BaseResourceMaximums(ResourceCount baseResourceMaximums)
         {
-            if(_startingInventory != null)
+            if (_startingInventory != null)
             {
                 _startingInventory = _startingInventory.WithBaseResourceMaximums(baseResourceMaximums);
             }
@@ -181,8 +181,9 @@ namespace sm_json_data_framework.Rules
         public static UnfinalizedStartConditions CreateVanillaStartConditions(UnfinalizedSuperMetroidModel model)
         {
             UnfinalizedStartConditions vanillaStartConditions = new UnfinalizedStartConditions();
-            vanillaStartConditions.StartingInventory = UnfinalizedItemInventory.CreateVanillaStartingInventory(model);
-            vanillaStartConditions.StartingResources = vanillaStartConditions.StartingInventory.BaseResourceMaximums.Clone();
+            vanillaStartConditions.StartingInventory = UnfinalizedItemInventory.CreateVanillaStartingUnfinalizedInventory(model);
+            vanillaStartConditions.BaseResourceMaximums = ResourceCount.CreateVanillaBaseResourceMaximums();
+            vanillaStartConditions.StartingResources = vanillaStartConditions.BaseResourceMaximums.Clone();
             vanillaStartConditions.StartingNode = model.GetNodeInRoom("Ceres Elevator Room", 1);
 
             // Start with no open locks, taken items, or active game falgs, so we can leave those as their empty defaults
@@ -199,7 +200,7 @@ namespace sm_json_data_framework.Rules
         /// Constructor that constructs StartConditions using the provided model and the <see cref="BasicStartConditions"/> it contains.
         /// </summary>
         /// <param name="model">Model from which to construct StartConditions</param>
-        public UnfinalizedStartConditions(UnfinalizedSuperMetroidModel model): this(model, model.BasicStartConditions)
+        public UnfinalizedStartConditions(UnfinalizedSuperMetroidModel model) : this(model, model.BasicStartConditions)
         {
 
         }
@@ -238,7 +239,7 @@ namespace sm_json_data_framework.Rules
                 startingResources.ApplyAmount(capacity.Resource, capacity.MaxAmount);
             }
 
-            UnfinalizedItemInventory startingInventory = new UnfinalizedItemInventory(startingResources);
+            UnfinalizedItemInventory startingInventory = new UnfinalizedItemInventory();
             foreach (string itemName in overrideBasicStartConditions.StartingItemNames)
             {
                 if (!model.Items.TryGetValue(itemName, out UnfinalizedItem item))
@@ -252,7 +253,8 @@ namespace sm_json_data_framework.Rules
             StartingNode = model.GetNodeInRoom(overrideBasicStartConditions.StartingRoomName, overrideBasicStartConditions.StartingNodeId);
             StartingGameFlags = startingFlags;
             StartingOpenLocks = startingLocks;
-            // Default starting resource counts to the starting maximum
+            // Default base maximums starting resource counts to the starting resources
+            BaseResourceMaximums = startingResources.Clone();
             StartingResources = startingResources.Clone();
             StartingInventory = startingInventory;
         }
@@ -282,7 +284,7 @@ namespace sm_json_data_framework.Rules
         private UnfinalizedItemInventory _itemInventory;
         public UnfinalizedItemInventory StartingInventory { get; set; }
 
-        public ReadOnlyResourceCount BaseResourceMaximums { get { return StartingInventory?.BaseResourceMaximums; } }
+        public ReadOnlyResourceCount BaseResourceMaximums { get; set; }
 
         public ResourceCount StartingResources { get; set; }
 

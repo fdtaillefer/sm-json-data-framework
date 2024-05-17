@@ -1,6 +1,6 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Rules;
+using sm_json_data_framework.Rules.InitialState;
 using System;
 using System.Collections.Generic;
 using System.Linq;

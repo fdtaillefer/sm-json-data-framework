@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Rules
+namespace sm_json_data_framework.Rules.InitialState
 {
     /// <summary>
     /// A model describing the game's start conditions, using int and string foreign keys rather than constructed models.

@@ -23,6 +23,7 @@ using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Rules.InitialState;
 using System;
 using System.Collections.Generic;
 using System.Data;

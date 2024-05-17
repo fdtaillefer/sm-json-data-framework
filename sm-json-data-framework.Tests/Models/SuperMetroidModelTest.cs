@@ -12,6 +12,7 @@ using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Tests.TestTools;
 using sm_json_data_framework.Utils;
 using System;

@@ -66,16 +66,15 @@ namespace sm_json_data_framework.Tests.InGameStates
             }
         }
 
-        // Use a static model to build it only once.
-        private static UnfinalizedSuperMetroidModel Model { get; set; } = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
+        private static SuperMetroidModel Model { get; set; } = StaticTestObjects.UnmodifiableModel;
 
         #region Tests for ApplyAddItem()
         [Fact]
         public void ApplyAddItem_NonConsumableItem_AddsItem()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
             inventory.ApplyAddItem(varia);
@@ -90,8 +89,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyAddItem_ExpansionItem_AddsItem()
         {
             // Given
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
             inventory.ApplyAddItem(missilePack);
@@ -107,8 +106,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyAddItem_ExpansionItem_ItemAlreadyPresent_AddsToCount()
         {
             // Given
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
             inventory.ApplyAddItem(missilePack);
 
             // When
@@ -127,8 +126,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDisableItem_NonConsumableItem_DisablesItem()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
             inventory.ApplyAddItem(varia);
 
             // When
@@ -142,8 +141,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDisableItem_NonConsumableItem_ItemNotInInventory_DoesNothing()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
             inventory.ApplyDisableItem(varia);
@@ -156,8 +155,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyDisableItem_ExpansionItem_DoesNothing()
         {
             // Given
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
             inventory.ApplyAddItem(missilePack);
 
             // When
@@ -173,8 +172,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyEnableItem_NonConsumableItem_EnablesItem()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
             inventory.ApplyAddItem(varia);
             inventory.ApplyDisableItem(varia);
 
@@ -189,8 +188,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyEnableItem_NonConsumableItem_ItemNotDisabled_DoesNothing()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
             inventory.ApplyAddItem(varia);
 
             // When
@@ -204,8 +203,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ApplyEnableItem_NonConsumableItem_ItemNotInInventory_DoesNothing()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
             inventory.ApplyEnableItem(varia);
@@ -220,13 +219,13 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ExceptIn_BuildsProperDifference()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem gravity = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            UnfinalizedItem speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItem superPack = Model.Items[SuperMetroidModel.SUPER_NAME];
-            UnfinalizedItem powerBombPack = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item gravity = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item superPack = Model.Items[SuperMetroidModel.SUPER_NAME];
+            Item powerBombPack = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
                 .ApplyAddItem(varia)
                 .ApplyAddItem(gravity)
                 .ApplyAddItem(missilePack)
@@ -234,7 +233,7 @@ namespace sm_json_data_framework.Tests.InGameStates
                 .ApplyAddItem(missilePack)
                 .ApplyAddItem(superPack);
 
-            UnfinalizedItemInventory otherInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+            ItemInventory otherInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
                 .ApplyAddItem(speedBooster)
                 .ApplyAddItem(gravity)
                 .ApplyAddItem(missilePack)
@@ -244,7 +243,7 @@ namespace sm_json_data_framework.Tests.InGameStates
                 .ApplyAddItem(powerBombPack);
 
             // When
-            UnfinalizedItemInventory result = inventory.ExceptIn(otherInventory);
+            ItemInventory result = inventory.ExceptIn(otherInventory);
 
             // Expect
             Assert.Contains(varia.Name, result.NonConsumableItems.Keys);
@@ -260,13 +259,13 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ExceptIn_ReturnsSeparateState()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            UnfinalizedItemInventory otherInventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            ItemInventory otherInventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
-            UnfinalizedItemInventory result = inventory.ExceptIn(otherInventory);
+            ItemInventory result = inventory.ExceptIn(otherInventory);
 
             // Subsequently given
             inventory.ApplyAddItem(varia).ApplyAddItem(missilePack).ApplyDisableItem(varia);
@@ -282,10 +281,10 @@ namespace sm_json_data_framework.Tests.InGameStates
         #region Tests for HasItem()
         [Theory]
         [MemberData(nameof(DifferentObjectTypeSamples))]
-        public void HasItem_ItemIsPresent_ReturnsTrue(UnfinalizedItem item)
+        public void HasItem_ItemIsPresent_ReturnsTrue(Item item)
         {
             // Given
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
                 .ApplyAddItem(item);
 
             // When
@@ -297,10 +296,10 @@ namespace sm_json_data_framework.Tests.InGameStates
 
         [Theory]
         [MemberData(nameof(DifferentObjectTypeSamples))]
-        public void HasItem_ItemNotPresent_ReturnsFalse(UnfinalizedItem item)
+        public void HasItem_ItemNotPresent_ReturnsFalse(Item item)
         {
             // Given
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
             bool result = inventory.HasItem(item);
@@ -313,8 +312,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void HasItem_ItemPresentButDisabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
                 .ApplyAddItem(varia)
                 .ApplyDisableItem(varia);
 
@@ -333,7 +332,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             int amount = 5;
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(new ResourceCount().ApplyAmount(resource, amount));
+            ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, amount));
 
             // When
             int result = inventory.ResourceMaximums.GetAmount(resource);
@@ -350,7 +349,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             int amount = 5;
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(new ResourceCount().ApplyAmount(resource, amount));
+            ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, amount));
 
             // When
             int result = inventory.ResourceMaximums.GetAmount(resource.ToConsumableResource());
@@ -363,7 +362,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ResourceMaximums_ConsumableEnergy_NoExpansions_ReturnsBaseValuesSum()
         {
             // Given
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(
+            ItemInventory inventory = new ItemInventory(
                 new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, 2).ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 4)
             );
 
@@ -376,11 +375,11 @@ namespace sm_json_data_framework.Tests.InGameStates
 
         [Theory]
         [MemberData(nameof(RechargeableResourceValuesWithExpansionItem))]
-        public void ResourceMaximums_RechargeableResource_WithExpansions_ReturnsSumOfBaseAndExpansion(RechargeableResourceEnum resource, UnfinalizedExpansionItem item)
+        public void ResourceMaximums_RechargeableResource_WithExpansions_ReturnsSumOfBaseAndExpansion(RechargeableResourceEnum resource, ExpansionItem item)
         {
             // Given
             int baseAmount = 5;
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
+            ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
                 .ApplyAddItem(item).ApplyAddItem(item);
 
             // When
@@ -400,8 +399,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             int baseAmount = 5;
-            UnfinalizedExpansionItem item = (UnfinalizedExpansionItem) Model.Items[itemName];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
+            ExpansionItem item = (ExpansionItem) Model.Items[itemName];
+            ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
                 .ApplyAddItem(item).ApplyAddItem(item);
 
             // When
@@ -416,9 +415,9 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ResourceMaximums_ConsumableEnergy_WithExpansions_ReturnsSumOfBaseAndExpansionForBothEnergyTypes()
         {
             // Given
-            UnfinalizedExpansionItem etank = (UnfinalizedExpansionItem)Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
-            UnfinalizedExpansionItem reserve = (UnfinalizedExpansionItem)Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(
+            ExpansionItem etank = (ExpansionItem)Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
+            ExpansionItem reserve = (ExpansionItem)Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
+            ItemInventory inventory = new ItemInventory(
                 new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, 2).ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 4))
                 .ApplyAddItem(etank)
                 .ApplyAddItem(etank)
@@ -438,8 +437,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ContainsAnyInGameItem_HasNonConsumableItem_ReturnsTrue()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(varia);
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(varia);
 
             // When
             bool result = inventory.ContainsAnyInGameItem();
@@ -452,8 +451,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ContainsAnyInGameItem_HasExpansionItem_ReturnsTrue()
         {
             // Given
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(missilePack);
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(missilePack);
 
             // When
             bool result = inventory.ContainsAnyInGameItem();
@@ -466,8 +465,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void ContainsAnyInGameItem_HasOnlyNonGameItem_ReturnsFalse()
         {
             // Given
-            UnfinalizedItem powerBeam = Model.Items[SuperMetroidModel.POWER_BEAM_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(powerBeam);
+            Item powerBeam = Model.Items[SuperMetroidModel.POWER_BEAM_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(powerBeam);
 
             // When
             bool result = inventory.ContainsAnyInGameItem();
@@ -482,8 +481,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void IsItemDisabled_ItemNotPresent_ReturnsFalse()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
             bool result = inventory.IsItemDisabled(varia);
@@ -496,8 +495,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void IsItemDisabled_ItemPresentButEnabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(varia);
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()).ApplyAddItem(varia);
 
             // When
             bool result = inventory.IsItemDisabled(varia);
@@ -510,8 +509,8 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void IsItemDisabled_ItemPresentAndDisabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
             inventory.ApplyAddItem(varia).ApplyDisableItem(varia);
             // When
             bool result = inventory.IsItemDisabled(varia);
@@ -526,9 +525,9 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void Clone_CopiesCorrectly()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
 
             ResourceCount resourceCount = new ResourceCount();
             int value = 1;
@@ -536,13 +535,13 @@ namespace sm_json_data_framework.Tests.InGameStates
             {
                 resourceCount.ApplyAmount(resource, value++);
             }
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(resourceCount);
+            ItemInventory inventory = new ItemInventory(resourceCount);
             inventory.ApplyAddItem(varia)
                 .ApplyAddItem(speedBooster).ApplyDisableItem(speedBooster)
                 .ApplyAddItem(missilePack).ApplyAddItem(missilePack);
 
             // When
-            UnfinalizedItemInventory clone = inventory.Clone();
+            ItemInventory clone = inventory.Clone();
 
             // Expect
             Assert.Equal(2, clone.NonConsumableItems.Count);
@@ -562,13 +561,13 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void Clone_SeparatesState()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
-            UnfinalizedItemInventory clone = inventory.Clone();
+            ItemInventory clone = inventory.Clone();
 
             // Subsequently given
             inventory.ApplyAddItem(varia)
@@ -587,12 +586,12 @@ namespace sm_json_data_framework.Tests.InGameStates
         public void WithResourceMaximums_CopiesCorrectly()
         {
             // Given
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
 
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
-            inventory.ApplyAddItem(varia)
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddItem(varia)
                 .ApplyAddItem(speedBooster).ApplyDisableItem(speedBooster)
                 .ApplyAddItem(missilePack).ApplyAddItem(missilePack);
             ResourceCount resourceCount = new ResourceCount();
@@ -603,7 +602,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             }
 
             // When
-            UnfinalizedItemInventory clone = inventory.WithBaseResourceMaximums(resourceCount);
+            ItemInventory clone = inventory.WithBaseResourceMaximums(resourceCount);
 
             // Expect
             Assert.Equal(2, clone.NonConsumableItems.Count);
@@ -629,13 +628,13 @@ namespace sm_json_data_framework.Tests.InGameStates
             {
                 resourceCount.ApplyAmount(resource, value++);
             }
-            UnfinalizedItem varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            UnfinalizedItem speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            UnfinalizedItem missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            UnfinalizedItemInventory inventory = new UnfinalizedItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+            Item varia = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item speedBooster = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            Item missilePack = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
 
             // When
-            UnfinalizedItemInventory clone = inventory.WithBaseResourceMaximums(resourceCount);
+            ItemInventory clone = inventory.WithBaseResourceMaximums(resourceCount);
 
             // Subsequently given
             inventory.ApplyAddItem(varia)
