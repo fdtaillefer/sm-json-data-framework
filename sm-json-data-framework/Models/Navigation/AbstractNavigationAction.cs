@@ -40,17 +40,17 @@ namespace sm_json_data_framework.Models.Navigation
             ItemsLost = new ItemInventory(model.StartConditions.BaseResourceMaximums.Clone());
 
             // Initialize enabled and disabled items
-            ItemsDisabledNames = executionResult.ResultingState.Inventory.DisabledItemNames.Except(initialInGameState.Inventory.DisabledItemNames);
-            ItemsEnabledNames = initialInGameState.Inventory.DisabledItemNames.Except(executionResult.ResultingState.Inventory.DisabledItemNames);
+            ItemsDisabledNames = executionResult.ResultingState.Inventory.DisabledItemNames.Except(initialInGameState.Inventory.DisabledItemNames).ToHashSet();
+            ItemsEnabledNames = initialInGameState.Inventory.DisabledItemNames.Except(executionResult.ResultingState.Inventory.DisabledItemNames).ToHashSet();
 
             // Initialize flags gained
-            GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptIn(initialInGameState).Values);
+            GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptIn(initialInGameState).Values).ToList();
 
             // Initialize locks opened
-            LocksOpened = LocksOpened.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptIn(initialInGameState).Values);
+            LocksOpened = LocksOpened.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptIn(initialInGameState).Values).ToList();
 
             // Initialize item locations taken
-            ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptIn(initialInGameState).Values);
+            ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptIn(initialInGameState).Values).ToList();
 
             // Initialize resources before and after
             ResourcesBefore = initialInGameState.Resources.Clone();
@@ -63,26 +63,24 @@ namespace sm_json_data_framework.Models.Navigation
                     executionResult.ResultingState.GetDestroyedObstacleIds()
                         .Except(initialInGameState.GetDestroyedObstacleIds())
                         .Select(obstacleId => executionResult.ResultingState.CurrentRoom.Obstacles[obstacleId])
-                    );
+                    ).ToList();
             }
 
             // Transfer information data from the ExecutionResult.
-            // No need to copy since they are IEnumerable and not supposed to be mutated.
-            RunwaysUsed = executionResult.RunwaysUsed;
-            CanLeaveChargedExecuted = executionResult.CanLeaveChargedExecuted;
-            OpenedLocks = executionResult.OpenedLocks;
-            BypassedLocks = executionResult.BypassedLocks;
-            KilledEnemies = executionResult.KilledEnemies;
+            RunwaysUsed = executionResult.RunwaysUsed.ToList();
+            CanLeaveChargedExecuted = executionResult.CanLeaveChargedExecuted.ToList();
+            OpenedLocks = executionResult.OpenedLocks.ToList();
+            BypassedLocks = executionResult.BypassedLocks.ToList();
+            KilledEnemies = executionResult.KilledEnemies.ToList();
 
-            // Since the set of items is mutable, do not transfer the instance
-            ItemsInvolved.UnionWith(executionResult.ItemsInvolved);
-            DamageReducingItemsInvolved.UnionWith(executionResult.DamageReducingItemsInvolved);
+            ItemsInvolved = executionResult.ItemsInvolved.ToDictionary(item => item.Name);
+            DamageReducingItemsInvolved = executionResult.DamageReducingItemsInvolved.ToDictionary(item => item.Name);
         }
 
         /// <summary>
         /// A description of what was being attempted which resulted in this action.
         /// </summary>
-        public string IntentDescription { get; set; } = "";
+        public string IntentDescription { get; protected set; } = "";
 
         #region Information about the action's effects
         /// <summary>
@@ -103,115 +101,115 @@ namespace sm_json_data_framework.Models.Navigation
         /// <summary>
         /// The inventory of items that have been gained by the player as a result of this action.
         /// </summary>
-        public ItemInventory ItemsGained { get; set; }
+        public ReadOnlyItemInventory ItemsGained { get; protected set; }
 
         /// <summary>
         /// The inventory of items that have been lost by the player as a result of this action.
         /// This can only really happen by reversing an action.
         /// </summary>
-        public ItemInventory ItemsLost { get; set; }
+        public ReadOnlyItemInventory ItemsLost { get; protected set; }
 
         /// <summary>
         /// The names of items that have been disabled by the player as a result of this action.
         /// </summary>
-        public IEnumerable<string> ItemsDisabledNames { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> ItemsDisabledNames { get; protected set; } = new HashSet<string>();
 
         /// <summary>
         /// The names of items that have been enabled by the player as a result of this action.
         /// </summary>
-        public IEnumerable<string> ItemsEnabledNames { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> ItemsEnabledNames { get; protected set; } = new HashSet<string>();
 
         /// <summary>
         /// The enumeration of game flags that have been obtained by the player as a result of this action.
         /// </summary>
-        public IEnumerable<GameFlag> GameFlagsGained { get; protected set; } = Enumerable.Empty<GameFlag>();
+        public IReadOnlyCollection<GameFlag> GameFlagsGained { get; protected set; } = new List<GameFlag>();
 
         /// <summary>
         /// The enumeration of game flags that have been obtained by the player as a result of this action.
         /// </summary>
-        public IEnumerable<GameFlag> GameFlagsLost { get; protected set; } = Enumerable.Empty<GameFlag>();
+        public IReadOnlyCollection<GameFlag> GameFlagsLost { get; protected set; } = new List<GameFlag>();
 
         /// <summary>
         /// The enumeration of node locks that have been opened as a result of this action.
         /// </summary>
-        public IEnumerable<NodeLock> LocksOpened { get; protected set; } = Enumerable.Empty<NodeLock>();
+        public IReadOnlyCollection<NodeLock> LocksOpened { get; protected set; } = new List<NodeLock>();
 
         /// <summary>
         /// The enumeration of node  locks that have been closed as a result of this action.
         /// This can only really happen by reversing an action.
         /// </summary>
-        public IEnumerable<NodeLock> LocksClosed { get; protected set; } = Enumerable.Empty<NodeLock>();
+        public IReadOnlyCollection<NodeLock> LocksClosed { get; protected set; } = new List<NodeLock>();
 
         /// <summary>
         /// The enumeration of item locations whose item has been taken by the player as a result of this action.
         /// </summary>
-        public IEnumerable<RoomNode> ItemLocationsTaken { get; protected set; } = Enumerable.Empty<RoomNode>();
+        public IReadOnlyCollection<RoomNode> ItemLocationsTaken { get; protected set; } = new List<RoomNode>();
 
         /// <summary>
         /// The enumeration of item locations whose item has been put back where it was as a result of this action.
         /// </summary>
-        public IEnumerable<RoomNode> ItemLocationsPutBack { get; protected set; } = Enumerable.Empty<RoomNode>();
+        public IReadOnlyCollection<RoomNode> ItemLocationsPutBack { get; protected set; } = new List<RoomNode>();
 
         /// <summary>
         /// <para>The enumeration of in-room obstacles that have been destroyed as a result of this action.</para>
         /// <para>Note that changes to obstacles are not kept when changing rooms.</para>
         /// </summary>
-        public IEnumerable<RoomObstacle> ObstaclesDestroyed { get; protected set; } = Enumerable.Empty<RoomObstacle>();
+        public IReadOnlyCollection<RoomObstacle> ObstaclesDestroyed { get; protected set; } = new List<RoomObstacle>();
 
         /// <summary>
         /// <para>The enumeration of in-room obstacles that have been restored as a result of this action.
         /// This can only really happen by reversing an action, since it's deemed unnecessary to indicate that exiting a room restores obstacles.</para>
         /// <para>Note that changes to obstacles are not kept when changing rooms.</para>
         /// </summary>
-        public IEnumerable<RoomObstacle> ObstaclesRestored { get; protected set; } = Enumerable.Empty<RoomObstacle>();
+        public IReadOnlyCollection<RoomObstacle> ObstaclesRestored { get; protected set; } = new List<RoomObstacle>();
 
         /// <summary>
         /// A ResourceCount representing the player's resources before this action.
         /// </summary>
-        ResourceCount ResourcesBefore { get; set; }
+        public ReadOnlyResourceCount ResourcesBefore { get; protected set; }
 
         /// <summary>
         /// A ResourceCount representing the player's resources after this action.
         /// </summary>
-        ResourceCount ResourcesAfter { get; set; }
+        public ReadOnlyResourceCount ResourcesAfter { get; protected set; }
         #endregion
 
         #region Information about how the action was performed
         /// <summary>
         /// A sequence of runways that were used (possibly retroactively) along with the accompanying runway strat.
         /// </summary>
-        public IEnumerable<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; set; } = Enumerable.Empty<(Runway, Strat)>();
+        public IReadOnlyCollection<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; protected set; } = new List<(Runway, Strat)>();
 
         /// <summary>
         /// A sequence of canLeaveCharged that were executed (possibly retroactively) along with the accompanying canLeaveCharged strat.
         /// </summary>
-        public IEnumerable<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; set; } = Enumerable.Empty<(CanLeaveCharged, Strat)>();
+        public IReadOnlyCollection<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; protected set; } = new List<(CanLeaveCharged, Strat)>();
 
         /// <summary>
         /// A sequence of node locks that were opened along with the open strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; set; } = Enumerable.Empty<(NodeLock openedLock, Strat stratUsed)>();
+        public IReadOnlyCollection<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; protected set; } = new List<(NodeLock openedLock, Strat stratUsed)>();
 
         /// <summary>
         /// A sequence of node locks that were bypassed along with the bypass strat used to opem them.
         /// </summary>
-        public IEnumerable<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; set; } = Enumerable.Empty<(NodeLock bypassedLock, Strat stratUsed)>();
+        public IReadOnlyCollection<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; protected set; } = new List<(NodeLock bypassedLock, Strat stratUsed)>();
 
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
         /// </summary>
-        public IEnumerable<IndividualEnemyKillResult> KilledEnemies { get; set; } = Enumerable.Empty<IndividualEnemyKillResult>();
+        public IReadOnlyCollection<IndividualEnemyKillResult> KilledEnemies { get; protected set; } = new List<IndividualEnemyKillResult>();
 
         /// <summary>
-        /// A sequence of items that were involved in some way, excluding damage reduction
-        /// and operation of weapons already present in <see cref="KilledEnemies"/>.
+        /// The items that were involved in some way, mapped by name,
+        /// excluding damage reduction (found in <see cref="DamageReducingItemsInvolved"/>) and operation of weapons to kill enemies (found in <see cref="KilledEnemies"/>).
         /// </summary>
-        public ISet<Item> ItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public IReadOnlyDictionary<string, Item> ItemsInvolved { get; protected set; } = new Dictionary<string, Item>();
 
         /// <summary>
-        /// A sequence of items that were involved in reducing incoming damage.
+        /// A sequence of items that were involved in reducing incoming damage, mapped by name.
         /// </summary>
-        public ISet<Item> DamageReducingItemsInvolved { get; set; } = new HashSet<Item>(ObjectReferenceEqualityComparer<Item>.Default);
+        public IReadOnlyDictionary<string, Item> DamageReducingItemsInvolved { get; protected set; } = new Dictionary<string, Item>();
         #endregion
 
         /// <summary>
@@ -339,12 +337,12 @@ namespace sm_json_data_framework.Models.Navigation
                     Console.WriteLine($"Enemy '{killResult.Enemy.Name}' was killed, using {killMethodString}.");
                 }
 
-                foreach(var item in ItemsInvolved)
+                foreach(var item in ItemsInvolved.Values)
                 {
                     Console.WriteLine($"Item '{item.Name}' was used during execution.");
                 }
 
-                foreach(var item in DamageReducingItemsInvolved)
+                foreach(var item in DamageReducingItemsInvolved.Values)
                 {
                     Console.WriteLine($"Item '{item.Name}' helped reduce incoming damage.");
                 }

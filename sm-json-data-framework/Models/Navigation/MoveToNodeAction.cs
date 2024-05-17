@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Navigation
         ///  The Strat that was used to navigate a link between two nodes.
         ///  Naturally, if this action is a reversed action, this is the Strat that was "unused".
         /// </summary>
-        public Strat StratUsed { get; set; }
+        public Strat StratUsed { get; protected set; }
 
         protected MoveToNodeAction(string intent) : base(intent)
         {

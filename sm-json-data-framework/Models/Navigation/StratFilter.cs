@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Navigation
         /// Keys to obtain from a dictionary, as a potentially faster way to get values out of a dictionary.
         /// The predicate will be used if applying to something that isn't a dictionary.
         /// </summary>
-        private ISet<String> Keys { get; set; }
+        private ISet<string> Keys { get; set; }
 
         public string Description { get; }
 
