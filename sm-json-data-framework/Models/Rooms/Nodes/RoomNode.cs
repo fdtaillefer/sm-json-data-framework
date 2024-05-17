@@ -219,7 +219,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // First thing is making sure no locks prevent interaction
             IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);
             IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState)
-                .Where(activeLock => !bypassedLocks.Contains(activeLock, ObjectReferenceEqualityComparer<NodeLock>.Default));
+                .Where(activeLock => !bypassedLocks.Contains(activeLock, ReferenceEqualityComparer.Instance));
 
             // Can't interact with the node if there's active locks that haven't been opened or bypassed
             if (unhandledLocks.Any())

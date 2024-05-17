@@ -81,7 +81,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 {
                     // Look for a free usable weapon this enemy is susceptible to.
                     var firstWeaponSusceptibility = e.WeaponSusceptibilities.Values
-                        .Where(ws => freeWeapons.Contains(ws.Weapon, ObjectReferenceEqualityComparer<Weapon>.Default))
+                        .Where(ws => freeWeapons.Contains(ws.Weapon, ReferenceEqualityComparer.Instance))
                         .FirstOrDefault();
 
                     // If we found a weapon, record a kill and return true (to remove the enemy)

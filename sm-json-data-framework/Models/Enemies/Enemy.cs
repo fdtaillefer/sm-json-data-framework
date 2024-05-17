@@ -248,8 +248,8 @@ namespace sm_json_data_framework.Models.Enemies
                 .SelectMany(rdm => rdm.Weapon.NameToWeapons(model).Select(w => new UnfinalizedWeaponMultiplier(w, rdm.Value)))
                 .ToDictionary(m => m.Weapon.Name);
             foreach (UnfinalizedWeapon neutralWeapon in model.Weapons.Values
-                .Except(WeaponMultipliers.Values.Select(wm => wm.Weapon), ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default)
-                .Except(InvulnerableWeapons, ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default))
+                .Except(WeaponMultipliers.Values.Select(wm => wm.Weapon), ReferenceEqualityComparer.Instance)
+                .Except(InvulnerableWeapons, ReferenceEqualityComparer.Instance))
             {
                 WeaponMultipliers.Add(neutralWeapon.Name, new UnfinalizedWeaponMultiplier(neutralWeapon, 1m));
             }
