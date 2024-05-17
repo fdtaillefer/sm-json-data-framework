@@ -27,7 +27,7 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
                 UnfinalizedEnemyKill enemyKill = (UnfinalizedEnemyKill)Activator.CreateInstance(type);
                 enemyKill.GroupedEnemyNames = Enemies.Select(subGroup => (IList<string>) new List<string>(subGroup)).ToList();
                 enemyKill.ExplicitWeaponNames = new HashSet<string>(ExplicitWeapons);
-                enemyKill.ExcludedWeaponNames = new List<string>(ExcludedWeapons);
+                enemyKill.ExcludedWeaponNames = new HashSet<string>(ExcludedWeapons);
                 enemyKill.FarmableAmmo = new HashSet<AmmoEnum>(FarmableAmmo);
                 return enemyKill;
             }

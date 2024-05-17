@@ -77,7 +77,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             IEnumerable<Weapon> freeWeapons = usableWeapons.Where(w => !w.ShotRequires.LogicalElements.Where(le => le is Ammo ammo && !FarmableAmmo.Contains(ammo.AmmoType)).Any());
 
             // Remove all enemies that can be killed by free weapons
-            IEnumerable<IEnumerable<Enemy>> nonFreeGroups = GroupedEnemies
+            IEnumerable<IList<Enemy>> nonFreeGroups = GroupedEnemies
                 .RemoveEnemies(e =>
                 {
                     // Look for a free usable weapon this enemy is susceptible to.
@@ -107,12 +107,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // The remaining enemies require ammo
             IEnumerable<Weapon> nonFreeWeapons = usableWeapons.Except(freeWeapons, ObjectReferenceEqualityComparer<Weapon>.Default);
             IEnumerable<Weapon> nonFreeSplashWeapons = nonFreeWeapons.Where(w => w.HitsGroup);
-            IEnumerable<Weapon> nonFreeIndividualWeapons = nonFreeWeapons.Where(w => !w.HitsGroup);
+            IList<Weapon> nonFreeIndividualWeapons = nonFreeWeapons.Where(w => !w.HitsGroup).ToList();
 
             // Iterate over each group, killing it and updating the resulting state.
             // We'll test many scenarios, each with 0 to 1 splash weapon and a fixed number of splash weapon shots (after which enemies are killed with single-target weapons).
             // We will not test multiple combinations of splash weapons.
-            foreach (IEnumerable<Enemy> currentEnemyGroup in nonFreeGroups)
+            foreach (IList<Enemy> currentEnemyGroup in nonFreeGroups)
             {
                 // Build a list of combinations of splash weapons and splash shots (including one entry for no splash weapon at all)
                 IEnumerable<(Weapon splashWeapon, int splashShots)> splashCombinations = nonFreeSplashWeapons.SelectMany(w =>
@@ -192,18 +192,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class EnemyGroupAmmoExecutable : IExecutable
     {
-        public EnemyGroupAmmoExecutable(IEnumerable<Enemy> enemyGroup, IEnumerable<Weapon> nonSplashWeapons,
+        public EnemyGroupAmmoExecutable(ICollection<Enemy> enemyGroup, ICollection<Weapon> nonSplashWeapons,
             Weapon splashWeapon, int splashShots)
         {
-            EnemyGroup = enemyGroup;
+            EnemyGroup = new List<Enemy>(enemyGroup);
             SplashWeapon = splashWeapon;
-            NonSplashWeapons = nonSplashWeapons;
+            NonSplashWeapons = new List<Weapon>(nonSplashWeapons);
             SplashShots = splashShots;
         }
 
-        private IEnumerable<Enemy> EnemyGroup { get; set; }
+        private IList<Enemy> EnemyGroup { get; set; }
 
-        private IEnumerable<Weapon> NonSplashWeapons { get; set; }
+        private IList<Weapon> NonSplashWeapons { get; set; }
 
         private Weapon SplashWeapon { get; set; }
 
@@ -355,17 +355,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// overriding the default behavior of allowing all non-situational weapons.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<UnfinalizedWeapon> ExplicitWeapons { get; set; }
+        public IList<UnfinalizedWeapon> ExplicitWeapons { get; set; }
 
         [JsonPropertyName("excludedWeapons")]
-        public IEnumerable<string> ExcludedWeaponNames { get; set; } = Enumerable.Empty<string>();
+        public ISet<string> ExcludedWeaponNames { get; set; } = new HashSet<string>();
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The weapons that this element's ExcludedWeapons reference. These weapons are not allowed for this enemy kill.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<UnfinalizedWeapon> ExcludedWeapons { get; set; }
+        public IList<UnfinalizedWeapon> ExcludedWeapons { get; set; }
 
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
@@ -373,9 +373,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// and the list of all existing weapons.</para>
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<UnfinalizedWeapon> ValidWeapons { get; set; }
+        public IList<UnfinalizedWeapon> ValidWeapons { get; set; }
 
-        public IEnumerable<AmmoEnum> FarmableAmmo { get; set; } = Enumerable.Empty<AmmoEnum>();
+        public ISet<AmmoEnum> FarmableAmmo { get; set; } = new HashSet<AmmoEnum>();
 
         protected override EnemyKill CreateFinalizedElement(UnfinalizedEnemyKill sourceElement, Action<EnemyKill> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
@@ -439,7 +439,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                     explicitWeapons.AddRange(weapons);
                 }
             }
-            ExplicitWeapons = explicitWeapons.Distinct();
+            ExplicitWeapons = explicitWeapons.Distinct().ToList();
 
 
             List<UnfinalizedWeapon> excludedWeapons = new List<UnfinalizedWeapon>();
@@ -455,7 +455,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                     excludedWeapons.AddRange(weapons);
                 }
             }
-            ExcludedWeapons = excludedWeapons.Distinct();
+            ExcludedWeapons = excludedWeapons.Distinct().ToList();
 
             List<UnfinalizedWeapon> validWeapons = new List<UnfinalizedWeapon>();
             // If some explicit weapons were provided, only they are allowed. Then take away any excluded weapons.
@@ -486,13 +486,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <param name="enemyGroups">The Enemy groups to remove enemies from</param>
         /// <param name="enemyRemovalCondition">A Predicate that will cause all enemies that meet it to be removed</param>
         /// <returns>The enemy groups with proper enemies removed, excluding groups with no enemy left.</returns>
-        public static IEnumerable<IEnumerable<Enemy>> RemoveEnemies(this IReadOnlyList<IReadOnlyList<Enemy>> enemyGroups, Predicate<Enemy> enemyRemovalCondition)
+        public static IEnumerable<IList<Enemy>> RemoveEnemies(this IReadOnlyList<IReadOnlyList<Enemy>> enemyGroups, Predicate<Enemy> enemyRemovalCondition)
         {
             return enemyGroups
                 // Transform each group of enemies into a new equivalent group, but with only a subset of enemies
                 .Select(g => g
                     // Remove all enemies that meet the removal condition - so retain those that do not
                     .Where(e => !enemyRemovalCondition(e))
+                    .ToList()
                 )
                 // After we removed enemies in the groups, eliminate groups with no enemy left
                 .Where(g => g.Any());
