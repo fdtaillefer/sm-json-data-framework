@@ -113,6 +113,24 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             return new ExecutableRunway(this, comingIn);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool noUsefulStrat = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if (!strat.UselessByLogicalOptions)
+                {
+                    noUsefulStrat = false;
+                }
+            }
+
+            // We could pre-calculate an effective runway length here if we had the rules.
+
+            // A runway becomes useless if its strats are impossible
+            return noUsefulStrat;
+        }
     }
 
     /// <summary>
@@ -192,24 +210,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override Runway CreateFinalizedElement(UnfinalizedRunway sourceElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Runway(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            bool noUsefulStrat = true;
-            foreach(UnfinalizedStrat strat in Strats.Values)
-            {
-                strat.ApplyLogicalOptions(logicalOptions);
-                if(!strat.UselessByLogicalOptions)
-                {
-                    noUsefulStrat = false;
-                }
-            }
-
-            // We could pre-calculate an effective runway length here if we had the rules.
-
-            // A runway becomes useless if its strats are impossible
-            return noUsefulStrat;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)

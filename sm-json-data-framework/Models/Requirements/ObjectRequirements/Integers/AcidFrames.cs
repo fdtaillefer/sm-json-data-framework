@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// A multiplier to apply to acid frame requirements as a leniency, as per applied logical options.
         /// </summary>
-        private decimal AcidLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+        private decimal AcidLeniencyMultiplier => AppliedLogicalOptions?.AcidLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public AcidFrames(int numberOfFrames): base(numberOfFrames)
         {
@@ -38,20 +38,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.GetAcidDamageReducingItems(model, inGameState);
         }
 
-        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            AcidLeniencyMultiplier = logicalOptions?.AcidLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-            base.ApplyLogicalOptions(logicalOptions);
+            // Nothing to do here
+            return false;
         }
     }
 
     public class UnfinalizedAcidFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedAcidFrames, AcidFrames>
     {
-        /// <summary>
-        /// A multiplier to apply to acid frame requirements as a leniency, as per applied logical options.
-        /// </summary>
-        private decimal AcidLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
-
         public UnfinalizedAcidFrames()
         {
 
@@ -65,13 +60,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override AcidFrames CreateFinalizedElement(UnfinalizedAcidFrames sourceElement, Action<AcidFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new AcidFrames(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            AcidLeniencyMultiplier = logicalOptions?.AcidLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-
-            return false;
         }
     }
 }

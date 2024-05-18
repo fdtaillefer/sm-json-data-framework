@@ -49,6 +49,14 @@ namespace sm_json_data_framework.Models.Rooms
         /// Whether this failure means Samus should no longer be seen as arriving from the previous node.
         /// </summary>
         public bool ClearsPreviousNode => InnerElement.ClearsPreviousNode;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Cost.ApplyLogicalOptions(logicalOptions);
+
+            // A failure object is not useless even if it describes an effective softlock
+            return false;
+        }
     }
 
     public class UnfinalizedStratFailure : AbstractUnfinalizedModelElement<UnfinalizedStratFailure, StratFailure>, InitializablePostDeserializeInRoom
@@ -86,14 +94,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override StratFailure CreateFinalizedElement(UnfinalizedStratFailure sourceElement, Action<StratFailure> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new StratFailure(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Cost.ApplyLogicalOptions(logicalOptions);
-
-            // A failure object is not useless even if it describes an effective softlock
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

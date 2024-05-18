@@ -56,6 +56,12 @@ namespace sm_json_data_framework.Models.Connections
         /// Where this ConnectionNode is positioned geometrically relative to the connection.
         /// </summary>
         public ConnectionNodePositionEnum Position => InnerElement.Position;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical Options have no power here
+            return false;
+        }
     }
 
     public class UnfinalizedConnectionNode : AbstractUnfinalizedModelElement<UnfinalizedConnectionNode, ConnectionNode>
@@ -93,12 +99,6 @@ namespace sm_json_data_framework.Models.Connections
         protected override ConnectionNode CreateFinalizedElement(UnfinalizedConnectionNode sourceElement, Action<ConnectionNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new ConnectionNode(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical Options have no power here
-            return false;
         }
 
         /// <summary>

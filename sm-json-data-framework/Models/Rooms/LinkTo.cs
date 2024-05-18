@@ -35,6 +35,22 @@ namespace sm_json_data_framework.Models.Rooms
         /// The strats that can be executed to follow this LinkTo, mapped by name.
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool noPossibleStrat = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if (!strat.UselessByLogicalOptions)
+                {
+                    noPossibleStrat = false;
+                }
+            }
+
+            // This LinkTo is unusable if all strats are unusable
+            return noPossibleStrat;
+        }
     }
 
     public class UnfinalizedLinkTo : AbstractUnfinalizedModelElement<UnfinalizedLinkTo, LinkTo>, InitializablePostDeserializeInRoom
@@ -66,22 +82,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override LinkTo CreateFinalizedElement(UnfinalizedLinkTo sourceElement, Action<LinkTo> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new LinkTo(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            bool noPossibleStrat = true;
-            foreach (UnfinalizedStrat strat in Strats.Values)
-            {
-                strat.ApplyLogicalOptions(logicalOptions);
-                if(!strat.UselessByLogicalOptions)
-                {
-                    noPossibleStrat = false;
-                }
-            }
-
-            // This LinkTo is unusable if all strats are unusable
-            return noPossibleStrat;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

@@ -47,6 +47,12 @@ namespace sm_json_data_framework.Models.Enemies
         {
             return WeaponMultiplier.NumberOfHits(enemyHp);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing to do here
+            return false;
+        }
     }
 
     /// <summary>
@@ -98,11 +104,5 @@ namespace sm_json_data_framework.Models.Enemies
         /// It knows the damage per shot, and how many shots it takes to kill an enemy with a given amount of hp.
         /// </summary>
         public UnfinalizedWeaponMultiplier WeaponMultiplier { get; }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing to do here
-            return false;
-        }
     }
 }

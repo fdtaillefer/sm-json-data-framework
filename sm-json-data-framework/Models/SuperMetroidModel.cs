@@ -101,6 +101,8 @@ namespace sm_json_data_framework.Models
             InitialGameState = new InGameState(StartConditions);
         }
 
+        private ReadOnlyLogicalOptions AppliedLogicalOptions { get; set; }
+
         /// <summary>
         /// The items in this model, mapped by name.
         /// </summary>
@@ -177,9 +179,9 @@ namespace sm_json_data_framework.Models
         public StartConditions StartConditions { get; }
 
         /// <summary>
-        /// An <see cref="InGameStateComparer"/> which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
+        /// An InGameStateComparer which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
         /// </summary>
-        public InGameStateComparer InGameStateComparer { get; private set; } = LogicalOptions.DefaultInGameStateComparer;
+        public InGameStateComparer InGameStateComparer => AppliedLogicalOptions?.InGameStateComparer ?? LogicalOptions.DefaultInGameStateComparer;
 
         public ReadOnlyInGameState InitialGameState { get; }
 
@@ -211,17 +213,9 @@ namespace sm_json_data_framework.Models
         /// <param name="logicalOptions">The LogicalOptions to apply. If null, this instead removes all alterations from logical options.</param>
         public void ApplyLogicalOptions(LogicalOptions logicalOptions)
         {
-            ReadOnlyLogicalOptions logicalOptionsToApply = null;
+            ReadOnlyLogicalOptions logicalOptionsToApply = logicalOptions?.Clone().AsReadOnly();
 
-            if (logicalOptions == null)
-            {
-                InGameStateComparer = LogicalOptions.DefaultInGameStateComparer;
-            }
-            else
-            {
-                logicalOptionsToApply = logicalOptions.Clone().AsReadOnly();
-                InGameStateComparer = logicalOptionsToApply.InGameStateComparer;
-            }
+            AppliedLogicalOptions = logicalOptionsToApply;
 
             foreach (GameFlag gameFlag in GameFlags.Values)
             {
@@ -702,68 +696,5 @@ namespace sm_json_data_framework.Models
         /// The normal enemies and boss enemies in this model, mapped by name.
         /// </summary>
         public IDictionary<string, UnfinalizedEnemy> Enemies { get; set; } = new Dictionary<string, UnfinalizedEnemy>();
-
-        /// <summary>
-        /// An <see cref="InGameStateComparer"/> which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
-        /// </summary>
-        public InGameStateComparer InGameStateComparer { get; private set; } = LogicalOptions.DefaultInGameStateComparer;
-
-        /// <summary>
-        /// Clones the provided LogicalOptions, and applies then to this model.
-        /// </summary>
-        /// <param name="logicalOptions">The LogicalOptions to apply. If null, this instead removes all alterations from logical options.</param>
-        public void ApplyLogicalOptions(LogicalOptions logicalOptions)
-        {
-            ReadOnlyLogicalOptions logicalOptionsToApply = null;
-
-            if(logicalOptions == null)
-            {
-                InGameStateComparer = LogicalOptions.DefaultInGameStateComparer;
-            }
-            else 
-            {
-                logicalOptionsToApply = logicalOptions.Clone().AsReadOnly();
-                InGameStateComparer = logicalOptionsToApply.InGameStateComparer;
-            }
-
-            foreach(UnfinalizedGameFlag gameFlag in GameFlags.Values) {
-                gameFlag.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedHelper helper in Helpers.Values)
-            {
-                helper.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedItem item in Items.Values)
-            {
-                item.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedTech tech in Techs.Values)
-            {
-                tech.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedWeapon weapon in Weapons.Values)
-            {
-                weapon.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedEnemy enemy in Enemies.Values)
-            {
-                enemy.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedConnection connection in Connections.Values)
-            {
-                connection.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-
-            foreach (UnfinalizedRoom room in Rooms.Values)
-            {
-                room.ApplyLogicalOptions(logicalOptionsToApply);
-            }
-        }
     }
 }

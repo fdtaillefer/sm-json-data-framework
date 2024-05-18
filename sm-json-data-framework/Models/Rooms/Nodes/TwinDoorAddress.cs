@@ -29,6 +29,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// The in-game address of the this twin door.
         /// </summary>
         public string DoorAddress => InnerElement.DoorAddress;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing to do here
+            return false;
+        }
     }
 
     public class UnfinalizedTwinDoorAddress: AbstractUnfinalizedModelElement<UnfinalizedTwinDoorAddress, TwinDoorAddress>
@@ -51,12 +57,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override TwinDoorAddress CreateFinalizedElement(UnfinalizedTwinDoorAddress sourceElement, Action<TwinDoorAddress> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new TwinDoorAddress(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing to do here
-            return false;
         }
     }
 }

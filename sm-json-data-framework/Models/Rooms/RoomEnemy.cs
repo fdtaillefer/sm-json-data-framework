@@ -133,6 +133,21 @@ namespace sm_json_data_framework.Models.Rooms
                 return _spawnerFarmExecution;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            foreach (FarmCycle farmCycle in FarmCycles.Values)
+            {
+                farmCycle.ApplyLogicalOptions(logicalOptions);
+            }
+
+            Spawn.ApplyLogicalOptions(logicalOptions);
+            StopSpawn.ApplyLogicalOptions(logicalOptions);
+            DropRequires.ApplyLogicalOptions(logicalOptions);
+
+            // There's no changes here that can make this enemy useless
+            return false;
+        }
     }
 
     /// <summary>
@@ -283,21 +298,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override RoomEnemy CreateFinalizedElement(UnfinalizedRoomEnemy sourceElement, Action<RoomEnemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new RoomEnemy(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            foreach (UnfinalizedFarmCycle farmCycle in FarmCycles.Values)
-            {
-                farmCycle.ApplyLogicalOptions(logicalOptions);
-            }
-
-            Spawn.ApplyLogicalOptions(logicalOptions);
-            StopSpawn.ApplyLogicalOptions(logicalOptions);
-            DropRequires.ApplyLogicalOptions(logicalOptions);
-
-            // There's no changes here that can make this enemy useless
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

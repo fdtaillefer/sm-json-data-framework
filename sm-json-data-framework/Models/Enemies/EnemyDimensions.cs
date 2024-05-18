@@ -29,6 +29,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// The width of the enemy, in pixels.
         /// </summary>
         public int Width => InnerElement.Width;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing to do here
+            return false;
+        }
     }
 
     public class UnfinalizedEnemyDimensions :AbstractUnfinalizedModelElement<UnfinalizedEnemyDimensions, EnemyDimensions>
@@ -51,12 +57,6 @@ namespace sm_json_data_framework.Models.Enemies
         protected override EnemyDimensions CreateFinalizedElement(UnfinalizedEnemyDimensions sourceElement, Action<EnemyDimensions> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new EnemyDimensions(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing to do here
-            return false;
         }
     }
 }

@@ -42,6 +42,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// The RoomNode on which this environment is.
         /// </summary>
         public RoomNode Node { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here
+            return false;
+        }
     }
 
     public class UnfinalizedDoorEnvironment : AbstractUnfinalizedModelElement<UnfinalizedDoorEnvironment, DoorEnvironment>, InitializablePostDeserializeInNode
@@ -79,12 +85,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override DoorEnvironment CreateFinalizedElement(UnfinalizedDoorEnvironment sourceElement, Action<DoorEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new DoorEnvironment(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical options have no power here
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)

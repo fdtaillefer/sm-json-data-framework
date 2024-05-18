@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
         /// </summary>
-        private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+        private decimal LavaLeniencyMultiplier => AppliedLogicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public LavaPhysicsFrames(UnfinalizedLavaPhysicsFrames innerElement, Action<LavaPhysicsFrames> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
@@ -34,19 +34,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.GetLavaPhysicsDamageReducingItems(model, inGameState);
         }
 
-        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            LavaLeniencyMultiplier = logicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-            base.ApplyLogicalOptions(logicalOptions);
+            // Nothing to do here
+            return false;
         }
     }
 
     public class UnfinalizedLavaPhysicsFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedLavaPhysicsFrames, LavaPhysicsFrames>
     {
-        /// <summary>
-        /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
-        /// </summary>
-        private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public UnfinalizedLavaPhysicsFrames()
         {
@@ -61,13 +57,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override LavaPhysicsFrames CreateFinalizedElement(UnfinalizedLavaPhysicsFrames sourceElement, Action<LavaPhysicsFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new LavaPhysicsFrames(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            LavaLeniencyMultiplier = logicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-            
-            return false;
         }
     }
 }

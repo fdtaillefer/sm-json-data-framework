@@ -18,6 +18,12 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class Strat : AbstractModelElement<UnfinalizedStrat, Strat>, IExecutable
     {
+
+        /// <summary>
+        /// Number of tries the player is expected to take to execute the strat, as per applied logical options.
+        /// </summary>
+        public int Tries => AppliedLogicalOptions?.NumberOfTries(this) ?? LogicalOptions.DefaultNumberOfTries;
+
         private UnfinalizedStrat InnerElement { get; set; }
 
         public Strat(UnfinalizedStrat innerElement, Action<Strat> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -68,7 +74,7 @@ namespace sm_json_data_framework.Models.Rooms
                 return null;
             }
 
-            times = times * InnerElement.Tries;
+            times = times * Tries;
 
             ExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
 
@@ -102,6 +108,29 @@ namespace sm_json_data_framework.Models.Rooms
 
             return result;
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            foreach (StratFailure failure in Failures.Values)
+            {
+                failure.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // A StratObstacle can make this strat useless if it's impossible to bypass it here, and impossible to destroy it at all
+            bool impossibleObstacle = false;
+            foreach (StratObstacle stratObstacle in Obstacles.Values)
+            {
+                stratObstacle.ApplyLogicalOptions(logicalOptions);
+                stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
+                if (stratObstacle.UselessFromHereByLogicalOptions && stratObstacle.Obstacle.IndestructibleByLogicalOptions)
+                {
+                    impossibleObstacle = true;
+                }
+            }
+            return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
+        }
     }
 
     public class UnfinalizedStrat : AbstractUnfinalizedModelElement<UnfinalizedStrat, Strat>, InitializablePostDeserializeInRoom
@@ -124,11 +153,6 @@ namespace sm_json_data_framework.Models.Rooms
 
         public ISet<string> StratProperties { get; set; } = new HashSet<string>();
 
-        /// <summary>
-        /// Number of tries the player is expected to take to execute the strat, as per applied logical options.
-        /// </summary>
-        public int Tries { get; private set; } = LogicalOptions.DefaultNumberOfTries;
-
         public UnfinalizedStrat() { 
 
         }
@@ -146,33 +170,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override Strat CreateFinalizedElement(UnfinalizedStrat sourceElement, Action<Strat> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Strat(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Tries = logicalOptions?.NumberOfTries(this) ?? LogicalOptions.DefaultNumberOfTries;
-
-            Requires.ApplyLogicalOptions(logicalOptions);
-
-            foreach (UnfinalizedStratFailure failure in Failures.Values)
-            {
-                failure.ApplyLogicalOptions(logicalOptions);
-            }
-
-            // Note that StratObstacles becoming impossible doesn't make this strat impossible,
-            // as maybe there's other places where those obstacles can be destroyed.
-            // If the obstacle has absolute requirements that become impossible though, then so do we
-            bool impossibleObstacle = false;
-            foreach (UnfinalizedStratObstacle obstacle in Obstacles.Values)
-            {
-                obstacle.ApplyLogicalOptions(logicalOptions);
-                obstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
-                if (obstacle.Obstacle.UselessByLogicalOptions)
-                {
-                    impossibleObstacle = true;
-                }
-            }
-            return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

@@ -20,6 +20,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class CanLeaveCharged : AbstractModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, IRunway, IExecutable
     {
+        /// <summary>
+        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
+        /// </summary>
+        public decimal TilesSavedWithStutter => AppliedLogicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+
+        /// <summary>
+        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
+        /// </summary>
+        public decimal TilesToShineCharge => AppliedLogicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+
         private UnfinalizedCanLeaveCharged InnerElement { get; set; }
 
         public CanLeaveCharged(UnfinalizedCanLeaveCharged innerElement, Action<CanLeaveCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -106,7 +116,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // If the player is unable to charge a shinespark with the available runway, this is not usable
-            if (model.Rules.CalculateEffectiveRunwayLength(this, InnerElement.TilesSavedWithStutter) < InnerElement.TilesToShineCharge)
+            if (model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter) < TilesToShineCharge)
             {
                 return null;
             }
@@ -138,6 +148,50 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             return result;
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool useless = false;
+            if (InitiateRemotely != null)
+            {
+                InitiateRemotely.ApplyLogicalOptions(logicalOptions);
+                if (InitiateRemotely.UselessByLogicalOptions)
+                {
+                    // This cannot be executed if it has a remote execution that has been made impossible
+                    useless = true;
+                }
+            }
+
+            // This cannot be executed if all its strats become impossible
+            bool allStratsUseless = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if (!strat.UselessByLogicalOptions)
+                {
+                    allStratsUseless = false;
+                }
+            }
+            if (allStratsUseless)
+            {
+                useless = true;
+            }
+
+            // This cannot be executed if it requires a shinespark and those are disabled
+            if (MustShinespark && !logicalOptions.CanShinespark)
+            {
+                useless = true;
+            }
+
+            // Since this is an in-room shine charge, its required nunmber of tiles is constant.
+            // As such, we could check here whether the logical options make the shine too short to be possible.
+            // However, this requires access to the game rules, which we don't have here.
+            // Improve this if we decide to pass the rules here.
+
+            // We could also pre-calculate an effective runway length if we had the rules
+
+            return useless;
+        }
     }
 
     public class UnfinalizedCanLeaveCharged : AbstractUnfinalizedModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, InitializablePostDeserializeInNode, IRunway
@@ -156,16 +210,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// Indicates whether this CanLeavecharged involves executing a shinespark.
         /// </summary>
         public bool MustShinespark => ShinesparkFrames > 0;
-
-        /// <summary>
-        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
-        /// </summary>
-        public decimal TilesSavedWithStutter { get; private set; } = LogicalOptions.DefaultTilesSavedWithStutter;
-
-        /// <summary>
-        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
-        /// </summary>
-        public decimal TilesToShineCharge { get; private set; } = LogicalOptions.DefaultTilesToShineCharge;
 
         public UnfinalizedInitiateRemotely InitiateRemotely {get;set;}
 
@@ -223,53 +267,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override CanLeaveCharged CreateFinalizedElement(UnfinalizedCanLeaveCharged sourceElement, Action<CanLeaveCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new CanLeaveCharged(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            TilesSavedWithStutter = logicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
-            TilesToShineCharge = logicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
-
-            bool useless = false;
-            if(InitiateRemotely != null)
-            {
-                InitiateRemotely.ApplyLogicalOptions(logicalOptions);
-                if (InitiateRemotely.UselessByLogicalOptions)
-                {
-                // This cannot be executed if it has a remote execution that has been made impossible
-                    useless = true;
-                }
-            }
-
-            // This cannot be executed if all its strats become impossible
-            bool allStratsUseless = true;
-            foreach (UnfinalizedStrat strat in Strats.Values)
-            {
-                strat.ApplyLogicalOptions(logicalOptions);
-                if(!strat.UselessByLogicalOptions)
-                {
-                    allStratsUseless = false;
-                }
-            }
-            if(allStratsUseless)
-            {
-                useless = true;
-            }
-
-            // This cannot be executed if it requires a shinespark and those are disabled
-            if (MustShinespark && !logicalOptions.CanShinespark)
-            {
-                useless = true;
-            }
-
-            // Since this is an in-room shine charge, its required nunmber of tiles is constant.
-            // As such, we could check here whether the logical options make the shine too short to be possible.
-            // However, this requires access to the game rules, which we don't have here.
-            // Improve this if we decide to pass the rules here.
-
-            // We could also pre-calculate an effective runway length if we had the rules
-
-            return useless;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)

@@ -49,6 +49,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
                 return null;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedPreviousNode : AbstractUnfinalizedObjectLogicalElementWithNodeId<UnfinalizedPreviousNode, PreviousNode>
@@ -66,12 +72,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override PreviousNode CreateFinalizedElement(UnfinalizedPreviousNode sourceElement, Action<PreviousNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new PreviousNode(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
 
         public override bool IsNever()

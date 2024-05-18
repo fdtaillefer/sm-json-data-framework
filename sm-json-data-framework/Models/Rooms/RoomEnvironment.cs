@@ -40,6 +40,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// The room to which this environment applies.
         /// </summary>
         public Room Room { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing to do here
+            return false;
+        }
     }
 
     public class UnfinalizedRoomEnvironment : AbstractUnfinalizedModelElement<UnfinalizedRoomEnvironment, RoomEnvironment>, InitializablePostDeserializeInRoom
@@ -77,12 +83,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override RoomEnvironment CreateFinalizedElement(UnfinalizedRoomEnvironment sourceElement, Action<RoomEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new RoomEnvironment(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical options have no power here
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

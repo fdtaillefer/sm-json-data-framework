@@ -31,6 +31,15 @@ namespace sm_json_data_framework.Models.Helpers
         /// The logical requirements that this helper represents.
         /// </summary>
         public LogicalRequirements Requires { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Propagate to requirements
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            // This helper becomes useless if requirements become impossible
+            return Requires.UselessByLogicalOptions;
+        }
     }
 
     public class UnfinalizedHelper : AbstractUnfinalizedModelElement<UnfinalizedHelper, Helper>, InitializablePostDeserializeOutOfRoom
@@ -59,15 +68,6 @@ namespace sm_json_data_framework.Models.Helpers
         protected override Helper CreateFinalizedElement(UnfinalizedHelper sourceElement, Action<Helper> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Helper(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Propagate to requirements
-            Requires.ApplyLogicalOptions(logicalOptions);
-
-            // This helper becomes useless if it becomes impossible
-            return Requires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model)

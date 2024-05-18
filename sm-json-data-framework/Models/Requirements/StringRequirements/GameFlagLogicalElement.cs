@@ -45,6 +45,14 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
                 return null;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            GameFlag.ApplyLogicalOptions(logicalOptions);
+
+            // This becomes impossible if the game flag itself becomes useless
+            return GameFlag.UselessByLogicalOptions;
+        }
     }
 
     public class UnfinalizedGameFlagLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>
@@ -60,14 +68,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             ModelFinalizationMappings mappings)
         {
             return new GameFlagLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            GameFlag.ApplyLogicalOptions(logicalOptions);
-
-            // This becomes impossible if the game flag itself becomes useless
-            return GameFlag.UselessByLogicalOptions;
         }
 
         public override bool IsNever()

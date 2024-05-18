@@ -44,6 +44,12 @@ namespace sm_json_data_framework.Models.Enemies
         {
             return InnerElement.NumberOfHits(enemyHp);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing to do here
+            return false;
+        }
     }
 
     public class UnfinalizedWeaponMultiplier : AbstractUnfinalizedModelElement<UnfinalizedWeaponMultiplier, WeaponMultiplier>
@@ -86,12 +92,6 @@ namespace sm_json_data_framework.Models.Enemies
         {
             // enemyHp / DamagePerShot will floor. Adding DamagePerShot - 1 is like forcing the division to ceiling instead
             return (enemyHp + DamagePerShot - 1) / DamagePerShot;
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing to do here
-            return false;
         }
     }
 }

@@ -25,6 +25,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         {
             return LogicalRequirements.ExecuteOne(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            LogicalRequirements.ApplyLogicalOptions(logicalOptions);
+
+            // Since this is an Or, it only becomes impossible to fulfill if all of the inner logical elements is
+            return LogicalRequirements.LogicalElements.All(element => element.UselessByLogicalOptions);
+        }
     }
 
 
@@ -41,14 +49,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         protected override Or CreateFinalizedElement(UnfinalizedOr sourceElement, Action<Or> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Or(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            LogicalRequirements.ApplyLogicalOptions(logicalOptions);
-
-            // Since this is an Or, it only becomes impossible to fulfill if all of the inner logical elements is
-            return LogicalRequirements.LogicalElements.All(element => element.UselessByLogicalOptions);
         }
 
         public UnfinalizedOr(UnfinalizedLogicalRequirements logicalRequirements) : base(logicalRequirements)

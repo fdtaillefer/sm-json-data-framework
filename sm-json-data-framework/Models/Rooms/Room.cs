@@ -97,6 +97,37 @@ namespace sm_json_data_framework.Models.Rooms
         {
             return InnerElement.GetLinkBetween(fromNodeId, toNodeId);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
+            {
+                roomEnvironment.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (RoomNode node in Nodes.Values)
+            {
+                node.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (RoomObstacle obstacle in Obstacles.Values)
+            {
+                obstacle.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (Link link in Links.Values)
+            {
+                link.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (RoomEnemy enemy in Enemies.Values)
+            {
+                enemy.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // A room never becomes useless
+            return false;
+        }
     }
 
     public class UnfinalizedRoom : AbstractUnfinalizedModelElement<UnfinalizedRoom, Room>, InitializablePostDeserializeOutOfRoom
@@ -165,37 +196,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override Room CreateFinalizedElement(UnfinalizedRoom sourceElement, Action<Room> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Room(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            foreach (UnfinalizedRoomEnvironment roomEnvironment in RoomEnvironments)
-            {
-                roomEnvironment.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedRoomNode node in Nodes.Values)
-            {
-                node.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedRoomObstacle obstacle in Obstacles.Values)
-            {
-                obstacle.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedLink link in Links.Values)
-            {
-                link.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedRoomEnemy enemy in Enemies.Values)
-            {
-                enemy.ApplyLogicalOptions(logicalOptions);
-            }
-
-            // A room never becomes useless
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model)

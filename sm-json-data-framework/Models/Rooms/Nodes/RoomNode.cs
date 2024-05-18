@@ -198,6 +198,46 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 return _interactExecution;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            InteractionRequires.ApplyLogicalOptions(logicalOptions);
+
+            foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
+            {
+                canLeaveCharged.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
+            {
+                doorEnvironment.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (ViewableNode viewableNode in ViewableNodes)
+            {
+                viewableNode.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (NodeLock nodeLock in Locks.Values)
+            {
+                nodeLock.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (Runway runway in Runways.Values)
+            {
+                runway.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (TwinDoorAddress twinDoorAddress in TwinDoorAddresses)
+            {
+                twinDoorAddress.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't need the information.
+
+            // A node never becomes useless
+            return false;
+        }
     }
 
     /// <summary>
@@ -434,46 +474,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override RoomNode CreateFinalizedElement(UnfinalizedRoomNode sourceElement, Action<RoomNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new RoomNode(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            InteractionRequires.ApplyLogicalOptions(logicalOptions);
-
-            foreach (UnfinalizedCanLeaveCharged canLeaveCharged in CanLeaveCharged)
-            {
-                canLeaveCharged.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedDoorEnvironment doorEnvironment in DoorEnvironments)
-            {
-                doorEnvironment.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedViewableNode viewableNode in ViewableNodes)
-            {
-                viewableNode.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedNodeLock nodeLock in Locks.Values)
-            {
-                nodeLock.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedRunway runway in Runways.Values)
-            {
-                runway.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedTwinDoorAddress twinDoorAddress in TwinDoorAddresses)
-            {
-                twinDoorAddress.ApplyLogicalOptions(logicalOptions);
-            }
-
-            // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't the information.
-
-            // A node never becomes useless
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

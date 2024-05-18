@@ -27,6 +27,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
             return model.Rules.GetEnvironmentalDamageReducingItems(model, inGameState);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedThornHits : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedThornHits, ThornHits>
@@ -44,12 +50,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override ThornHits CreateFinalizedElement(UnfinalizedThornHits sourceElement, Action<ThornHits> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new ThornHits(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
     }
 }

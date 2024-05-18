@@ -49,6 +49,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
                 return null;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedPreviousStratProperty : AbstractUnfinalizedObjectLogicalElementWithString<UnfinalizedPreviousStratProperty, PreviousStratProperty>
@@ -66,12 +72,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         protected override PreviousStratProperty CreateFinalizedElement(UnfinalizedPreviousStratProperty sourceElement, Action<PreviousStratProperty> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new PreviousStratProperty(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
 
         public override bool IsNever()

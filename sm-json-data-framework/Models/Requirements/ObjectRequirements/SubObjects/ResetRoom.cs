@@ -86,6 +86,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // We've avoided all pitfalls. This ResetRoom is fulfilled. Clone the InGameState to fulfill method contract
             return new ExecutionResult(inGameState.Clone());
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
@@ -119,12 +125,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override ResetRoom CreateFinalizedElement(UnfinalizedResetRoom sourceElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new ResetRoom(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
 
         public override bool IsNever()

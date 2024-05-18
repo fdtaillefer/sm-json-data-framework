@@ -31,6 +31,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         {
             return null;
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedNeverLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedNeverLogicalElement, NeverLogicalElement>
@@ -38,12 +44,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         protected override NeverLogicalElement CreateFinalizedElement(UnfinalizedNeverLogicalElement sourceElement, Action<NeverLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mapping)
         {
             return new NeverLogicalElement(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
 
         public override bool IsNever()

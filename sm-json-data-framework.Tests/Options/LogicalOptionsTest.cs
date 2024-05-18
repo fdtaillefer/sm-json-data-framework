@@ -17,13 +17,13 @@ namespace sm_json_data_framework.Tests.Options
     public class LogicalOptionsTest
     {
         // Use a static model to build it only once.
-        private static UnfinalizedSuperMetroidModel Model { get; set; } = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
+        private static SuperMetroidModel Model { get; set; } = StaticTestObjects.UnmodifiableModel;
 
         [Fact]
         public void NumberOfTries_TechWithRegisteredNumber_ReturnsRegisteredValue()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             int expected = 5;
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterTechTries(tech.Name, expected);
@@ -39,7 +39,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_UnalteredTech_ReturnsDefaultNumber()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -53,7 +53,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_HelperWithRegisteredTries_ReturnsRegisteredValue()
         {
             // Given
-            UnfinalizedHelper helper = Model.Helpers["h_canBombThings"];
+            Helper helper = Model.Helpers["h_canBombThings"];
             int expected = 5;
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterHelperTries(helper.Name, expected);
@@ -69,7 +69,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_UnalteredHelper_ReturnsDefaultNumber()
         {
             // Given
-            UnfinalizedHelper helper = Model.Helpers["h_canBombThings"];
+            Helper helper = Model.Helpers["h_canBombThings"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -83,7 +83,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_StratWithRegisteredNumber_ReturnsRegisteredValue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             int expected = 5;
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterStratTries(strat.Name, expected);
@@ -99,7 +99,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_NonNotableStrat_ReturnsDefaultNumber()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 5).LinksTo[2].Strats["Base"];
+            Strat strat = Model.GetNodeInRoom("Landing Site", 5).LinksTo[2].Strats["Base"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterStratTries(strat.Name, 5);
 
@@ -114,7 +114,7 @@ namespace sm_json_data_framework.Tests.Options
         public void NumberOfTries_UnalteredStrat_ReturnsDefaultNumber()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -128,7 +128,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsTechEnabled_TechsEnabledByDefaultAndNoMention_ReturnsTrue()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -142,7 +142,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsTechEnabled_ExplicitlyDisabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledTech(tech.Name);
 
@@ -157,7 +157,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsTechEnabled_Reenabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledTech(tech.Name);
             logicalOptions.UnregisterDisabledTech(tech.Name);
@@ -173,7 +173,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsTechEnabled_TechsDisabledByDefaultButExplicitlyEnabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.TechsEnabledByDefault = false;
             logicalOptions.RegisterEnabledTech(tech.Name);
@@ -189,7 +189,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsTechEnabled_TechsDisabledByDefaultReDisabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.TechsEnabledByDefault = false;
             logicalOptions.RegisterEnabledTech(tech.Name);
@@ -206,7 +206,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsTechEnabled_TechsDisabledByDefaultAndNoMention_ReturnsFalse()
         {
             // Given
-            UnfinalizedTech tech = Model.Techs["canIBJ"];
+            Tech tech = Model.Techs["canIBJ"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.TechsEnabledByDefault = false;
 
@@ -221,7 +221,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_NoMention_ReturnsTrue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -235,7 +235,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_ExplicitlyDisabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledStrat(strat.Name);
 
@@ -250,7 +250,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_Reenabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledStrat(strat.Name);
             logicalOptions.UnregisterDisabledStrat(strat.Name);
@@ -266,7 +266,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsStratEnabled_NonNotableDisabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Landing Site", 5).LinksTo[2].Strats["Base"];
+            Strat strat = Model.GetNodeInRoom("Landing Site", 5).LinksTo[2].Strats["Base"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledStrat(strat.Name);
 
@@ -281,7 +281,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsGameFlagEnabled_NoMention_ReturnsTrue()
         {
             // Given
-            UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flag = Model.GameFlags["f_ZebesAwake"];
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
@@ -295,7 +295,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsGameFlagEnabled_ExplicitlyDisabled_ReturnsFalse()
         {
             // Given
-            UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flag = Model.GameFlags["f_ZebesAwake"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledGameFlag(flag.Name);
 
@@ -310,7 +310,7 @@ namespace sm_json_data_framework.Tests.Options
         public void IsGameFlagEnabled_Reenabled_ReturnsTrue()
         {
             // Given
-            UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flag = Model.GameFlags["f_ZebesAwake"];
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledGameFlag(flag.Name);
             logicalOptions.UnregisterDisabledGameFlag(flag.Name);
@@ -326,11 +326,11 @@ namespace sm_json_data_framework.Tests.Options
         public void Clone_CopiesCorectly()
         {
             // Given
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
-            UnfinalizedTech disabledTech = Model.Techs["canWalljump"];
-            UnfinalizedTech enabledTech = Model.Techs["canIBJ"];
-            UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];
-            UnfinalizedHelper helper = Model.Helpers["h_canBombThings"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Tech disabledTech = Model.Techs["canWalljump"];
+            Tech enabledTech = Model.Techs["canIBJ"];
+            GameFlag flag = Model.GameFlags["f_ZebesAwake"];
+            Helper helper = Model.Helpers["h_canBombThings"];
 
             LogicalOptions logicalOptions = new LogicalOptions();
 
@@ -406,11 +406,11 @@ namespace sm_json_data_framework.Tests.Options
 
             // Subsequently given
             // Modifications to clone
-            UnfinalizedStrat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
-            UnfinalizedTech disabledTech = Model.Techs["canWalljump"];
-            UnfinalizedTech enabledTech = Model.Techs["canIBJ"];
-            UnfinalizedGameFlag flag = Model.GameFlags["f_ZebesAwake"];
-            UnfinalizedHelper helper = Model.Helpers["h_canBombThings"];
+            Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
+            Tech disabledTech = Model.Techs["canWalljump"];
+            Tech enabledTech = Model.Techs["canIBJ"];
+            GameFlag flag = Model.GameFlags["f_ZebesAwake"];
+            Helper helper = Model.Helpers["h_canBombThings"];
 
             clone.AcidLeniencyMultiplier = 2;
             clone.HeatLeniencyMultiplier = 3;

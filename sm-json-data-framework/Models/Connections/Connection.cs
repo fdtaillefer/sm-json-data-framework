@@ -37,6 +37,14 @@ namespace sm_json_data_framework.Models.Connections
         /// Details about the destination node of this Connection.
         /// </summary>
         public ConnectionNode ToNode { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here, but we can still delegate to the nodes
+            FromNode.ApplyLogicalOptions(logicalOptions);
+            ToNode.ApplyLogicalOptions(logicalOptions);
+            return false;
+        }
     }
 
     public class UnfinalizedConnection : AbstractUnfinalizedModelElement<UnfinalizedConnection, Connection>
@@ -61,14 +69,6 @@ namespace sm_json_data_framework.Models.Connections
         protected override Connection CreateFinalizedElement(UnfinalizedConnection sourceElement, Action<Connection> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Connection(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical options have no power here, but we can still delegate to the nodes
-            FromNode.ApplyLogicalOptions(logicalOptions);
-            ToNode.ApplyLogicalOptions(logicalOptions);
-            return false;
         }
     }
 }

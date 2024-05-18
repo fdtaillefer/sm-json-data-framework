@@ -45,6 +45,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
                 return null;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedItemLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedItemLogicalElement, ItemLogicalElement>
@@ -60,12 +66,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             ModelFinalizationMappings mappings)
         {
             return new ItemLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
 
         public override bool IsNever()

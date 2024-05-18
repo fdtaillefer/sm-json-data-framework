@@ -27,6 +27,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
             return model.Rules.GetElectricityGrappleDamageReducingItems(model, inGameState);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedDraygonElectricityFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedDraygonElectricityFrames, DraygonElectricityFrames>
@@ -44,12 +50,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override DraygonElectricityFrames CreateFinalizedElement(UnfinalizedDraygonElectricityFrames sourceElement, Action<DraygonElectricityFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new DraygonElectricityFrames(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
     }
 }

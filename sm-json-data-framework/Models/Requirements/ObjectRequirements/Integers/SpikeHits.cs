@@ -27,6 +27,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
             return model.Rules.GetEnvironmentalDamageReducingItems(model, inGameState);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedSpikeHits : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedSpikeHits, SpikeHits>
@@ -44,12 +50,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override SpikeHits CreateFinalizedElement(UnfinalizedSpikeHits sourceElement, Action<SpikeHits> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new SpikeHits(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
     }
 }

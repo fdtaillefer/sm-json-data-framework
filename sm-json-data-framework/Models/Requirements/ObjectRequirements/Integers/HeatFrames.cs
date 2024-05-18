@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// A multiplier to apply to heat frame requirements as a leniency, as per applied logical options.
         /// </summary>
-        private decimal HeatLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
+        private decimal HeatLeniencyMultiplier => AppliedLogicalOptions?.HeatLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public HeatFrames(int numberOfFrames) : base(numberOfFrames)
         {
@@ -39,20 +39,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.GetHeatDamageReducingItems(model, inGameState);
         }
 
-        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            HeatLeniencyMultiplier = logicalOptions?.HeatLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-            base.ApplyLogicalOptions(logicalOptions);
+            // Nothing to do here
+            return false;
         }
     }
 
     public class UnfinalizedHeatFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedHeatFrames, HeatFrames>
     {
-        /// <summary>
-        /// A multiplier to apply to heat frame requirements as a leniency, as per applied logical options.
-        /// </summary>
-        private decimal HeatLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
-
         public UnfinalizedHeatFrames()
         {
 
@@ -66,13 +61,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override HeatFrames CreateFinalizedElement(UnfinalizedHeatFrames sourceElement, Action<HeatFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new HeatFrames(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            HeatLeniencyMultiplier = logicalOptions?.HeatLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-
-            return false;
         }
     }
 }

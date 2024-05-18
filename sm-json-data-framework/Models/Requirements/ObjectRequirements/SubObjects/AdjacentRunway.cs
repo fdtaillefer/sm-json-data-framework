@@ -128,6 +128,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 return _useFramesExecution;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     /// <summary>
@@ -184,12 +190,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override AdjacentRunway CreateFinalizedElement(UnfinalizedAdjacentRunway sourceElement, Action<AdjacentRunway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new AdjacentRunway(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
 
         public override bool IsNever()

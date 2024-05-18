@@ -20,6 +20,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class CanComeInCharged : AbstractObjectLogicalElement<UnfinalizedCanComeInCharged, CanComeInCharged>
     {
+        /// <summary>
+        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
+        /// </summary>
+        public decimal TilesSavedWithStutter => AppliedLogicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+
+        /// <summary>
+        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
+        /// </summary>
+        public decimal TilesToShineCharge => AppliedLogicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+
         public UnfinalizedCanComeInCharged InnerElement { get; set; }
 
         public CanComeInCharged(UnfinalizedCanComeInCharged innerElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -177,7 +187,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // runway that is usable coming in and combines for a long enough runway
             foreach (var (_, currentAdjacentRunwayResult, currentLength) in usableAdjacentRunwayEvaluations.Where(runway => runway.length > model.Rules.RoomTransitionTilesLost))
             {
-                var requiredInRoomLength = InnerElement.TilesToShineCharge + model.Rules.RoomTransitionTilesLost - currentLength;
+                var requiredInRoomLength = TilesToShineCharge + model.Rules.RoomTransitionTilesLost - currentLength;
 
                 // Determine which runways we may attempt to use. Limit to the ones we evaluated
                 // earlier because there's no point re-evaluating those we couldn't execute then,
@@ -255,17 +265,30 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 from runway in runways
                 let executionResult = runway.Execute(model, inGameState, comingIn: false, times, previousRoomCount)
                 where executionResult != null && hasEnergyForShinespark(executionResult.ResultingState)
-                select (runway, executionResult, length: calculateRunwayLength(runway, InnerElement.TilesSavedWithStutter));
+                select (runway, executionResult, length: calculateRunwayLength(runway, TilesSavedWithStutter));
 
             // Find the best resulting state among all provided runways whose length is enough to fulfill this CanComeInCharged
             var bestResult = (
                     from runway in usableRunways
-                    where runway.length >= InnerElement.TilesToShineCharge
+                    where runway.length >= TilesToShineCharge
                     select runway.executionResult
                 ).OrderByDescending(result => result.ResultingState, model.InGameStateComparer)
                 .FirstOrDefault();
 
             return (usableRunways, bestResult);
+        }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool useless = false;
+            if (MustShinespark && !logicalOptions.CanShinespark)
+            {
+                useless = true;
+            }
+
+            // We might have a chance to preprocess some runway scenarios, possibly, but not unless we receive the Rules here.
+
+            return useless;
         }
     }
 
@@ -290,35 +313,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool MustShinespark => ShinesparkFrames > 0;
 
-        /// <summary>
-        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
-        /// </summary>
-        public decimal TilesSavedWithStutter { get; private set; } = LogicalOptions.DefaultTilesSavedWithStutter;
-
-        /// <summary>
-        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
-        /// </summary>
-        public decimal TilesToShineCharge { get; private set; } = LogicalOptions.DefaultTilesToShineCharge;
-
         protected override CanComeInCharged CreateFinalizedElement(UnfinalizedCanComeInCharged sourceElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new CanComeInCharged(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            TilesSavedWithStutter = logicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
-            TilesToShineCharge = logicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
-
-            bool useless = false;
-            if (MustShinespark && !logicalOptions.CanShinespark)
-            {
-                useless = true;
-            }
-
-            // We might have a chance to preprocess some runway scenarios, possibly, but not unless we receive the Rules here.
-
-            return useless;
         }
 
         public override bool IsNever()

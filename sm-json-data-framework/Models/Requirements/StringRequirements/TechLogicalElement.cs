@@ -12,6 +12,11 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// </summary>
     public class TechLogicalElement : AbstractStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>
     {
+        /// <summary>
+        /// Number of tries the player is expected to take to execute the tech, as per applied logical options.
+        /// </summary>
+        public int Tries  => AppliedLogicalOptions?.NumberOfTries(Tech) ?? LogicalOptions.DefaultNumberOfTries;
+
         private UnfinalizedTechLogicalElement InnerElement { get; set; }
 
         public TechLogicalElement(UnfinalizedTechLogicalElement innerElement, Action<TechLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -33,18 +38,20 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return Tech.Requires.Execute(model, inGameState, times: times * InnerElement.Tries, previousRoomCount: previousRoomCount);
+            return Tech.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
+        }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Tech.ApplyLogicalOptions(logicalOptions);
+            // This becomes impossible if the tech itself becomes impossible
+            return Tech.UselessByLogicalOptions;
         }
     }
 
     public class UnfinalizedTechLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>
     {
         public UnfinalizedTech Tech { get; set; }
-
-        /// <summary>
-        /// Number of tries the player is expected to take to execute the tech, as per applied logical options.
-        /// </summary>
-        public int Tries { get; private set; } = LogicalOptions.DefaultNumberOfTries;
 
         public UnfinalizedTechLogicalElement(UnfinalizedTech tech)
         {
@@ -54,14 +61,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         protected override TechLogicalElement CreateFinalizedElement(UnfinalizedTechLogicalElement sourceElement, Action<TechLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new TechLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Tries = logicalOptions?.NumberOfTries(Tech) ?? LogicalOptions.DefaultNumberOfTries;
-            Tech.ApplyLogicalOptions(logicalOptions);
-            // This becomes impossible if the tech itself becomes impossible
-            return Tech.UselessByLogicalOptions;
         }
 
         public override bool IsNever()

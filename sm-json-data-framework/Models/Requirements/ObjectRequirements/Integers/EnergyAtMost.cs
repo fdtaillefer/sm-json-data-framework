@@ -30,6 +30,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             // This brings energy down to a specific level, and has no cares for damage reduction items
             return new Item[] { };
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Nothing in logical options can alter this
+            return false;
+        }
     }
 
     public class UnfinalizedEnergyAtMost : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>
@@ -47,12 +53,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override EnergyAtMost CreateFinalizedElement(UnfinalizedEnergyAtMost sourceElement, Action<EnergyAtMost> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new EnergyAtMost(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Nothing in logical options can alter this
-            return false;
         }
     }
 }

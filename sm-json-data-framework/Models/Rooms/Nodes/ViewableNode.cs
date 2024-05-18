@@ -34,6 +34,22 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// The strats that can be executed to view the node, mapped by name.
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool noUsefulStrat = true;
+            foreach (Strat strat in Strats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+                if (!strat.UselessByLogicalOptions)
+                {
+                    noUsefulStrat = false;
+                }
+            }
+
+            // A runway becomes useless if its strats are impossible
+            return noUsefulStrat;
+        }
     }
 
     public class UnfinalizedViewableNode : AbstractUnfinalizedModelElement<UnfinalizedViewableNode, ViewableNode>, InitializablePostDeserializeInNode
@@ -65,22 +81,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override ViewableNode CreateFinalizedElement(UnfinalizedViewableNode sourceElement, Action<ViewableNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new ViewableNode(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            bool noUsefulStrat = true;
-            foreach (UnfinalizedStrat strat in Strats.Values)
-            {
-                strat.ApplyLogicalOptions(logicalOptions);
-                if (!strat.UselessByLogicalOptions)
-                {
-                    noUsefulStrat = false;
-                }
-            }
-
-            // A runway becomes useless if its strats are impossible
-            return noUsefulStrat;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)

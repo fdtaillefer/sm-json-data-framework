@@ -135,6 +135,28 @@ namespace sm_json_data_framework.Models.Enemies
                 return Drops.Clone();
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            foreach (EnemyAttack attack in Attacks.Values)
+            {
+                attack.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (WeaponMultiplier weaponMultiplier in WeaponMultipliers.Values)
+            {
+                weaponMultiplier.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (WeaponSusceptibility weaponSusceptibility in WeaponSusceptibilities.Values)
+            {
+                weaponSusceptibility.ApplyLogicalOptions(logicalOptions);
+            }
+
+            Dimensions.ApplyLogicalOptions(logicalOptions);
+
+            return false;
+        }
     }
 
     public class UnfinalizedEnemy : AbstractUnfinalizedModelElement<UnfinalizedEnemy, Enemy>, InitializablePostDeserializeOutOfRoom
@@ -214,28 +236,6 @@ namespace sm_json_data_framework.Models.Enemies
         protected override Enemy CreateFinalizedElement(UnfinalizedEnemy sourceElement, Action<Enemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Enemy(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            foreach (UnfinalizedEnemyAttack attack in Attacks.Values)
-            {
-                attack.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach(UnfinalizedWeaponMultiplier weaponMultiplier in WeaponMultipliers.Values)
-            {
-                weaponMultiplier.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedWeaponSusceptibility weaponSusceptibility in WeaponSusceptibilities.Values)
-            {
-                weaponSusceptibility.ApplyLogicalOptions(logicalOptions);
-            }
-
-            Dimensions.ApplyLogicalOptions(logicalOptions);
-
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model)

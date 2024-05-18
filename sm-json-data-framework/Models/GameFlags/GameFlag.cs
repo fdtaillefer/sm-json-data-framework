@@ -23,6 +23,12 @@ namespace sm_json_data_framework.Models.GameFlags
         /// The unique name of the game flag. Game flag names are defined by the model and are not official names.
         /// </summary>
         public string Name => InnerElement.Name;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool explicitlyDisabled = !logicalOptions.IsGameFlagEnabled(this);
+            return explicitlyDisabled;
+        }
     }
 
     public class UnfinalizedGameFlag : AbstractUnfinalizedModelElement<UnfinalizedGameFlag, GameFlag>
@@ -39,12 +45,6 @@ namespace sm_json_data_framework.Models.GameFlags
         protected override GameFlag CreateFinalizedElement(UnfinalizedGameFlag sourceElement, Action<GameFlag> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new GameFlag(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            bool explicitlyDisabled = !logicalOptions.IsGameFlagEnabled(this);
-            return explicitlyDisabled;
         }
     }
 }

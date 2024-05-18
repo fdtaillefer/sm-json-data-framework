@@ -129,6 +129,28 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 return _bypassExecution;
             }
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Lock.ApplyLogicalOptions(logicalOptions);
+
+            foreach (Strat strat in UnlockStrats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+            }
+
+            foreach (Strat strat in BypassStrats.Values)
+            {
+                strat.ApplyLogicalOptions(logicalOptions);
+            }
+
+            // We could update a property able to indicate that this lock can never ever be dealt with,
+            // but we'd need a way to ascertain that the lock is always active
+
+            // A lock remains useful even if it's impolssible to unlock or bypass as it plays the role of blocking the way.
+            // It does become useless if its activation conditions become impossible though
+            return Lock.UselessByLogicalOptions;
+        }
     }
 
     /// <summary>
@@ -248,25 +270,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override NodeLock CreateFinalizedElement(UnfinalizedNodeLock sourceElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new NodeLock(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Lock.ApplyLogicalOptions(logicalOptions);
-
-            foreach (UnfinalizedStrat strat in UnlockStrats.Values)
-            {
-                strat.ApplyLogicalOptions(logicalOptions);
-            }
-
-            foreach (UnfinalizedStrat strat in BypassStrats.Values)
-            {
-                strat.ApplyLogicalOptions(logicalOptions);
-            }
-
-            // A lock remains useful even if it's impolssible to unlock or bypass as it plays the role of blocking the way.
-            // It does become useless if its activation conditions become impossible though
-            return Lock.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node)

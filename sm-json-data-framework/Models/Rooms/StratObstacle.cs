@@ -18,6 +18,12 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class StratObstacle : AbstractModelElement<UnfinalizedStratObstacle, StratObstacle>
     {
+        /// <summary>
+        /// Indicates whether trying to handle the obstacle via this strat is rendered impossible by logical options.
+        /// This would mean this StartObstacle cannot be executed except if the obstacle has already been destroyed by a different strat.
+        /// </summary>
+        public bool UselessFromHereByLogicalOptions { get; protected set; } = false;
+
         private UnfinalizedStratObstacle InnerElement { get; set; }
 
         public StratObstacle(UnfinalizedStratObstacle innerElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -82,6 +88,21 @@ namespace sm_json_data_framework.Models.Rooms
                 }
                 return _bypassExecution;
             }
+        }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Requires.ApplyLogicalOptions(logicalOptions);
+            Bypass?.ApplyLogicalOptions(logicalOptions);
+            Obstacle.ApplyLogicalOptions(logicalOptions);
+
+            bool indestructibleHere = Obstacle.IndestructibleByLogicalOptions || Requires.UselessByLogicalOptions;
+            bool unbypassableHere = Bypass == null || Bypass.UselessByLogicalOptions;
+            // This StratObstacle becomes locally useless (so - impossible unless the obstacle is destroyed elsewhere) if it can be neither destroyed or bypassed from here
+            UselessFromHereByLogicalOptions = indestructibleHere && unbypassableHere;
+
+            // This StratObstacle can become fully useless if the obstacle is indestructible from anywhere and cannot be bypassed from here
+            return Obstacle.IndestructibleByLogicalOptions && unbypassableHere;
         }
     }
 
@@ -192,19 +213,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override StratObstacle CreateFinalizedElement(UnfinalizedStratObstacle sourceElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new StratObstacle(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Requires.ApplyLogicalOptions(logicalOptions);
-            if (Bypass != null)
-            {
-                Bypass.ApplyLogicalOptions(logicalOptions);
-            }
-
-            // A StratObstacle never becomes truly impossible via logical options, as it's still possible to execute it
-            // if the obstacle was destroyed previously from elsehwere
-            return false;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

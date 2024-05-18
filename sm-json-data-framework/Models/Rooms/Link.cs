@@ -32,6 +32,22 @@ namespace sm_json_data_framework.Models.Rooms
         /// The details of how this Link links to different nodes, mapped by target node ID.
         /// </summary>
         public IReadOnlyDictionary<int, LinkTo> To { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool allDestinationsImpossible = true;
+            foreach (LinkTo linkTo in To.Values)
+            {
+                linkTo.ApplyLogicalOptions(logicalOptions);
+                if (!linkTo.UselessByLogicalOptions)
+                {
+                    allDestinationsImpossible = false;
+                }
+            }
+
+            // A link is useless if there's no destination that's possible to reach
+            return allDestinationsImpossible;
+        }
     }
 
     public class UnfinalizedLink : AbstractUnfinalizedModelElement<UnfinalizedLink, Link>, InitializablePostDeserializeInRoom
@@ -63,22 +79,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override Link CreateFinalizedElement(UnfinalizedLink sourceElement, Action<Link> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Link(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            bool allDestinationsImpossible = true;
-            foreach (UnfinalizedLinkTo linkTo in To.Values)
-            {
-                linkTo.ApplyLogicalOptions(logicalOptions);
-                if(!linkTo.UselessByLogicalOptions)
-                {
-                    allDestinationsImpossible = false;
-                }
-            }
-
-            // A link is useless if there's no destination that's possible to reach
-            return allDestinationsImpossible;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

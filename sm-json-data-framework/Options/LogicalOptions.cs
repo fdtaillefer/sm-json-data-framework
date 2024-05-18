@@ -23,6 +23,8 @@ namespace sm_json_data_framework.Options
         public static readonly decimal DefaultTilesToShineCharge = 32.5M;
         public static readonly decimal DefaultFrameLeniencyMultiplier = 1;
 
+        public static readonly ReadOnlySpawnerFarmingOptions DefaultSpawnerFarmingOptions = new SpawnerFarmingOptions().AsReadOnly();
+
         private static IInGameResourceEvaluator DefaultInGameResourceEvaluator { get; } = new ResourceEvaluatorByFixedValues(
                 new Dictionary<ConsumableResourceEnum, int> {
                     {ConsumableResourceEnum.Energy,  1},
@@ -135,7 +137,7 @@ namespace sm_json_data_framework.Options
             TriesByTech.Add(techName, numberOfTries);
         }
 
-        public int NumberOfTries(UnfinalizedTech tech)
+        public int NumberOfTries(Tech tech)
         {
             if (TriesByTech.TryGetValue(tech.Name, out int tries))
             {
@@ -166,7 +168,7 @@ namespace sm_json_data_framework.Options
             TriesByHelper.Add(helperName, numberOfTries);
         }
 
-        public int NumberOfTries(UnfinalizedHelper helper)
+        public int NumberOfTries(Helper helper)
         {
             if (TriesByHelper.TryGetValue(helper.Name, out int tries))
             {
@@ -196,7 +198,7 @@ namespace sm_json_data_framework.Options
             TriesByStrat.Add(stratName, numberOfTries);
         }
 
-        public int NumberOfTries(UnfinalizedStrat strat)
+        public int NumberOfTries(Strat strat)
         {
             if (strat.Notable && TriesByStrat.TryGetValue(strat.Name, out int tries))
             {
@@ -254,7 +256,7 @@ namespace sm_json_data_framework.Options
             InternalEnabledTechs.Remove(techName);
         }
 
-        public bool IsTechEnabled(UnfinalizedTech tech)
+        public bool IsTechEnabled(Tech tech)
         {
             return IsTechEnabled(tech.Name);
         }
@@ -291,7 +293,7 @@ namespace sm_json_data_framework.Options
             InternalDisabledStrats.Remove(stratName);
         }
 
-        public bool IsStratEnabled(UnfinalizedStrat strat)
+        public bool IsStratEnabled(Strat strat)
         {
             // Non-notable strats are always enabled. Beyond that, strats are enabled by default unless disabled
             return (!strat.Notable || !InternalDisabledStrats.Contains(strat.Name));
@@ -315,7 +317,7 @@ namespace sm_json_data_framework.Options
             InternalRemovedGameFlags.Remove(flagName);
         }
 
-        public bool IsGameFlagEnabled(UnfinalizedGameFlag gameFlag)
+        public bool IsGameFlagEnabled(GameFlag gameFlag)
         {
             return !InternalRemovedGameFlags.Contains(gameFlag.Name);
         }
@@ -383,21 +385,21 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="tech"></param>
         /// <returns></returns>
-        public int NumberOfTries(UnfinalizedTech tech);
+        public int NumberOfTries(Tech tech);
 
         /// <summary>
         /// Returns the number of tries that are logically expected to be attempted before a success for the provided helper.
         /// </summary>
         /// <param name="helper"></param>
         /// <returns></returns>
-        public int NumberOfTries(UnfinalizedHelper helper);
+        public int NumberOfTries(Helper helper);
 
         /// <summary>
         /// Returns the number of tries that are logically expected to be attempted before a success for the provided strat.
         /// </summary>
         /// <param name="strat"></param>
         /// <returns></returns>
-        public int NumberOfTries(UnfinalizedStrat strat);
+        public int NumberOfTries(Strat strat);
 
         /// <summary>
         /// An instance of <see cref="InGameStateComparer"/>, initialized with the current relative resource values.
@@ -436,7 +438,7 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="tech">Tech to check for</param>
         /// <returns></returns>
-        public bool IsTechEnabled(UnfinalizedTech tech);
+        public bool IsTechEnabled(Tech tech);
 
         /// <summary>
         /// Indicates thse logical options expect the player to shinespark.
@@ -449,14 +451,14 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="strat">Strat to check for</param>
         /// <returns></returns>
-        public bool IsStratEnabled(UnfinalizedStrat strat);
+        public bool IsStratEnabled(Strat strat);
 
         /// <summary>
         /// Indicates whether the player is expected to be able to enable the provided GameFlag according to this LogicalOptions.
         /// </summary>
         /// <param name="gameFlag">GameFlag to check for</param>
         /// <returns></returns>
-        public bool IsGameFlagEnabled(UnfinalizedGameFlag gameFlag);
+        public bool IsGameFlagEnabled(GameFlag gameFlag);
 
         /// <summary>
         /// A sub-model containing the logical options with regards to using enemy spawners for farming resources.

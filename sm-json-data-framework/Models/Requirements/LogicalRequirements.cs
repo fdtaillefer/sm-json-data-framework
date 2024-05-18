@@ -77,6 +77,29 @@ namespace sm_json_data_framework.Models.Requirements
             (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool anyUselessLogicalElement = false;
+            foreach (ILogicalElement logicalElement in LogicalElements)
+            {
+                logicalElement.ApplyLogicalOptions(logicalOptions);
+                if (logicalElement.UselessByLogicalOptions)
+                {
+                    anyUselessLogicalElement = true;
+                }
+            }
+
+            if (logicalOptions == null)
+            {
+                return false;
+            }
+            else
+            {
+                // We're implicitly an And, so we become impossible/useless as soon as any sub element is
+                return anyUselessLogicalElement;
+            }
+        }
     }
 
     public class UnfinalizedLogicalRequirements : AbstractUnfinalizedModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>
@@ -107,24 +130,6 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         public IList<IUnfinalizedLogicalElement> LogicalElements { get; private set; } = new List<IUnfinalizedLogicalElement>();
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            foreach (IUnfinalizedLogicalElement logicalElement in LogicalElements)
-            {
-                logicalElement.ApplyLogicalOptions(logicalOptions);
-            }
-
-            if (logicalOptions == null)
-            {
-                return false;
-            }
-            else
-            {
-                // We're implicitly an And, so we become impossible/useless as soon as any sub element is
-                return LogicalElements.Where(logicalElement => logicalElement.UselessByLogicalOptions).Any();
-            }
-        }
 
         /// <summary>
         /// Returns whether this set of logical requirements in its base state is logically impossible to fully complete

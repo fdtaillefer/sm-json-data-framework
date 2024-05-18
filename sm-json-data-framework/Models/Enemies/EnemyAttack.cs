@@ -38,6 +38,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// Indicates whether this attack is mitigated by Gravity suit.
         /// </summary>
         public bool AffectedByGravity => InnerElement.AffectedByGravity;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here
+            return false;
+        }
     }
 
     public class UnfinalizedEnemyAttack: AbstractUnfinalizedModelElement<UnfinalizedEnemyAttack, EnemyAttack>
@@ -66,12 +72,6 @@ namespace sm_json_data_framework.Models.Enemies
         protected override EnemyAttack CreateFinalizedElement(UnfinalizedEnemyAttack sourceElement, Action<EnemyAttack> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new EnemyAttack(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical options have no power here
-            return false;
         }
     }
 }

@@ -141,6 +141,22 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             return result;
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Propagate to all valid weapons, so we can tell if any of them is still usable
+            bool usableWeapon = false;
+            foreach (Weapon weapon in ValidWeapons.Values)
+            {
+                weapon.ApplyLogicalOptions(logicalOptions);
+                if (!weapon.UselessByLogicalOptions)
+                {
+                    usableWeapon = true;
+                }
+            }
+            // We are rendered useless if there's no remaining usable weapons
+            return !usableWeapon;
+        }
     }
 
     /// <summary>
@@ -372,22 +388,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override EnemyKill CreateFinalizedElement(UnfinalizedEnemyKill sourceElement, Action<EnemyKill> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new EnemyKill(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Propagate to all valid weapons, so we can tell if any of them is still usable
-            bool usableWeapon = false;
-            foreach(UnfinalizedWeapon weapon in ValidWeapons)
-            {
-                weapon.ApplyLogicalOptions(logicalOptions);
-                if (!weapon.UselessByLogicalOptions)
-                {
-                    usableWeapon = true;
-                }
-            }
-            // We are rendered useless if there's no remaining usable weapons
-            return !usableWeapon;
         }
 
         public override bool IsNever()

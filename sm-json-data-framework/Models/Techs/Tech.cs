@@ -47,6 +47,24 @@ namespace sm_json_data_framework.Models.Techs
         {
             return ExtensionTechs.SelectMany(tech => tech.Value.SelectWithExtensions()).Prepend(this).ToList();
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            bool explicitlyDisabled = !logicalOptions.IsTechEnabled(this);
+            // Propagate to requirements
+            Requires.ApplyLogicalOptions(logicalOptions);
+            // Assign UselessByLogicalOptions explicitly now, because extension techs requirements will depend on this tech's state.
+            // Tech becomes useless if explicitly disabled or if it becomes impossible to execute
+            UselessByLogicalOptions = explicitlyDisabled || Requires.UselessByLogicalOptions;
+
+            // Propagate to extension techs
+            foreach (Tech tech in ExtensionTechs.Values)
+            {
+                tech.ApplyLogicalOptions(logicalOptions);
+            }
+
+            return UselessByLogicalOptions;
+        }
     }
 
     public class UnfinalizedTech : AbstractUnfinalizedModelElement<UnfinalizedTech, Tech>, InitializablePostDeserializeOutOfRoom
@@ -78,23 +96,6 @@ namespace sm_json_data_framework.Models.Techs
         protected override Tech CreateFinalizedElement(UnfinalizedTech sourceElement, Action<Tech> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Tech(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            bool explicitlyDisabled = !logicalOptions.IsTechEnabled(this);
-            // Propagate to requirements
-            Requires.ApplyLogicalOptions(logicalOptions);
-            // Assign UselessByLogicalOptions explicitly now, because extension techs requirements will depend on this tech's state.
-            // Tech becomes useless if explicitly disabled or if it becomes impossible to execute
-            UselessByLogicalOptions = explicitlyDisabled || Requires.UselessByLogicalOptions;
-
-            // Propagate to extension techs
-            foreach(UnfinalizedTech tech in ExtensionTechs) {
-                tech.ApplyLogicalOptions(logicalOptions);
-            }
-
-            return UselessByLogicalOptions;
         }
 
         /// <summary>

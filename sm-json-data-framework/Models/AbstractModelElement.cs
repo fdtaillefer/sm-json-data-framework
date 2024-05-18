@@ -30,26 +30,66 @@ namespace sm_json_data_framework.Models
             mappingsInsertionCallback.Invoke((ConcreteType)this);
         }
 
-        public bool UselessByLogicalOptions => InnerElement?.UselessByLogicalOptions ?? false;
+        public bool UselessByLogicalOptions { get; protected set; }
 
-        public ReadOnlyLogicalOptions AppliedLogicalOptions => InnerElement?.AppliedLogicalOptions;
+        public ReadOnlyLogicalOptions AppliedLogicalOptions { get; protected set; }
 
-        public virtual void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        /// <summary>
+        /// <para>
+        /// Propagates the application of a LogicalOptions instance to other models.
+        /// </para>
+        /// <para>
+        /// Note that this will not be called for a LogicalOptions instance that is already altering this model.
+        /// </para>
+        /// <para>
+        /// Concrete implementations of this method should call <see cref="ApplyLogicalOptions(ReadOnlyLogicalOptions)"/> on:
+        /// <list type="bullet">
+        /// <item>All owned sub-models</item>
+        /// <item>All non-owned sub-models whose logically-altered behavior they need to rely in order to properly apply logical options on themselves</item>
+        /// <item>Optionally any other  model (it's not needed but not harmful)</item>
+        /// </list>
+        /// </para>
+        /// </summary>
+        /// <param name="logicalOptions">LogicalOptions being applied</param>
+        /// <returns>True if this model is rendered useless by the logical options, false otherwise</returns>
+        protected abstract bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
+
+        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            if (InnerElement == null)
+            if (logicalOptions != AppliedLogicalOptions)
             {
-                throw new InvalidOperationException("Can't apply LogicalOptions on this model element, because it doesn't have an inner element.");
+                AppliedLogicalOptions = logicalOptions;
+                UselessByLogicalOptions = PropagateLogicalOptions(logicalOptions);
             }
-            InnerElement.ApplyLogicalOptions(logicalOptions);
         }
     }
 
     /// <summary>
     /// The untyped interface portion of <see cref="AbstractModelElement{ConcreteType, TargetType}"/>.
+    /// Notably, a model that implements this interface can have <see cref="ReadOnlyLogicalOptions"/> applied to it (in a non-destructive way),
+    /// potentially rendering it useless while the options are applied.
     /// </summary>
-    public interface IModelElement : IConfigurableByLogicalOptions
+    public interface IModelElement
     {
+        /// <summary>
+        /// Applies alterations to this object, based on the provided ReadOnlyLogicalOptions. 
+        /// The goal of doing this is to preprocess things and avoid re-calculating them multiple times on the fly.
+        /// This should not be called except as part of the application of logical options to an entire <see cref="SuperMetroidModel"/>.,
+        /// as that could leave the model in an inconsistent state.
+        /// </summary>
+        /// <param name="logicalOptions">LogicalOptions being applied</param>
+        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
 
+        /// <summary>
+        /// Indicates whether the <see cref="ReadOnlyLogicalOptions"/> applied to this make it meaningless, or impossible to fulfill.
+        /// This should likely default to false when no logical options are applied.
+        /// </summary>
+        public bool UselessByLogicalOptions { get; }
+
+        /// <summary>
+        /// The LogicalOptions that are currently applied to this model, if any. Null means no logical options are currently applied.
+        /// </summary>
+        public ReadOnlyLogicalOptions AppliedLogicalOptions { get; }
     }
 
     /// <summary>
@@ -86,45 +126,12 @@ namespace sm_json_data_framework.Models
         /// <param name="mappings">Mappings of unfinalized-to-finalized model element instances, which can be used as a reference to obtain finalized sub-models</param>
         /// <returns></returns>
         protected abstract TargetType CreateFinalizedElement(ConcreteType sourceElement, Action<TargetType> mappingsInsertionCallback, ModelFinalizationMappings mappings);
-
-        public bool UselessByLogicalOptions { get; protected set; }
-
-        public ReadOnlyLogicalOptions AppliedLogicalOptions { get; protected set; }
-
-        /// <summary>
-        /// <para>
-        /// Applies alterations to this logical element, based on the provided LogicalOptions.
-        /// </para>
-        /// <para>
-        /// Note that this will not be called for a LogicalOptions that is already altering this model.
-        /// </para>
-        /// <para>
-        /// Concrete implementations of this method should:
-        /// <list type="bullet">
-        /// <item>Propagate this call to all owned sub-models</item>
-        /// <item>Propagate this call to all non-owned sub-models whose altered state they need to rely on, and optionally any other</item>
-        /// <item>Apply all alterations in an undoable, non-destructive way</item>
-        /// </list>
-        /// </para>
-        /// </summary>
-        /// <param name="logicalOptions">LogicalOptions on which to base alterations</param>
-        /// <returns>True if this model is rendered useless by the logical options, false otherwise</returns>
-        protected abstract bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions);
-
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
-        {
-            if (logicalOptions != AppliedLogicalOptions)
-            {
-                AppliedLogicalOptions = logicalOptions;
-                UselessByLogicalOptions = ApplyLogicalOptionsEffects(logicalOptions);
-            }
-        }
     }
 
     /// <summary>
     /// The untyped interface portion of <see cref="AbstractUnfinalizedModelElement{ConcreteType, TargetType}"/>.
     /// </summary>
-    public interface IUnfinalizedModelElement: IConfigurableByLogicalOptions
+    public interface IUnfinalizedModelElement
     {
         /// <summary>
         /// Does the same as <see cref="AbstractUnfinalizedModelElement{ConcreteType, TargetType}.Finalize(ModelFinalizationMappings)"/>, 
@@ -133,32 +140,5 @@ namespace sm_json_data_framework.Models
         /// <param name="mappings">A model containing mappings between unfinalized instances and corresponding finalized instances</param>
         /// <returns></returns>
         public IModelElement FinalizeUntyped(ModelFinalizationMappings mappings);
-    }
-
-    /// <summary>
-    /// Interface indicating that a model can have <see cref="ReadOnlyLogicalOptions"/> applied to it (in a non-destructive way),
-    /// potentially rendering it useless while the options are applied.
-    /// </summary>
-    public interface IConfigurableByLogicalOptions
-    {
-        /// <summary>
-        /// Applies alterations to this object, based on the provided ReadOnlyLogicalOptions. 
-        /// The goal of doing this is to preprocess things and avoid re-calculating them multiple times on the fly.
-        /// This should not be called except as part of the application of logical options to an entire <see cref="UnfinalizedSuperMetroidModel"/>.,
-        /// as that could leave the model in an inconsistent state.
-        /// </summary>
-        /// <param name="logicalOptions">LogicalOptions being applied</param>
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
-
-        /// <summary>
-        /// Indicates whether the <see cref="ReadOnlyLogicalOptions"/> applied to this make it meaningless, or impossible to fulfill.
-        /// This should likely default to false when no logical options are applied.
-        /// </summary>
-        public bool UselessByLogicalOptions { get; }
-
-        /// <summary>
-        /// The LogicalOptions that are currently applied to this model, if any. Null means no logical options are currently applied.
-        /// </summary>
-        public ReadOnlyLogicalOptions AppliedLogicalOptions { get; }
     }
 }

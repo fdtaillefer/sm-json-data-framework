@@ -12,6 +12,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class LavaFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedLavaFrames, LavaFrames>
     {
+        /// <summary>
+        /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
+        /// </summary>
+        private decimal LavaLeniencyMultiplier => AppliedLogicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
+
         public LavaFrames(int numberOfFrames) : base(numberOfFrames)
         {
 
@@ -22,11 +27,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
 
         }
-
-        /// <summary>
-        /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
-        /// </summary>
-        private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
 
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
@@ -39,20 +39,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.GetLavaDamageReducingItems(model, inGameState);
         }
 
-        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            LavaLeniencyMultiplier = logicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-            base.ApplyLogicalOptions(logicalOptions);
+            // Nothing to do here
+            return false;
         }
     }
 
     public class UnfinalizedLavaFrames : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedLavaFrames, LavaFrames>
     {
-        /// <summary>
-        /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
-        /// </summary>
-        private decimal LavaLeniencyMultiplier { get; set; } = LogicalOptions.DefaultFrameLeniencyMultiplier;
-
         public UnfinalizedLavaFrames()
         {
 
@@ -66,13 +61,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override LavaFrames CreateFinalizedElement(UnfinalizedLavaFrames sourceElement, Action<LavaFrames> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new LavaFrames(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            LavaLeniencyMultiplier = logicalOptions?.LavaLeniencyMultiplier ?? LogicalOptions.DefaultFrameLeniencyMultiplier;
-
-            return false;
         }
     }
 }

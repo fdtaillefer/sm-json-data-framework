@@ -23,6 +23,12 @@ namespace sm_json_data_framework.Models.Items
         /// The unique name of this item.
         /// </summary>
         public string Name => InnerElement.Name;
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // Logical options have no power here
+            return false;
+        }
     }
 
     public class UnfinalizedItem: AbstractUnfinalizedModelElement<UnfinalizedItem, Item>
@@ -39,12 +45,6 @@ namespace sm_json_data_framework.Models.Items
         protected override Item CreateFinalizedElement(UnfinalizedItem sourceElement, Action<Item> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Item(sourceElement, mappingsInsertionCallback);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // Logical options have no power here
-            return false;
         }
     }
 }

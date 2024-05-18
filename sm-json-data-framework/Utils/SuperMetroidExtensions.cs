@@ -91,7 +91,7 @@ namespace sm_json_data_framework.Utils
         /// </summary>
         /// <param name="elements">Enumeration of elements to filter</param>
         /// <returns></returns>
-        public static IEnumerable<T> WhereUseful<T>(this IEnumerable<T> elements) where T: IConfigurableByLogicalOptions
+        public static IEnumerable<T> WhereUseful<T>(this IEnumerable<T> elements) where T: IModelElement
         {
             return elements.Where(clc => !clc.UselessByLogicalOptions);
         }

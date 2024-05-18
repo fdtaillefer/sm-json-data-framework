@@ -48,6 +48,35 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// The node through which this remote initiation ultimately exits the room charged.
         /// </summary>
         public RoomNode ExitNode { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            // If this contains strats, they belong to a LinkTo.
+            // However, we need to apply the logical options to them to see if they become impossible
+            bool anyNodeImpossible = false;
+            for (int i = 0; i < PathToDoor.Count; i++)
+            {
+                var (_, strats) = PathToDoor[i];
+                bool anyStratPossible = false;
+                foreach (Strat strat in strats.Values)
+                {
+                    strat.ApplyLogicalOptions(logicalOptions);
+                    if (!strat.UselessByLogicalOptions)
+                    {
+                        anyStratPossible = true;
+                    }
+                }
+
+                // This node becomes impossible if no possible strat remains
+                if (!anyStratPossible)
+                {
+                    anyNodeImpossible = true;
+                }
+            }
+
+            // If there is a node in the path that has no possible strats remaining, this InitiateRemotely becomes impossible
+            return anyNodeImpossible;
+        }
     }
 
     /// <summary>
@@ -100,34 +129,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override InitiateRemotely CreateFinalizedElement(UnfinalizedInitiateRemotely sourceElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new InitiateRemotely(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            // If this contains strats, they belong to a LinkTo.
-            // However, we need to apply the logical options to them to see if they become impossible
-            bool anyNodeImpossible = false;
-            for (int i = 0; i < PathToDoor.Count; i++)
-            {
-                var (_, strats) = PathToDoor[i];
-                bool anyStratPossible = false;
-                foreach(UnfinalizedStrat strat in strats)
-                {
-                    strat.ApplyLogicalOptions(logicalOptions);
-                    if (!strat.UselessByLogicalOptions)
-                    {
-                        anyStratPossible = true;
-                    }
-                }
-                
-                // This node becomes impossible if no possible strat remains
-                if (!anyStratPossible) {
-                    anyNodeImpossible = true;
-                }
-            }
-               
-            // If there is a node in the path that has no possible strats remaining, this InitiateRemotely becomes impossible
-            return anyNodeImpossible;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomNode node, UnfinalizedCanLeaveCharged canLeaveCharged)

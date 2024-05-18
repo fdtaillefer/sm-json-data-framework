@@ -17,9 +17,9 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class FarmCycle : AbstractModelElement<UnfinalizedFarmCycle, FarmCycle>
     {
-        private UnfinalizedFarmCycle InnerElement { get; set; }
+        public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions => AppliedLogicalOptions?.SpawnerFarmingOptions ?? LogicalOptions.DefaultSpawnerFarmingOptions;
 
-        public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions { get; private set; } = new SpawnerFarmingOptions().AsReadOnly();
+        private UnfinalizedFarmCycle InnerElement { get; set; }
 
         public FarmCycle(UnfinalizedFarmCycle innerElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
@@ -113,17 +113,12 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        public override void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            base.ApplyLogicalOptions(logicalOptions);
-            if (logicalOptions == null)
-            {
-                AppliedFarmingLogicalOptions = new SpawnerFarmingOptions();
-            }
-            else
-            {
-                AppliedFarmingLogicalOptions = logicalOptions.SpawnerFarmingOptions;
-            }
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            // A farm cycle becomes useless if its requirements are impossible
+            return Requires.UselessByLogicalOptions;
         }
     }
 
@@ -431,22 +426,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override FarmCycle CreateFinalizedElement(UnfinalizedFarmCycle sourceElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new FarmCycle(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Requires.ApplyLogicalOptions(logicalOptions);
-
-            if(logicalOptions == null)
-            {
-                AppliedFarmingLogicalOptions = new SpawnerFarmingOptions();
-            } else
-            {
-                AppliedFarmingLogicalOptions = logicalOptions.SpawnerFarmingOptions;
-            }
-
-            // A farm cycle becomes useless if its requirements are impossible
-            return Requires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room, UnfinalizedRoomEnemy roomEnemy)

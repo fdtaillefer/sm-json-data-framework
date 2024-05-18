@@ -28,6 +28,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         {
             return LogicalRequirements.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            LogicalRequirements.ApplyLogicalOptions(logicalOptions);
+
+            // Since this is an And, the default behavior of the internal LogicalRequirements matches our purposes
+            return LogicalRequirements.UselessByLogicalOptions;
+        }
     }
 
     public class UnfinalizedAnd : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>
@@ -45,14 +53,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         protected override And CreateFinalizedElement(UnfinalizedAnd sourceElement, Action<And> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new And(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            LogicalRequirements.ApplyLogicalOptions(logicalOptions);
-
-            // Since this is an And, the default behavior of the internal LogicalRequirements matches our purposes
-            return LogicalRequirements.UselessByLogicalOptions;
         }
 
         public override bool IsNever()

@@ -71,6 +71,15 @@ namespace sm_json_data_framework.Models.Weapons
         /// Can be used to infer some properties of this Weapon.
         /// </summary>
         public IReadOnlySet<WeaponCategoryEnum> Categories { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            UseRequires.ApplyLogicalOptions(logicalOptions);
+            ShotRequires.ApplyLogicalOptions(logicalOptions);
+
+            // This weapon is rendered useless if either using it altogether, or doing an individual shot, becomes impossible
+            return UseRequires.UselessByLogicalOptions || ShotRequires.UselessByLogicalOptions;
+        }
     }
 
     public class UnfinalizedWeapon : AbstractUnfinalizedModelElement<UnfinalizedWeapon, Weapon>, InitializablePostDeserializeOutOfRoom
@@ -114,15 +123,6 @@ namespace sm_json_data_framework.Models.Weapons
         protected override Weapon CreateFinalizedElement(UnfinalizedWeapon sourceElement, Action<Weapon> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new Weapon(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            UseRequires.ApplyLogicalOptions(logicalOptions);
-            ShotRequires.ApplyLogicalOptions(logicalOptions);
-
-            // This weapon is rendered useless if either using it altogether, or doing an individual shot, becomes impossible
-            return UseRequires.UselessByLogicalOptions || ShotRequires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model)

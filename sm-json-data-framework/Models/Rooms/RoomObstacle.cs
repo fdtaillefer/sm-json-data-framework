@@ -15,6 +15,8 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomObstacle : AbstractModelElement<UnfinalizedRoomObstacle, RoomObstacle>
     {
+        public bool IndestructibleByLogicalOptions { get; protected set; } = false;
+
         private UnfinalizedRoomObstacle InnerElement { get; set; }
 
         public RoomObstacle(UnfinalizedRoomObstacle innerElement, Action<RoomObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -50,6 +52,17 @@ namespace sm_json_data_framework.Models.Rooms
         /// The room in which this obstacle is.
         /// </summary>
         public Room Room { get; }
+
+        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        {
+            Requires.ApplyLogicalOptions(logicalOptions);
+
+            // While it's possible for an obstacle to become logically indestructible, we can't say it's useless
+            // because it still blocks the player, and also because it could still potentially be bypassed in some strats.
+            // It's still useful to know if this is indestructible though
+            IndestructibleByLogicalOptions = Requires.UselessByLogicalOptions;
+            return false;
+        }
     }
 
     public class UnfinalizedRoomObstacle : AbstractUnfinalizedModelElement<UnfinalizedRoomObstacle, RoomObstacle>, InitializablePostDeserializeInRoom
@@ -84,15 +97,6 @@ namespace sm_json_data_framework.Models.Rooms
         protected override RoomObstacle CreateFinalizedElement(UnfinalizedRoomObstacle sourceElement, Action<RoomObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new RoomObstacle(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        protected override bool ApplyLogicalOptionsEffects(ReadOnlyLogicalOptions logicalOptions)
-        {
-            Requires.ApplyLogicalOptions(logicalOptions);
-
-            // This obstacle's flat requirements must be fulfilled regardless of where and how the obstacle is destroyed.
-            // So if it becomes impossible, the obstacle becomes impossible to destroy.
-            return Requires.UselessByLogicalOptions;
         }
 
         public void InitializeProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)
