@@ -99,8 +99,12 @@ namespace sm_json_data_framework.Models.Requirements
             BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks).ToList();
             ActivatedGameFlags = ActivatedGameFlags.Concat(subsequentResult.ActivatedGameFlags).ToList();
             KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies).ToList();
-            ItemsInvolved = ItemsInvolved.Concat(subsequentResult.ItemsInvolved).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            DamageReducingItemsInvolved = DamageReducingItemsInvolved.Concat(subsequentResult.DamageReducingItemsInvolved).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            ItemsInvolved = ItemsInvolved.Values.Concat(subsequentResult.ItemsInvolved.Values)
+                .Distinct(ObjectReferenceEqualityComparer<Item>.Default)
+                .ToDictionary(item => item.Name);
+            DamageReducingItemsInvolved = DamageReducingItemsInvolved.Values.Concat(subsequentResult.DamageReducingItemsInvolved.Values)
+                .Distinct(ObjectReferenceEqualityComparer<Item>.Default)
+                .ToDictionary(item => item.Name);
 
             return this;
         }
