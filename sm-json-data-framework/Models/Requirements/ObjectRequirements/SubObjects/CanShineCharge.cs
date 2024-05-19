@@ -136,6 +136,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Improve this if we decide to pass the rules here.
             return impossible;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // Since this is an in-room shine charge, its required number of tiles is constant.
+            // As such, we could check here whether the logical options make the shine long enough to always be possible.
+            // However, this requires access to the game rules, which we don't have here.
+            // It would also require SpeedBooster to always be available which we don't have a way to check here.
+            return false;
+        }
     }
 
     public class UnfinalizedCanShineCharge : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanShineCharge, CanShineCharge>, IRunway

@@ -32,11 +32,11 @@ namespace sm_json_data_framework.Options
 
         private static IInGameResourceEvaluator DefaultInGameResourceEvaluator { get; } = new ResourceEvaluatorByFixedValues(
                 new Dictionary<ConsumableResourceEnum, int> {
-                    {ConsumableResourceEnum.Energy,  1},
+                    {ConsumableResourceEnum.Energy, 1},
                     // Missile drops are super plentiful, AND each drop gives twice as much as Supers.
-                    {ConsumableResourceEnum.Missile,  3},
-                    {ConsumableResourceEnum.Super,  30},
-                    {ConsumableResourceEnum.PowerBomb,  60}
+                    {ConsumableResourceEnum.Missile, 3},
+                    {ConsumableResourceEnum.Super, 30},
+                    {ConsumableResourceEnum.PowerBomb, 60}
                 }
             );
 

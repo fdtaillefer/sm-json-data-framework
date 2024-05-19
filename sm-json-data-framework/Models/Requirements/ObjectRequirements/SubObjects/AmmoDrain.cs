@@ -64,6 +64,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // This is always possible, by definition
             return false;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This is always possible, by definition - though it's not always free
+            return true;
+        }
     }
 
     public class UnfinalizedAmmoDrain : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmoDrain, AmmoDrain>

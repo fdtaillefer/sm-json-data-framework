@@ -64,6 +64,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // but max ammo is not available in logical options.
             return false;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // A count of 0 makes no sense, but it *would* be logically always
+            return Count == 0;
+        }
     }
 
     public class UnfinalizedAmmo : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmo, Ammo>

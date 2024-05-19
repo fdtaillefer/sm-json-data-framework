@@ -54,8 +54,14 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         protected override bool CalculateLogicallyNever()
         {
-            // Logical options can't currently take away items
-            return false;
+            // This is impossible if the item can never be used
+            return Item.LogicallyNever;
+        }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This is always possible if the item can always be used
+            return Item.LogicallyAlways;
         }
     }
 

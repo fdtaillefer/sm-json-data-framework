@@ -29,6 +29,43 @@ namespace sm_json_data_framework.Models.Items
             // Logical options have no power here
             return false;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+            LogicallyAlways = CalculateLogicallyAlways();
+        }
+
+        /// <summary>
+        /// If true, then this item is impossible to use with its currently applied logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // Logical options can't currently take away items
+            return false;
+        }
+
+        /// <summary>
+        /// If true, then this item is always possible to use with its currently applied logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways()
+        {
+            // This could be always if the player always starts with the item, but this is not part of logical options currently.
+            return false;
+        }
     }
 
     public class UnfinalizedItem: AbstractUnfinalizedModelElement<UnfinalizedItem, Item>

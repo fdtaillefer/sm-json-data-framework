@@ -307,6 +307,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // This could also become impossible based on layout and not logic, but that part is beyond the scope of this method.
             return impossible;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This could be always possible based on layout and not logic, but that part is beyond the scope of this method.
+            // It would also require SpeedBooster to always be available which we don't have a way to check here.
+            return false;
+        }
     }
 
     public class UnfinalizedCanComeInCharged : AbstractUnfinalizedObjectLogicalElement<UnfinalizedCanComeInCharged, CanComeInCharged>

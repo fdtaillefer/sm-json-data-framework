@@ -42,6 +42,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             // This is always possible, by definition
             return false;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This is always possible, by definition - though it's not always free
+            return true;
+        }
     }
 
     public class UnfinalizedEnergyAtMost : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>

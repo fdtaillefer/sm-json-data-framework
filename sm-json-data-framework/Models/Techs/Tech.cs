@@ -65,10 +65,11 @@ namespace sm_json_data_framework.Models.Techs
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+            LogicallyAlways = CalculateLogicallyAlways();
         }
 
         /// <summary>
-        /// If true, then this tech is impossible to execute.
+        /// If true, then this tech is impossible to execute with its currently applied logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -80,6 +81,21 @@ namespace sm_json_data_framework.Models.Techs
         {
             // Tech is impossible if it's disabled or if its requirements are impossible
             return !AppliedLogicalOptions.IsTechEnabled(this) || Requires.LogicallyNever;
+        }
+
+        /// <summary>
+        /// If true, then this tech is always possible to execute with its currently applied logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways()
+        {
+            // A Tech is always possible it's enabled and its requirements are always possible
+            return AppliedLogicalOptions.IsTechEnabled(this) && Requires.LogicallyAlways;
         }
     }
 

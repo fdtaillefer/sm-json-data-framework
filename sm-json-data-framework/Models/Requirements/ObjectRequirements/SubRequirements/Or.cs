@@ -36,8 +36,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
 
         protected override bool CalculateLogicallyNever()
         {
-            // Delegate to requirements (if interpreted as an Or)
+            // Delegate to requirements (interpreted as an Or)
             return LogicalRequirements.LogicallyOrNever;
+        }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // Delegate to requirements (interpreted as an Or)
+            return LogicalRequirements.LogicallyOrAlways;
         }
     }
 

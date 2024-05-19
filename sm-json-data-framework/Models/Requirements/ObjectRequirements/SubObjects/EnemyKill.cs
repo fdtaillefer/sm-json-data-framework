@@ -161,12 +161,20 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override bool CalculateLogicallyNever()
         {
             // Can't fulfill this if none of the valid weapons are usable
-            bool unusable = !ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever);
+            bool unkillable = !ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever);
 
             // This could also become impossible by requiring more ammo than the max ammo we can ever get,
             // but max ammo is not available in logical options.
 
-            return unusable;
+            return unkillable;
+        }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This is always possible if any of the valid weapons also is
+            bool alwaysKillable = ValidWeapons.Values.Any(weapon => weapon.LogicallyAlways);
+
+            return alwaysKillable;
         }
     }
 

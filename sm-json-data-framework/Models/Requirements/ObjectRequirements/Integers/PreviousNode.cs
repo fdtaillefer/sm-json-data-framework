@@ -61,6 +61,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             // This could become impossible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            return false;
+        }
     }
 
     public class UnfinalizedPreviousNode : AbstractUnfinalizedObjectLogicalElementWithNodeId<UnfinalizedPreviousNode, PreviousNode>

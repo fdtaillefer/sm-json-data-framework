@@ -54,6 +54,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // This is impossible if the tech itself is impossible
             return Tech.LogicallyNever;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This is always possible if the tech itself also is
+            return Tech.LogicallyAlways;
+        }
     }
 
     public class UnfinalizedTechLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>

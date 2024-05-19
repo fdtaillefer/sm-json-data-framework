@@ -67,6 +67,7 @@ namespace sm_json_data_framework.Models.Requirements
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+            LogicallyAlways = CalculateLogicallyAlways();
         }
 
         public bool LogicallyNever { get; private set; }
@@ -76,6 +77,14 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <returns></returns>
         protected abstract bool CalculateLogicallyNever();
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract bool CalculateLogicallyAlways();
     }
 
     /// <summary>
@@ -93,9 +102,14 @@ namespace sm_json_data_framework.Models.Requirements
         public bool IsNever();
 
         /// <summary>
-        /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed.
+        /// If true, this logical element can never be fulfilled, regardless of in-game state, with the current logical options.
         /// </summary>
         public bool LogicallyNever { get; }
+
+        /// <summary>
+        /// If true, this logical element can always be fulfilled, regardless of in-game state, with the current logical options.
+        /// </summary>
+        public bool LogicallyAlways { get; }
     }
 
     public abstract class AbstractUnfinalizedLogicalElement<ConcreteType, TargetType> : AbstractUnfinalizedModelElement<ConcreteType, TargetType>, IUnfinalizedLogicalElement

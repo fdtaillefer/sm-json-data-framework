@@ -60,6 +60,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // This is impossible if the game flag itself is impossible
             return GameFlag.LogicallyNever;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This is always possible if the game flag itself also is
+            return GameFlag.LogicallyAlways;
+        }
     }
 
     public class UnfinalizedGameFlagLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>

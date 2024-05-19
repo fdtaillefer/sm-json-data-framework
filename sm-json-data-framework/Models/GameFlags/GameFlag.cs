@@ -34,10 +34,11 @@ namespace sm_json_data_framework.Models.GameFlags
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+            LogicallyAlways = CalculateLogicallyAlways();
         }
 
         /// <summary>
-        /// If true, then this GameFlag is impossible to enable.
+        /// If true, then this GameFlag is impossible to enable with its currently applied logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -49,6 +50,21 @@ namespace sm_json_data_framework.Models.GameFlags
         {
             // GameFlag is impossible if it's disabled
             return !AppliedLogicalOptions.IsGameFlagEnabled(this);
+        }
+
+        /// <summary>
+        /// If true, then this Gameflag is always enabled with its currently applied logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways()
+        {
+            // A GameFlag could be always if we start with it enabled, but that's not defined in logical options so it's currently out of scope for this method.
+            return false;
         }
     }
 

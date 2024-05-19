@@ -85,10 +85,11 @@ namespace sm_json_data_framework.Models.Weapons
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+            LogicallyAlways = CalculateLogicallyAlways();
         }
 
         /// <summary>
-        /// If true, then this weapon is impossible to use.
+        /// If true, then this weapon is impossible to use with its currently applied logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -96,6 +97,21 @@ namespace sm_json_data_framework.Models.Weapons
         {
             // Weapon is impossible to use if either using it altogether, or doing an individual shot, becomes impossible
             return UseRequires.LogicallyNever || ShotRequires.LogicallyNever;
+        }
+
+        /// <summary>
+        /// If true, then this weapon is always possible to use with its currently applied logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways()
+        {
+            // Weapon is always possible to use if using it altogether, and doing an individual shot, are both always possible
+            return UseRequires.LogicallyAlways && ShotRequires.LogicallyAlways;
         }
     }
 

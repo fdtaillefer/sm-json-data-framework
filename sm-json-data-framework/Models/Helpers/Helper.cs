@@ -45,10 +45,11 @@ namespace sm_json_data_framework.Models.Helpers
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+            LogicallyAlways = CalculateLogicallyAlways();
         }
 
         /// <summary>
-        /// If true, then this helper is impossible to execute.
+        /// If true, then this helper is impossible to execute with its currently applied logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -60,6 +61,20 @@ namespace sm_json_data_framework.Models.Helpers
         {
             // Helper is impossible if its requirements also are.
             return Requires.LogicallyNever;
+        }
+
+        /// <summary>
+        /// If true, then this Helper is always possible to execute with its currently applied logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways()
+        {
+            return Requires.LogicallyAlways;
         }
     }
 

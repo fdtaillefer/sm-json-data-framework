@@ -106,6 +106,8 @@ namespace sm_json_data_framework.Models.Requirements
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
             LogicallyOrNever = CalculateLogicallyOrNever();
+            LogicallyAlways = CalculateLogicallyAlways();
+            LogicallyOrAlways = CalculateLogicallyOrAlways();
         }
 
         /// <summary>
@@ -125,7 +127,7 @@ namespace sm_json_data_framework.Models.Requirements
 
         /// <summary>
         /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed, 
-        /// even if it were interpreted as a logical Or.
+        /// regardless of in-game state, even if it were interpreted as a logical Or.
         /// </summary>
         public bool LogicallyOrNever { get; private set; }
 
@@ -143,6 +145,44 @@ namespace sm_json_data_framework.Models.Requirements
 
             // If we have any child logical elements, an Or is impossible if all children are impossible
             return !LogicalElements.All(element => element.LogicallyNever);
+        }
+
+        /// <summary>
+        /// If true, this this can always be fulfilled, regardless of in-game state, with the current logical options.
+        /// </summary>
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways()
+        {
+            // Since executing logical requirements means executing all logical elements,
+            // this only becomes "always" if all child elements also are (but also if empty)
+            return LogicalElements.All(element => element.LogicallyAlways);
+        }
+
+        /// <summary>
+        /// If true, then it is known that this logical element with its currently applied logical options could always be executed, 
+        /// regardless of in-game state, if it were interpreted as a logical Or.
+        /// </summary>
+        public bool LogicallyOrAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyOrAlways"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyOrAlways()
+        {
+            // An empty Or makes little sense - interpret it as always being possible to fulfill
+            if (!LogicalElements.Any())
+            {
+                return true;
+            }
+
+            // If we have any child logical elements, an Or is "always" if at least one child is
+            return LogicalElements.Any(element => element.LogicallyAlways);
         }
     }
 

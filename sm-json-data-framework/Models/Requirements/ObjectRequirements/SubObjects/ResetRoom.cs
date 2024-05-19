@@ -100,6 +100,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // (also unlikely to have enough value to be worth the effort)
             return false;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            return false;
+        }
     }
 
     public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>

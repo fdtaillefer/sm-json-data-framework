@@ -140,6 +140,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // This could be impossible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
+
+        protected override bool CalculateLogicallyAlways()
+        {
+            // This could be always possible, but that depends on layout and not logic, and is beyond the scope of this method.
+            return false;
+        }
     }
 
     /// <summary>
