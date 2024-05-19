@@ -49,6 +49,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // This becomes impossible if the helper itself becomes impossible
             return Helper.UselessByLogicalOptions;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This is impossible if the helper itself is impossible
+            return Helper.LogicallyNever;
+        }
     }
 
     public class UnfinalizedHelperLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedHelperLogicalElement, HelperLogicalElement>

@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
@@ -52,6 +53,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
             // This becomes impossible if the game flag itself becomes useless
             return GameFlag.UselessByLogicalOptions;
+        }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This is impossible if the game flag itself is impossible
+            return GameFlag.LogicallyNever;
         }
     }
 

@@ -66,6 +66,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <param name="inGameState">The in-game state that execution would start with.</param>
         /// <returns></returns>
         public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState);
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // A damage element could become impossible if the minimum damage it can inflict is more than the max energy we can ever get,
+            // but max energy is not available in logical options.
+            return false;
+        }
     }
 
     public abstract class AbstractUnfinalizedDamageNumericalValueLogicalElement<ConcreteType, TargetType>: AbstractUnfinalizedObjectLogicalElementWithNumericalIntegerValue<ConcreteType, TargetType>

@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.Models.GameFlags;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
 using System;
@@ -46,6 +47,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Tech.ApplyLogicalOptions(logicalOptions);
             // This becomes impossible if the tech itself becomes impossible
             return Tech.UselessByLogicalOptions;
+        }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This is impossible if the tech itself is impossible
+            return Tech.LogicallyNever;
         }
     }
 

@@ -60,7 +60,17 @@ namespace sm_json_data_framework.Models
             {
                 AppliedLogicalOptions = logicalOptions;
                 UselessByLogicalOptions = PropagateLogicalOptions(logicalOptions);
+                UpdateLogicalProperties();
             }
+        }
+
+        /// <summary>
+        /// Updates any logical property of this model, as a result of logical options being applied.
+        /// Any override of this method should call the base implementation first.
+        /// </summary>
+        protected virtual void UpdateLogicalProperties()
+        {
+
         }
     }
 

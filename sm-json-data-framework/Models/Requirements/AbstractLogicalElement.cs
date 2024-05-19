@@ -62,6 +62,20 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <returns></returns>
         public abstract bool IsNever();
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract bool CalculateLogicallyNever();
     }
 
     /// <summary>
@@ -77,6 +91,11 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <returns></returns>
         public bool IsNever();
+
+        /// <summary>
+        /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed.
+        /// </summary>
+        public bool LogicallyNever { get; }
     }
 
     public abstract class AbstractUnfinalizedLogicalElement<ConcreteType, TargetType> : AbstractUnfinalizedModelElement<ConcreteType, TargetType>, IUnfinalizedLogicalElement

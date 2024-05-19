@@ -53,17 +53,33 @@ namespace sm_json_data_framework.Models.Techs
             bool explicitlyDisabled = !logicalOptions.IsTechEnabled(this);
             // Propagate to requirements
             Requires.ApplyLogicalOptions(logicalOptions);
-            // Assign UselessByLogicalOptions explicitly now, because extension techs requirements will depend on this tech's state.
-            // Tech becomes useless if explicitly disabled or if it becomes impossible to execute
-            UselessByLogicalOptions = explicitlyDisabled || Requires.UselessByLogicalOptions;
 
-            // Propagate to extension techs
-            foreach (Tech tech in ExtensionTechs.Values)
-            {
-                tech.ApplyLogicalOptions(logicalOptions);
-            }
+            // Don't propagate to extension techs. They don't "belong" to this, and they will depend on the logical state of this to be up-to-date
+            // in order to update their own logical state, so we don't want to be in this halfway state when that happens.
+            // This all assumes that no Tech can ever depend on itself by any circular logic.
 
             return UselessByLogicalOptions;
+        }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this tech is impossible to execute.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // Tech is impossible if it's disabled or if its requirements are impossible
+            return !AppliedLogicalOptions.IsTechEnabled(this) || Requires.LogicallyNever;
         }
     }
 

@@ -157,6 +157,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // We are rendered useless if there's no remaining usable weapons
             return !usableWeapon;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // Can't fulfill this if none of the valid weapons are usable
+            bool unusable = !ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever);
+
+            // This could also become impossible by requiring more ammo than the max ammo we can ever get,
+            // but max ammo is not available in logical options.
+
+            return unusable;
+        }
     }
 
     /// <summary>

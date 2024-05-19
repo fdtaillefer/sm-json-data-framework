@@ -80,6 +80,23 @@ namespace sm_json_data_framework.Models.Weapons
             // This weapon is rendered useless if either using it altogether, or doing an individual shot, becomes impossible
             return UseRequires.UselessByLogicalOptions || ShotRequires.UselessByLogicalOptions;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this weapon is impossible to use.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        protected bool CalculateLogicallyNever()
+        {
+            // Weapon is impossible to use if either using it altogether, or doing an individual shot, becomes impossible
+            return UseRequires.LogicallyNever || ShotRequires.LogicallyNever;
+        }
     }
 
     public class UnfinalizedWeapon : AbstractUnfinalizedModelElement<UnfinalizedWeapon, Weapon>, InitializablePostDeserializeOutOfRoom

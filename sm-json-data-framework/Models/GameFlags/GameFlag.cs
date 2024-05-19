@@ -29,6 +29,27 @@ namespace sm_json_data_framework.Models.GameFlags
             bool explicitlyDisabled = !logicalOptions.IsGameFlagEnabled(this);
             return explicitlyDisabled;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this GameFlag is impossible to enable.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // GameFlag is impossible if it's disabled
+            return !AppliedLogicalOptions.IsGameFlagEnabled(this);
+        }
     }
 
     public class UnfinalizedGameFlag : AbstractUnfinalizedModelElement<UnfinalizedGameFlag, GameFlag>

@@ -92,6 +92,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // There might be some complex checks that can find cases where this is impossible,
+            // but they are layout-based and not logic-based, so out of scope for this method.
+            // (also unlikely to have enough value to be worth the effort)
+            return false;
+        }
     }
 
     public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>

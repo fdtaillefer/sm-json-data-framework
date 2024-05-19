@@ -30,6 +30,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public decimal TilesToShineCharge => AppliedLogicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
 
+        /// <summary>
+        /// Whether the player is logically expected to know how to shinespark.
+        /// </summary>
+        public bool CanShinespark => AppliedLogicalOptions?.CanShinespark ?? LogicalOptions.DefaultTechsAllowed;
+
         public UnfinalizedCanComeInCharged InnerElement { get; set; }
 
         public CanComeInCharged(UnfinalizedCanComeInCharged innerElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -281,7 +286,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             bool useless = false;
-            if (MustShinespark && !logicalOptions.CanShinespark)
+            if (MustShinespark && !CanShinespark)
             {
                 useless = true;
             }
@@ -289,6 +294,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // We might have a chance to preprocess some runway scenarios, possibly, but not unless we receive the Rules here.
 
             return useless;
+        }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            bool impossible = false;
+            if (MustShinespark && !CanShinespark)
+            {
+                impossible = true;
+            }
+
+            // This could also become impossible based on layout and not logic, but that part is beyond the scope of this method.
+            return impossible;
         }
     }
 

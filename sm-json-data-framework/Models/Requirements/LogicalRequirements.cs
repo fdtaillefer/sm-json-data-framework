@@ -96,9 +96,53 @@ namespace sm_json_data_framework.Models.Requirements
             }
             else
             {
-                // We're implicitly an And, so we become impossible/useless as soon as any sub element is
+                // We're implicitly an And, so this becomes impossible/useless as soon as any sub element is
                 return anyUselessLogicalElement;
             }
+        }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+            LogicallyOrNever = CalculateLogicallyOrNever();
+        }
+
+        /// <summary>
+        /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // Since executing logical requirements means executing all logical elements, this becomes impossible if any child is impossible
+            return LogicalElements.Any(element =>  element.LogicallyNever);
+        }
+
+        /// <summary>
+        /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed, 
+        /// even if it were interpreted as a logical Or.
+        /// </summary>
+        public bool LogicallyOrNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyOrNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyOrNever()
+        {
+            // An empty Or makes little sense - interpret it as being possible to fulfill
+            if(!LogicalElements.Any())
+            {
+                return false;
+            }
+
+            // If we have any child logical elements, an Or is impossible if all children are impossible
+            return !LogicalElements.All(element => element.LogicallyNever);
         }
     }
 

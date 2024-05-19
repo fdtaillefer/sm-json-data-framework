@@ -23,6 +23,11 @@ namespace sm_json_data_framework.Options
         public static readonly decimal DefaultTilesToShineCharge = 32.5M;
         public static readonly decimal DefaultFrameLeniencyMultiplier = 1;
 
+        /// <summary>
+        /// Indicates whether techs should be considered allowed when no logical options are applied.
+        /// </summary>
+        public static readonly bool DefaultTechsAllowed = true;
+
         public static readonly ReadOnlySpawnerFarmingOptions DefaultSpawnerFarmingOptions = new SpawnerFarmingOptions().AsReadOnly();
 
         private static IInGameResourceEvaluator DefaultInGameResourceEvaluator { get; } = new ResourceEvaluatorByFixedValues(

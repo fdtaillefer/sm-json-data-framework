@@ -40,6 +40,27 @@ namespace sm_json_data_framework.Models.Helpers
             // This helper becomes useless if requirements become impossible
             return Requires.UselessByLogicalOptions;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this helper is impossible to execute.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // Helper is impossible if its requirements also are.
+            return Requires.LogicallyNever;
+        }
     }
 
     public class UnfinalizedHelper : AbstractUnfinalizedModelElement<UnfinalizedHelper, Helper>, InitializablePostDeserializeOutOfRoom

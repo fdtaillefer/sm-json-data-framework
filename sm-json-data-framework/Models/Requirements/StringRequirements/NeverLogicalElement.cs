@@ -37,6 +37,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // Never is always never
+            return true;
+        }
     }
 
     public class UnfinalizedNeverLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedNeverLogicalElement, NeverLogicalElement>

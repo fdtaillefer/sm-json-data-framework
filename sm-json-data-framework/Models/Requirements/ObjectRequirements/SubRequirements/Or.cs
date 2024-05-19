@@ -30,8 +30,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         {
             LogicalRequirements.ApplyLogicalOptions(logicalOptions);
 
-            // Since this is an Or, it only becomes impossible to fulfill if all of the inner logical elements is
+            // Since this is an Or, it only becomes impossible to fulfill if all of the inner logical elements are
             return LogicalRequirements.LogicalElements.All(element => element.UselessByLogicalOptions);
+        }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // Delegate to requirements (if interpreted as an Or)
+            return LogicalRequirements.LogicallyOrNever;
         }
     }
 

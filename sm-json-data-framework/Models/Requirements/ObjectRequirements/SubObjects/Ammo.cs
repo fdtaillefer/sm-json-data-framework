@@ -57,6 +57,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This could become impossible if the required ammo is more than the max ammo we can ever get,
+            // but max ammo is not available in logical options.
+            return false;
+        }
     }
 
     public class UnfinalizedAmmo : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmo, Ammo>

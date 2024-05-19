@@ -134,6 +134,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This could be impossible, but that depends on layout and not logic, and is beyond the scope of this method.
+            return false;
+        }
     }
 
     /// <summary>

@@ -55,6 +55,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This could become impossible, but that depends on layout and not logic, and is beyond the scope of this method.
+            return false;
+        }
     }
 
     public class UnfinalizedPreviousStratProperty : AbstractUnfinalizedObjectLogicalElementWithString<UnfinalizedPreviousStratProperty, PreviousStratProperty>

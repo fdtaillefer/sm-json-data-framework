@@ -58,6 +58,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This is always possible, by definition
+            return false;
+        }
     }
 
     public class UnfinalizedAmmoDrain : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmoDrain, AmmoDrain>

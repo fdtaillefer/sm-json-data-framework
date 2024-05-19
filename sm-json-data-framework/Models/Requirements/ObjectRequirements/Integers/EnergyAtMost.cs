@@ -36,6 +36,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This is always possible, by definition
+            return false;
+        }
     }
 
     public class UnfinalizedEnergyAtMost : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>

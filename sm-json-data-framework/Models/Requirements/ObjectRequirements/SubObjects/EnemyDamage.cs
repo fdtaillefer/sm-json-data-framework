@@ -72,6 +72,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Nothing in logical options can alter this
             return false;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // This could become impossible if the minimum damage it can inflict is more than the max energy we can ever get,
+            // but max energy is not available in logical options.
+            return false;
+        }
     }
 
     public class UnfinalizedEnemyDamage : AbstractUnfinalizedObjectLogicalElement<UnfinalizedEnemyDamage, EnemyDamage>

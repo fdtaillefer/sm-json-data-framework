@@ -36,6 +36,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             // Since this is an And, the default behavior of the internal LogicalRequirements matches our purposes
             return LogicalRequirements.UselessByLogicalOptions;
         }
+
+        protected override bool CalculateLogicallyNever()
+        {
+            // Delegate to requirements
+            return LogicalRequirements.LogicallyNever;
+        }
     }
 
     public class UnfinalizedAnd : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>
