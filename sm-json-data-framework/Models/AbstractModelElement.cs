@@ -97,7 +97,13 @@ namespace sm_json_data_framework.Models
         public bool UselessByLogicalOptions { get; }
 
         /// <summary>
-        /// The LogicalOptions that are currently applied to this model, if any. Null means no logical options are currently applied.
+        /// <para>
+        /// The LogicalOptions that are currently applied to this model.
+        /// This is never null, since some default logical options will be used instead.
+        /// </para>
+        /// <para>
+        /// Note that the <see cref="StartConditions"/> in this instance is also never null.
+        /// </para>
         /// </summary>
         public ReadOnlyLogicalOptions AppliedLogicalOptions { get; }
     }

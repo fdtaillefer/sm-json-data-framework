@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// <summary>
         /// Number of tries the player is expected to take to execute the helper, as per applied logical options.
         /// </summary>
-        public int Tries => AppliedLogicalOptions?.NumberOfTries(Helper) ?? LogicalOptions.DefaultNumberOfTries;
+        public int Tries => AppliedLogicalOptions.NumberOfTries(Helper);
 
         private UnfinalizedHelperLogicalElement InnerElement { get; set; }
 

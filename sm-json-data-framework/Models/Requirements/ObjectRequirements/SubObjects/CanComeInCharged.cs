@@ -23,17 +23,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
         /// </summary>
-        public decimal TilesSavedWithStutter => AppliedLogicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+        public decimal TilesSavedWithStutter => AppliedLogicalOptions.TilesSavedWithStutter;
 
         /// <summary>
         /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
         /// </summary>
-        public decimal TilesToShineCharge => AppliedLogicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+        public decimal TilesToShineCharge => AppliedLogicalOptions.TilesToShineCharge;
 
         /// <summary>
         /// Whether the player is logically expected to know how to shinespark.
         /// </summary>
-        public bool CanShinespark => AppliedLogicalOptions?.CanShinespark ?? LogicalOptions.DefaultTechsAllowed;
+        public bool CanShinespark => AppliedLogicalOptions.CanShinespark;
 
         public UnfinalizedCanComeInCharged InnerElement { get; set; }
 

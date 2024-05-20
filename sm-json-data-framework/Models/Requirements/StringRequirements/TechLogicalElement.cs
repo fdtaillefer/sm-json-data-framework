@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// <summary>
         /// Number of tries the player is expected to take to execute the tech, as per applied logical options.
         /// </summary>
-        public int Tries  => AppliedLogicalOptions?.NumberOfTries(Tech) ?? LogicalOptions.DefaultNumberOfTries;
+        public int Tries  => AppliedLogicalOptions.NumberOfTries(Tech);
 
         private UnfinalizedTechLogicalElement InnerElement { get; set; }
 

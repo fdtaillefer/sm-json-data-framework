@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class FarmCycle : AbstractModelElement<UnfinalizedFarmCycle, FarmCycle>
     {
-        public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions => AppliedLogicalOptions?.SpawnerFarmingOptions ?? LogicalOptions.DefaultSpawnerFarmingOptions;
+        public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions => AppliedLogicalOptions.SpawnerFarmingOptions;
 
         private UnfinalizedFarmCycle InnerElement { get; set; }
 

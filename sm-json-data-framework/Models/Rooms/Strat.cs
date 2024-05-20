@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Number of tries the player is expected to take to execute the strat, as per applied logical options.
         /// </summary>
-        public int Tries => AppliedLogicalOptions?.NumberOfTries(this) ?? LogicalOptions.DefaultNumberOfTries;
+        public int Tries => AppliedLogicalOptions.NumberOfTries(this);
 
         private UnfinalizedStrat InnerElement { get; set; }
 

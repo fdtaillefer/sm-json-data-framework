@@ -34,7 +34,7 @@ namespace sm_json_data_framework.Models.InGameStates
         // We'll see when we get to the step of reducing logical elements *shrug*
 
         /// <summary>
-        /// Creates a new InGameState based on the provided StartConditions. 
+        /// Creates a new InGameState based on a copy of the provided StartConditions. 
         /// Note that an InGameState created in this way should only be used with the <see cref="SuperMetroidModel"/> that contains
         /// the node instance found in the StartConditions.
         /// </summary>

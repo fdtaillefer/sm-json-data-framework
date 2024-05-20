@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options.ResourceValues;
+using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,13 +21,9 @@ namespace sm_json_data_framework.Options
     {
         public static readonly int DefaultNumberOfTries = 1;
         public static readonly decimal DefaultTilesSavedWithStutter = 0;
-        public static readonly decimal DefaultTilesToShineCharge = 32.5M;
+        // Obscenely short distance so that all shine charges are possible
+        public static readonly decimal DefaultTilesToShineCharge = 10;
         public static readonly decimal DefaultFrameLeniencyMultiplier = 1;
-
-        /// <summary>
-        /// Indicates whether techs should be considered allowed when no logical options are applied.
-        /// </summary>
-        public static readonly bool DefaultTechsAllowed = true;
 
         public static readonly ReadOnlySpawnerFarmingOptions DefaultSpawnerFarmingOptions = new SpawnerFarmingOptions().AsReadOnly();
 
@@ -42,12 +39,16 @@ namespace sm_json_data_framework.Options
 
         public static InGameStateComparer DefaultInGameStateComparer = new InGameStateComparer(DefaultInGameResourceEvaluator);
 
+        /// <summary>
+        /// A static instance of LogicalOptions will all default values. 
+        /// It allows all techs and strats, with super short charge and no leniency.
+        /// </summary>
+        public static ReadOnlyLogicalOptions DefaultLogicalOptions = new LogicalOptions().AsReadOnly();
+
         public LogicalOptions()
         {
             // Default resource comparer
             InGameResourceEvaluator = DefaultInGameResourceEvaluator;
-
-            InternalSpawnerFarmingOptions = new SpawnerFarmingOptions();
         }
 
         public LogicalOptions(LogicalOptions other)
@@ -69,6 +70,7 @@ namespace sm_json_data_framework.Options
             LavaLeniencyMultiplier = other.LavaLeniencyMultiplier;
             AcidLeniencyMultiplier = other.AcidLeniencyMultiplier;
             InternalSpawnerFarmingOptions = other.InternalSpawnerFarmingOptions.Clone();
+            InternalStartConditions = other.InternalStartConditions?.Clone();
         }
 
         public LogicalOptions Clone()
@@ -327,8 +329,11 @@ namespace sm_json_data_framework.Options
             return !InternalRemovedGameFlags.Contains(gameFlag.Name);
         }
 
-        public SpawnerFarmingOptions InternalSpawnerFarmingOptions { get; set; }
+        public SpawnerFarmingOptions InternalSpawnerFarmingOptions { get; set; } = DefaultSpawnerFarmingOptions.Clone();
         public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions => InternalSpawnerFarmingOptions.AsReadOnly();
+
+        public StartConditions InternalStartConditions { get; set; }
+        public StartConditions StartConditions => InternalStartConditions;
     }
 
     /// <summary>
@@ -469,5 +474,10 @@ namespace sm_json_data_framework.Options
         /// A sub-model containing the logical options with regards to using enemy spawners for farming resources.
         /// </summary>
         public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions { get; }
+
+        /// <summary>
+        /// Some start conditions that can override a model's usual start conditions. Can be null to not override.
+        /// </summary>
+        public StartConditions StartConditions { get; }
     }
 }

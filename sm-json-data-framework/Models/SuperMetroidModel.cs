@@ -77,7 +77,7 @@ namespace sm_json_data_framework.Models
         public const string ENERGY_TANK_NAME = "ETank";
         public const string RESERVE_TANK_NAME = "ReserveTank";
 
-        public SuperMetroidModel(UnfinalizedSuperMetroidModel sourceModel)
+        public SuperMetroidModel(UnfinalizedSuperMetroidModel sourceModel, LogicalOptions logicalOptions = null)
         {
             ModelFinalizationMappings mappings = new ModelFinalizationMappings();
             Items = sourceModel.Items.Values.Select(item => item.Finalize(mappings)).ToDictionary(item => item.Name).AsReadOnly();
@@ -97,10 +97,15 @@ namespace sm_json_data_framework.Models
             Connections = sourceModel.Connections.Select(kvp => new KeyValuePair<string, Connection>(kvp.Key, kvp.Value.Finalize(mappings)))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
             Rules = sourceModel.Rules;
-            StartConditions = sourceModel.StartConditions.Finalize(mappings);
-            InitialGameState = new InGameState(StartConditions);
+            InternalStartConditions = sourceModel.StartConditions.Finalize(mappings);
+            // Initialize logical state so that all elements of the model always have logical options available
+            ApplyLogicalOptions(logicalOptions);
         }
 
+        /// <summary>
+        /// The logical options currently applied to this model.
+        /// Note that the <see cref="StartConditions"/> within this instance is never null.
+        /// </summary>
         private ReadOnlyLogicalOptions AppliedLogicalOptions { get; set; }
 
         /// <summary>
@@ -174,16 +179,20 @@ namespace sm_json_data_framework.Models
         public SuperMetroidRules Rules { get; }
 
         /// <summary>
-        /// Describes the start condition for the game, complete with relevant objects within this model.
+        /// Describes the start conditions for the game, complete with relevant objects within this model.
+        /// May have been overridden by applied logical options.
         /// </summary>
-        public StartConditions StartConditions { get; }
+        public StartConditions StartConditions => AppliedLogicalOptions.StartConditions;
 
         /// <summary>
-        /// An InGameStateComparer which is either a default implementation or obtained from applied <see cref="LogicalOptions"/>.
+        /// The start conditions that will be defaulted to if not overridden by logical options.
         /// </summary>
-        public InGameStateComparer InGameStateComparer => AppliedLogicalOptions?.InGameStateComparer ?? LogicalOptions.DefaultInGameStateComparer;
+        protected StartConditions InternalStartConditions { get; }
 
-        public ReadOnlyInGameState InitialGameState { get; }
+        /// <summary>
+        /// An InGameStateComparer, which can be used to decide which of two InGameStates has "better" resources.
+        /// </summary>
+        public InGameStateComparer InGameStateComparer => AppliedLogicalOptions.InGameStateComparer;
 
         /// <summary>
         /// Gets and returns a node, referenced by its room name and node ID.
@@ -210,51 +219,57 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// Clones the provided LogicalOptions, and applies then to this model.
         /// </summary>
-        /// <param name="logicalOptions">The LogicalOptions to apply. If null, this instead removes all alterations from logical options.</param>
+        /// <param name="logicalOptions">The LogicalOptions to apply.
+        /// If null, this instead removes all alterations made by logical options, by applying default logical options.</param>
         public void ApplyLogicalOptions(LogicalOptions logicalOptions)
         {
-            ReadOnlyLogicalOptions logicalOptionsToApply = logicalOptions?.Clone().AsReadOnly();
+            // Clone the logical options. If null, clone the default logical options instead.
+            LogicalOptions logicalOptionsToApply = (logicalOptions ?? LogicalOptions.DefaultLogicalOptions).Clone();
 
-            AppliedLogicalOptions = logicalOptionsToApply;
+            // We want the operation that applies logical options to have access to whatever the StartConditions are,
+            // so even though they're optional, we'll replace them with the model's internal StartConditions if null
+            logicalOptionsToApply.InternalStartConditions ??= InternalStartConditions;
+
+            AppliedLogicalOptions = logicalOptionsToApply?.AsReadOnly();
 
             foreach (GameFlag gameFlag in GameFlags.Values)
             {
-                gameFlag.ApplyLogicalOptions(logicalOptionsToApply);
+                gameFlag.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Helper helper in Helpers.Values)
             {
-                helper.ApplyLogicalOptions(logicalOptionsToApply);
+                helper.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Item item in Items.Values)
             {
-                item.ApplyLogicalOptions(logicalOptionsToApply);
+                item.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Tech tech in Techs.Values)
             {
-                tech.ApplyLogicalOptions(logicalOptionsToApply);
+                tech.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Weapon weapon in Weapons.Values)
             {
-                weapon.ApplyLogicalOptions(logicalOptionsToApply);
+                weapon.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Enemy enemy in Enemies.Values)
             {
-                enemy.ApplyLogicalOptions(logicalOptionsToApply);
+                enemy.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Connection connection in Connections.Values)
             {
-                connection.ApplyLogicalOptions(logicalOptionsToApply);
+                connection.ApplyLogicalOptions(AppliedLogicalOptions);
             }
 
             foreach (Room room in Rooms.Values)
             {
-                room.ApplyLogicalOptions(logicalOptionsToApply);
+                room.ApplyLogicalOptions(AppliedLogicalOptions);
             }
         }
 
@@ -362,12 +377,12 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Creates and returns a copy of the initial game state. Requires this model to have been initialized.
+        /// Creates and returns a copy of the initial game state.
         /// </summary>
         /// <returns></returns>
-        public InGameState CreateInitialGameStateCopy()
+        public InGameState CreateInitialGameState()
         {
-            return InitialGameState.Clone();
+            return new InGameState(StartConditions);
         }
 
         /// <summary>
@@ -379,7 +394,7 @@ namespace sm_json_data_framework.Models
         /// <returns></returns>
         public GameNavigator CreateInitialGameNavigator(int maxPreviousStatesSize)
         {
-            return new GameNavigator(this, CreateInitialGameStateCopy(), maxPreviousStatesSize);
+            return new GameNavigator(this, CreateInitialGameState(), maxPreviousStatesSize);
         }
     }
 

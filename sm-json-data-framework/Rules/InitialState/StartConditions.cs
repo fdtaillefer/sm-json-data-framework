@@ -88,6 +88,21 @@ namespace sm_json_data_framework.Rules.InitialState
             StartingOpenLocks = startingOpenLocks?.ToList().AsReadOnly() ?? new List<NodeLock>().AsReadOnly();
             StartingTakenItemLocations = startingTakenItemLocations?.ToList().AsReadOnly() ?? new List<RoomNode>().AsReadOnly();
         }
+
+        public StartConditions(StartConditions other)
+        {
+            StartingNode = other.StartingNode;
+            StartingInventory = other.StartingInventory.Clone().AsReadOnly();
+            StartingResources = other.StartingResources.Clone().AsReadOnly();
+            StartingGameFlags = other.StartingGameFlags?.ToList().AsReadOnly() ?? new List<GameFlag>().AsReadOnly();
+            StartingOpenLocks = other.StartingOpenLocks?.ToList().AsReadOnly() ?? new List<NodeLock>().AsReadOnly();
+            StartingTakenItemLocations = other.StartingTakenItemLocations?.ToList().AsReadOnly() ?? new List<RoomNode>().AsReadOnly();
+        }
+
+        public StartConditions Clone()
+        {
+            return new StartConditions(this);
+        }
     }
 
     public class StartConditionsBuilder

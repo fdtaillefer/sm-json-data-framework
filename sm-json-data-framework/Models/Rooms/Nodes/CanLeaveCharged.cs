@@ -23,12 +23,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
         /// </summary>
-        public decimal TilesSavedWithStutter => AppliedLogicalOptions?.TilesSavedWithStutter ?? LogicalOptions.DefaultTilesSavedWithStutter;
+        public decimal TilesSavedWithStutter => AppliedLogicalOptions.TilesSavedWithStutter;
 
         /// <summary>
         /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
         /// </summary>
-        public decimal TilesToShineCharge => AppliedLogicalOptions?.TilesToShineCharge ?? LogicalOptions.DefaultTilesToShineCharge;
+        public decimal TilesToShineCharge => AppliedLogicalOptions.TilesToShineCharge;
 
         private UnfinalizedCanLeaveCharged InnerElement { get; set; }
 
