@@ -62,20 +62,29 @@ namespace sm_json_data_framework.Rules.InitialState
 
         public ReadOnlyResourceCount StartingResources { get; }
 
-        public IReadOnlyList<GameFlag> StartingGameFlags { get; }
+        /// <summary>
+        /// Game flags the game always starts with, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, GameFlag> StartingGameFlags { get; }
 
-        public IReadOnlyList<NodeLock> StartingOpenLocks { get; }
+        /// <summary>
+        /// Locks that are always unlocked at game start, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, NodeLock> StartingOpenLocks { get; }
 
-        public IReadOnlyList<RoomNode> StartingTakenItemLocations { get; }
+        /// <summary>
+        /// Item locations that are already taken at game start, mapped by name
+        /// </summary>
+        public IReadOnlyDictionary<string, RoomNode> StartingTakenItemLocations { get; }
 
         public StartConditions(UnfinalizedStartConditions sourceElement, ModelFinalizationMappings mappings)
         {
             StartingNode = sourceElement.StartingNode.Finalize(mappings);
             StartingInventory = new ItemInventory(sourceElement, mappings).AsReadOnly();
             StartingResources = sourceElement.StartingResources.Clone().AsReadOnly();
-            StartingGameFlags = sourceElement.StartingGameFlags.Select(flag => flag.Finalize(mappings)).ToList().AsReadOnly();
-            StartingOpenLocks = sourceElement.StartingOpenLocks.Select(nodeLock => nodeLock.Finalize(mappings)).ToList().AsReadOnly();
-            StartingTakenItemLocations = sourceElement.StartingTakenItemLocations.Select(node => node.Finalize(mappings)).ToList().AsReadOnly();
+            StartingGameFlags = sourceElement.StartingGameFlags.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            StartingOpenLocks = sourceElement.StartingOpenLocks.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
+            StartingTakenItemLocations = sourceElement.StartingTakenItemLocations.Select(node => node.Finalize(mappings)).ToDictionary(node =>  node.Name).AsReadOnly();
         }
 
         public StartConditions(RoomNode startingNode, ReadOnlyItemInventory startingInventory, ReadOnlyResourceCount startingResources,
@@ -84,9 +93,9 @@ namespace sm_json_data_framework.Rules.InitialState
             StartingNode = startingNode;
             StartingInventory = startingInventory;
             StartingResources = startingResources;
-            StartingGameFlags = startingGameFlags?.ToList().AsReadOnly() ?? new List<GameFlag>().AsReadOnly();
-            StartingOpenLocks = startingOpenLocks?.ToList().AsReadOnly() ?? new List<NodeLock>().AsReadOnly();
-            StartingTakenItemLocations = startingTakenItemLocations?.ToList().AsReadOnly() ?? new List<RoomNode>().AsReadOnly();
+            StartingGameFlags = startingGameFlags?.ToDictionary(flag => flag.Name).AsReadOnly() ?? new Dictionary<string, GameFlag>().AsReadOnly();
+            StartingOpenLocks = startingOpenLocks?.ToDictionary(nodeLock => nodeLock.Name).AsReadOnly() ?? new Dictionary<string, NodeLock>().AsReadOnly();
+            StartingTakenItemLocations = startingTakenItemLocations?.ToDictionary(node => node.Name).AsReadOnly() ?? new Dictionary<string, RoomNode>().AsReadOnly();
         }
 
         public StartConditions(StartConditions other)
@@ -94,9 +103,9 @@ namespace sm_json_data_framework.Rules.InitialState
             StartingNode = other.StartingNode;
             StartingInventory = other.StartingInventory.Clone().AsReadOnly();
             StartingResources = other.StartingResources.Clone().AsReadOnly();
-            StartingGameFlags = other.StartingGameFlags?.ToList().AsReadOnly() ?? new List<GameFlag>().AsReadOnly();
-            StartingOpenLocks = other.StartingOpenLocks?.ToList().AsReadOnly() ?? new List<NodeLock>().AsReadOnly();
-            StartingTakenItemLocations = other.StartingTakenItemLocations?.ToList().AsReadOnly() ?? new List<RoomNode>().AsReadOnly();
+            StartingGameFlags = other.StartingGameFlags?.Values.ToDictionary(flag => flag.Name).AsReadOnly() ?? new Dictionary<string, GameFlag>().AsReadOnly();
+            StartingOpenLocks = other.StartingOpenLocks?.Values.ToDictionary(nodeLock => nodeLock.Name).AsReadOnly() ?? new Dictionary<string, NodeLock>().AsReadOnly();
+            StartingTakenItemLocations = other.StartingTakenItemLocations?.Values.ToDictionary(node => node.Name).AsReadOnly() ?? new Dictionary<string, RoomNode>().AsReadOnly();
         }
 
         public StartConditions Clone()

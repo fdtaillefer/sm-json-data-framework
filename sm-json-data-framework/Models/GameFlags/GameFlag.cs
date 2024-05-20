@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -63,8 +64,8 @@ namespace sm_json_data_framework.Models.GameFlags
         /// <returns></returns>
         protected bool CalculateLogicallyAlways()
         {
-            // A GameFlag could be always if we start with it enabled, but that's not defined in logical options so it's currently out of scope for this method.
-            return false;
+            // Game flag is always enabled if the game always starts with it
+            return AppliedLogicalOptions.StartConditions.StartingGameFlags.ContainsKey(Name);
         }
     }
 

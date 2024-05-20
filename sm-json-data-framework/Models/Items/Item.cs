@@ -63,8 +63,8 @@ namespace sm_json_data_framework.Models.Items
         /// <returns></returns>
         protected bool CalculateLogicallyAlways()
         {
-            // This could be always if the player always starts with the item, but this is not part of logical options currently.
-            return false;
+            // Item is always usable if the game always starts with it
+            return AppliedLogicalOptions.StartConditions.StartingInventory.HasItem(this);
         }
     }
 

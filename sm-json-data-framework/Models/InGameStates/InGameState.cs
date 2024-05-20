@@ -48,19 +48,19 @@ namespace sm_json_data_framework.Models.InGameStates
             InternalResources = startConditions.StartingResources.Clone();
 
             // Initialize starting game flags
-            foreach (GameFlag gameFlag in startConditions.StartingGameFlags)
+            foreach (GameFlag gameFlag in startConditions.StartingGameFlags.Values)
             {
                 ApplyAddGameFlag(gameFlag);
             }
 
             // Initialize starting opened locks
-            foreach (NodeLock openLock in startConditions.StartingOpenLocks)
+            foreach (NodeLock openLock in startConditions.StartingOpenLocks.Values)
             {
                 ApplyOpenLock(openLock, applyToRoomState: false);
             }
 
             // Initialize starting taken item locations
-            foreach (RoomNode itemNode in startConditions.StartingTakenItemLocations)
+            foreach (RoomNode itemNode in startConditions.StartingTakenItemLocations.Values)
             {
                 ApplyTakeLocation(itemNode);
             }
