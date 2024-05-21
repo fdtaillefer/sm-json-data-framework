@@ -89,6 +89,12 @@ namespace sm_json_data_framework.Models.Weapons
             LogicallyFree = CalculateLogicallyFree();
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A weapon that can never be used may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
         /// <summary>
         /// If true, then this weapon is impossible to use given the current logical options, regardless of in-game state.
         /// </summary>

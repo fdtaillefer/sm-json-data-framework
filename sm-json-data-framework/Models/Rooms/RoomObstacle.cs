@@ -63,6 +63,36 @@ namespace sm_json_data_framework.Models.Rooms
             IndestructibleByLogicalOptions = Requires.UselessByLogicalOptions;
             return false;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyIndestructible = CalculateLogicallyIndestructible();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // An obstacle is always relevant.
+            // Even if indestructible, and even if it has base requirements that are always free (because specific strats likely define additional requirements).
+            return true;
+        }
+
+        /// <summary>
+        /// If true, then it's always impossible to destroy obstacle given the current logical options, regardless of in-game state.
+        /// This would mean this obstacle can never be destroyed by any strat, and the only way to possibly deal with it would be if a strat has a way to bypass it.
+        /// </summary>
+        public bool LogicallyIndestructible { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyIndestructible"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyIndestructible()
+        {
+            // If the base destruction requirements are impossible to fulfill, this can never be destroyed
+            // If they are possible to fulfill, the obstacle might still be indestructible but we can't tell based on the data we have here.
+            return Requires.LogicallyNever;
+        }
     }
 
     public class UnfinalizedRoomObstacle : AbstractUnfinalizedModelElement<UnfinalizedRoomObstacle, RoomObstacle>, InitializablePostDeserializeInRoom

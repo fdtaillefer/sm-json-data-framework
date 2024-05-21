@@ -37,6 +37,12 @@ namespace sm_json_data_framework.Models.Items
             LogicallyAlways = CalculateLogicallyAlways();
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // An item that can't be obtained may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
         /// <summary>
         /// If true, then this item is impossible to use given the current logical options, regardless of in-game state.
         /// </summary>

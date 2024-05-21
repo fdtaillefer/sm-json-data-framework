@@ -131,6 +131,33 @@ namespace sm_json_data_framework.Models.Rooms
             }
             return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A strat that cannot be executed may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this strat is impossible to execute given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // A strat is impossible to execute if it has impossible requirements, but also if it has any impossible obstacle
+            return Requires.LogicallyNever || Obstacles.Values.Any(obstacle => obstacle.LogicallyNever);
+        }
     }
 
     public class UnfinalizedStrat : AbstractUnfinalizedModelElement<UnfinalizedStrat, Strat>, InitializablePostDeserializeInRoom

@@ -49,6 +49,12 @@ namespace sm_json_data_framework.Models.Helpers
             LogicallyFree = CalculateLogicallyFree();
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A helper that can't be executed may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
         /// <summary>
         /// If true, then this helper is impossible to execute given the current logical options, regardless of in-game state.
         /// </summary>

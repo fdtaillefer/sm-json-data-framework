@@ -35,6 +35,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Nothing to do here
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A TwinDoorAddress is just data with no logical implications.
+            return false;
+        }
     }
 
     public class UnfinalizedTwinDoorAddress: AbstractUnfinalizedModelElement<UnfinalizedTwinDoorAddress, TwinDoorAddress>

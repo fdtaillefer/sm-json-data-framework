@@ -46,6 +46,12 @@ namespace sm_json_data_framework.Models.Rooms
             // Nothing to do here
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // There's nothing that can make a room environment irrelevant
+            return true;
+        }
     }
 
     public class UnfinalizedRoomEnvironment : AbstractUnfinalizedModelElement<UnfinalizedRoomEnvironment, RoomEnvironment>, InitializablePostDeserializeInRoom

@@ -67,6 +67,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public bool MustShinespark => InnerElement.MustShinespark;
 
         /// <summary>
+        /// Whether the player is logically expected to know how to shinespark.
+        /// </summary>
+        public bool CanShinespark => AppliedLogicalOptions.CanShinespark;
+
+        /// <summary>
         /// If present, declares this CanLeaveCharged as one that is initiated remotely and contains details regarding that context.
         /// A remote CanLeaveCharged is one that is executed at a different node than the door and follows a specific path to the door.
         /// In practice using this with a <see cref="GameNavigator"/>, you still start it at the exit node but then the navigator checks retroactively if you respected the path.
@@ -191,6 +196,36 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // We could also pre-calculate an effective runway length if we had the rules
 
             return useless;
+        }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // If a CanLeaveCharged is impossible to execute, it may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this CanLeaveCharged is impossible to execute given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // There's three separate things that can make a CanLeaveCharged impossible to execute:
+            // - It must be initiated remotely, but that remote initiation is impossible
+            // - It has no possible strats
+            // - It requires a shinespark but shinesparks are logically disabled
+            return (InitiateRemotely?.LogicallyNever is true) || !Strats.Values.Any(strat => strat.LogicallyRelevant) || (MustShinespark && !CanShinespark);
         }
     }
 

@@ -57,6 +57,12 @@ namespace sm_json_data_framework.Models.Rooms
             // A failure object is not useless even if it describes an effective softlock
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A StratFailure remains relevant even if it describes an effective softlock
+            return true;
+        }
     }
 
     public class UnfinalizedStratFailure : AbstractUnfinalizedModelElement<UnfinalizedStratFailure, StratFailure>, InitializablePostDeserializeInRoom

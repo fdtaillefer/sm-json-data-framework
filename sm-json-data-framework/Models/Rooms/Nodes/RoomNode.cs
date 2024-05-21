@@ -238,6 +238,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // A node never becomes useless
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A node always has relevance
+            return true;
+        }
     }
 
     /// <summary>

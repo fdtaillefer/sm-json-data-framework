@@ -48,6 +48,12 @@ namespace sm_json_data_framework.Models.Rooms
             // A link is useless if there's no destination that's possible to reach
             return allDestinationsImpossible;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A link has no logical relevance if it has no destination that can logically be reached
+            return To.Values.Any(linkTo => linkTo.LogicallyRelevant);
+        }
     }
 
     public class UnfinalizedLink : AbstractUnfinalizedModelElement<UnfinalizedLink, Link>, InitializablePostDeserializeInRoom

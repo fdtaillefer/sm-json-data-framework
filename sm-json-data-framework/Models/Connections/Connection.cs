@@ -45,6 +45,13 @@ namespace sm_json_data_framework.Models.Connections
             ToNode.ApplyLogicalOptions(logicalOptions);
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // Arguably a connection might not be relevant if on a node that's impossible to interact with,
+            // but that's a matter of layout and not logic, and is out of scope here.
+            return true;
+        }
     }
 
     public class UnfinalizedConnection : AbstractUnfinalizedModelElement<UnfinalizedConnection, Connection>

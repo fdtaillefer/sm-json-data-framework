@@ -100,6 +100,12 @@ namespace sm_json_data_framework.Models.Requirements
             LogicallyOrFree = CalculateLogicallyOrFree();
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // Logical requirements are always relevant, even when free or impossible
+            return true;
+        }
+
         /// <summary>
         /// If true, then it is known that this logical element given the current logical options can never ever be executed.
         /// </summary>

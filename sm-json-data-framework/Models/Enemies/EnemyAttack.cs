@@ -44,6 +44,12 @@ namespace sm_json_data_framework.Models.Enemies
             // Logical options have no power here
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // An enemy attack always has some relevance
+            return true;
+        }
     }
 
     public class UnfinalizedEnemyAttack: AbstractUnfinalizedModelElement<UnfinalizedEnemyAttack, EnemyAttack>

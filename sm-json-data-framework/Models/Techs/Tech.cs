@@ -61,6 +61,12 @@ namespace sm_json_data_framework.Models.Techs
             return UselessByLogicalOptions;
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A tech that can't be executed may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
         protected override void UpdateLogicalProperties()
         {
             base.UpdateLogicalProperties();

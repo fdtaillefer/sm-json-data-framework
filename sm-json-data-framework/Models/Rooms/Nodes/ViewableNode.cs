@@ -50,6 +50,33 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // A runway becomes useless if its strats are impossible
             return noUsefulStrat;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // If a viewableNode cannot be used, it may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this viewableNode is impossible to use given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // A viewableNode is impossible to use if it has no strats that can be executed
+            return Strats.Values.Any(strat => strat.LogicallyRelevant);
+        }
     }
 
     public class UnfinalizedViewableNode : AbstractUnfinalizedModelElement<UnfinalizedViewableNode, ViewableNode>, InitializablePostDeserializeInNode

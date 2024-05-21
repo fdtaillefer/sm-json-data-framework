@@ -35,6 +35,13 @@ namespace sm_json_data_framework.Models.Enemies
             // Nothing to do here
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // Enemy dimensions are just data with no logical implications.
+            // They have in-game implications but that's too complex to be calculated here.
+            return false;
+        }
     }
 
     public class UnfinalizedEnemyDimensions :AbstractUnfinalizedModelElement<UnfinalizedEnemyDimensions, EnemyDimensions>

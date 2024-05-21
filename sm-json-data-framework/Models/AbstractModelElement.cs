@@ -70,8 +70,16 @@ namespace sm_json_data_framework.Models
         /// </summary>
         protected virtual void UpdateLogicalProperties()
         {
-
+            LogicallyRelevant = CalculateLogicallyRelevant();
         }
+
+        public bool LogicallyRelevant { get; private set; }
+
+        /// <summary>
+        /// Calculates and returns what the value of <see cref="LogicallyRelevant"/> should be.
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool CalculateLogicallyRelevant();
     }
 
     /// <summary>
@@ -106,6 +114,12 @@ namespace sm_json_data_framework.Models
         /// </para>
         /// </summary>
         public ReadOnlyLogicalOptions AppliedLogicalOptions { get; }
+
+        /// <summary>
+        /// Whether this element, given the current logical options, has any kind of logical relevance.
+        /// If this is false, it is effectively safe to pretend the element doesn't exist.
+        /// </summary>
+        public bool LogicallyRelevant { get; }
     }
 
     /// <summary>

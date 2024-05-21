@@ -104,6 +104,53 @@ namespace sm_json_data_framework.Models.Rooms
             // This StratObstacle can become fully useless if the obstacle is indestructible from anywhere and cannot be bypassed from here
             return Obstacle.IndestructibleByLogicalOptions && unbypassableHere;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+            LogicallyNeverFromHere = CalculateLogicallyNeverFromHere();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A StratObstacle is always relevant - even if impossible because it blocks the path, and even if free because it's a way to destroy the obstacle.
+            return true;
+        }
+
+        /// <summary>
+        /// If true, then it's always impossible to deal with the obstacle via this strat given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // This StratObstacle becomes impossible to fulfill ever if the obstacle can never be destroyed, and can't be bypassed from here
+            bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
+            return Obstacle.IndestructibleByLogicalOptions && unbypassableHere;
+        }
+
+        /// <summary>
+        /// If true, then it's always impossible to deal with the obstacle via this strat given the current logical options, regardless of in-game state,
+        /// unless it has already been destroyed previously by a different strat.
+        /// </summary>
+        public bool LogicallyNeverFromHere { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNeverFromHere"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNeverFromHere()
+        {
+            bool indestructibleHere = Obstacle.LogicallyIndestructible || Requires.LogicallyNever;
+            bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
+            // This StratObstacle becomes impossible to fulfill locally (so - impossible unless the obstacle is destroyed elsewhere) if it can be neither destroyed or bypassed from here
+            return indestructibleHere && unbypassableHere;
+        }
     }
 
     /// <summary>

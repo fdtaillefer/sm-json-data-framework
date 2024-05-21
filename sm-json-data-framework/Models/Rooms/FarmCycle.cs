@@ -120,6 +120,33 @@ namespace sm_json_data_framework.Models.Rooms
             // A farm cycle becomes useless if its requirements are impossible
             return Requires.UselessByLogicalOptions;
         }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // If a farm cycle cannot be executed, it may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
+        /// <summary>
+        /// If true, then this farmCycle is impossible to execute given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // A farm cycle is impossible if its requirements are impossible
+            return Requires.LogicallyNever;
+        }
     }
 
 

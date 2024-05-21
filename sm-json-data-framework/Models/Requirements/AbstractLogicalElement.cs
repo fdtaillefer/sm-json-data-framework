@@ -62,6 +62,12 @@ namespace sm_json_data_framework.Models.Requirements
             LogicallyFree = CalculateLogicallyFree();
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // There's always situations where a logical element (even one that's logically free or logically never) has some relevance
+            return true;
+        }
+
         public bool LogicallyNever { get; private set; }
 
         /// <summary>

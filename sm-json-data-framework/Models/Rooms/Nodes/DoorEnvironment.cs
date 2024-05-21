@@ -48,6 +48,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Logical options have no power here
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // There's nothing that can make a door environment irrelevant
+            return true;
+        }
     }
 
     public class UnfinalizedDoorEnvironment : AbstractUnfinalizedModelElement<UnfinalizedDoorEnvironment, DoorEnvironment>, InitializablePostDeserializeInNode

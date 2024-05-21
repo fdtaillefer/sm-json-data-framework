@@ -148,6 +148,12 @@ namespace sm_json_data_framework.Models.Rooms
             // There's no changes here that can make this enemy useless
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // There's nothing that can make a room enemy irrelevant
+            return true;
+        }
     }
 
     /// <summary>

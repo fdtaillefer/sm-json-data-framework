@@ -51,6 +51,12 @@ namespace sm_json_data_framework.Models.Rooms
             // This LinkTo is unusable if all strats are unusable
             return noPossibleStrat;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A linkTo has no logical relevance if there are no strats that can be executed to follow it
+            return Strats.Values.Any(strat => strat.LogicallyRelevant);
+        }
     }
 
     public class UnfinalizedLinkTo : AbstractUnfinalizedModelElement<UnfinalizedLinkTo, LinkTo>, InitializablePostDeserializeInRoom

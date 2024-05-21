@@ -157,6 +157,12 @@ namespace sm_json_data_framework.Models.Enemies
 
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // An enemy always has some relevance
+            return true;
+        }
     }
 
     public class UnfinalizedEnemy : AbstractUnfinalizedModelElement<UnfinalizedEnemy, Enemy>, InitializablePostDeserializeOutOfRoom

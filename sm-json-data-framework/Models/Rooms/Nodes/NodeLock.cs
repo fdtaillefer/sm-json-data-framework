@@ -147,9 +147,38 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // We could update a property able to indicate that this lock can never ever be dealt with,
             // but we'd need a way to ascertain that the lock is always active
 
-            // A lock remains useful even if it's impolssible to unlock or bypass as it plays the role of blocking the way.
+            // A lock remains useful even if it's impossible to unlock or bypass as it plays the role of blocking the way.
             // It does become useless if its activation conditions become impossible though
             return Lock.UselessByLogicalOptions;
+        }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A lock that's impossible to open remains logically relevant.
+            // A lock that is free to open is still arguably relevant in that it does get unlocked which is arguably a logical change
+
+            // But if a lock can never become active, it may as well not exist
+            return Lock.LogicallyNever;
+        }
+
+        /// <summary>
+        /// If true, then this lock is impossible to pass through given the current logical options, either by opening or bypassing, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            return !UnlockStrats.Values.Where(strat => strat.LogicallyRelevant).Any() && !BypassStrats.Values.Where(strat => strat.LogicallyRelevant).Any();
         }
     }
 

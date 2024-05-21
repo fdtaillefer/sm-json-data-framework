@@ -62,6 +62,12 @@ namespace sm_json_data_framework.Models.Connections
             // Logical Options have no power here
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // The two ends of a connection are always relevant given their connection is
+            return true;
+        }
     }
 
     public class UnfinalizedConnectionNode : AbstractUnfinalizedModelElement<UnfinalizedConnectionNode, ConnectionNode>

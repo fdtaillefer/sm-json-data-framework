@@ -128,6 +128,12 @@ namespace sm_json_data_framework.Models.Rooms
             // A room never becomes useless
             return false;
         }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A room always has relevance
+            return true;
+        }
     }
 
     public class UnfinalizedRoom : AbstractUnfinalizedModelElement<UnfinalizedRoom, Room>, InitializablePostDeserializeOutOfRoom

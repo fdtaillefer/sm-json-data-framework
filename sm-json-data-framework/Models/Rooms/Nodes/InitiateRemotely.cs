@@ -52,7 +52,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             // If this contains strats, they belong to a LinkTo.
-            // However, we need to apply the logical options to them to see if they become impossible
+            // However, we need to apply the logical options to them to calculate if they become impossible
             bool anyNodeImpossible = false;
             for (int i = 0; i < PathToDoor.Count; i++)
             {
@@ -76,6 +76,33 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // If there is a node in the path that has no possible strats remaining, this InitiateRemotely becomes impossible
             return anyNodeImpossible;
+        }
+
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNever = CalculateLogicallyNever();
+        }
+
+        public override bool CalculateLogicallyRelevant()
+        {
+            // An InitiateRemotely is logically relevant even if impossible, because its existence indicates that its CanLeaveCharged is impossible
+            return true;
+        }
+
+        /// <summary>
+        /// If true, then this remote initiation is impossible to execute given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever()
+        {
+            // If there is any node in the path that has no possible strat, then it's impossible to execute this InitiateRemotely
+            return PathToDoor.Any(pathNode => !pathNode.strats.Values.Any(strat => strat.LogicallyRelevant));
         }
     }
 

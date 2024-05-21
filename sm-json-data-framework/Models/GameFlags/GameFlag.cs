@@ -38,6 +38,12 @@ namespace sm_json_data_framework.Models.GameFlags
             LogicallyAlways = CalculateLogicallyAlways();
         }
 
+        public override bool CalculateLogicallyRelevant()
+        {
+            // A game flag that can't be enabled may as well not exist
+            return !CalculateLogicallyNever();
+        }
+
         /// <summary>
         /// If true, then this GameFlag is impossible to enable given the current logical options, regardless of in-game state.
         /// </summary>
