@@ -142,7 +142,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Since this is an in-room shine charge, its required number of tiles is constant.
             // As such, we could check here whether the logical options make the shine long enough to always be possible.
             // However, this requires access to the game rules, which we don't have here.
-            // It would also require SpeedBooster to always be available which we don't have a way to check here.
+            // It would also need SpeedBooster to always be available and it would need to not require a shinespark.
+            return false;
+        }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This could be free if it's always possible, but the same caveats as described in CalculateLogicallyAlways() apply
             return false;
         }
     }

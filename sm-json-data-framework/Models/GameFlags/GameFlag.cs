@@ -39,7 +39,7 @@ namespace sm_json_data_framework.Models.GameFlags
         }
 
         /// <summary>
-        /// If true, then this GameFlag is impossible to enable with its currently applied logical options, regardless of in-game state.
+        /// If true, then this GameFlag is impossible to enable given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -54,7 +54,7 @@ namespace sm_json_data_framework.Models.GameFlags
         }
 
         /// <summary>
-        /// If true, then this Gameflag is always enabled with its currently applied logical options, regardless of in-game state.
+        /// If true, then this Gameflag is always enabled given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyAlways { get; private set; }
 
@@ -67,6 +67,12 @@ namespace sm_json_data_framework.Models.GameFlags
             // Game flag is always enabled if the game always starts with it
             return AppliedLogicalOptions.StartConditions.StartingGameFlags.ContainsKey(Name);
         }
+
+        /// <summary>
+        /// If true, not only is this GameFlag always enabled given the current logical options, regardless of in-game state,
+        /// but that enabled state is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree => LogicallyAlways; // Just having a gameFlag enabled can never cost resources
     }
 
     public class UnfinalizedGameFlag : AbstractUnfinalizedModelElement<UnfinalizedGameFlag, GameFlag>

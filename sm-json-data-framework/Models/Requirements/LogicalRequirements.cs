@@ -108,10 +108,12 @@ namespace sm_json_data_framework.Models.Requirements
             LogicallyOrNever = CalculateLogicallyOrNever();
             LogicallyAlways = CalculateLogicallyAlways();
             LogicallyOrAlways = CalculateLogicallyOrAlways();
+            LogicallyFree = CalculateLogicallyFree();
+            LogicallyOrFree = CalculateLogicallyOrFree();
         }
 
         /// <summary>
-        /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed.
+        /// If true, then it is known that this logical element given the current logical options can never ever be executed.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -126,7 +128,7 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// If true, then it is known that this logical element with its currently applied logical options can never ever be executed, 
+        /// If true, then it is known that this logical element given the current logical options can never ever be executed, 
         /// regardless of in-game state, even if it were interpreted as a logical Or.
         /// </summary>
         public bool LogicallyOrNever { get; private set; }
@@ -148,7 +150,7 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// If true, this this can always be fulfilled, regardless of in-game state, with the current logical options.
+        /// If true, this this can always be fulfilled, regardless of in-game state, given the current logical options.
         /// </summary>
         public bool LogicallyAlways { get; private set; }
 
@@ -164,7 +166,7 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// If true, then it is known that this logical element with its currently applied logical options could always be executed, 
+        /// If true, then it is known that this logical element given the current logical options could always be executed, 
         /// regardless of in-game state, if it were interpreted as a logical Or.
         /// </summary>
         public bool LogicallyOrAlways { get; private set; }
@@ -183,6 +185,45 @@ namespace sm_json_data_framework.Models.Requirements
 
             // If we have any child logical elements, an Or is "always" if at least one child is
             return LogicalElements.Any(element => element.LogicallyAlways);
+        }
+
+        /// <summary>
+        /// If true, not only can this these requirements always be executed given the current logical options, regardless of in-game state,
+        /// but that fulfillment is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree()
+        {
+            // Since executing logical requirements means executing all logical elements,
+            // this only becomes free if all child elements also are (but also if empty)
+            return LogicalElements.All(element => element.LogicallyFree);
+        }
+
+        /// <summary>
+        /// If true, then these requirements can always be executed for free given the current logical options, regardless of in-game state,
+        /// when interpreted as a logical Or. A free execution means not only always possible, but also with on resource cost.
+        /// </summary>
+        public bool LogicallyOrFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyOrFree"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyOrFree()
+        {
+            // An empty Or makes little sense - interpret it as always being free
+            if (!LogicalElements.Any())
+            {
+                return true;
+            }
+
+            // If we have any child logical elements, an Or is free if at least one child is
+            return LogicalElements.Any(element => element.LogicallyFree);
         }
     }
 

@@ -66,10 +66,11 @@ namespace sm_json_data_framework.Models.Techs
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
             LogicallyAlways = CalculateLogicallyAlways();
+            LogicallyFree = CalculateLogicallyFree();
         }
 
         /// <summary>
-        /// If true, then this tech is impossible to execute with its currently applied logical options, regardless of in-game state.
+        /// If true, then this tech is impossible to execute given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -84,7 +85,7 @@ namespace sm_json_data_framework.Models.Techs
         }
 
         /// <summary>
-        /// If true, then this tech is always possible to execute with its currently applied logical options, regardless of in-game state.
+        /// If true, then this tech is always possible to execute given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyAlways { get; private set; }
 
@@ -96,6 +97,22 @@ namespace sm_json_data_framework.Models.Techs
         {
             // A Tech is always possible it's enabled and its requirements are always possible
             return AppliedLogicalOptions.IsTechEnabled(this) && Requires.LogicallyAlways;
+        }
+
+        /// <summary>
+        /// If true, not only can this tech always be executed given the current logical options, regardless of in-game state,
+        /// but that fulfillment is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree()
+        {
+            // A Tech is always free it's enabled and its requirements are free
+            return AppliedLogicalOptions.IsTechEnabled(this) && Requires.LogicallyFree;
         }
     }
 

@@ -86,10 +86,11 @@ namespace sm_json_data_framework.Models.Weapons
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
             LogicallyAlways = CalculateLogicallyAlways();
+            LogicallyFree = CalculateLogicallyFree();
         }
 
         /// <summary>
-        /// If true, then this weapon is impossible to use with its currently applied logical options, regardless of in-game state.
+        /// If true, then this weapon is impossible to use given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -100,7 +101,7 @@ namespace sm_json_data_framework.Models.Weapons
         }
 
         /// <summary>
-        /// If true, then this weapon is always possible to use with its currently applied logical options, regardless of in-game state.
+        /// If true, then this weapon is always possible to use given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyAlways { get; private set; }
 
@@ -112,6 +113,22 @@ namespace sm_json_data_framework.Models.Weapons
         {
             // Weapon is always possible to use if using it altogether, and doing an individual shot, are both always possible
             return UseRequires.LogicallyAlways && ShotRequires.LogicallyAlways;
+        }
+
+        /// <summary>
+        /// If true, not only can this weapon always be used given the current logical options, regardless of in-game state,
+        /// but that fulfillment is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree()
+        {
+            // Weapon is always free to use if using it altogether, and doing an individual shot, are both always free
+            return UseRequires.LogicallyFree && ShotRequires.LogicallyFree;
         }
     }
 

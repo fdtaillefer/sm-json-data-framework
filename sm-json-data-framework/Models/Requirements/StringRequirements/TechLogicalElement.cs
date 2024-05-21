@@ -60,6 +60,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // This is always possible if the tech itself also is
             return Tech.LogicallyAlways;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This is always possible if the tech itself also is
+            return Tech.LogicallyFree;
+        }
     }
 
     public class UnfinalizedTechLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedTechLogicalElement, TechLogicalElement>

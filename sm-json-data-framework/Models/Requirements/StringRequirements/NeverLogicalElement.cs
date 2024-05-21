@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         protected override bool CalculateLogicallyAlways()
         {
             // Never is never always
+            return false;
+        }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // Never is never possible, let alone free
             return false;
         }
     }

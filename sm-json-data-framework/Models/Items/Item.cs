@@ -38,7 +38,7 @@ namespace sm_json_data_framework.Models.Items
         }
 
         /// <summary>
-        /// If true, then this item is impossible to use with its currently applied logical options, regardless of in-game state.
+        /// If true, then this item is impossible to use given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -53,7 +53,7 @@ namespace sm_json_data_framework.Models.Items
         }
 
         /// <summary>
-        /// If true, then this item is always possible to use with its currently applied logical options, regardless of in-game state.
+        /// If true, then this item is always possible to use given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyAlways { get; private set; }
 
@@ -66,6 +66,12 @@ namespace sm_json_data_framework.Models.Items
             // Item is always usable if the game always starts with it
             return AppliedLogicalOptions.StartConditions.StartingInventory.HasItem(this);
         }
+
+        /// <summary>
+        /// If true, not only is this item always available given the current logical options, regardless of in-game state,
+        /// but that availability is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree => LogicallyAlways; // Just owning an item can never cost resources
     }
 
     public class UnfinalizedItem: AbstractUnfinalizedModelElement<UnfinalizedItem, Item>

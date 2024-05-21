@@ -61,6 +61,12 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // This is always possible if the helper itself also is
             return Helper.LogicallyAlways;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This is always possible if the helper itself also is
+            return Helper.LogicallyFree;
+        }
     }
 
     public class UnfinalizedHelperLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedHelperLogicalElement, HelperLogicalElement>

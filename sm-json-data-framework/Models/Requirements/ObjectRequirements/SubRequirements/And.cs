@@ -48,6 +48,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             // Delegate to requirements
             return LogicalRequirements.LogicallyAlways;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // Delegate to requirements
+            return LogicalRequirements.LogicallyFree;
+        }
     }
 
     public class UnfinalizedAnd : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>

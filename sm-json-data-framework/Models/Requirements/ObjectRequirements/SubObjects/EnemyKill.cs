@@ -176,6 +176,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             return alwaysKillable;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This is always free if any of the valid weapons also is
+            bool free = ValidWeapons.Values.Any(weapon => weapon.LogicallyFree);
+
+            return free;
+        }
     }
 
     /// <summary>

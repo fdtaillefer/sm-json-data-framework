@@ -63,6 +63,11 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             // This is always possible if the item can always be used
             return Item.LogicallyAlways;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            return Item.LogicallyFree;
+        }
     }
 
     public class UnfinalizedItemLogicalElement : AbstractUnfinalizedStringLogicalElement<UnfinalizedItemLogicalElement, ItemLogicalElement>

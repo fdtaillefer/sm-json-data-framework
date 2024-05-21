@@ -66,6 +66,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         {
             return false;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            return false;
+        }
     }
 
     public class UnfinalizedPreviousStratProperty : AbstractUnfinalizedObjectLogicalElementWithString<UnfinalizedPreviousStratProperty, PreviousStratProperty>

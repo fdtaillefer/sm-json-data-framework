@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Utils;
@@ -65,6 +66,11 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         {
             // This is always possible if the game flag itself also is
             return GameFlag.LogicallyAlways;
+        }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            return GameFlag.LogicallyFree;
         }
     }
 

@@ -105,6 +105,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         {
             return false;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            return false;
+        }
     }
 
     public class UnfinalizedResetRoom : AbstractUnfinalizedObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>

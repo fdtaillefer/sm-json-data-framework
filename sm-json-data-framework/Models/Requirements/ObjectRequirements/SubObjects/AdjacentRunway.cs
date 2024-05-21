@@ -146,6 +146,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // This could be always possible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This could be always free (using an adjacent runway never costs resources), but that depends on layout and not logic, and is beyond the scope of this method.
+            return false;
+        }
     }
 
     /// <summary>

@@ -79,6 +79,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             // This could be always if it ends up being 0 damage suitless, but that would be defined by the rules, which aren't available here
             return false;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This could be free if it ends up being 0 damage suitless, but that would be defined by the rules, which aren't available here
+            return false;
+        }
     }
 
     public abstract class AbstractUnfinalizedDamageNumericalValueLogicalElement<ConcreteType, TargetType>: AbstractUnfinalizedObjectLogicalElementWithNumericalIntegerValue<ConcreteType, TargetType>

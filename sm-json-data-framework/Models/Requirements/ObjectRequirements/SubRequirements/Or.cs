@@ -45,6 +45,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             // Delegate to requirements (interpreted as an Or)
             return LogicalRequirements.LogicallyOrAlways;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // Delegate to requirements (interpreted as an Or)
+            return LogicalRequirements.LogicallyOrFree;
+        }
     }
 
 

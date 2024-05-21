@@ -70,6 +70,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // A count of 0 makes no sense, but it *would* be logically always
             return Count == 0;
         }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // A count of 0 makes no sense, but it *would* always be free
+            return Count == 0;
+        }
     }
 
     public class UnfinalizedAmmo : AbstractUnfinalizedObjectLogicalElement<UnfinalizedAmmo, Ammo>

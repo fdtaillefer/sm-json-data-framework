@@ -68,6 +68,7 @@ namespace sm_json_data_framework.Models.Requirements
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
             LogicallyAlways = CalculateLogicallyAlways();
+            LogicallyFree = CalculateLogicallyFree();
         }
 
         public bool LogicallyNever { get; private set; }
@@ -85,6 +86,14 @@ namespace sm_json_data_framework.Models.Requirements
         /// </summary>
         /// <returns></returns>
         protected abstract bool CalculateLogicallyAlways();
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract bool CalculateLogicallyFree();
     }
 
     /// <summary>
@@ -102,14 +111,20 @@ namespace sm_json_data_framework.Models.Requirements
         public bool IsNever();
 
         /// <summary>
-        /// If true, this logical element can never be fulfilled, regardless of in-game state, with the current logical options.
+        /// If true, this logical element can never be fulfilled given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; }
 
         /// <summary>
-        /// If true, this logical element can always be fulfilled, regardless of in-game state, with the current logical options.
+        /// If true, this logical element can always be fulfilled given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyAlways { get; }
+
+        /// <summary>
+        /// If true, not only can this logical element always be fulfilled given the current logical options, regardless of in-game state,
+        /// but that fulfillment is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree { get; }
     }
 
     public abstract class AbstractUnfinalizedLogicalElement<ConcreteType, TargetType> : AbstractUnfinalizedModelElement<ConcreteType, TargetType>, IUnfinalizedLogicalElement

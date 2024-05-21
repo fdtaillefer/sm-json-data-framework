@@ -46,10 +46,11 @@ namespace sm_json_data_framework.Models.Helpers
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
             LogicallyAlways = CalculateLogicallyAlways();
+            LogicallyFree = CalculateLogicallyFree();
         }
 
         /// <summary>
-        /// If true, then this helper is impossible to execute with its currently applied logical options, regardless of in-game state.
+        /// If true, then this helper is impossible to execute given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
@@ -64,7 +65,7 @@ namespace sm_json_data_framework.Models.Helpers
         }
 
         /// <summary>
-        /// If true, then this Helper is always possible to execute with its currently applied logical options, regardless of in-game state.
+        /// If true, then this Helper is always possible to execute given the current logical options, regardless of in-game state.
         /// </summary>
         public bool LogicallyAlways { get; private set; }
 
@@ -75,6 +76,22 @@ namespace sm_json_data_framework.Models.Helpers
         protected bool CalculateLogicallyAlways()
         {
             return Requires.LogicallyAlways;
+        }
+
+        /// <summary>
+        /// If true, not only can this helper always be executed given the current logical options, regardless of in-game state,
+        /// but that fulfillment is also guaranteed to cost no resources.
+        /// </summary>
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree()
+        {
+            // A helper is always free if its requirements are free
+            return Requires.LogicallyFree;
         }
     }
 

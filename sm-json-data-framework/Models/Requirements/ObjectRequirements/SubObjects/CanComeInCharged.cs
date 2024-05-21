@@ -311,7 +311,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override bool CalculateLogicallyAlways()
         {
             // This could be always possible based on layout and not logic, but that part is beyond the scope of this method.
-            // It would also require SpeedBooster to always be available which we don't have a way to check here.
+            // It would also require SpeedBooster to always be available and to not require a shinespark.
+            return false;
+        }
+
+        protected override bool CalculateLogicallyFree()
+        {
+            // This could be always free based on layout and not logic, but that part is beyond the scope of this method.
+            // It would also need SpeedBooster to always be available and it would need to not require a shinespark.
             return false;
         }
     }
