@@ -32,11 +32,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
             return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (IsFulfilled(inGameState, previousRoomCount))
@@ -88,11 +83,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         protected override PreviousStratProperty CreateFinalizedElement(UnfinalizedPreviousStratProperty sourceElement, Action<PreviousStratProperty> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new PreviousStratProperty(sourceElement, mappingsInsertionCallback);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

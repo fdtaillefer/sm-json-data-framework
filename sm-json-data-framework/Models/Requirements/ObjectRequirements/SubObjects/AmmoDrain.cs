@@ -31,11 +31,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public int Count => InnerElement.Count;
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int currentAmmo = inGameState.Resources.GetAmount(AmmoType.GetConsumableResourceEnum());
@@ -87,11 +82,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override AmmoDrain CreateFinalizedElement(UnfinalizedAmmoDrain sourceElement, Action<AmmoDrain> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new AmmoDrain(sourceElement, mappingsInsertionCallback);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

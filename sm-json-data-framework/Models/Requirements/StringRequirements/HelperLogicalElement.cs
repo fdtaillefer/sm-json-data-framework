@@ -27,11 +27,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             Helper = InnerElement.Helper.Finalize(mappings);
         }
 
-        public override bool IsNever()
-        {
-            return Helper.Requires.IsNever();
-        }
-
         /// <summary>
         /// The helper whose logical requirements must be fulfilled for this logical element.
         /// </summary>
@@ -82,11 +77,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             ModelFinalizationMappings mappings)
         {
             return new HelperLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return Helper.Requires.IsNever();
         }
     }
 }

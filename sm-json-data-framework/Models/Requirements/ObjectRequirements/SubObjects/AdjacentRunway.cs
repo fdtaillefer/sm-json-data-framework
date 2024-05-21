@@ -61,11 +61,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool OverrideRunwayRequirements => InnerElement.OverrideRunwayRequirements;
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If no in-room path is specified, then player will be required to have entered at fromNode and not moved
@@ -208,11 +203,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override AdjacentRunway CreateFinalizedElement(UnfinalizedAdjacentRunway sourceElement, Action<AdjacentRunway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new AdjacentRunway(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

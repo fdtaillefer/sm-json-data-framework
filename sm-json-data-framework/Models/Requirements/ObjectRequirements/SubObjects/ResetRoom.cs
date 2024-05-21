@@ -50,11 +50,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool MustStayPut => InnerElement.MustStayPut;
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
@@ -143,11 +138,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override ResetRoom CreateFinalizedElement(UnfinalizedResetRoom sourceElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new ResetRoom(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
 
         public override IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room)

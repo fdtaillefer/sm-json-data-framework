@@ -30,11 +30,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// </summary>
         public GameFlag GameFlag { get; }
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.ActiveGameFlags.ContainsFlag(GameFlag))
@@ -87,11 +82,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             ModelFinalizationMappings mappings)
         {
             return new GameFlagLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
     }
 }

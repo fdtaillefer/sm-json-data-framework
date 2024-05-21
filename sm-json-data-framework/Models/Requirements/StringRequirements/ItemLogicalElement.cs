@@ -26,11 +26,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// </summary>
         public Item Item { get; }
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             if (inGameState.Inventory.HasItem(Item))
@@ -83,11 +78,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             ModelFinalizationMappings mappings)
         {
             return new ItemLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
     }
 }

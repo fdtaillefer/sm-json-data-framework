@@ -25,11 +25,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             
         }
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int damage = CalculateDamage(model, inGameState, times: times, previousRoomCount: previousRoomCount);
@@ -99,11 +94,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         public AbstractUnfinalizedDamageNumericalValueLogicalElement(int value) : base(value)
         {
 
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
     }
 }

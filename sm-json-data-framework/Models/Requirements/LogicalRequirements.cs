@@ -39,18 +39,6 @@ namespace sm_json_data_framework.Models.Requirements
 
         public IReadOnlyList<ILogicalElement> LogicalElements { get; }
 
-        /// <summary>
-        /// Returns whether this set of logical requirements in its base state is logically impossible to fully complete
-        /// (due to having a mandatory <see cref="NeverLogicalElement"/>).
-        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
-        /// which are not available here.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsNever()
-        {
-            return LogicalElements.Where(element => element.IsNever()).Any();
-        }
-
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If logical options make these logical requirements impossible, don't bother trying
@@ -255,18 +243,6 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         public IList<IUnfinalizedLogicalElement> LogicalElements { get; private set; } = new List<IUnfinalizedLogicalElement>();
-
-        /// <summary>
-        /// Returns whether this set of logical requirements in its base state is logically impossible to fully complete
-        /// (due to having a mandatory <see cref="UnfinalizedNeverLogicalElement"/>).
-        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
-        /// which are not available here.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsNever()
-        {
-            return LogicalElements.Where(element => element.IsNever()).Any();
-        }
 
         /// <summary>
         /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),

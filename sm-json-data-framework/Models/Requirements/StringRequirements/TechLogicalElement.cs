@@ -32,11 +32,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// </summary>
         public Tech Tech { get; }
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return Tech.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
@@ -80,11 +75,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         protected override TechLogicalElement CreateFinalizedElement(UnfinalizedTechLogicalElement sourceElement, Action<TechLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new TechLogicalElement(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
     }
 }

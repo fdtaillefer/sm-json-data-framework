@@ -23,11 +23,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         }
 
-        public override bool IsNever()
-        {
-            return true;
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return null;
@@ -63,11 +58,6 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         protected override NeverLogicalElement CreateFinalizedElement(UnfinalizedNeverLogicalElement sourceElement, Action<NeverLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mapping)
         {
             return new NeverLogicalElement(sourceElement, mappingsInsertionCallback);
-        }
-
-        public override bool IsNever()
-        {
-            return true;
         }
     }
 }

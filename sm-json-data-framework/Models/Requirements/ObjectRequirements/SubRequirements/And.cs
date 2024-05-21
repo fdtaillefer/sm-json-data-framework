@@ -19,11 +19,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
 
         }
 
-        public override bool IsNever()
-        {
-            return LogicalRequirements.IsNever();
-        }
-
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             return LogicalRequirements.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
@@ -71,11 +66,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         protected override And CreateFinalizedElement(UnfinalizedAnd sourceElement, Action<And> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new And(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return LogicalRequirements.IsNever();
         }
     }
 }

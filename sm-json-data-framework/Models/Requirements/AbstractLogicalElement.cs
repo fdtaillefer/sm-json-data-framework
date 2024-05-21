@@ -54,15 +54,6 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
         protected abstract ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
-        /// <summary>
-        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on) a mandatory
-        /// <see cref="NeverLogicalElement"/>.
-        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
-        /// which are not available here.
-        /// </summary>
-        /// <returns></returns>
-        public abstract bool IsNever();
-
         protected override void UpdateLogicalProperties()
         {
             base.UpdateLogicalProperties();
@@ -101,14 +92,6 @@ namespace sm_json_data_framework.Models.Requirements
     /// </summary>
     public interface ILogicalElement : IExecutable, IModelElement
     {
-        /// <summary>
-        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on) a mandatory
-        /// <see cref="NeverLogicalElement"/>.
-        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
-        /// which are not available here.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsNever();
 
         /// <summary>
         /// If true, this logical element can never be fulfilled given the current logical options, regardless of in-game state.
@@ -137,10 +120,6 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         public abstract IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room);
-
-        public abstract bool IsNever();
-
-        // STITCHME could be nice to ask for always? As in isAlwaysFree()
     }
 
     /// <summary>
@@ -164,14 +143,5 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="room">The room in which this logical element is, or null if it's not in a room</param>
         /// <returns>A sequence of strings describing references that could not be initialized properly.</returns>
         public IEnumerable<string> InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel model, UnfinalizedRoom room);
-
-        /// <summary>
-        /// Returns whether this logical element in its base state is one that can never get fulfilled because it is a (or depends on) a mandatory
-        /// <see cref="NeverLogicalElement"/>.
-        /// This does not tell whether the logical element should be replaced by a never, because that depends on map layout and logical options, 
-        /// which are not available here.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsNever();
     }
 }

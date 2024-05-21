@@ -18,11 +18,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public override bool IsNever()
-        {
-            return false;
-        }
-
         /// <summary>
         /// Returns whether the provided InGameState fulfills this PreviousNode element.
         /// </summary>
@@ -88,11 +83,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         protected override PreviousNode CreateFinalizedElement(UnfinalizedPreviousNode sourceElement, Action<PreviousNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {
             return new PreviousNode(sourceElement, mappingsInsertionCallback, mappings);
-        }
-
-        public override bool IsNever()
-        {
-            return false;
         }
     }
 }
