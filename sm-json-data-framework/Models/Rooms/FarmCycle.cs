@@ -175,8 +175,13 @@ namespace sm_json_data_framework.Models.Rooms
         {
             FarmCycle = farmCycle;
         }
+
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
+            if(FarmCycle.LogicallyNever)
+            {
+                return null;
+            }
             var requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // Can't even execute one cycle, so return a failure
             if (requirementsResult == null)

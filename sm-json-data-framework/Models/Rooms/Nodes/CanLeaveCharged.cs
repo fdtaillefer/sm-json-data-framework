@@ -127,7 +127,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // STITCHME Is there any remote initiation check anywhere? If this is remote it should only be executable if the path followed in the room matches the remote config
-            // I think there were checks elsewhere though, I think it's in InGameState.GetRetroactiveCanLeaveChargdes().
+            // I think there were checks elsewhere though, I think it's in InGameState.GetRetroactiveCanLeaveChargeds().
+            // Should consider whether that logic belongs here instead.
 
             // Figure out how much energy we will need to have for the shinespark
             int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);

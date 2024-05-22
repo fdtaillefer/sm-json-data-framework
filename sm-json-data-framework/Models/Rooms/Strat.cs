@@ -74,7 +74,7 @@ namespace sm_json_data_framework.Models.Rooms
                 return null;
             }
 
-            times = times * Tries;
+            times *= Tries;
 
             ExecutionResult result = Requires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
 
@@ -133,8 +133,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         public override bool CalculateLogicallyRelevant()
         {
-            // A strat that is logically turned off or that cannot be executed may as well not exist
-            return AppliedLogicalOptions.IsStratEnabled(this) && !CalculateLogicallyNever();
+            // A strat that can never be executed may as well not exist
+            return !CalculateLogicallyNever();
         }
 
         /// <summary>
@@ -149,7 +149,9 @@ namespace sm_json_data_framework.Models.Rooms
         protected bool CalculateLogicallyNever()
         {
             // A strat is impossible to execute if it has impossible requirements, but also if it has any impossible obstacle
-            return Requires.LogicallyNever || Obstacles.Values.Any(obstacle => obstacle.LogicallyNever);
+            // or if it's just logically disabled
+            return Requires.LogicallyNever || Obstacles.Values.Any(obstacle => obstacle.LogicallyNever)
+                || !AppliedLogicalOptions.IsStratEnabled(this);
         }
     }
 

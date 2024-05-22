@@ -235,10 +235,31 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't need the information.
         }
 
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNeverInteract = CalculateLogicallyNeverInteract();
+        }
+
         public override bool CalculateLogicallyRelevant()
         {
             // A node always has relevance
             return true;
+        }
+
+        /// <summary>
+        /// If true, then this node is impossible to interact with given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNeverInteract { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNeverInteract"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNeverInteract()
+        {
+            // A node is impossible to interact with if it has impossible interaction requirements or a lock that can't be taken care of
+            return InteractionRequires.LogicallyNever || Locks.Values.Any(nodeLock => nodeLock.LogicallyNever);
         }
     }
 
@@ -258,6 +279,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
+            if (Node.LogicallyNeverInteract)
+            {
+                return null;
+            }
+
             // First thing is making sure no locks prevent interaction
             IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);
             IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState)

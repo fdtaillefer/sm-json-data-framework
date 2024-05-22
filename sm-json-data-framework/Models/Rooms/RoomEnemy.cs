@@ -146,10 +146,45 @@ namespace sm_json_data_framework.Models.Rooms
             DropRequires.ApplyLogicalOptions(logicalOptions);
         }
 
+        protected override void UpdateLogicalProperties()
+        {
+            base.UpdateLogicalProperties();
+            LogicallyNeverSpawns = CalculateLogicallyNeverSpawns();
+            LogicallyAlwaysSpawns = CalculateLogicallyAlwaysSpawns();
+        }
+
         public override bool CalculateLogicallyRelevant()
         {
             // There's nothing that can make a room enemy irrelevant
             return true;
+        }
+
+        /// <summary>
+        /// If true, then this enemy never ever spawns given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNeverSpawns { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNeverSpawns"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNeverSpawns()
+        {
+            return Spawn.LogicallyNever;
+        }
+
+        /// <summary>
+        /// If true, then this enemy always spawns given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyAlwaysSpawns { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlwaysSpawns"/> should currently be.
+        /// </summary>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlwaysSpawns()
+        {
+            return Spawn.LogicallyFree;
         }
     }
 
