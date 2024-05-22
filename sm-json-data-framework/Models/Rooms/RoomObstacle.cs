@@ -15,8 +15,6 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomObstacle : AbstractModelElement<UnfinalizedRoomObstacle, RoomObstacle>
     {
-        public bool IndestructibleByLogicalOptions { get; protected set; } = false;
-
         private UnfinalizedRoomObstacle InnerElement { get; set; }
 
         public RoomObstacle(UnfinalizedRoomObstacle innerElement, Action<RoomObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -59,8 +57,6 @@ namespace sm_json_data_framework.Models.Rooms
 
             // While it's possible for an obstacle to become logically indestructible, we can't say it's useless
             // because it still blocks the player, and also because it could still potentially be bypassed in some strats.
-            // It's still useful to know if this is indestructible though
-            IndestructibleByLogicalOptions = Requires.UselessByLogicalOptions;
             return false;
         }
 

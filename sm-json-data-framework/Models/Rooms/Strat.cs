@@ -124,7 +124,7 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 stratObstacle.ApplyLogicalOptions(logicalOptions);
                 stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
-                if (stratObstacle.UselessFromHereByLogicalOptions && stratObstacle.Obstacle.IndestructibleByLogicalOptions)
+                if (stratObstacle.UselessFromHereByLogicalOptions && stratObstacle.Obstacle.LogicallyIndestructible)
                 {
                     impossibleObstacle = true;
                 }

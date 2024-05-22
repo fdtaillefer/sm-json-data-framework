@@ -96,13 +96,13 @@ namespace sm_json_data_framework.Models.Rooms
             Bypass?.ApplyLogicalOptions(logicalOptions);
             Obstacle.ApplyLogicalOptions(logicalOptions);
 
-            bool indestructibleHere = Obstacle.IndestructibleByLogicalOptions || Requires.UselessByLogicalOptions;
+            bool indestructibleHere = Obstacle.LogicallyIndestructible || Requires.UselessByLogicalOptions;
             bool unbypassableHere = Bypass == null || Bypass.UselessByLogicalOptions;
             // This StratObstacle becomes locally useless (so - impossible unless the obstacle is destroyed elsewhere) if it can be neither destroyed or bypassed from here
             UselessFromHereByLogicalOptions = indestructibleHere && unbypassableHere;
 
             // This StratObstacle can become fully useless if the obstacle is indestructible from anywhere and cannot be bypassed from here
-            return Obstacle.IndestructibleByLogicalOptions && unbypassableHere;
+            return Obstacle.LogicallyIndestructible && unbypassableHere;
         }
 
         protected override void UpdateLogicalProperties()
@@ -131,7 +131,7 @@ namespace sm_json_data_framework.Models.Rooms
         {
             // This StratObstacle becomes impossible to fulfill ever if the obstacle can never be destroyed, and can't be bypassed from here
             bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
-            return Obstacle.IndestructibleByLogicalOptions && unbypassableHere;
+            return Obstacle.LogicallyIndestructible && unbypassableHere;
         }
 
         /// <summary>
