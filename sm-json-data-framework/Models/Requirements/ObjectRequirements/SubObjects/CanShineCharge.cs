@@ -99,23 +99,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool useless = false;
-            if (MustShinespark && !CanShinespark)
-            {
-                useless = true;
-            }
-
-            // Since this is an in-room shine charge, its required number of tiles is constant.
-            // As such, we could check here whether the logical options make the shine too short to be possible.
-            // However, this requires access to the game rules, which we don't have here.
-            // Improve this if we decide to pass the rules here.
-
-            // We could pre-calculate an effective runway length here if we had the rules...
-
-            return useless;
+            // Nothing to do here
         }
+
+        // We could override UpdateLogicalProperties() to pre-calculate an effective runway length here if we had the rules...
 
         protected override bool CalculateLogicallyNever()
         {

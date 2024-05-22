@@ -38,12 +38,10 @@ namespace sm_json_data_framework.Models.Connections
         /// </summary>
         public ConnectionNode ToNode { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Logical options have no power here, but we can still delegate to the nodes
             FromNode.ApplyLogicalOptions(logicalOptions);
             ToNode.ApplyLogicalOptions(logicalOptions);
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

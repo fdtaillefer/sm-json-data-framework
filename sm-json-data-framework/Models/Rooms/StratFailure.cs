@@ -50,12 +50,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public bool ClearsPreviousNode => InnerElement.ClearsPreviousNode;
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Cost.ApplyLogicalOptions(logicalOptions);
-
-            // A failure object is not useless even if it describes an effective softlock
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

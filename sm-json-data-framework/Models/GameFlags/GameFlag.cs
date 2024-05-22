@@ -25,10 +25,9 @@ namespace sm_json_data_framework.Models.GameFlags
         /// </summary>
         public string Name => InnerElement.Name;
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool explicitlyDisabled = !logicalOptions.IsGameFlagEnabled(this);
-            return explicitlyDisabled;
+            // Nothing to do here
         }
 
         protected override void UpdateLogicalProperties()

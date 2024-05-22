@@ -43,10 +43,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode Node { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Logical options have no power here
-            return false;
+            // Nothing to do here
         }
 
         public override bool CalculateLogicallyRelevant()

@@ -113,12 +113,9 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Requires.ApplyLogicalOptions(logicalOptions);
-
-            // A farm cycle becomes useless if its requirements are impossible
-            return Requires.UselessByLogicalOptions;
         }
 
         protected override void UpdateLogicalProperties()

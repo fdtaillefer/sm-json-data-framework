@@ -51,13 +51,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public Room Room { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Requires.ApplyLogicalOptions(logicalOptions);
-
-            // While it's possible for an obstacle to become logically indestructible, we can't say it's useless
-            // because it still blocks the player, and also because it could still potentially be bypassed in some strats.
-            return false;
         }
 
         protected override void UpdateLogicalProperties()

@@ -30,10 +30,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public string DoorAddress => InnerElement.DoorAddress;
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             // Nothing to do here
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

@@ -34,7 +34,7 @@ namespace sm_json_data_framework.Models.Requirements
         // Inherited from IExecutable
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            if (UselessByLogicalOptions)
+            if (LogicallyNever)
             {
                 return null;
             }

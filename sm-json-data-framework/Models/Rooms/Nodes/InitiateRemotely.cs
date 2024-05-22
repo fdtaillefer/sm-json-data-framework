@@ -49,33 +49,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode ExitNode { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             // If this contains strats, they belong to a LinkTo.
             // However, we need to apply the logical options to them to calculate if they become impossible
-            bool anyNodeImpossible = false;
             for (int i = 0; i < PathToDoor.Count; i++)
             {
                 var (_, strats) = PathToDoor[i];
-                bool anyStratPossible = false;
                 foreach (Strat strat in strats.Values)
                 {
                     strat.ApplyLogicalOptions(logicalOptions);
-                    if (!strat.UselessByLogicalOptions)
-                    {
-                        anyStratPossible = true;
-                    }
                 }
 
-                // This node becomes impossible if no possible strat remains
-                if (!anyStratPossible)
-                {
-                    anyNodeImpossible = true;
-                }
             }
-
-            // If there is a node in the path that has no possible strats remaining, this InitiateRemotely becomes impossible
-            return anyNodeImpossible;
         }
 
         protected override void UpdateLogicalProperties()

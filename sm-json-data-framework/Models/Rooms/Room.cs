@@ -98,7 +98,7 @@ namespace sm_json_data_framework.Models.Rooms
             return InnerElement.GetLinkBetween(fromNodeId, toNodeId);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
             {
@@ -124,9 +124,6 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 enemy.ApplyLogicalOptions(logicalOptions);
             }
-
-            // A room never becomes useless
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

@@ -28,10 +28,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return null;
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Nothing in logical options can alter this
-            return false;
+            // Nothing to do here
         }
 
         protected override bool CalculateLogicallyNever()

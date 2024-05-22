@@ -45,12 +45,10 @@ namespace sm_json_data_framework.Models.Enemies
             return InnerElement.NumberOfHits(enemyHp);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             // The state of the weapon itself is useful to calculate logical relevance, so propagate to it to be sure it's up-to-date when we calculate.
             Weapon.ApplyLogicalOptions(logicalOptions);
-
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

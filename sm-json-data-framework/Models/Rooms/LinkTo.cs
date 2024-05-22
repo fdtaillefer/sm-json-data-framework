@@ -36,20 +36,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool noPossibleStrat = true;
             foreach (Strat strat in Strats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
-                if (!strat.UselessByLogicalOptions)
-                {
-                    noPossibleStrat = false;
-                }
             }
-
-            // This LinkTo is unusable if all strats are unusable
-            return noPossibleStrat;
         }
 
         public override bool CalculateLogicallyRelevant()

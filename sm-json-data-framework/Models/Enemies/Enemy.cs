@@ -136,7 +136,7 @@ namespace sm_json_data_framework.Models.Enemies
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             foreach (EnemyAttack attack in Attacks.Values)
             {
@@ -154,8 +154,6 @@ namespace sm_json_data_framework.Models.Enemies
             }
 
             Dimensions.ApplyLogicalOptions(logicalOptions);
-
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

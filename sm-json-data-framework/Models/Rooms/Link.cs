@@ -33,20 +33,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IReadOnlyDictionary<int, LinkTo> To { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool allDestinationsImpossible = true;
             foreach (LinkTo linkTo in To.Values)
             {
                 linkTo.ApplyLogicalOptions(logicalOptions);
-                if (!linkTo.UselessByLogicalOptions)
-                {
-                    allDestinationsImpossible = false;
-                }
             }
-
-            // A link is useless if there's no destination that's possible to reach
-            return allDestinationsImpossible;
         }
 
         public override bool CalculateLogicallyRelevant()

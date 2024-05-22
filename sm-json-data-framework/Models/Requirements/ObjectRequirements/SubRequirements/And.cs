@@ -24,12 +24,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             return LogicalRequirements.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             LogicalRequirements.ApplyLogicalOptions(logicalOptions);
-
-            // Since this is an And, the default behavior of the internal LogicalRequirements matches our purposes
-            return LogicalRequirements.UselessByLogicalOptions;
         }
 
         protected override bool CalculateLogicallyNever()

@@ -37,12 +37,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return Helper.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Helper.ApplyLogicalOptions(logicalOptions);
-
-            // This becomes impossible if the helper itself becomes impossible
-            return Helper.UselessByLogicalOptions;
         }
 
         protected override bool CalculateLogicallyNever()

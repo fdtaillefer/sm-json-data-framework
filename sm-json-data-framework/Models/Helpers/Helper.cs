@@ -32,13 +32,10 @@ namespace sm_json_data_framework.Models.Helpers
         /// </summary>
         public LogicalRequirements Requires { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             // Propagate to requirements
             Requires.ApplyLogicalOptions(logicalOptions);
-
-            // This helper becomes useless if requirements become impossible
-            return Requires.UselessByLogicalOptions;
         }
 
         protected override void UpdateLogicalProperties()

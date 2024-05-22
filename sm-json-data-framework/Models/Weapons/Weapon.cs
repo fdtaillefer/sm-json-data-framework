@@ -72,13 +72,10 @@ namespace sm_json_data_framework.Models.Weapons
         /// </summary>
         public IReadOnlySet<WeaponCategoryEnum> Categories { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             UseRequires.ApplyLogicalOptions(logicalOptions);
             ShotRequires.ApplyLogicalOptions(logicalOptions);
-
-            // This weapon is rendered useless if either using it altogether, or doing an individual shot, becomes impossible
-            return UseRequires.UselessByLogicalOptions || ShotRequires.UselessByLogicalOptions;
         }
 
         protected override void UpdateLogicalProperties()

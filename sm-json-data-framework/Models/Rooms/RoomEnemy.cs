@@ -134,7 +134,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             foreach (FarmCycle farmCycle in FarmCycles.Values)
             {
@@ -144,9 +144,6 @@ namespace sm_json_data_framework.Models.Rooms
             Spawn.ApplyLogicalOptions(logicalOptions);
             StopSpawn.ApplyLogicalOptions(logicalOptions);
             DropRequires.ApplyLogicalOptions(logicalOptions);
-
-            // There's no changes here that can make this enemy useless
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

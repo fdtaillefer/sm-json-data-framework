@@ -43,12 +43,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             GameFlag.ApplyLogicalOptions(logicalOptions);
-
-            // This becomes impossible if the game flag itself becomes useless
-            return GameFlag.UselessByLogicalOptions;
         }
 
         protected override bool CalculateLogicallyNever()

@@ -79,7 +79,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, bool comingIn, int times = 1, int previousRoomCount = 0)
         {
-            if (UselessByLogicalOptions)
+            if (LogicallyNever)
             {
                 return null;
             }
@@ -114,28 +114,20 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return new ExecutableRunway(this, comingIn);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool noUsefulStrat = true;
             foreach (Strat strat in Strats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
-                if (!strat.UselessByLogicalOptions)
-                {
-                    noUsefulStrat = false;
-                }
             }
-
-            // We could pre-calculate an effective runway length here if we had the rules.
-
-            // A runway becomes useless if its strats are impossible
-            return noUsefulStrat;
         }
 
         protected override void UpdateLogicalProperties()
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+
+            // We could pre-calculate an effective runway length here if we had the rules.
         }
 
         public override bool CalculateLogicallyRelevant()

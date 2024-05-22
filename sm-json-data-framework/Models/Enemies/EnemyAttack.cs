@@ -39,10 +39,9 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         public bool AffectedByGravity => InnerElement.AffectedByGravity;
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Logical options have no power here
-            return false;
+            // Nothing to do here
         }
 
         public override bool CalculateLogicallyRelevant()

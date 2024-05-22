@@ -84,16 +84,11 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Requires.ApplyLogicalOptions(logicalOptions);
             Bypass?.ApplyLogicalOptions(logicalOptions);
             Obstacle.ApplyLogicalOptions(logicalOptions);
-
-            bool unbypassableHere = Bypass == null || Bypass.UselessByLogicalOptions;
-
-            // This StratObstacle can become fully useless if the obstacle is indestructible from anywhere and cannot be bypassed from here
-            return Obstacle.LogicallyIndestructible && unbypassableHere;
         }
 
         protected override void UpdateLogicalProperties()

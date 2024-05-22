@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Models.Requirements
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If logical options make these logical requirements impossible, don't bother trying
-            if (UselessByLogicalOptions)
+            if (LogicallyNever)
             {
                 return null;
             }
@@ -66,26 +66,11 @@ namespace sm_json_data_framework.Models.Requirements
             return result;
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool anyUselessLogicalElement = false;
             foreach (ILogicalElement logicalElement in LogicalElements)
             {
                 logicalElement.ApplyLogicalOptions(logicalOptions);
-                if (logicalElement.UselessByLogicalOptions)
-                {
-                    anyUselessLogicalElement = true;
-                }
-            }
-
-            if (logicalOptions == null)
-            {
-                return false;
-            }
-            else
-            {
-                // We're implicitly an And, so this becomes impossible/useless as soon as any sub element is
-                return anyUselessLogicalElement;
             }
         }
 

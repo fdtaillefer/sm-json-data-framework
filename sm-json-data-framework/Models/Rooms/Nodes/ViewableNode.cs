@@ -35,20 +35,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool noUsefulStrat = true;
             foreach (Strat strat in Strats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
-                if (!strat.UselessByLogicalOptions)
-                {
-                    noUsefulStrat = false;
-                }
             }
-
-            // A runway becomes useless if its strats are impossible
-            return noUsefulStrat;
         }
 
         protected override void UpdateLogicalProperties()

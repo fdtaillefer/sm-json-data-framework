@@ -109,7 +109,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // There are many things to check...
             // If logical options have rendered this CanLeaveCharged unusable, it can't be executed
-            if (UselessByLogicalOptions)
+            if (LogicallyNever)
             {
                 return null;
             }
@@ -154,54 +154,22 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return result;
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool useless = false;
-            if (InitiateRemotely != null)
-            {
-                InitiateRemotely.ApplyLogicalOptions(logicalOptions);
-                if (InitiateRemotely.UselessByLogicalOptions)
-                {
-                    // This cannot be executed if it has a remote execution that has been made impossible
-                    useless = true;
-                }
-            }
+            InitiateRemotely?.ApplyLogicalOptions(logicalOptions);
 
-            // This cannot be executed if all its strats become impossible
-            bool allStratsUseless = true;
             foreach (Strat strat in Strats.Values)
             {
                 strat.ApplyLogicalOptions(logicalOptions);
-                if (!strat.UselessByLogicalOptions)
-                {
-                    allStratsUseless = false;
-                }
             }
-            if (allStratsUseless)
-            {
-                useless = true;
-            }
-
-            // This cannot be executed if it requires a shinespark and those are disabled
-            if (MustShinespark && !logicalOptions.CanShinespark)
-            {
-                useless = true;
-            }
-
-            // Since this is an in-room shine charge, its required nunmber of tiles is constant.
-            // As such, we could check here whether the logical options make the shine too short to be possible.
-            // However, this requires access to the game rules, which we don't have here.
-            // Improve this if we decide to pass the rules here.
-
-            // We could also pre-calculate an effective runway length if we had the rules
-
-            return useless;
         }
 
         protected override void UpdateLogicalProperties()
         {
             base.UpdateLogicalProperties();
             LogicallyNever = CalculateLogicallyNever();
+
+            // We could also pre-calculate an effective runway length if we had the rules
         }
 
         public override bool CalculateLogicallyRelevant()

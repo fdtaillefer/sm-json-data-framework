@@ -30,10 +30,9 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         public int Width => InnerElement.Width;
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             // Nothing to do here
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

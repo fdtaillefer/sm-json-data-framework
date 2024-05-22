@@ -20,12 +20,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             return LogicalRequirements.ExecuteOne(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             LogicalRequirements.ApplyLogicalOptions(logicalOptions);
-
-            // Since this is an Or, it only becomes impossible to fulfill if all of the inner logical elements are
-            return LogicalRequirements.LogicalElements.All(element => element.UselessByLogicalOptions);
         }
 
         protected override bool CalculateLogicallyNever()

@@ -198,7 +198,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             InteractionRequires.ApplyLogicalOptions(logicalOptions);
 
@@ -233,9 +233,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't need the information.
-
-            // A node never becomes useless
-            return false;
         }
 
         public override bool CalculateLogicallyRelevant()

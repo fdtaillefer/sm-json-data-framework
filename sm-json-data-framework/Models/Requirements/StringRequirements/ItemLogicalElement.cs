@@ -41,10 +41,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Nothing in logical options can alter this
-            return false;
+            Item.ApplyLogicalOptions(logicalOptions);
         }
 
         protected override bool CalculateLogicallyNever()

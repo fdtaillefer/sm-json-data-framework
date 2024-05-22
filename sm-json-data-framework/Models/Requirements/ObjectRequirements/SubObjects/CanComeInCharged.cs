@@ -278,17 +278,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return (usableRunways, bestResult);
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool useless = false;
-            if (MustShinespark && !CanShinespark)
-            {
-                useless = true;
-            }
-
-            // We might have a chance to preprocess some runway scenarios, possibly, but not unless we receive the Rules here.
-
-            return useless;
+            // Nothing to do here
         }
 
         protected override bool CalculateLogicallyNever()

@@ -57,10 +57,9 @@ namespace sm_json_data_framework.Models.Connections
         /// </summary>
         public ConnectionNodePositionEnum Position => InnerElement.Position;
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            // Logical Options have no power here
-            return false;
+            // Nothing to do here
         }
 
         public override bool CalculateLogicallyRelevant()

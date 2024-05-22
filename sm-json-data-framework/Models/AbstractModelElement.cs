@@ -30,8 +30,6 @@ namespace sm_json_data_framework.Models
             mappingsInsertionCallback.Invoke((ConcreteType)this);
         }
 
-        public bool UselessByLogicalOptions { get; protected set; }
-
         public ReadOnlyLogicalOptions AppliedLogicalOptions { get; protected set; }
 
         /// <summary>
@@ -50,17 +48,20 @@ namespace sm_json_data_framework.Models
         /// <item>Optionally any other  model (it's not needed but not harmful)</item>
         /// </list>
         /// </para>
+        /// <para>
+        /// It is important for an element to NOT propagate to elements that depend on their own logical state for their logical properties, 
+        /// because then they may end up relying on that element while its logical state is not fully updated.
+        /// </para>
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>
-        /// <returns>True if this model is rendered useless by the logical options, false otherwise</returns>
-        protected abstract bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
+        protected abstract void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
 
         public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             if (logicalOptions != AppliedLogicalOptions)
             {
                 AppliedLogicalOptions = logicalOptions;
-                UselessByLogicalOptions = PropagateLogicalOptions(logicalOptions);
+                PropagateLogicalOptions(logicalOptions);
                 UpdateLogicalProperties();
             }
         }
@@ -98,12 +99,6 @@ namespace sm_json_data_framework.Models
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>
         public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
-
-        /// <summary>
-        /// Indicates whether the <see cref="ReadOnlyLogicalOptions"/> applied to this make it meaningless, or impossible to fulfill.
-        /// This should likely default to false when no logical options are applied.
-        /// </summary>
-        public bool UselessByLogicalOptions { get; }
 
         /// <summary>
         /// <para>

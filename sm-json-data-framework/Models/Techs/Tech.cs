@@ -48,17 +48,14 @@ namespace sm_json_data_framework.Models.Techs
             return ExtensionTechs.SelectMany(tech => tech.Value.SelectWithExtensions()).Prepend(this).ToList();
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
-            bool explicitlyDisabled = !logicalOptions.IsTechEnabled(this);
             // Propagate to requirements
             Requires.ApplyLogicalOptions(logicalOptions);
 
             // Don't propagate to extension techs. They don't "belong" to this, and they will depend on the logical state of this to be up-to-date
             // in order to update their own logical state, so we don't want to be in this halfway state when that happens.
             // This all assumes that no Tech can ever depend on itself by any circular logic.
-
-            return UselessByLogicalOptions;
         }
 
         public override bool CalculateLogicallyRelevant()

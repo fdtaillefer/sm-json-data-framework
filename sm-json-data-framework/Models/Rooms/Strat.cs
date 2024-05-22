@@ -69,7 +69,7 @@ namespace sm_json_data_framework.Models.Rooms
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            if (UselessByLogicalOptions)
+            if (LogicallyNever)
             {
                 return null;
             }
@@ -109,7 +109,7 @@ namespace sm_json_data_framework.Models.Rooms
             return result;
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Requires.ApplyLogicalOptions(logicalOptions);
 
@@ -118,18 +118,11 @@ namespace sm_json_data_framework.Models.Rooms
                 failure.ApplyLogicalOptions(logicalOptions);
             }
 
-            // A StratObstacle can make this strat useless if it's impossible to bypass it here, and impossible to destroy it at all
-            bool impossibleObstacle = false;
             foreach (StratObstacle stratObstacle in Obstacles.Values)
             {
                 stratObstacle.ApplyLogicalOptions(logicalOptions);
                 stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
-                if (stratObstacle.LogicallyNeverFromHere && stratObstacle.Obstacle.LogicallyIndestructible)
-                {
-                    impossibleObstacle = true;
-                }
             }
-            return !logicalOptions.IsStratEnabled(this) || Requires.UselessByLogicalOptions || impossibleObstacle;
         }
 
         protected override void UpdateLogicalProperties()
@@ -140,8 +133,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         public override bool CalculateLogicallyRelevant()
         {
-            // A strat that cannot be executed may as well not exist
-            return !CalculateLogicallyNever();
+            // A strat that is logically turned off or that cannot be executed may as well not exist
+            return AppliedLogicalOptions.IsStratEnabled(this) && !CalculateLogicallyNever();
         }
 
         /// <summary>

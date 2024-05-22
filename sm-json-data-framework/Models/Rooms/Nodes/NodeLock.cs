@@ -130,7 +130,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        protected override bool PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
             Lock.ApplyLogicalOptions(logicalOptions);
 
@@ -143,13 +143,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             {
                 strat.ApplyLogicalOptions(logicalOptions);
             }
-
-            // We could update a property able to indicate that this lock can never ever be dealt with,
-            // but we'd need a way to ascertain that the lock is always active
-
-            // A lock remains useful even if it's impossible to unlock or bypass as it plays the role of blocking the way.
-            // It does become useless if its activation conditions become impossible though
-            return Lock.UselessByLogicalOptions;
         }
 
         protected override void UpdateLogicalProperties()
@@ -178,7 +171,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyNever()
         {
-            return !UnlockStrats.Values.WhereLogicallyRelevant().Any() && !BypassStrats.Values.WhereLogicallyRelevant().Any();
+            // To be fully impossible to pass, a lock must not only be impossible to open or bypass, but must also always be active
+            return Lock.LogicallyAlways && !UnlockStrats.Values.WhereLogicallyRelevant().Any() && !BypassStrats.Values.WhereLogicallyRelevant().Any();
         }
     }
 

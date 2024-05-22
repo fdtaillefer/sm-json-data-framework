@@ -20,10 +20,10 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             Execution = (navigator, command) =>
             {
                 IEnumerable<LinkTo> links = navigator.CurrentInGameState.CurrentNode.LinksTo.Values;
-                foreach (LinkTo link in navigator.CurrentInGameState.CurrentNode.LinksTo.Values)
+                foreach (LinkTo linkTo in navigator.CurrentInGameState.CurrentNode.LinksTo.Values)
                 {
-                    string output = $"Adjacent node {link.TargetNode.Id}: {link.TargetNode.Name}";
-                    if(link.UselessByLogicalOptions)
+                    string output = $"Adjacent node {linkTo.TargetNode.Id}: {linkTo.TargetNode.Name}";
+                    if(!linkTo.LogicallyRelevant)
                     {
                         output += " (logically impossible)";
                     }
