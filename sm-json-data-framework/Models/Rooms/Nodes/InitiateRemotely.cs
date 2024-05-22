@@ -14,17 +14,15 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 {
     public class InitiateRemotely : AbstractModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>
     {
-        private UnfinalizedInitiateRemotely InnerElement { get; set; }
-
         public InitiateRemotely(UnfinalizedInitiateRemotely innerElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            InitiateAtNode = InnerElement.InitiateAtNode.Finalize(mappings);
-            PathToDoor = InnerElement.PathToDoor
+            MustOpenDoorFirst = innerElement.MustOpenDoorFirst;
+            InitiateAtNode = innerElement.InitiateAtNode.Finalize(mappings);
+            PathToDoor = innerElement.PathToDoor
                 .Select(node => (node.link.Finalize(mappings), (IReadOnlyDictionary<string, Strat>)node.strats.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly()))
                 .ToList().AsReadOnly();
-            ExitNode = InnerElement.ExitNode.Finalize(mappings);
+            ExitNode = innerElement.ExitNode.Finalize(mappings);
         }
 
         /// <summary>
@@ -36,7 +34,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// Indicates whether the door at <see cref="ExitNode"/> needs to be opened before doing the remove initiation.
         /// For the door to be considered opened, it must have no active locks and its node must have been visited during the current room visit.
         /// </summary>
-        public bool MustOpenDoorFirst => InnerElement.MustOpenDoorFirst;
+        public bool MustOpenDoorFirst { get; }
 
         /// <summary>
         /// <para>A path that must be followed by Samus to execute the remote CanLeaveCharged, represented as links to follow and appropriate strats(that are mapped by name).</para>

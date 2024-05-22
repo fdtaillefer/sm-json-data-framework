@@ -15,47 +15,51 @@ namespace sm_json_data_framework.Models.Connections
     /// </summary>
     public class ConnectionNode : AbstractModelElement<UnfinalizedConnectionNode, ConnectionNode>
     {
-        private UnfinalizedConnectionNode InnerElement { get; set; }
-
         public ConnectionNode(UnfinalizedConnectionNode innerElement, Action<ConnectionNode> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Area = innerElement.Area;
+            Subarea = innerElement.Subarea;
+            Roomid = innerElement.Roomid;
+            RoomName = innerElement.RoomName;
+            Nodeid = innerElement.Nodeid;
+            NodeName = innerElement.NodeName;
+            Position = innerElement.Position;
         }
 
         /// <summary>
         /// The area of the room this ConnectionNode is in. See <see cref="Room.Area"/>.
         /// </summary>
-        public string Area => InnerElement.Area;
+        public string Area { get; }
 
         /// <summary>
         /// The sub-area of the room this ConnectionNode is in. See <see cref="Room.Subarea"/>.
         /// </summary>
-        public string Subarea => InnerElement.Subarea;
+        public string Subarea  { get; }
 
         /// <summary>
         /// Numerical ID of the room this ConnectionNode is in. See <see cref="Room.Id"/>.
         /// </summary>
-        public int Roomid => InnerElement.Roomid;
+        public int Roomid { get; }
 
         /// <summary>
         /// Name of the room this ConnectionNode is in. See <see cref="Room.Name"/>.
         /// </summary>
-        public string RoomName => InnerElement.RoomName;
+        public string RoomName { get; }
 
         /// <summary>
         /// In-room ID of the <see cref="RoomNode"/> this ConnectionNode references. See <see cref="RoomNode.Id"/>.
         /// </summary>
-        public int Nodeid => InnerElement.Nodeid;
+        public int Nodeid { get; }
 
         /// <summary>
         /// Name of the <see cref="RoomNode"/> this ConnectionNode references. See <see cref="RoomNode.Name"/>.
         /// </summary>
-        public string NodeName => InnerElement.NodeName;
+        public string NodeName { get; }
 
         /// <summary>
         /// Where this ConnectionNode is positioned geometrically relative to the connection.
         /// </summary>
-        public ConnectionNodePositionEnum Position => InnerElement.Position;
+        public ConnectionNodePositionEnum Position { get; }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {

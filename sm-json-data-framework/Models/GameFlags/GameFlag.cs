@@ -12,18 +12,16 @@ namespace sm_json_data_framework.Models.GameFlags
     /// </summary>
     public class GameFlag : AbstractModelElement<UnfinalizedGameFlag, GameFlag>
     {
-        private UnfinalizedGameFlag InnerElement { get; set; }
-
         public GameFlag(UnfinalizedGameFlag innerElement, Action<GameFlag> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Name = innerElement.Name;
         }
 
         /// <summary>
         /// The unique name of the game flag. Game flag names are defined by the model and are not official names.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {

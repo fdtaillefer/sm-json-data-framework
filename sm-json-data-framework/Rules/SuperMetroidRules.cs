@@ -609,22 +609,22 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
-        /// Creates and returns the equivalent of the provided runway, but used in the opposite direction.
+        /// Creates and returns the equivalent of the provided IRunway, but used in the opposite direction.
         /// </summary>
         /// <param name="runway">The runway to reverse</param>
         /// <returns></returns>
         public virtual IRunway ReverseRunway(IRunway runway)
         {
-            return new UnfinalizedRunway {
-                Length = runway.Length,
-                EndingUpTiles = runway.StartingDownTiles,
-                GentleDownTiles = runway.GentleUpTiles,
-                GentleUpTiles = runway.GentleDownTiles,
-                OpenEnds = runway.OpenEnds,
-                StartingDownTiles = runway.EndingUpTiles,
-                SteepDownTiles = runway.SteepUpTiles,
-                SteepUpTiles = runway.SteepDownTiles
-            };
+            return new BasicRunway (
+                length: runway.Length,
+                endingUpTiles: runway.StartingDownTiles,
+                gentleDownTiles: runway.GentleUpTiles,
+                gentleUpTiles: runway.GentleDownTiles,
+                openEnds: runway.OpenEnds,
+                startingDownTiles: runway.EndingUpTiles,
+                steepDownTiles: runway.SteepUpTiles,
+                steepUpTiles: runway.SteepDownTiles
+            );
         }
 
         /// <summary>

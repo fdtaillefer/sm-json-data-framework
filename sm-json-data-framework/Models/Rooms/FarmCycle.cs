@@ -19,25 +19,24 @@ namespace sm_json_data_framework.Models.Rooms
     {
         public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions => AppliedLogicalOptions.SpawnerFarmingOptions;
 
-        private UnfinalizedFarmCycle InnerElement { get; set; }
-
         public FarmCycle(UnfinalizedFarmCycle innerElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Requires = InnerElement.Requires.Finalize(mappings);
-            RoomEnemy = InnerElement.RoomEnemy.Finalize(mappings);
+            Name = innerElement.Name;
+            CycleFrames = innerElement.CycleFrames;
+            Requires = innerElement.Requires.Finalize(mappings);
+            RoomEnemy = innerElement.RoomEnemy.Finalize(mappings);
         }
 
         /// <summary>
         /// A name to identify this FarmCycle. This is unique ONLY within a <see cref="RoomEnemy"/>.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The number of frames it takes to wait for the enemies to spawn, kill them, and grab their drops
         /// </summary>
-        public int CycleFrames => InnerElement.CycleFrames;
+        public int CycleFrames { get; }
 
         /// <summary>
         /// The LogicalRequirements that must be fulfilled in order to execute a cycle of farming on the enemies.

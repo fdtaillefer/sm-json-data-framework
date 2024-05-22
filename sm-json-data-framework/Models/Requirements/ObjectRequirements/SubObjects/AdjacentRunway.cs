@@ -18,18 +18,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class AdjacentRunway : AbstractObjectLogicalElement<UnfinalizedAdjacentRunway, AdjacentRunway>
     {
-        private UnfinalizedAdjacentRunway InnerElement { get; set; }
-
         public AdjacentRunway(UnfinalizedAdjacentRunway innerElement, Action<AdjacentRunway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            UsedTiles = innerElement.UsedTiles;
+            UseFrames = innerElement.UseFrames;
+            OverrideRunwayRequirements = innerElement.OverrideRunwayRequirements;
             FromNode = innerElement.FromNode.Finalize(mappings);
             InRoomPath = innerElement.InRoomPath.AsReadOnly();
-            Physics = InnerElement.Physics.AsReadOnly();
+            Physics = innerElement.Physics.AsReadOnly();
         }
-
-        public int FromNodeId => InnerElement.FromNodeId;
 
         /// <summary>
         /// The node that this element's FromNodeId references.
@@ -44,7 +42,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// The number of tiles Samus needs to use to gain enough momentum at the adjacent runway.
         /// </summary>
-        public decimal UsedTiles => InnerElement.UsedTiles;
+        public decimal UsedTiles { get; }
 
         /// <summary>
         /// The set of acceptable physics at the adjacent door. If the physics at the adjacent door is not in this set, this AdjacentRunway cannot be executed.
@@ -54,17 +52,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// The number of frames that Samus should expect to spend at the adjacent door, being subjected to the door environment.
         /// </summary>
-        public int UseFrames => InnerElement.UseFrames;
+        public int UseFrames { get; }
 
         /// <summary>
         /// Indicates whether the requirements on the Runway itself should be ignored.
         /// </summary>
-        public bool OverrideRunwayRequirements => InnerElement.OverrideRunwayRequirements;
+        public bool OverrideRunwayRequirements { get; }
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // If no in-room path is specified, then player will be required to have entered at fromNode and not moved
-            IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNodeId } : InRoomPath;
+            IEnumerable<int> requiredInRoomPath = (InRoomPath == null || !InRoomPath.Any()) ? new[] { FromNode.Id } : InRoomPath;
 
             // Find all runways from the previous room that can be retroactively attempted and are long enough.
             // We're calculating runway length to account for open ends, but using 0 for tilesSavedWithStutter because no charging is involved.

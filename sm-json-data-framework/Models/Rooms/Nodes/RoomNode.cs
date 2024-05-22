@@ -23,55 +23,58 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class RoomNode : AbstractModelElement<UnfinalizedRoomNode, RoomNode>
     {
-        private UnfinalizedRoomNode InnerElement { get; set; }
-
         public RoomNode(UnfinalizedRoomNode innerElement, Action<RoomNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            NodeItem = InnerElement.NodeItem?.Finalize(mappings);
-            DoorEnvironments = InnerElement.DoorEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
-            InteractionRequires = InnerElement.InteractionRequires.Finalize(mappings);
-            Runways = InnerElement.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
-            CanLeaveCharged = InnerElement.CanLeaveCharged.Select(canLeaveCharged => canLeaveCharged.Finalize(mappings)).ToList().AsReadOnly();
-            OverrideSpawnAtNode = InnerElement.OverrideSpawnAtNode?.Finalize(mappings);
-            SpawnAtNode = InnerElement.SpawnAtNode.Finalize(mappings);
-            Locks = InnerElement.Locks.Values.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
-            Utility = InnerElement.Utility.AsReadOnly();
-            ViewableNodes = InnerElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToList().AsReadOnly();
-            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
-            Note = InnerElement.Note?.AsReadOnly();
-            Room = InnerElement.Room.Finalize(mappings);
-            OutConnection = InnerElement.OutConnection?.Finalize(mappings);
-            OutNode = InnerElement.OutNode?.Finalize(mappings);
-            LinksTo = InnerElement.LinksTo.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
-            TwinDoorAddresses = InnerElement.TwinDoorAddresses.Select(twinAddress => twinAddress.Finalize(mappings)).ToList().AsReadOnly();
+            Id = innerElement.Id;
+            IdentifyingString = innerElement.IdentifyingString;
+            Name = innerElement.Name;
+            NodeType = innerElement.NodeType;
+            NodeSubType = innerElement.NodeSubType;
+            NodeAddress = innerElement.NodeAddress;
+            NodeItem = innerElement.NodeItem?.Finalize(mappings);
+            DoorEnvironments = innerElement.DoorEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
+            InteractionRequires = innerElement.InteractionRequires.Finalize(mappings);
+            Runways = innerElement.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
+            CanLeaveCharged = innerElement.CanLeaveCharged.Select(canLeaveCharged => canLeaveCharged.Finalize(mappings)).ToList().AsReadOnly();
+            OverrideSpawnAtNode = innerElement.OverrideSpawnAtNode?.Finalize(mappings);
+            SpawnAtNode = innerElement.SpawnAtNode.Finalize(mappings);
+            Locks = innerElement.Locks.Values.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
+            Utility = innerElement.Utility.AsReadOnly();
+            ViewableNodes = innerElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToList().AsReadOnly();
+            Yields = innerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Note = innerElement.Note?.AsReadOnly();
+            Room = innerElement.Room.Finalize(mappings);
+            OutConnection = innerElement.OutConnection?.Finalize(mappings);
+            OutNode = innerElement.OutNode?.Finalize(mappings);
+            LinksTo = innerElement.LinksTo.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
+            TwinDoorAddresses = innerElement.TwinDoorAddresses.Select(twinAddress => twinAddress.Finalize(mappings)).ToList().AsReadOnly();
         }
 
         /// <summary>
         /// An in-room ID to identify the node. This is unique ONLY within the room!
         /// </summary>
-        public int Id => InnerElement.Id;
+        public int Id { get; }
 
         /// <summary>
         /// A string that identifies this node, often used as a key in Dictionaries. This is unique across the entire model.
         /// </summary>
-        public string IdentifyingString => InnerElement.IdentifyingString;
+        public string IdentifyingString { get; }
 
         /// <summary>
         /// A human-legible name that identifies the node. This is unique across the entire model, but is long and unwieldy.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The type of node this is.
         /// </summary>
-        public NodeTypeEnum NodeType => InnerElement.NodeType;
+        public NodeTypeEnum NodeType { get; }
 
         /// <summary>
         /// The subtype of this node. Which Value that make sense depends on the node type.
         /// </summary>
-        public NodeSubTypeEnum NodeSubType => InnerElement.NodeSubType;
+        public NodeSubTypeEnum NodeSubType { get; }
 
         /// <summary>
         /// The item that can be obtained by interacting with this node (if any).
@@ -81,7 +84,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// The in-game address of this node.
         /// </summary>
-        public string NodeAddress => InnerElement.NodeAddress;
+        public string NodeAddress { get; }
 
         /// <summary>
         /// The possible environments for this node. 
@@ -118,7 +121,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Whether entering a room at this node effectively spawns Samus at a different node.
         /// </summary>
-        public bool SpawnsAtDifferentNode => InnerElement.SpawnsAtDifferentNode;
+        public bool SpawnsAtDifferentNode => SpawnAtNode != this;
 
         /// <summary>
         /// The locks that may prevent interaction with this node, mapped by name.
@@ -409,11 +412,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <para>The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.</para>
         /// </summary>
         public UnfinalizedRoomNode SpawnAtNode => OverrideSpawnAtNode ?? this;
-
-        /// <summary>
-        /// Whether entering a room at this node effectively spawns Samus at a different node.
-        /// </summary>
-        public bool SpawnsAtDifferentNode => SpawnAtNode != this;
 
         /// <summary>
         /// The locks that may prevent interaction with this node, mapped by name.

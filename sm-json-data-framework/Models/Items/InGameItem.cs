@@ -10,17 +10,15 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class InGameItem : Item
     {
-        private UnfinalizedInGameItem InnerElement { get; set; }
-
         public InGameItem(UnfinalizedInGameItem innerElement, Action<Item> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = InnerElement;
+            Data = innerElement.Data;
         }
 
         /// <summary>
         /// Hex value that represents this item.
         /// </summary>
-        public string Data => InnerElement.Data;
+        public string Data { get; }
     }
 
     public class UnfinalizedInGameItem : UnfinalizedItem

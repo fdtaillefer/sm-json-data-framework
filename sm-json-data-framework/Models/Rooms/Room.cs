@@ -16,50 +16,53 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class Room : AbstractModelElement<UnfinalizedRoom, Room>
     {
-        private UnfinalizedRoom InnerElement { get; set; }
-
         public Room(UnfinalizedRoom innerElement, Action<Room> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            RoomEnvironments = InnerElement.RoomEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
-            Nodes = InnerElement.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Links = InnerElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNode.Id).AsReadOnly();
-            Obstacles = InnerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
-            Enemies = InnerElement.Enemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.Id).AsReadOnly();
+            Id = innerElement.Id;
+            Name = innerElement.Name;
+            Area = innerElement.Area;
+            Subarea = innerElement.Subarea;
+            Playable = innerElement.Playable;
+            RoomAddress = innerElement.RoomAddress;
+            RoomEnvironments = innerElement.RoomEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
+            Nodes = innerElement.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Links = innerElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNode.Id).AsReadOnly();
+            Obstacles = innerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
+            Enemies = innerElement.Enemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.Id).AsReadOnly();
         }
 
         /// <summary>
         /// An arbitrary, numerical ID that can be used to identify this Room.
         /// </summary>
-        public int Id => InnerElement.Id;
+        public int Id { get; }
 
         /// <summary>
         /// A human-legible name that uniquely identifies this Room. 
         /// Room names typically come from the community and not any official source.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The name of the in-game area this Room is in, e.g. Brinstar.
         /// </summary>
-        public string Area => InnerElement.Area;
+        public string Area { get; }
 
         /// <summary>
         /// The name of the sub-area (within the <see cref="Area"/>) that this Room is in. 
         /// Sub-areas are not officially defined in-game.
         /// </summary>
-        public string Subarea => InnerElement.Subarea;
+        public string Subarea { get; }
 
         /// <summary>
         /// Whether player inputs work while in this room. 
         /// </summary>
-        public bool Playable => InnerElement.Playable;
+        public bool Playable { get; }
 
         /// <summary>
         /// The in-game address of this Room.
         /// </summary>
-        public string RoomAddress => InnerElement.RoomAddress;
+        public string RoomAddress { get; }
 
         /// <summary>
         /// The list of RoomEnvironments that can affect this Room.
@@ -93,9 +96,16 @@ namespace sm_json_data_framework.Models.Rooms
         /// <param name="fromNodeId">ID of the origin node</param>
         /// <param name="toNodeId">ID of the destination node</param>
         /// <returns>The LinkTo, or null if not found.</returns>
-        public UnfinalizedLinkTo GetLinkBetween(int fromNodeId, int toNodeId)
+        public LinkTo GetLinkBetween(int fromNodeId, int toNodeId)
         {
-            return InnerElement.GetLinkBetween(fromNodeId, toNodeId);
+            if (Links.TryGetValue(fromNodeId, out Link link))
+            {
+                if (link.To.TryGetValue(toNodeId, out LinkTo linkTo))
+                {
+                    return linkTo;
+                }
+            }
+            return null;
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)

@@ -11,18 +11,16 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class Item : AbstractModelElement<UnfinalizedItem, Item>
     {
-        private UnfinalizedItem InnerElement { get; set; }
-
         public Item(UnfinalizedItem innerElement, Action<Item> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Name = innerElement.Name;
         }
 
         /// <summary>
         /// The unique name of this item.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {

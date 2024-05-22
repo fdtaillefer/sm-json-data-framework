@@ -16,20 +16,18 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class DoorEnvironment : AbstractModelElement<UnfinalizedDoorEnvironment, DoorEnvironment>
     {
-        private UnfinalizedDoorEnvironment InnerElement { get; set; }
-
         public DoorEnvironment(UnfinalizedDoorEnvironment innerElement, Action<DoorEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            EntranceNodes = InnerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Node = InnerElement.Node.Finalize(mappings);
+            Physics = innerElement.Physics;
+            EntranceNodes = innerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Node = innerElement.Node.Finalize(mappings);
         }
 
         /// <summary>
         /// The physics that are in effect in this DoorEnvironment
         /// </summary>
-        public PhysicsEnum Physics => InnerElement.Physics;
+        public PhysicsEnum Physics { get; }
 
         public IReadOnlySet<int> EntranceNodeIds { get; }
 

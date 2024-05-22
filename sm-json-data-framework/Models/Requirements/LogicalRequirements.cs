@@ -125,7 +125,7 @@ namespace sm_json_data_framework.Models.Requirements
             }
 
             // If we have any child logical elements, an Or is impossible if all children are impossible
-            return !LogicalElements.All(element => element.LogicallyNever);
+            return LogicalElements.All(element => element.LogicallyNever);
         }
 
         /// <summary>

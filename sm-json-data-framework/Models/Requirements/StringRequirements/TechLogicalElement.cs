@@ -18,12 +18,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// </summary>
         public int Tries  => AppliedLogicalOptions.NumberOfTries(Tech);
 
-        private UnfinalizedTechLogicalElement InnerElement { get; set; }
-
         public TechLogicalElement(UnfinalizedTechLogicalElement innerElement, Action<TechLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             Tech = innerElement.Tech.Finalize(mappings);
         }
 

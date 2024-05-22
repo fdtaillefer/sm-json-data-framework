@@ -11,12 +11,11 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class WeaponMultiplier : AbstractModelElement<UnfinalizedWeaponMultiplier, WeaponMultiplier>
     {
-        private UnfinalizedWeaponMultiplier InnerElement { get; set; }
-
         public WeaponMultiplier(UnfinalizedWeaponMultiplier innerElement, Action<WeaponMultiplier> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Multiplier = innerElement.Multiplier;
+            DamagePerShot = innerElement.DamagePerShot;
             Weapon = innerElement.Weapon.Finalize(mappings);
         }
 
@@ -28,12 +27,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The value by which to multiply base weapon damage
         /// </summary>
-        public decimal Multiplier => InnerElement.Multiplier;
+        public decimal Multiplier { get; }
 
         /// <summary>
         /// The damage this WeaponMultiplier's weapon will inflict with each shot.
         /// </summary>
-        public int DamagePerShot => InnerElement.DamagePerShot;
+        public int DamagePerShot { get; }
 
         /// <summary>
         /// Calculates the number of hits an enemy with the provided hp will take to die if this WeaponMultiplier is applied to it.
@@ -42,7 +41,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <returns>The number of hits to kill the enemy</returns>
         public int NumberOfHits(int enemyHp)
         {
-            return InnerElement.NumberOfHits(enemyHp);
+            return WeaponMultiplierCalculations.NumberOfHits(enemyHp, DamagePerShot);
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
@@ -96,8 +95,16 @@ namespace sm_json_data_framework.Models.Enemies
         /// <returns>The number of hits to kill the enemy</returns>
         public int NumberOfHits(int enemyHp)
         {
+            return WeaponMultiplierCalculations.NumberOfHits(enemyHp, DamagePerShot);
+        }
+    }
+
+    internal static class WeaponMultiplierCalculations
+    {
+        internal static int NumberOfHits(int enemyHp, int damagePerShot)
+        {
             // enemyHp / DamagePerShot will floor. Adding DamagePerShot - 1 is like forcing the division to ceiling instead
-            return (enemyHp + DamagePerShot - 1) / DamagePerShot;
+            return (enemyHp + damagePerShot - 1) / damagePerShot;
         }
     }
 }

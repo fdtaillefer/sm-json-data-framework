@@ -14,18 +14,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithString<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithStrings<SourceType, ConcreteType>
     {
-        private AbstractUnfinalizedObjectLogicalElementWithString<SourceType, ConcreteType> InnerElement { get; set; }
-
         protected AbstractObjectLogicalElementWithStrings(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Value = innerElement.Value;
         }
 
         /// <summary>
         /// The string value of this logical element.
         /// </summary>
-        public string Value => InnerElement.Value;
+        public string Value { get; }
     }
 
     public abstract class AbstractUnfinalizedObjectLogicalElementWithString<ConcreteType, TargetType> : AbstractUnfinalizedObjectLogicalElement<ConcreteType, TargetType>

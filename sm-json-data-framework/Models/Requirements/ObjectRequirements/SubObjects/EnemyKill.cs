@@ -14,11 +14,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 {
     public class EnemyKill : AbstractObjectLogicalElement<UnfinalizedEnemyKill, EnemyKill>
     {
-        private UnfinalizedEnemyKill InnerElement { get; set; }
         public EnemyKill(UnfinalizedEnemyKill innerElement, Action<EnemyKill> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             GroupedEnemyNames = innerElement.GroupedEnemyNames.Select(group => group.AsReadOnly()).ToList().AsReadOnly();
             GroupedEnemies = innerElement.GroupedEnemies.Select(group => group.Select(enemy => enemy.Finalize(mappings)).ToList().AsReadOnly()).ToList().AsReadOnly();
             ExplicitWeapons = innerElement.ExplicitWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();

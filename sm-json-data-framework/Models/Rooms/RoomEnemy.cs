@@ -19,31 +19,31 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomEnemy : AbstractModelElement<UnfinalizedRoomEnemy, RoomEnemy>
     {
-        private UnfinalizedRoomEnemy InnerElement { get; set; }
-
         public RoomEnemy(UnfinalizedRoomEnemy innerElement, Action<RoomEnemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Enemy = InnerElement.Enemy.Finalize(mappings);
-            HomeNodes = InnerElement.HomeNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            BetweenNodes = InnerElement.BetweenNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Spawn = InnerElement.Spawn.Finalize(mappings);
-            StopSpawn = InnerElement.StopSpawn.Finalize(mappings);
-            DropRequires = InnerElement.DropRequires.Finalize(mappings);
-            FarmCycles = InnerElement.FarmCycles.Values.Select(farmCycle => farmCycle.Finalize(mappings)).ToDictionary(farmCycle => farmCycle.Name).AsReadOnly();
-            Room = InnerElement.Room.Finalize(mappings);
+            Id = innerElement.Id;
+            GroupName = innerElement.GroupName;
+            Quantity = innerElement.Quantity;
+            Enemy = innerElement.Enemy.Finalize(mappings);
+            HomeNodes = innerElement.HomeNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            BetweenNodes = innerElement.BetweenNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Spawn = innerElement.Spawn.Finalize(mappings);
+            StopSpawn = innerElement.StopSpawn.Finalize(mappings);
+            DropRequires = innerElement.DropRequires.Finalize(mappings);
+            FarmCycles = innerElement.FarmCycles.Values.Select(farmCycle => farmCycle.Finalize(mappings)).ToDictionary(farmCycle => farmCycle.Name).AsReadOnly();
+            Room = innerElement.Room.Finalize(mappings);
         }
 
         /// <summary>
         /// A short identifier for this RoomEnemy that is only unique within the room.
         /// </summary>
-        public string Id => InnerElement.Id;
+        public string Id { get; }
 
         /// <summary>
         /// A name for this roomEnemy, that is unique across the entire model.
         /// </summary>
-        public string GroupName => InnerElement.GroupName;
+        public string GroupName { get; }
 
         /// <summary>
         /// The actual Enemy this RoomEnemy represents a number of.
@@ -51,9 +51,9 @@ namespace sm_json_data_framework.Models.Rooms
         public Enemy Enemy { get; }
 
         /// <summary>
-        /// The number of enemies repersented by this RoomEnemy.
+        /// The number of enemies represented by this RoomEnemy.
         /// </summary>
-        public int Quantity => InnerElement.Quantity;
+        public int Quantity { get; }
 
         /// <summary>
         /// The nodes in which this enemy roams, mapped by their node ID. Mutually-exclusive with <see cref="BetweenNodes"/>.
@@ -93,7 +93,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Whether this RoomEnemy is an enemy spawner, causing new enemies to spawn to replace those that are killed.
         /// </summary>
-        public bool IsSpawner => InnerElement.IsSpawner;
+        public bool IsSpawner { get => FarmCycles.Any(); }
 
         /// <summary>
         /// Indicates whether this room enemy will spawn, given the provided model and inGameState.
@@ -308,8 +308,6 @@ namespace sm_json_data_framework.Models.Rooms
         /// <para>The Room in which this enemy group is.</para>
         /// </summary>
         public UnfinalizedRoom Room { get; set; }
-
-        public bool IsSpawner { get => FarmCycles.Any(); }
 
         public UnfinalizedRoomEnemy()
         {

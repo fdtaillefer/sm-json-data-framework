@@ -16,20 +16,18 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomEnvironment : AbstractModelElement<UnfinalizedRoomEnvironment, RoomEnvironment>
     {
-        private UnfinalizedRoomEnvironment InnerElement { get; set; }
-
         public RoomEnvironment(UnfinalizedRoomEnvironment innerElement, Action<RoomEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            EntranceNodes = InnerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Room = InnerElement.Room.Finalize(mappings);
+            Heated = innerElement.Heated;
+            EntranceNodes = innerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Room = innerElement.Room.Finalize(mappings);
         }
 
         /// <summary>
         /// Whether the environment is geated, making Samus take damage unless she has something to mitigate the heat.
         /// </summary>
-        public bool Heated => InnerElement.Heated;
+        public bool Heated { get; }
 
         /// <summary>
         /// The nodes that enable this environment if Samus has entered the room from one of them, mapped by in-room ID. Or, if null, the environment is always applicable.

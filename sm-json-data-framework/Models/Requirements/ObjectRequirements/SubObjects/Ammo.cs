@@ -14,23 +14,22 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class Ammo : AbstractObjectLogicalElement<UnfinalizedAmmo, Ammo>
     {
-        private UnfinalizedAmmo InnerElement { get; set; }
-
         public Ammo(UnfinalizedAmmo innerElement, Action<Ammo> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            AmmoType = innerElement.AmmoType;
+            Count = innerElement.Count;
         }
 
         /// <summary>
         /// The type of ammo that is being consumed by this.
         /// </summary>
-        public AmmoEnum AmmoType => InnerElement.AmmoType;
+        public AmmoEnum AmmoType { get; }
 
         /// <summary>
         /// The amount of ammo that is being consumed by this.
         /// </summary>
-        public int Count => InnerElement.Count;
+        public int Count { get; }
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {

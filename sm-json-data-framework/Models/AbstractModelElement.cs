@@ -17,8 +17,6 @@ namespace sm_json_data_framework.Models
         where ConcreteType : AbstractModelElement<SourceType, ConcreteType>
         where SourceType : AbstractUnfinalizedModelElement<SourceType, ConcreteType>
     {
-        private SourceType InnerElement { get; set; }
-
         protected AbstractModelElement()
         {
 
@@ -26,7 +24,6 @@ namespace sm_json_data_framework.Models
 
         protected AbstractModelElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             mappingsInsertionCallback.Invoke((ConcreteType)this);
         }
 

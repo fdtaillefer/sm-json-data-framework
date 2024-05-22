@@ -33,37 +33,44 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool CanShinespark => AppliedLogicalOptions.CanShinespark;
 
-        private UnfinalizedCanShineCharge InnerElement {get;set;}
         public CanShineCharge(UnfinalizedCanShineCharge innerElement, Action<CanShineCharge> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Length = innerElement.Length;
+            EndingUpTiles = innerElement.EndingUpTiles;
+            GentleUpTiles = innerElement.GentleUpTiles;
+            GentleDownTiles = innerElement.GentleDownTiles;
+            SteepUpTiles = innerElement.SteepUpTiles;
+            SteepDownTiles = innerElement.SteepDownTiles;
+            StartingDownTiles = innerElement.StartingDownTiles;
+            OpenEnds = innerElement.OpenEnds;
+            ShinesparkFrames = innerElement.ShinesparkFrames;
         }
 
-        public int Length => InnerElement.Length;
+        public int Length { get; }
 
-        public int EndingUpTiles => InnerElement.EndingUpTiles;
+        public int EndingUpTiles { get; }
 
-        public int GentleUpTiles => InnerElement.GentleUpTiles;
+        public int GentleUpTiles { get; }
 
-        public int GentleDownTiles => InnerElement.GentleDownTiles;
+        public int GentleDownTiles { get; }
 
-        public int SteepUpTiles => InnerElement.SteepUpTiles;
+        public int SteepUpTiles { get; }
 
-        public int SteepDownTiles => InnerElement.SteepDownTiles;
+        public int SteepDownTiles { get; }
 
-        public int StartingDownTiles => InnerElement.StartingDownTiles;
+        public int StartingDownTiles { get; }
 
-        public int OpenEnds => InnerElement.OpenEnds;
+        public int OpenEnds { get; }
 
         /// <summary>
         /// The duration (in frames) of the shinespark that goes alongside this CanShineCharge, if any. Can be 0 if no shinespark is involved.
         /// </summary>
-        public int ShinesparkFrames => InnerElement.ShinesparkFrames;
+        public int ShinesparkFrames { get; }
 
         /// <summary>
         /// Indicates whether this CanShineCharge involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark => InnerElement.MustShinespark;
+        public bool MustShinespark => ShinesparkFrames > 0;
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
@@ -158,11 +165,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public int OpenEnds { get; set; } = 0;
 
         public int ShinesparkFrames { get; set; }
-
-        /// <summary>
-        /// Indicates whether this CanShineCharge involves executing a shinespark.
-        /// </summary>
-        public bool MustShinespark => ShinesparkFrames > 0;
 
         protected override CanShineCharge CreateFinalizedElement(UnfinalizedCanShineCharge sourceElement, Action<CanShineCharge> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {

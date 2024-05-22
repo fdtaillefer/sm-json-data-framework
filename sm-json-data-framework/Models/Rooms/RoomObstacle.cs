@@ -15,30 +15,30 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomObstacle : AbstractModelElement<UnfinalizedRoomObstacle, RoomObstacle>
     {
-        private UnfinalizedRoomObstacle InnerElement { get; set; }
-
         public RoomObstacle(UnfinalizedRoomObstacle innerElement, Action<RoomObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Requires = InnerElement.Requires.Finalize(mappings);
-            Room = InnerElement.Room.Finalize(mappings);
+            Id = innerElement.Id;
+            Name = innerElement.Name;
+            ObstacleType = innerElement.ObstacleType;
+            Requires = innerElement.Requires.Finalize(mappings);
+            Room = innerElement.Room.Finalize(mappings);
         }
 
         /// <summary>
         /// An arbitrary ID that identifies this obstacle. It is only unique within this obstacle's room.
         /// </summary>
-        public string Id => InnerElement.Id;
+        public string Id { get; }
 
         /// <summary>
         /// A human-legible name that identifies this obstacle.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The type of obstacle this is.
         /// </summary>
-        public ObstacleTypeEnum ObstacleType => InnerElement.ObstacleType;
+        public ObstacleTypeEnum ObstacleType { get; }
 
         /// <summary>
         /// Logical requirements that must systematically be fulfilled in order to destroy this obstacle, regardless of any other context.

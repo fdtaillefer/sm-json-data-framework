@@ -17,11 +17,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class ResetRoom : AbstractObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
     {
-        private UnfinalizedResetRoom InnerElement { get; set; }
         public ResetRoom(UnfinalizedResetRoom innerElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            MustStayPut = innerElement.MustStayPut;
             Nodes = innerElement.Nodes.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
             NodesToAvoid = innerElement.NodesToAvoid.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
             ObstaclesToAvoid = innerElement.ObstaclesToAvoid.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
@@ -48,7 +47,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// If true, this is equivalent to <see cref="NodesToAvoid"/> containing all nodes in the room.
         /// </summary>
-        public bool MustStayPut => InnerElement.MustStayPut;
+        public bool MustStayPut { get; }
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {

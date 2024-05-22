@@ -10,22 +10,21 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class ExpansionItem : InGameItem
     {
-        private UnfinalizedExpansionItem InnerElement { get; set; }
-
         public ExpansionItem(UnfinalizedExpansionItem innerElement, Action<Item> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Resource = innerElement.Resource;
+            ResourceAmount = innerElement.ResourceAmount;
         }
 
         /// <summary>
         /// The resource that this expansion item increases the capacity of.
         /// </summary>
-        public RechargeableResourceEnum Resource => InnerElement.Resource;
+        public RechargeableResourceEnum Resource { get; }
 
         /// <summary>
         /// The amount by which this item expands the capacity of its resource.
         /// </summary>
-        public int ResourceAmount => InnerElement.ResourceAmount;
+        public int ResourceAmount { get; }
     }
 
     public class UnfinalizedExpansionItem : UnfinalizedInGameItem

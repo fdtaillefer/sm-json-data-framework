@@ -35,12 +35,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool CanShinespark => AppliedLogicalOptions.CanShinespark;
 
-        public UnfinalizedCanComeInCharged InnerElement { get; set; }
-
         public CanComeInCharged(UnfinalizedCanComeInCharged innerElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            FramesRemaining = innerElement.FramesRemaining;
+            ShinesparkFrames = innerElement.ShinesparkFrames;
             FromNode = innerElement.FromNode.Finalize(mappings);
             InRoomPath = innerElement.InRoomPath.AsReadOnly();
         }
@@ -58,17 +57,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// Minimum number of frames that must be remaining in the shine charge when coming in the room in order to satisgy this CanComeInCharged.
         /// </summary>
-        public int FramesRemaining => InnerElement.FramesRemaining;
+        public int FramesRemaining { get; }
 
         /// <summary>
         /// The duration (in frames) of the shinespark that goes alongside this CanComeInCharged, if any. Can be 0 if no shinespark is involved.
         /// </summary>
-        public int ShinesparkFrames => InnerElement.ShinesparkFrames;
+        public int ShinesparkFrames { get; }
 
         /// <summary>
         /// Indicates whether this CanComeInCharged involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark => InnerElement.MustShinespark;
+        public bool MustShinespark => ShinesparkFrames > 0;
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
@@ -325,11 +324,6 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public int FramesRemaining { get; set; }
 
         public int ShinesparkFrames { get; set; }
-
-        /// <summary>
-        /// Indicates whether this CanComeInCharged involves executing a shinespark.
-        /// </summary>
-        public bool MustShinespark => ShinesparkFrames > 0;
 
         protected override CanComeInCharged CreateFinalizedElement(UnfinalizedCanComeInCharged sourceElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {

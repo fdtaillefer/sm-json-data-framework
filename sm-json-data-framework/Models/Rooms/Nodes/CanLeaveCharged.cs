@@ -30,41 +30,47 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public decimal TilesToShineCharge => AppliedLogicalOptions.TilesToShineCharge;
 
-        private UnfinalizedCanLeaveCharged InnerElement { get; set; }
-
         public CanLeaveCharged(UnfinalizedCanLeaveCharged innerElement, Action<CanLeaveCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            UsedTiles = innerElement.UsedTiles;
+            FramesRemaining = innerElement.FramesRemaining;
+            ShinesparkFrames = innerElement.ShinesparkFrames;
+            OpenEnds = innerElement.OpenEnds;
+            GentleUpTiles = innerElement.GentleUpTiles;
+            GentleDownTiles = innerElement.GentleDownTiles;
+            SteepUpTiles = innerElement.SteepUpTiles;
+            SteepDownTiles = innerElement.SteepDownTiles;
+            StartingDownTiles = innerElement.StartingDownTiles;
             InitiateRemotely = innerElement.InitiateRemotely?.Finalize(mappings);
             Strats = innerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
             Node = innerElement.Node.Finalize(mappings);
         }
 
-        public int Length => InnerElement.Length;
+        public int Length => UsedTiles;
 
-        public int EndingUpTiles => InnerElement.EndingUpTiles;
+        public int EndingUpTiles { get => 0; }
 
         /// <summary>
         /// The number of tiles available to obtain a shine charge.
         /// </summary>
-        public int UsedTiles => InnerElement.UsedTiles;
+        public int UsedTiles { get; }
 
         /// <summary>
         /// The number of frames remaining on the shine charge when exiting the room.
         /// </summary>
-        public int FramesRemaining => InnerElement.FramesRemaining;
+        public int FramesRemaining { get; }
 
         /// <summary>
         /// The number of frames that Samus spends shinesparking while executing this.
         /// Anything more than 0 implies leaving via a shinespark, so <see cref="FramesRemaining"/> should be 0.
         /// </summary>
-        public int ShinesparkFrames => InnerElement.ShinesparkFrames;
+        public int ShinesparkFrames { get; }
 
         /// <summary>
         /// Indicates whether this CanLeavecharged involves executing a shinespark.
         /// </summary>
-        public bool MustShinespark => InnerElement.MustShinespark;
+        public bool MustShinespark => ShinesparkFrames > 0;
 
         /// <summary>
         /// Whether the player is logically expected to know how to shinespark.
@@ -81,24 +87,24 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Returns whether this CanLeaveCharged is initiated at a different node than the door it exits through.
         /// </summary>
-        public bool IsInitiatedRemotely => InnerElement.IsInitiatedRemotely;
+        public bool IsInitiatedRemotely => InitiateRemotely != null;
 
         /// <summary>
         /// The strats that can be used to execute this CanLeaveCharged, mapped by name.
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
 
-        public int OpenEnds => InnerElement.OpenEnds;
+        public int OpenEnds { get; }
 
-        public int GentleUpTiles => InnerElement.GentleUpTiles;
+        public int GentleUpTiles { get; }
 
-        public int GentleDownTiles => InnerElement.GentleDownTiles;
+        public int GentleDownTiles { get; }
 
-        public int SteepUpTiles => InnerElement.SteepUpTiles;
+        public int SteepUpTiles { get; }
 
-        public int SteepDownTiles => InnerElement.SteepDownTiles;
+        public int SteepDownTiles { get; }
 
-        public int StartingDownTiles => InnerElement.StartingDownTiles;
+        public int StartingDownTiles { get; }
 
         /// <summary>
         /// The node in which this CanLeaveCharged is.
@@ -198,29 +204,15 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         }
     }
 
-    public class UnfinalizedCanLeaveCharged : AbstractUnfinalizedModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, InitializablePostDeserializeInNode, IRunway
+    public class UnfinalizedCanLeaveCharged : AbstractUnfinalizedModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, InitializablePostDeserializeInNode
     {
-        public int Length { get => UsedTiles; }
-
-        public int EndingUpTiles { get => 0; }
-
         public int UsedTiles { get; set; }
 
         public int FramesRemaining { get; set; }
 
         public int ShinesparkFrames { get; set; }
 
-        /// <summary>
-        /// Indicates whether this CanLeavecharged involves executing a shinespark.
-        /// </summary>
-        public bool MustShinespark => ShinesparkFrames > 0;
-
-        public UnfinalizedInitiateRemotely InitiateRemotely {get;set;}
-
-        /// <summary>
-        /// Returns whether this CanLeaveCharged is initiated at a different node than the door it exits through.
-        /// </summary>
-        public bool IsInitiatedRemotely => InitiateRemotely != null;
+        public UnfinalizedInitiateRemotely InitiateRemotely { get; set; }
 
         /// <summary>
         /// The strats that can be used to execute this CanLeaveCharged, mapped by name.

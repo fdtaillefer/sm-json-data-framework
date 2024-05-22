@@ -14,20 +14,18 @@ namespace sm_json_data_framework.Models.Techs
     /// </summary>
     public class Tech : AbstractModelElement<UnfinalizedTech, Tech>
     {
-        private UnfinalizedTech InnerElement { get; set; }
-
         public Tech(UnfinalizedTech innerElement, Action<Tech> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Requires = InnerElement.Requires.Finalize(mappings);
-            ExtensionTechs = InnerElement.ExtensionTechs.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
+            Name = innerElement.Name;
+            Requires = innerElement.Requires.Finalize(mappings);
+            ExtensionTechs = innerElement.ExtensionTechs.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
         }
 
         /// <summary>
         /// A unique name that identifies this Tech.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// Logical requirements that must be fulfilled to execute this Tech.

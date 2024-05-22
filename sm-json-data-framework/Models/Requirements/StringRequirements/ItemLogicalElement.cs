@@ -12,12 +12,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// </summary>
     public class ItemLogicalElement : AbstractStringLogicalElement<UnfinalizedItemLogicalElement, ItemLogicalElement>
     {
-        private UnfinalizedItemLogicalElement InnerElement { get; set; }
-
         public ItemLogicalElement(UnfinalizedItemLogicalElement innerElement, Action<ItemLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             Item = innerElement.Item.Finalize(mappings);
         }
 

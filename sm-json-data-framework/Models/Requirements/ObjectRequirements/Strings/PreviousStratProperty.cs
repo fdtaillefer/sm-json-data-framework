@@ -13,11 +13,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
     /// </summary>
     public class PreviousStratProperty : AbstractObjectLogicalElementWithStrings<UnfinalizedPreviousStratProperty, PreviousStratProperty>
     {
-        private UnfinalizedPreviousStratProperty InnerElement { get; set; }
-
         public PreviousStratProperty(UnfinalizedPreviousStratProperty innerElement, Action<PreviousStratProperty> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            
         }
 
         /// <summary>

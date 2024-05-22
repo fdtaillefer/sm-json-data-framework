@@ -18,12 +18,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithNodeId<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithNodeId<SourceType, ConcreteType>
     {
-        private SourceType InnerElement { get; set; }
-
         public AbstractObjectLogicalElementWithNodeId(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             Node = innerElement.Node.Finalize(mappings);
         }
 

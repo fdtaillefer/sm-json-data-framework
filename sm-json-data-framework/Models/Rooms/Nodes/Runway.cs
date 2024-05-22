@@ -18,34 +18,41 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class Runway : AbstractModelElement<UnfinalizedRunway, Runway>, IRunway
     {
-        private UnfinalizedRunway InnerElement {get;set;}
-
         public Runway(UnfinalizedRunway innerElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Strats = InnerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            Node = InnerElement.Node.Finalize(mappings);
+            Name = innerElement.Name;
+            Length = innerElement.Length;
+            GentleUpTiles = innerElement.GentleUpTiles;
+            GentleDownTiles = innerElement.GentleDownTiles;
+            SteepUpTiles = innerElement.SteepUpTiles;
+            SteepDownTiles = innerElement.SteepDownTiles;
+            StartingDownTiles = innerElement.StartingDownTiles;
+            EndingUpTiles = innerElement.EndingUpTiles;
+            UsableComingIn = innerElement.UsableComingIn;
+            OpenEnds = innerElement.OpenEnds;
+            Strats = innerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Node = innerElement.Node.Finalize(mappings);
         }
 
         /// <summary>
         /// The name of the runway. This is unique across the entire model.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
-        public int Length => InnerElement.Length;
+        public int Length { get; }
 
-        public int GentleUpTiles => InnerElement.GentleUpTiles;
+        public int GentleUpTiles { get; }
 
-        public int GentleDownTiles => InnerElement.GentleDownTiles;
+        public int GentleDownTiles { get; }
 
-        public int SteepUpTiles => InnerElement.SteepUpTiles;
+        public int SteepUpTiles { get; }
 
-        public int SteepDownTiles => InnerElement.SteepDownTiles;
+        public int SteepDownTiles { get; }
 
-        public int StartingDownTiles => InnerElement.StartingDownTiles;
+        public int StartingDownTiles { get; }
 
-        public int EndingUpTiles => InnerElement.EndingUpTiles;
+        public int EndingUpTiles { get; }
         
         /// <summary>
         /// The strats that can be executed to use this Runway, mapped by name.
@@ -55,14 +62,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Indicates whether this Runway can be used to continue gaining momentum after entering the room with some momentum.
         /// </summary>
-        public bool UsableComingIn => InnerElement.UsableComingIn;
+        public bool UsableComingIn { get; }
 
         /// <summary>
         /// The node to which this runway is tied.
         /// </summary>
         public RoomNode Node { get; }
 
-        public int OpenEnds => InnerElement.OpenEnds;
+        public int OpenEnds { get; }
 
         /// <summary>
         /// Attempts to use this runway based on the provided in-game state (which will not be altered), 
@@ -173,7 +180,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         }
     }
 
-    public class UnfinalizedRunway : AbstractUnfinalizedModelElement<UnfinalizedRunway, Runway>, InitializablePostDeserializeInNode, IRunway
+    public class UnfinalizedRunway : AbstractUnfinalizedModelElement<UnfinalizedRunway, Runway>, InitializablePostDeserializeInNode
     {
         public string Name { get; set; }
 

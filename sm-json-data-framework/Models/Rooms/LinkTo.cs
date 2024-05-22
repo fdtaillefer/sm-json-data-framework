@@ -16,14 +16,11 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class LinkTo : AbstractModelElement<UnfinalizedLinkTo, LinkTo>
     {
-        private UnfinalizedLinkTo InnerElement { get; set; }
-
         public LinkTo(UnfinalizedLinkTo innerElement, Action<LinkTo> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            TargetNode = InnerElement.TargetNode.Finalize(mappings);
-            Strats = InnerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            TargetNode = innerElement.TargetNode.Finalize(mappings);
+            Strats = innerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
         }
 
         /// <summary>

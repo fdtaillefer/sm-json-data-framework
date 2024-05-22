@@ -15,20 +15,20 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class StratFailure : AbstractModelElement<UnfinalizedStratFailure, StratFailure>
     {
-        private UnfinalizedStratFailure InnerElement { get; set; }
-
         public StratFailure(UnfinalizedStratFailure innerElement, Action<StratFailure> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            LeadsToNode = InnerElement.LeadsToNode?.Finalize(mappings);
-            Cost = InnerElement.Cost.Finalize(mappings);
+            Name = innerElement.Name;
+            Softlock = innerElement.Softlock;
+            ClearsPreviousNode = innerElement.ClearsPreviousNode;
+            LeadsToNode = innerElement.LeadsToNode?.Finalize(mappings);
+            Cost = innerElement.Cost.Finalize(mappings);
         }
 
         /// <summary>
         /// A name given to this StratFailure. This is only unique within the strat.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The node that this strat failure leads to, if it leads to a node. Null otherwise.
@@ -43,12 +43,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Whether this failure is systematically a softlock.
         /// </summary>
-        public bool Softlock => InnerElement.Softlock;
+        public bool Softlock { get; }
 
         /// <summary>
         /// Whether this failure means Samus should no longer be seen as arriving from the previous node.
         /// </summary>
-        public bool ClearsPreviousNode => InnerElement.ClearsPreviousNode;
+        public bool ClearsPreviousNode { get; }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {

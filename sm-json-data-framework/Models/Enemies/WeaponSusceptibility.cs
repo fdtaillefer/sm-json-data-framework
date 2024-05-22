@@ -8,13 +8,11 @@ namespace sm_json_data_framework.Models.Enemies
 {
     public class WeaponSusceptibility : AbstractModelElement<UnfinalizedWeaponSusceptibility, WeaponSusceptibility>
     {
-        private UnfinalizedWeaponSusceptibility InnerElement { get; set; }
-
         public WeaponSusceptibility(UnfinalizedWeaponSusceptibility innerElement, Action<WeaponSusceptibility> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            WeaponMultiplier = InnerElement.WeaponMultiplier.Finalize(mappings);
+            Shots = innerElement.Shots;
+            WeaponMultiplier = innerElement.WeaponMultiplier.Finalize(mappings);
         }
 
         /// <summary>
@@ -31,7 +29,7 @@ namespace sm_json_data_framework.Models.Enemies
         /// <summary>
         /// The number of perfectly-aimed shots of the weapon it would take to kill the implicit enemy
         /// </summary>
-        public int Shots => InnerElement.Shots;
+        public int Shots { get; }
 
         /// <summary>
         /// The amount of damage done to the implicit enemy per successful shot of the weapon

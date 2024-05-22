@@ -14,36 +14,39 @@ namespace sm_json_data_framework.Models.Weapons
     /// </summary>
     public class Weapon : AbstractModelElement<UnfinalizedWeapon, Weapon>
     {
-        private UnfinalizedWeapon InnerElement { get; set; }
-
         public Weapon(UnfinalizedWeapon innerElement, Action<Weapon> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            UseRequires = InnerElement.UseRequires.Finalize(mappings);
-            ShotRequires = InnerElement.ShotRequires.Finalize(mappings);
-            Categories = InnerElement.Categories.AsReadOnly();
+            Id = innerElement.Id;
+            Name = innerElement.Name;
+            Damage = innerElement.Damage;
+            CooldownFrames = innerElement.CooldownFrames;
+            Situational = innerElement.Situational;
+            HitsGroup = innerElement.HitsGroup;
+            UseRequires = innerElement.UseRequires.Finalize(mappings);
+            ShotRequires = innerElement.ShotRequires.Finalize(mappings);
+            Categories = innerElement.Categories.AsReadOnly();
         }
 
         /// <summary>
         /// A unique, arbitrary numerical ID that can identify this Weapon.
         /// </summary>
-        public int Id => InnerElement.Id;
+        public int Id { get; }
 
         /// <summary>
         /// A unique, human-legible name that can identify this Weapon.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The amount of damage one shot of this weapon does.
         /// </summary>
-        public int Damage => InnerElement.Damage;
+        public int Damage { get; }
 
         /// <summary>
         /// The amount of time (in frames) that must pass between two shots of this Weapon.
         /// </summary>
-        public int CooldownFrames => InnerElement.CooldownFrames;
+        public int CooldownFrames { get; }
 
         /// <summary>
         /// Logical requirements to fulfill in order to be able to ever use this Weapon.
@@ -59,12 +62,12 @@ namespace sm_json_data_framework.Models.Weapons
         /// <summary>
         /// Indicates whether this is a weapon that can be use only when explicitly referenced by logic.
         /// </summary>
-        public bool Situational => InnerElement.Situational;
+        public bool Situational { get; }
 
         /// <summary>
         /// Indicates whether a shot of this Weapon hits all enemies in an enemy group.
         /// </summary>
-        public bool HitsGroup => InnerElement.HitsGroup;
+        public bool HitsGroup { get; }
 
         /// <summary>
         /// The set of all weapon categories this Weapon is part of.

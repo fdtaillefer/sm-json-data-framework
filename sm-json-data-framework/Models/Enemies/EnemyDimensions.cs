@@ -12,23 +12,22 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class EnemyDimensions : AbstractModelElement<UnfinalizedEnemyDimensions, EnemyDimensions>
     {
-        private UnfinalizedEnemyDimensions InnerElement { get; set; }
-
         public EnemyDimensions(UnfinalizedEnemyDimensions innerElement, Action<EnemyDimensions> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Height = innerElement.Height;
+            Width = innerElement.Width;
         }
 
         /// <summary>
         /// The height of the enemy, in pixels.
         /// </summary>
-        public int Height => InnerElement.Height;
+        public int Height { get; }
 
         /// <summary>
         /// The width of the enemy, in pixels.
         /// </summary>
-        public int Width => InnerElement.Width;
+        public int Width { get; }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {

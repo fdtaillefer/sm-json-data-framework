@@ -16,12 +16,9 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// </summary>
     public class GameFlagLogicalElement : AbstractStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>
     {
-        private UnfinalizedGameFlagLogicalElement InnerElement { get; set; }
-
         public GameFlagLogicalElement(UnfinalizedGameFlagLogicalElement innerElement, Action<GameFlagLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
             GameFlag = innerElement.GameFlag.Finalize(mappings);
         }
 

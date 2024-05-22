@@ -24,27 +24,26 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public int Tries => AppliedLogicalOptions.NumberOfTries(this);
 
-        private UnfinalizedStrat InnerElement { get; set; }
-
         public Strat(UnfinalizedStrat innerElement, Action<Strat> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Requires = InnerElement.Requires.Finalize(mappings);
-            Obstacles = InnerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Obstacle.Id).AsReadOnly();
-            Failures = InnerElement.Failures.Values.Select(failure => failure.Finalize(mappings)).ToDictionary(failure => failure.Name).AsReadOnly();
-            StratProperties = InnerElement.StratProperties.AsReadOnly();
+            Name = innerElement.Name;
+            Notable = innerElement.Notable;
+            Requires = innerElement.Requires.Finalize(mappings);
+            Obstacles = innerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Obstacle.Id).AsReadOnly();
+            Failures = innerElement.Failures.Values.Select(failure => failure.Finalize(mappings)).ToDictionary(failure => failure.Name).AsReadOnly();
+            StratProperties = innerElement.StratProperties.AsReadOnly();
         }
 
         /// <summary>
         /// The name of this Strat. This is only unique for strats that are notable.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// Whether this strat is notable. A strat being notable usually means it requires specific knowledge beyond the ability to fulfill the logical requirements.
         /// </summary>
-        public bool Notable => InnerElement.Notable;
+        public bool Notable { get; }
 
         /// <summary>
         /// The logical requirements that must be fulfilled to execute this Strat.

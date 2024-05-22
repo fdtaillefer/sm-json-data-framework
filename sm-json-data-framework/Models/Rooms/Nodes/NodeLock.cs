@@ -19,23 +19,22 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class NodeLock : AbstractModelElement<UnfinalizedNodeLock, NodeLock>
     {
-        private UnfinalizedNodeLock InnerElement { get; set; }
-
         public NodeLock(UnfinalizedNodeLock innerElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
-            Lock = InnerElement.Lock.Finalize(mappings);
-            UnlockStrats = InnerElement.UnlockStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            BypassStrats = InnerElement.BypassStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            Yields = InnerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
-            Node = InnerElement.Node.Finalize(mappings);
+            LockType = innerElement.LockType;
+            Name = innerElement.Name;
+            Lock = innerElement.Lock.Finalize(mappings);
+            UnlockStrats = innerElement.UnlockStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            BypassStrats = innerElement.BypassStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Yields = innerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Node = innerElement.Node.Finalize(mappings);
         }
 
         /// <summary>
         /// The type of this lock.
         /// </summary>
-        public LockTypeEnum LockType => InnerElement.LockType;
+        public LockTypeEnum LockType { get; }
 
         /// <summary>
         /// Logical requirements that must be met for this lock to be active.
@@ -46,7 +45,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// A name that identifies this lock. Unique across the entire model.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// Strats that can be executed to unlock this lock, mapped by name.

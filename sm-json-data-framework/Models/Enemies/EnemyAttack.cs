@@ -11,33 +11,34 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class EnemyAttack : AbstractModelElement<UnfinalizedEnemyAttack, EnemyAttack>
     {
-        private UnfinalizedEnemyAttack InnerElement { get; set; }
-
         public EnemyAttack(UnfinalizedEnemyAttack innerElement, Action<EnemyAttack> mappingsInsertionCallback)
             : base(innerElement, mappingsInsertionCallback)
         {
-            InnerElement = innerElement;
+            Name = innerElement.Name;
+            BaseDamage = innerElement.BaseDamage;
+            AffectedByVaria = innerElement.AffectedByVaria;
+            AffectedByGravity = innerElement.AffectedByGravity;
         }
 
         /// <summary>
         /// The name of this enemy attack.
         /// </summary>
-        public string Name => InnerElement.Name;
+        public string Name { get; }
 
         /// <summary>
         /// The amount of damage this attack does when unmitigated.
         /// </summary>
-        public int BaseDamage => InnerElement.BaseDamage;
+        public int BaseDamage { get; }
 
         /// <summary>
         /// Indicates whether this attack is mitigated by Varia suit.
         /// </summary>
-        public bool AffectedByVaria => InnerElement.AffectedByVaria;
+        public bool AffectedByVaria { get; }
 
         /// <summary>
         /// Indicates whether this attack is mitigated by Gravity suit.
         /// </summary>
-        public bool AffectedByGravity => InnerElement.AffectedByGravity;
+        public bool AffectedByGravity { get; }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
         {
