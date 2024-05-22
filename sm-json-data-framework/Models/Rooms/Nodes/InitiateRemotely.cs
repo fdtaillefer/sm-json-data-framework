@@ -102,7 +102,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected bool CalculateLogicallyNever()
         {
             // If there is any node in the path that has no possible strat, then it's impossible to execute this InitiateRemotely
-            return PathToDoor.Any(pathNode => !pathNode.strats.Values.Any(strat => strat.LogicallyRelevant));
+            return PathToDoor.Any(pathNode => !pathNode.strats.Values.WhereLogicallyRelevant().Any());
         }
     }
 

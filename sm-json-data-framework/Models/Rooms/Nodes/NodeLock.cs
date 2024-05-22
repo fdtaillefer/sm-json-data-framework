@@ -164,7 +164,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // A lock that is free to open is still arguably relevant in that it does get unlocked which is arguably a logical change
 
             // But if a lock can never become active, it may as well not exist
-            return Lock.LogicallyNever;
+            return !Lock.LogicallyNever;
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyNever()
         {
-            return !UnlockStrats.Values.Where(strat => strat.LogicallyRelevant).Any() && !BypassStrats.Values.Where(strat => strat.LogicallyRelevant).Any();
+            return !UnlockStrats.Values.WhereLogicallyRelevant().Any() && !BypassStrats.Values.WhereLogicallyRelevant().Any();
         }
     }
 
@@ -203,7 +203,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best unlock strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereLogicallyRelevant(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
@@ -237,7 +237,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best bypass strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereUseful(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereLogicallyRelevant(), inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyBypassedLock(NodeLock, bestStrat);

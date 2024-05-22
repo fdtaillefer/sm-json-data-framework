@@ -87,13 +87,13 @@ namespace sm_json_data_framework.Utils
         }
 
         /// <summary>
-        /// Returns an enumeration of the provided IConfigurableByLogicalOptions objects, except those rendered useless by logical options.
+        /// Returns an enumeration of the provided IModelElement objects, except those that are logically irrelevant and can always be ignored in a logic context.
         /// </summary>
         /// <param name="elements">Enumeration of elements to filter</param>
         /// <returns></returns>
-        public static IEnumerable<T> WhereUseful<T>(this IEnumerable<T> elements) where T: IModelElement
+        public static IEnumerable<T> WhereLogicallyRelevant<T>(this IEnumerable<T> elements) where T : IModelElement
         {
-            return elements.Where(clc => !clc.UselessByLogicalOptions);
+            return elements.Where(element => element.LogicallyRelevant);
         }
 
         public static bool ContainsFlag(this IDictionary<string, UnfinalizedGameFlag> flagDictionary, string gameFlagName)

@@ -177,10 +177,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
-            //Should remove that .Name and pass just nodeLock again, once I've removed all Unfinalized everywhere
             // Return locks whose locking conditions have been met, and that haven't been opened
-            return Locks.Values.WhereUseful().Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
-                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock.Name));
+            return Locks.Values.WhereLogicallyRelevant().Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
+                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock));
         }
 
         IExecutable _interactExecution = null;

@@ -75,7 +75,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected bool CalculateLogicallyNever()
         {
             // A viewableNode is impossible to use if it has no strats that can be executed
-            return Strats.Values.Any(strat => strat.LogicallyRelevant);
+            return !Strats.Values.WhereLogicallyRelevant().Any();
         }
     }
 

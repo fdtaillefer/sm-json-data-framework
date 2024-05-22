@@ -707,8 +707,8 @@ namespace sm_json_data_framework.Models.InGameStates
                 return Enumerable.Empty<Runway>();
             }
 
-            // We've confirmed we can use retroactive runways. Return all runways of the previous room's exit node (excluding logically impossible ones)
-            return previousRoomExitNode.Runways.Values.WhereUseful();
+            // We've confirmed we can use retroactive runways. Return all runways of the previous room's exit node (excluding logically irrelevant ones)
+            return previousRoomExitNode.Runways.Values.WhereLogicallyRelevant();
         }
 
         public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
@@ -760,7 +760,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // Return all CanLeaveCharged that are valid to retroactively execute
-            return previousRoomExitNode.CanLeaveCharged.WhereUseful().Where(clc => {
+            return previousRoomExitNode.CanLeaveCharged.WhereLogicallyRelevant().Where(clc => {
                 // If the CanLeaveCharged is initiated remotely, we must take a closer look at what happened in that room
                 if (clc.IsInitiatedRemotely)
                 {

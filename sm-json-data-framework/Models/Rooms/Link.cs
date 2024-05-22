@@ -52,7 +52,7 @@ namespace sm_json_data_framework.Models.Rooms
         public override bool CalculateLogicallyRelevant()
         {
             // A link has no logical relevance if it has no destination that can logically be reached
-            return To.Values.Any(linkTo => linkTo.LogicallyRelevant);
+            return To.Values.WhereLogicallyRelevant().Any();
         }
     }
 

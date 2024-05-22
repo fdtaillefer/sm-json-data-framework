@@ -63,7 +63,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             ExecutionResult result = new ExecutionResult(inGameState.Clone());
 
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Values.WhereUseful().Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null);
+            IEnumerable<Weapon> usableWeapons = ValidWeapons.Values.WhereLogicallyRelevant().Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null);
 
             // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
             // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),

@@ -225,7 +225,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // - It must be initiated remotely, but that remote initiation is impossible
             // - It has no possible strats
             // - It requires a shinespark but shinesparks are logically disabled
-            return (InitiateRemotely?.LogicallyNever is true) || !Strats.Values.Any(strat => strat.LogicallyRelevant) || (MustShinespark && !CanShinespark);
+            return (InitiateRemotely?.LogicallyNever is true) || !Strats.Values.WhereLogicallyRelevant().Any() || (MustShinespark && !CanShinespark);
         }
     }
 

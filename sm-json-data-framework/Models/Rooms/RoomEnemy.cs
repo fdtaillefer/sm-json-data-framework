@@ -182,7 +182,7 @@ namespace sm_json_data_framework.Models.Rooms
             // We'll execute them all in order, remembering the one that refilled the most resources.
             // We'll stop as soon as we find one that we can execute and which costs no resources. 
             // Then we'll return the best result.
-            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.Values.WhereUseful().OrderBy(cycle => cycle.CycleFrames);
+            IEnumerable<FarmCycle> orderedFarmCycles = RoomEnemy.FarmCycles.Values.WhereLogicallyRelevant().OrderBy(cycle => cycle.CycleFrames);
             foreach (FarmCycle currentFarmCycle in orderedFarmCycles)
             {
                 var currentFarmResult = currentFarmCycle.FarmExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);

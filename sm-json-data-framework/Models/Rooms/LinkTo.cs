@@ -55,7 +55,7 @@ namespace sm_json_data_framework.Models.Rooms
         public override bool CalculateLogicallyRelevant()
         {
             // A linkTo has no logical relevance if there are no strats that can be executed to follow it
-            return Strats.Values.Any(strat => strat.LogicallyRelevant);
+            return Strats.Values.WhereLogicallyRelevant().Any();
         }
     }
 
