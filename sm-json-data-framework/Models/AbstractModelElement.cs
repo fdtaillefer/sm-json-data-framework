@@ -45,7 +45,8 @@ namespace sm_json_data_framework.Models
         /// Concrete implementations of this method should call <see cref="ApplyLogicalOptions(ReadOnlyLogicalOptions)"/> on:
         /// <list type="bullet">
         /// <item>All owned sub-models</item>
-        /// <item>All non-owned sub-models whose logically-altered behavior they need to rely in order to properly apply logical options on themselves</item>
+        /// <item>All non-owned sub-models whose logically-updated behavior they need to rely in order to properly apply logical options on themselves,
+        /// or to calculate logial properties</item>
         /// <item>Optionally any other  model (it's not needed but not harmful)</item>
         /// </list>
         /// </para>

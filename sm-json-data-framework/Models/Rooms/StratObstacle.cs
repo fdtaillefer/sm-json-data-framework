@@ -18,12 +18,6 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class StratObstacle : AbstractModelElement<UnfinalizedStratObstacle, StratObstacle>
     {
-        /// <summary>
-        /// Indicates whether trying to handle the obstacle via this strat is rendered impossible by logical options.
-        /// This would mean this StartObstacle cannot be executed except if the obstacle has already been destroyed by a different strat.
-        /// </summary>
-        public bool UselessFromHereByLogicalOptions { get; protected set; } = false;
-
         private UnfinalizedStratObstacle InnerElement { get; set; }
 
         public StratObstacle(UnfinalizedStratObstacle innerElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
@@ -96,10 +90,7 @@ namespace sm_json_data_framework.Models.Rooms
             Bypass?.ApplyLogicalOptions(logicalOptions);
             Obstacle.ApplyLogicalOptions(logicalOptions);
 
-            bool indestructibleHere = Obstacle.LogicallyIndestructible || Requires.UselessByLogicalOptions;
             bool unbypassableHere = Bypass == null || Bypass.UselessByLogicalOptions;
-            // This StratObstacle becomes locally useless (so - impossible unless the obstacle is destroyed elsewhere) if it can be neither destroyed or bypassed from here
-            UselessFromHereByLogicalOptions = indestructibleHere && unbypassableHere;
 
             // This StratObstacle can become fully useless if the obstacle is indestructible from anywhere and cannot be bypassed from here
             return Obstacle.LogicallyIndestructible && unbypassableHere;
