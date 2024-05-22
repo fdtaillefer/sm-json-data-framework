@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class HibashiHits : AbstractDamageNumericalValueLogicalElement<UnfinalizedHibashiHits, HibashiHits>
     {
-        public HibashiHits(UnfinalizedHibashiHits innerElement, Action<HibashiHits> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public HibashiHits(UnfinalizedHibashiHits sourceElement, Action<HibashiHits> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

@@ -15,11 +15,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class ViewableNode : AbstractModelElement<UnfinalizedViewableNode, ViewableNode>
     {
-        public ViewableNode(UnfinalizedViewableNode innerElement, Action<ViewableNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public ViewableNode(UnfinalizedViewableNode sourceElement, Action<ViewableNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Node = innerElement.Node.Finalize(mappings);
-            Strats = innerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Node = sourceElement.Node.Finalize(mappings);
+            Strats = sourceElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
         }
 
         /// <summary>

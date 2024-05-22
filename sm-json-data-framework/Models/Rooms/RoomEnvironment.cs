@@ -16,12 +16,12 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomEnvironment : AbstractModelElement<UnfinalizedRoomEnvironment, RoomEnvironment>
     {
-        public RoomEnvironment(UnfinalizedRoomEnvironment innerElement, Action<RoomEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public RoomEnvironment(UnfinalizedRoomEnvironment sourceElement, Action<RoomEnvironment> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Heated = innerElement.Heated;
-            EntranceNodes = innerElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Room = innerElement.Room.Finalize(mappings);
+            Heated = sourceElement.Heated;
+            EntranceNodes = sourceElement.EntranceNodes?.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Room = sourceElement.Room.Finalize(mappings);
         }
 
         /// <summary>

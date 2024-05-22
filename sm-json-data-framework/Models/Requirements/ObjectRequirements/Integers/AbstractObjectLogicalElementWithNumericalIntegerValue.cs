@@ -15,8 +15,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        protected AbstractObjectLogicalElementWithNumericalIntegerValue(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        protected AbstractObjectLogicalElementWithNumericalIntegerValue(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

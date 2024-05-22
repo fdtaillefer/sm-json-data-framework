@@ -16,11 +16,11 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class Link : AbstractModelElement<UnfinalizedLink, Link>
     {
-        public Link(UnfinalizedLink innerElement, Action<Link> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Link(UnfinalizedLink sourceElement, Action<Link> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            FromNode = innerElement.FromNode.Finalize(mappings);
-            To = innerElement.To.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
+            FromNode = sourceElement.FromNode.Finalize(mappings);
+            To = sourceElement.To.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
         }
 
         public RoomNode FromNode { get; }

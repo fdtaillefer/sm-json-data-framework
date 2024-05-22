@@ -18,10 +18,10 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
         /// </summary>
         public int Tries => AppliedLogicalOptions.NumberOfTries(Helper);
 
-        public HelperLogicalElement(UnfinalizedHelperLogicalElement innerElement, Action<HelperLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public HelperLogicalElement(UnfinalizedHelperLogicalElement sourceElement, Action<HelperLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Helper = innerElement.Helper.Finalize(mappings);
+            Helper = sourceElement.Helper.Finalize(mappings);
         }
 
         /// <summary>

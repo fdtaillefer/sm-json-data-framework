@@ -18,21 +18,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class Runway : AbstractModelElement<UnfinalizedRunway, Runway>, IRunway
     {
-        public Runway(UnfinalizedRunway innerElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Runway(UnfinalizedRunway sourceElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
-            Length = innerElement.Length;
-            GentleUpTiles = innerElement.GentleUpTiles;
-            GentleDownTiles = innerElement.GentleDownTiles;
-            SteepUpTiles = innerElement.SteepUpTiles;
-            SteepDownTiles = innerElement.SteepDownTiles;
-            StartingDownTiles = innerElement.StartingDownTiles;
-            EndingUpTiles = innerElement.EndingUpTiles;
-            UsableComingIn = innerElement.UsableComingIn;
-            OpenEnds = innerElement.OpenEnds;
-            Strats = innerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            Node = innerElement.Node.Finalize(mappings);
+            Name = sourceElement.Name;
+            Length = sourceElement.Length;
+            GentleUpTiles = sourceElement.GentleUpTiles;
+            GentleDownTiles = sourceElement.GentleDownTiles;
+            SteepUpTiles = sourceElement.SteepUpTiles;
+            SteepDownTiles = sourceElement.SteepDownTiles;
+            StartingDownTiles = sourceElement.StartingDownTiles;
+            EndingUpTiles = sourceElement.EndingUpTiles;
+            UsableComingIn = sourceElement.UsableComingIn;
+            OpenEnds = sourceElement.OpenEnds;
+            Strats = sourceElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Node = sourceElement.Node.Finalize(mappings);
         }
 
         /// <summary>

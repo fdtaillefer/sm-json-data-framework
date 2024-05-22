@@ -23,32 +23,32 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class RoomNode : AbstractModelElement<UnfinalizedRoomNode, RoomNode>
     {
-        public RoomNode(UnfinalizedRoomNode innerElement, Action<RoomNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public RoomNode(UnfinalizedRoomNode sourceElement, Action<RoomNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Id = innerElement.Id;
-            IdentifyingString = innerElement.IdentifyingString;
-            Name = innerElement.Name;
-            NodeType = innerElement.NodeType;
-            NodeSubType = innerElement.NodeSubType;
-            NodeAddress = innerElement.NodeAddress;
-            NodeItem = innerElement.NodeItem?.Finalize(mappings);
-            DoorEnvironments = innerElement.DoorEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
-            InteractionRequires = innerElement.InteractionRequires.Finalize(mappings);
-            Runways = innerElement.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
-            CanLeaveCharged = innerElement.CanLeaveCharged.Select(canLeaveCharged => canLeaveCharged.Finalize(mappings)).ToList().AsReadOnly();
-            OverrideSpawnAtNode = innerElement.OverrideSpawnAtNode?.Finalize(mappings);
-            SpawnAtNode = innerElement.SpawnAtNode.Finalize(mappings);
-            Locks = innerElement.Locks.Values.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
-            Utility = innerElement.Utility.AsReadOnly();
-            ViewableNodes = innerElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToList().AsReadOnly();
-            Yields = innerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
-            Note = innerElement.Note?.AsReadOnly();
-            Room = innerElement.Room.Finalize(mappings);
-            OutConnection = innerElement.OutConnection?.Finalize(mappings);
-            OutNode = innerElement.OutNode?.Finalize(mappings);
-            LinksTo = innerElement.LinksTo.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
-            TwinDoorAddresses = innerElement.TwinDoorAddresses.Select(twinAddress => twinAddress.Finalize(mappings)).ToList().AsReadOnly();
+            Id = sourceElement.Id;
+            IdentifyingString = sourceElement.IdentifyingString;
+            Name = sourceElement.Name;
+            NodeType = sourceElement.NodeType;
+            NodeSubType = sourceElement.NodeSubType;
+            NodeAddress = sourceElement.NodeAddress;
+            NodeItem = sourceElement.NodeItem?.Finalize(mappings);
+            DoorEnvironments = sourceElement.DoorEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
+            InteractionRequires = sourceElement.InteractionRequires.Finalize(mappings);
+            Runways = sourceElement.Runways.Values.Select(runway => runway.Finalize(mappings)).ToDictionary(runway => runway.Name).AsReadOnly();
+            CanLeaveCharged = sourceElement.CanLeaveCharged.Select(canLeaveCharged => canLeaveCharged.Finalize(mappings)).ToList().AsReadOnly();
+            OverrideSpawnAtNode = sourceElement.OverrideSpawnAtNode?.Finalize(mappings);
+            SpawnAtNode = sourceElement.SpawnAtNode.Finalize(mappings);
+            Locks = sourceElement.Locks.Values.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
+            Utility = sourceElement.Utility.AsReadOnly();
+            ViewableNodes = sourceElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToList().AsReadOnly();
+            Yields = sourceElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Note = sourceElement.Note?.AsReadOnly();
+            Room = sourceElement.Room.Finalize(mappings);
+            OutConnection = sourceElement.OutConnection?.Finalize(mappings);
+            OutNode = sourceElement.OutNode?.Finalize(mappings);
+            LinksTo = sourceElement.LinksTo.Values.Select(linkTo => linkTo.Finalize(mappings)).ToDictionary(linkTo => linkTo.TargetNode.Id).AsReadOnly();
+            TwinDoorAddresses = sourceElement.TwinDoorAddresses.Select(twinAddress => twinAddress.Finalize(mappings)).ToList().AsReadOnly();
         }
 
         /// <summary>

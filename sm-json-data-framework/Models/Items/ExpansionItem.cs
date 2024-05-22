@@ -10,10 +10,10 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class ExpansionItem : InGameItem
     {
-        public ExpansionItem(UnfinalizedExpansionItem innerElement, Action<Item> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public ExpansionItem(UnfinalizedExpansionItem sourceElement, Action<Item> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
-            Resource = innerElement.Resource;
-            ResourceAmount = innerElement.ResourceAmount;
+            Resource = sourceElement.Resource;
+            ResourceAmount = sourceElement.ResourceAmount;
         }
 
         /// <summary>

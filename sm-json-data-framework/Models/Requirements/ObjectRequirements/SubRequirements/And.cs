@@ -13,8 +13,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
     /// </summary>
     public class And : AbstractObjectLogicalElementWithSubRequirements<UnfinalizedAnd, And>
     {
-        public And(UnfinalizedAnd innerElement, Action<And> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback, mappings)
+        public And(UnfinalizedAnd sourceElement, Action<And> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback, mappings)
         {
 
         }

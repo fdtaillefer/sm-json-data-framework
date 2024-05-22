@@ -22,8 +22,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public HeatFrames(UnfinalizedHeatFrames innerElement, Action<HeatFrames> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public HeatFrames(UnfinalizedHeatFrames sourceElement, Action<HeatFrames> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

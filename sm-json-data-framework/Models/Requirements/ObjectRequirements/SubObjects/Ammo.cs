@@ -14,11 +14,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class Ammo : AbstractObjectLogicalElement<UnfinalizedAmmo, Ammo>
     {
-        public Ammo(UnfinalizedAmmo innerElement, Action<Ammo> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public Ammo(UnfinalizedAmmo sourceElement, Action<Ammo> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            AmmoType = innerElement.AmmoType;
-            Count = innerElement.Count;
+            AmmoType = sourceElement.AmmoType;
+            Count = sourceElement.Count;
         }
 
         /// <summary>

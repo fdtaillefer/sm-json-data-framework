@@ -17,8 +17,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// </summary>
         private decimal LavaLeniencyMultiplier => AppliedLogicalOptions.LavaLeniencyMultiplier;
 
-        public LavaPhysicsFrames(UnfinalizedLavaPhysicsFrames innerElement, Action<LavaPhysicsFrames> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public LavaPhysicsFrames(UnfinalizedLavaPhysicsFrames sourceElement, Action<LavaPhysicsFrames> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

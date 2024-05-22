@@ -18,8 +18,8 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         }
 
-        public AbstractStringLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback) 
-            :base(innerElement, mappingsInsertionCallback)
+        public AbstractStringLogicalElement(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback) 
+            :base(sourceElement, mappingsInsertionCallback)
         {
 
         }

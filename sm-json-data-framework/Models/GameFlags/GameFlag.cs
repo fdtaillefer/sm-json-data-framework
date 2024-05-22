@@ -12,10 +12,10 @@ namespace sm_json_data_framework.Models.GameFlags
     /// </summary>
     public class GameFlag : AbstractModelElement<UnfinalizedGameFlag, GameFlag>
     {
-        public GameFlag(UnfinalizedGameFlag innerElement, Action<GameFlag> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public GameFlag(UnfinalizedGameFlag sourceElement, Action<GameFlag> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
+            Name = sourceElement.Name;
         }
 
         /// <summary>

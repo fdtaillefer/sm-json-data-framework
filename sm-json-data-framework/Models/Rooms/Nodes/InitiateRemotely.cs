@@ -14,15 +14,15 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 {
     public class InitiateRemotely : AbstractModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>
     {
-        public InitiateRemotely(UnfinalizedInitiateRemotely innerElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public InitiateRemotely(UnfinalizedInitiateRemotely sourceElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            MustOpenDoorFirst = innerElement.MustOpenDoorFirst;
-            InitiateAtNode = innerElement.InitiateAtNode.Finalize(mappings);
-            PathToDoor = innerElement.PathToDoor
+            MustOpenDoorFirst = sourceElement.MustOpenDoorFirst;
+            InitiateAtNode = sourceElement.InitiateAtNode.Finalize(mappings);
+            PathToDoor = sourceElement.PathToDoor
                 .Select(node => (node.link.Finalize(mappings), (IReadOnlyDictionary<string, Strat>)node.strats.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly()))
                 .ToList().AsReadOnly();
-            ExitNode = innerElement.ExitNode.Finalize(mappings);
+            ExitNode = sourceElement.ExitNode.Finalize(mappings);
         }
 
         /// <summary>

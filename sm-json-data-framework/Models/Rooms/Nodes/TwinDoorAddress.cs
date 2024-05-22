@@ -12,11 +12,11 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class TwinDoorAddress : AbstractModelElement<UnfinalizedTwinDoorAddress, TwinDoorAddress>
     {
-        public TwinDoorAddress(UnfinalizedTwinDoorAddress innerElement, Action<TwinDoorAddress> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public TwinDoorAddress(UnfinalizedTwinDoorAddress sourceElement, Action<TwinDoorAddress> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            RoomAddress = innerElement.RoomAddress;
-            DoorAddress = innerElement.DoorAddress;
+            RoomAddress = sourceElement.RoomAddress;
+            DoorAddress = sourceElement.DoorAddress;
         }
 
         /// <summary>

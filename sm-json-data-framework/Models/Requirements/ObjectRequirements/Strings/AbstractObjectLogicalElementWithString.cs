@@ -14,10 +14,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithString<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithStrings<SourceType, ConcreteType>
     {
-        protected AbstractObjectLogicalElementWithStrings(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        protected AbstractObjectLogicalElementWithStrings(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Value = innerElement.Value;
+            Value = sourceElement.Value;
         }
 
         /// <summary>

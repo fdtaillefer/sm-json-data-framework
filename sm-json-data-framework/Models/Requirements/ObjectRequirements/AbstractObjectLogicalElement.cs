@@ -18,8 +18,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
 
         }
 
-        public AbstractObjectLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public AbstractObjectLogicalElement(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

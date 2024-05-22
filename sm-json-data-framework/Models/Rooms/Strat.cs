@@ -24,15 +24,15 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public int Tries => AppliedLogicalOptions.NumberOfTries(this);
 
-        public Strat(UnfinalizedStrat innerElement, Action<Strat> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Strat(UnfinalizedStrat sourceElement, Action<Strat> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
-            Notable = innerElement.Notable;
-            Requires = innerElement.Requires.Finalize(mappings);
-            Obstacles = innerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Obstacle.Id).AsReadOnly();
-            Failures = innerElement.Failures.Values.Select(failure => failure.Finalize(mappings)).ToDictionary(failure => failure.Name).AsReadOnly();
-            StratProperties = innerElement.StratProperties.AsReadOnly();
+            Name = sourceElement.Name;
+            Notable = sourceElement.Notable;
+            Requires = sourceElement.Requires.Finalize(mappings);
+            Obstacles = sourceElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Obstacle.Id).AsReadOnly();
+            Failures = sourceElement.Failures.Values.Select(failure => failure.Finalize(mappings)).ToDictionary(failure => failure.Name).AsReadOnly();
+            StratProperties = sourceElement.StratProperties.AsReadOnly();
         }
 
         /// <summary>

@@ -13,11 +13,11 @@ namespace sm_json_data_framework.Models.Helpers
     /// </summary>
     public class Helper : AbstractModelElement<UnfinalizedHelper, Helper>
     {
-        public Helper(UnfinalizedHelper innerElement, Action<Helper> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Helper(UnfinalizedHelper sourceElement, Action<Helper> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
-            Requires = innerElement.Requires.Finalize(mappings);
+            Name = sourceElement.Name;
+            Requires = sourceElement.Requires.Finalize(mappings);
         }
 
         /// <summary>

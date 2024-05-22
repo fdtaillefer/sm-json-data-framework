@@ -22,8 +22,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public LavaFrames(UnfinalizedLavaFrames innerElement, Action<LavaFrames> mappingsInsertionCallback) 
-            : base(innerElement, mappingsInsertionCallback)
+        public LavaFrames(UnfinalizedLavaFrames sourceElement, Action<LavaFrames> mappingsInsertionCallback) 
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

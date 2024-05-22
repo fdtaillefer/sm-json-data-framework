@@ -19,20 +19,20 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomEnemy : AbstractModelElement<UnfinalizedRoomEnemy, RoomEnemy>
     {
-        public RoomEnemy(UnfinalizedRoomEnemy innerElement, Action<RoomEnemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public RoomEnemy(UnfinalizedRoomEnemy sourceElement, Action<RoomEnemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Id = innerElement.Id;
-            GroupName = innerElement.GroupName;
-            Quantity = innerElement.Quantity;
-            Enemy = innerElement.Enemy.Finalize(mappings);
-            HomeNodes = innerElement.HomeNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            BetweenNodes = innerElement.BetweenNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Spawn = innerElement.Spawn.Finalize(mappings);
-            StopSpawn = innerElement.StopSpawn.Finalize(mappings);
-            DropRequires = innerElement.DropRequires.Finalize(mappings);
-            FarmCycles = innerElement.FarmCycles.Values.Select(farmCycle => farmCycle.Finalize(mappings)).ToDictionary(farmCycle => farmCycle.Name).AsReadOnly();
-            Room = innerElement.Room.Finalize(mappings);
+            Id = sourceElement.Id;
+            GroupName = sourceElement.GroupName;
+            Quantity = sourceElement.Quantity;
+            Enemy = sourceElement.Enemy.Finalize(mappings);
+            HomeNodes = sourceElement.HomeNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            BetweenNodes = sourceElement.BetweenNodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Spawn = sourceElement.Spawn.Finalize(mappings);
+            StopSpawn = sourceElement.StopSpawn.Finalize(mappings);
+            DropRequires = sourceElement.DropRequires.Finalize(mappings);
+            FarmCycles = sourceElement.FarmCycles.Values.Select(farmCycle => farmCycle.Finalize(mappings)).ToDictionary(farmCycle => farmCycle.Name).AsReadOnly();
+            Room = sourceElement.Room.Finalize(mappings);
         }
 
         /// <summary>

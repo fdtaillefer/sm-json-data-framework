@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public AcidFrames(UnfinalizedAcidFrames innerElement, Action<AcidFrames> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public AcidFrames(UnfinalizedAcidFrames sourceElement, Action<AcidFrames> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

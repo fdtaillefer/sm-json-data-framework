@@ -11,13 +11,13 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class EnemyAttack : AbstractModelElement<UnfinalizedEnemyAttack, EnemyAttack>
     {
-        public EnemyAttack(UnfinalizedEnemyAttack innerElement, Action<EnemyAttack> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public EnemyAttack(UnfinalizedEnemyAttack sourceElement, Action<EnemyAttack> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
-            BaseDamage = innerElement.BaseDamage;
-            AffectedByVaria = innerElement.AffectedByVaria;
-            AffectedByGravity = innerElement.AffectedByGravity;
+            Name = sourceElement.Name;
+            BaseDamage = sourceElement.BaseDamage;
+            AffectedByVaria = sourceElement.AffectedByVaria;
+            AffectedByGravity = sourceElement.AffectedByGravity;
         }
 
         /// <summary>

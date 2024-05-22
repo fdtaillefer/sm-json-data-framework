@@ -15,14 +15,14 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class RoomObstacle : AbstractModelElement<UnfinalizedRoomObstacle, RoomObstacle>
     {
-        public RoomObstacle(UnfinalizedRoomObstacle innerElement, Action<RoomObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public RoomObstacle(UnfinalizedRoomObstacle sourceElement, Action<RoomObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Id = innerElement.Id;
-            Name = innerElement.Name;
-            ObstacleType = innerElement.ObstacleType;
-            Requires = innerElement.Requires.Finalize(mappings);
-            Room = innerElement.Room.Finalize(mappings);
+            Id = sourceElement.Id;
+            Name = sourceElement.Name;
+            ObstacleType = sourceElement.ObstacleType;
+            Requires = sourceElement.Requires.Finalize(mappings);
+            Room = sourceElement.Room.Finalize(mappings);
         }
 
         /// <summary>

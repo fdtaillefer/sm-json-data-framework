@@ -17,13 +17,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class ResetRoom : AbstractObjectLogicalElement<UnfinalizedResetRoom, ResetRoom>
     {
-        public ResetRoom(UnfinalizedResetRoom innerElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public ResetRoom(UnfinalizedResetRoom sourceElement, Action<ResetRoom> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            MustStayPut = innerElement.MustStayPut;
-            Nodes = innerElement.Nodes.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            NodesToAvoid = innerElement.NodesToAvoid.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            ObstaclesToAvoid = innerElement.ObstaclesToAvoid.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
+            MustStayPut = sourceElement.MustStayPut;
+            Nodes = sourceElement.Nodes.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            NodesToAvoid = sourceElement.NodesToAvoid.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            ObstaclesToAvoid = sourceElement.ObstaclesToAvoid.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
         }
 
         /// <summary>

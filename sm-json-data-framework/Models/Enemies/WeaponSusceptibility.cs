@@ -8,11 +8,11 @@ namespace sm_json_data_framework.Models.Enemies
 {
     public class WeaponSusceptibility : AbstractModelElement<UnfinalizedWeaponSusceptibility, WeaponSusceptibility>
     {
-        public WeaponSusceptibility(UnfinalizedWeaponSusceptibility innerElement, Action<WeaponSusceptibility> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public WeaponSusceptibility(UnfinalizedWeaponSusceptibility sourceElement, Action<WeaponSusceptibility> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Shots = innerElement.Shots;
-            WeaponMultiplier = innerElement.WeaponMultiplier.Finalize(mappings);
+            Shots = sourceElement.Shots;
+            WeaponMultiplier = sourceElement.WeaponMultiplier.Finalize(mappings);
         }
 
         /// <summary>

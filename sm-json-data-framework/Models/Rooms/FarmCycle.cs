@@ -19,13 +19,13 @@ namespace sm_json_data_framework.Models.Rooms
     {
         public ReadOnlySpawnerFarmingOptions AppliedFarmingLogicalOptions => AppliedLogicalOptions.SpawnerFarmingOptions;
 
-        public FarmCycle(UnfinalizedFarmCycle innerElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public FarmCycle(UnfinalizedFarmCycle sourceElement, Action<FarmCycle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
-            CycleFrames = innerElement.CycleFrames;
-            Requires = innerElement.Requires.Finalize(mappings);
-            RoomEnemy = innerElement.RoomEnemy.Finalize(mappings);
+            Name = sourceElement.Name;
+            CycleFrames = sourceElement.CycleFrames;
+            Requires = sourceElement.Requires.Finalize(mappings);
+            RoomEnemy = sourceElement.RoomEnemy.Finalize(mappings);
         }
 
         /// <summary>

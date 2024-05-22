@@ -10,9 +10,9 @@ namespace sm_json_data_framework.Models.Items
     /// </summary>
     public class InGameItem : Item
     {
-        public InGameItem(UnfinalizedInGameItem innerElement, Action<Item> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public InGameItem(UnfinalizedInGameItem sourceElement, Action<Item> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
-            Data = innerElement.Data;
+            Data = sourceElement.Data;
         }
 
         /// <summary>

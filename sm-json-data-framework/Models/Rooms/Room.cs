@@ -16,20 +16,20 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class Room : AbstractModelElement<UnfinalizedRoom, Room>
     {
-        public Room(UnfinalizedRoom innerElement, Action<Room> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Room(UnfinalizedRoom sourceElement, Action<Room> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Id = innerElement.Id;
-            Name = innerElement.Name;
-            Area = innerElement.Area;
-            Subarea = innerElement.Subarea;
-            Playable = innerElement.Playable;
-            RoomAddress = innerElement.RoomAddress;
-            RoomEnvironments = innerElement.RoomEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
-            Nodes = innerElement.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
-            Links = innerElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNode.Id).AsReadOnly();
-            Obstacles = innerElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
-            Enemies = innerElement.Enemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.Id).AsReadOnly();
+            Id = sourceElement.Id;
+            Name = sourceElement.Name;
+            Area = sourceElement.Area;
+            Subarea = sourceElement.Subarea;
+            Playable = sourceElement.Playable;
+            RoomAddress = sourceElement.RoomAddress;
+            RoomEnvironments = sourceElement.RoomEnvironments.Select(environment => environment.Finalize(mappings)).ToList().AsReadOnly();
+            Nodes = sourceElement.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Id).AsReadOnly();
+            Links = sourceElement.Links.Values.Select(link => link.Finalize(mappings)).ToDictionary(link => link.FromNode.Id).AsReadOnly();
+            Obstacles = sourceElement.Obstacles.Values.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
+            Enemies = sourceElement.Enemies.Values.Select(roomEnemy => roomEnemy.Finalize(mappings)).ToDictionary(roomEnemy => roomEnemy.Id).AsReadOnly();
         }
 
         /// <summary>

@@ -15,10 +15,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
         where SourceType : AbstractUnfinalizedObjectLogicalElementWithSubRequirements<SourceType, ConcreteType>
         where ConcreteType : AbstractObjectLogicalElementWithSubRequirements<SourceType, ConcreteType>
     {
-        protected AbstractObjectLogicalElementWithSubRequirements(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        protected AbstractObjectLogicalElementWithSubRequirements(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            LogicalRequirements = innerElement.LogicalRequirements.Finalize(mappings);
+            LogicalRequirements = sourceElement.LogicalRequirements.Finalize(mappings);
         }
 
         /// <summary>

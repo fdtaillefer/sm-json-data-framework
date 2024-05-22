@@ -21,10 +21,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             Value = value;
         }
 
-        protected AbstractObjectLogicalElementWithInteger(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        protected AbstractObjectLogicalElementWithInteger(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Value = innerElement.Value;
+            Value = sourceElement.Value;
         }
 
         /// <summary>

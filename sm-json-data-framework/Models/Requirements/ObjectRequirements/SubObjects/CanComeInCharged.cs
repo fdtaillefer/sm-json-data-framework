@@ -35,13 +35,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool CanShinespark => AppliedLogicalOptions.CanShinespark;
 
-        public CanComeInCharged(UnfinalizedCanComeInCharged innerElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public CanComeInCharged(UnfinalizedCanComeInCharged sourceElement, Action<CanComeInCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            FramesRemaining = innerElement.FramesRemaining;
-            ShinesparkFrames = innerElement.ShinesparkFrames;
-            FromNode = innerElement.FromNode.Finalize(mappings);
-            InRoomPath = innerElement.InRoomPath.AsReadOnly();
+            FramesRemaining = sourceElement.FramesRemaining;
+            ShinesparkFrames = sourceElement.ShinesparkFrames;
+            FromNode = sourceElement.FromNode.Finalize(mappings);
+            InRoomPath = sourceElement.InRoomPath.AsReadOnly();
         }
 
         /// <summary>

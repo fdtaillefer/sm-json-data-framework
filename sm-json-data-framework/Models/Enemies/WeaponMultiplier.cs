@@ -11,12 +11,12 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class WeaponMultiplier : AbstractModelElement<UnfinalizedWeaponMultiplier, WeaponMultiplier>
     {
-        public WeaponMultiplier(UnfinalizedWeaponMultiplier innerElement, Action<WeaponMultiplier> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public WeaponMultiplier(UnfinalizedWeaponMultiplier sourceElement, Action<WeaponMultiplier> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Multiplier = innerElement.Multiplier;
-            DamagePerShot = innerElement.DamagePerShot;
-            Weapon = innerElement.Weapon.Finalize(mappings);
+            Multiplier = sourceElement.Multiplier;
+            DamagePerShot = sourceElement.DamagePerShot;
+            Weapon = sourceElement.Weapon.Finalize(mappings);
         }
 
         /// <summary>

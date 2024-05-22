@@ -12,11 +12,11 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class EnemyDimensions : AbstractModelElement<UnfinalizedEnemyDimensions, EnemyDimensions>
     {
-        public EnemyDimensions(UnfinalizedEnemyDimensions innerElement, Action<EnemyDimensions> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public EnemyDimensions(UnfinalizedEnemyDimensions sourceElement, Action<EnemyDimensions> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Height = innerElement.Height;
-            Width = innerElement.Width;
+            Height = sourceElement.Height;
+            Width = sourceElement.Width;
         }
 
         /// <summary>

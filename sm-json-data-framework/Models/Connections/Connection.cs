@@ -13,12 +13,12 @@ namespace sm_json_data_framework.Models.Connections
     /// </summary>
     public class Connection : AbstractModelElement<UnfinalizedConnection, Connection>
     {
-        public Connection(UnfinalizedConnection innerElement, Action<Connection> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Connection(UnfinalizedConnection sourceElement, Action<Connection> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            ConnectionType = innerElement.ConnectionType;
-            FromNode = innerElement.FromNode.Finalize(mappings);
-            ToNode = innerElement.ToNode.Finalize(mappings);
+            ConnectionType = sourceElement.ConnectionType;
+            FromNode = sourceElement.FromNode.Finalize(mappings);
+            ToNode = sourceElement.ToNode.Finalize(mappings);
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
     /// </summary>
     public class PreviousStratProperty : AbstractObjectLogicalElementWithStrings<UnfinalizedPreviousStratProperty, PreviousStratProperty>
     {
-        public PreviousStratProperty(UnfinalizedPreviousStratProperty innerElement, Action<PreviousStratProperty> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public PreviousStratProperty(UnfinalizedPreviousStratProperty sourceElement, Action<PreviousStratProperty> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
             
         }

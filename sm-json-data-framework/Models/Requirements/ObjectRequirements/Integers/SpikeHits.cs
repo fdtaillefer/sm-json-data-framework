@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class SpikeHits : AbstractDamageNumericalValueLogicalElement<UnfinalizedSpikeHits, SpikeHits>
     {
-        public SpikeHits(UnfinalizedSpikeHits innerElement, Action<SpikeHits> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public SpikeHits(UnfinalizedSpikeHits sourceElement, Action<SpikeHits> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

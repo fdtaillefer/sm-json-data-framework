@@ -14,10 +14,10 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class AmmoDrain : AbstractObjectLogicalElement<UnfinalizedAmmoDrain, AmmoDrain>
     {
-        public AmmoDrain(UnfinalizedAmmoDrain innerElement, Action<AmmoDrain> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public AmmoDrain(UnfinalizedAmmoDrain sourceElement, Action<AmmoDrain> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
-            AmmoType = innerElement.AmmoType;
-            Count = innerElement.Count;
+            AmmoType = sourceElement.AmmoType;
+            Count = sourceElement.Count;
         }
 
         /// <summary>

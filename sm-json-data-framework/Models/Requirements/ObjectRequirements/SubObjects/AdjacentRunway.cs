@@ -18,15 +18,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class AdjacentRunway : AbstractObjectLogicalElement<UnfinalizedAdjacentRunway, AdjacentRunway>
     {
-        public AdjacentRunway(UnfinalizedAdjacentRunway innerElement, Action<AdjacentRunway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public AdjacentRunway(UnfinalizedAdjacentRunway sourceElement, Action<AdjacentRunway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            UsedTiles = innerElement.UsedTiles;
-            UseFrames = innerElement.UseFrames;
-            OverrideRunwayRequirements = innerElement.OverrideRunwayRequirements;
-            FromNode = innerElement.FromNode.Finalize(mappings);
-            InRoomPath = innerElement.InRoomPath.AsReadOnly();
-            Physics = innerElement.Physics.AsReadOnly();
+            UsedTiles = sourceElement.UsedTiles;
+            UseFrames = sourceElement.UseFrames;
+            OverrideRunwayRequirements = sourceElement.OverrideRunwayRequirements;
+            FromNode = sourceElement.FromNode.Finalize(mappings);
+            InRoomPath = sourceElement.InRoomPath.AsReadOnly();
+            Physics = sourceElement.Physics.AsReadOnly();
         }
 
         /// <summary>

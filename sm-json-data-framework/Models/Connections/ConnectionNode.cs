@@ -15,15 +15,15 @@ namespace sm_json_data_framework.Models.Connections
     /// </summary>
     public class ConnectionNode : AbstractModelElement<UnfinalizedConnectionNode, ConnectionNode>
     {
-        public ConnectionNode(UnfinalizedConnectionNode innerElement, Action<ConnectionNode> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public ConnectionNode(UnfinalizedConnectionNode sourceElement, Action<ConnectionNode> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
-            Area = innerElement.Area;
-            Subarea = innerElement.Subarea;
-            Roomid = innerElement.Roomid;
-            RoomName = innerElement.RoomName;
-            Nodeid = innerElement.Nodeid;
-            NodeName = innerElement.NodeName;
-            Position = innerElement.Position;
+            Area = sourceElement.Area;
+            Subarea = sourceElement.Subarea;
+            Roomid = sourceElement.Roomid;
+            RoomName = sourceElement.RoomName;
+            Nodeid = sourceElement.Nodeid;
+            NodeName = sourceElement.NodeName;
+            Position = sourceElement.Position;
         }
 
         /// <summary>

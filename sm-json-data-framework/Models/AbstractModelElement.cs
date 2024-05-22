@@ -22,7 +22,7 @@ namespace sm_json_data_framework.Models
 
         }
 
-        protected AbstractModelElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
+        protected AbstractModelElement(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback)
         {
             mappingsInsertionCallback.Invoke((ConcreteType)this);
         }

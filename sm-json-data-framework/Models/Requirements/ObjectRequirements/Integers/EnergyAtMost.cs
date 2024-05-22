@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class EnergyAtMost : AbstractDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>
     {
-        public EnergyAtMost(UnfinalizedEnergyAtMost innerElement, Action<EnergyAtMost> mappingsInsertionCallback) 
-            : base(innerElement, mappingsInsertionCallback)
+        public EnergyAtMost(UnfinalizedEnergyAtMost sourceElement, Action<EnergyAtMost> mappingsInsertionCallback) 
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

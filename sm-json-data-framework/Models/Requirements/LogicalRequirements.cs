@@ -31,10 +31,10 @@ namespace sm_json_data_framework.Models.Requirements
             LogicalElements = logicalElements;
         }
 
-        public LogicalRequirements(UnfinalizedLogicalRequirements innerElement, Action<LogicalRequirements> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public LogicalRequirements(UnfinalizedLogicalRequirements sourceElement, Action<LogicalRequirements> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            LogicalElements = innerElement.LogicalElements.Select(unfinalized => unfinalized.FinalizeUntypedLogicalElement(mappings)).ToList().AsReadOnly();
+            LogicalElements = sourceElement.LogicalElements.Select(unfinalized => unfinalized.FinalizeUntypedLogicalElement(mappings)).ToList().AsReadOnly();
         }
 
         public IReadOnlyList<ILogicalElement> LogicalElements { get; }

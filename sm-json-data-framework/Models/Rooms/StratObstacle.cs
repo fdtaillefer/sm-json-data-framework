@@ -18,13 +18,13 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class StratObstacle : AbstractModelElement<UnfinalizedStratObstacle, StratObstacle>
     {
-        public StratObstacle(UnfinalizedStratObstacle innerElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public StratObstacle(UnfinalizedStratObstacle sourceElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Obstacle = innerElement.Obstacle.Finalize(mappings);
-            Requires = innerElement.Requires.Finalize(mappings);
-            Bypass = innerElement.Bypass?.Finalize(mappings);
-            AdditionalObstacles = innerElement.AdditionalObstacles.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
+            Obstacle = sourceElement.Obstacle.Finalize(mappings);
+            Requires = sourceElement.Requires.Finalize(mappings);
+            Bypass = sourceElement.Bypass?.Finalize(mappings);
+            AdditionalObstacles = sourceElement.AdditionalObstacles.Select(obstacle => obstacle.Finalize(mappings)).ToDictionary(obstacle => obstacle.Id).AsReadOnly();
         }
 
         /// <summary>

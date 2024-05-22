@@ -30,21 +30,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public decimal TilesToShineCharge => AppliedLogicalOptions.TilesToShineCharge;
 
-        public CanLeaveCharged(UnfinalizedCanLeaveCharged innerElement, Action<CanLeaveCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public CanLeaveCharged(UnfinalizedCanLeaveCharged sourceElement, Action<CanLeaveCharged> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            UsedTiles = innerElement.UsedTiles;
-            FramesRemaining = innerElement.FramesRemaining;
-            ShinesparkFrames = innerElement.ShinesparkFrames;
-            OpenEnds = innerElement.OpenEnds;
-            GentleUpTiles = innerElement.GentleUpTiles;
-            GentleDownTiles = innerElement.GentleDownTiles;
-            SteepUpTiles = innerElement.SteepUpTiles;
-            SteepDownTiles = innerElement.SteepDownTiles;
-            StartingDownTiles = innerElement.StartingDownTiles;
-            InitiateRemotely = innerElement.InitiateRemotely?.Finalize(mappings);
-            Strats = innerElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            Node = innerElement.Node.Finalize(mappings);
+            UsedTiles = sourceElement.UsedTiles;
+            FramesRemaining = sourceElement.FramesRemaining;
+            ShinesparkFrames = sourceElement.ShinesparkFrames;
+            OpenEnds = sourceElement.OpenEnds;
+            GentleUpTiles = sourceElement.GentleUpTiles;
+            GentleDownTiles = sourceElement.GentleDownTiles;
+            SteepUpTiles = sourceElement.SteepUpTiles;
+            SteepDownTiles = sourceElement.SteepDownTiles;
+            StartingDownTiles = sourceElement.StartingDownTiles;
+            InitiateRemotely = sourceElement.InitiateRemotely?.Finalize(mappings);
+            Strats = sourceElement.Strats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Node = sourceElement.Node.Finalize(mappings);
         }
 
         public int Length => UsedTiles;

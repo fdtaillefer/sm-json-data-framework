@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class ThornHits : AbstractDamageNumericalValueLogicalElement<UnfinalizedThornHits, ThornHits>
     {
-        public ThornHits(UnfinalizedThornHits innerElement, Action<ThornHits> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public ThornHits(UnfinalizedThornHits sourceElement, Action<ThornHits> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

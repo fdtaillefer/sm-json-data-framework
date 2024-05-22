@@ -15,14 +15,14 @@ namespace sm_json_data_framework.Models.Rooms
     /// </summary>
     public class StratFailure : AbstractModelElement<UnfinalizedStratFailure, StratFailure>
     {
-        public StratFailure(UnfinalizedStratFailure innerElement, Action<StratFailure> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public StratFailure(UnfinalizedStratFailure sourceElement, Action<StratFailure> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Name = innerElement.Name;
-            Softlock = innerElement.Softlock;
-            ClearsPreviousNode = innerElement.ClearsPreviousNode;
-            LeadsToNode = innerElement.LeadsToNode?.Finalize(mappings);
-            Cost = innerElement.Cost.Finalize(mappings);
+            Name = sourceElement.Name;
+            Softlock = sourceElement.Softlock;
+            ClearsPreviousNode = sourceElement.ClearsPreviousNode;
+            LeadsToNode = sourceElement.LeadsToNode?.Finalize(mappings);
+            Cost = sourceElement.Cost.Finalize(mappings);
         }
 
         /// <summary>

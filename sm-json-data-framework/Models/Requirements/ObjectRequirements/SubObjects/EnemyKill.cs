@@ -14,15 +14,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 {
     public class EnemyKill : AbstractObjectLogicalElement<UnfinalizedEnemyKill, EnemyKill>
     {
-        public EnemyKill(UnfinalizedEnemyKill innerElement, Action<EnemyKill> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public EnemyKill(UnfinalizedEnemyKill sourceElement, Action<EnemyKill> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            GroupedEnemyNames = innerElement.GroupedEnemyNames.Select(group => group.AsReadOnly()).ToList().AsReadOnly();
-            GroupedEnemies = innerElement.GroupedEnemies.Select(group => group.Select(enemy => enemy.Finalize(mappings)).ToList().AsReadOnly()).ToList().AsReadOnly();
-            ExplicitWeapons = innerElement.ExplicitWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
-            ExcludedWeapons = innerElement.ExcludedWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
-            ValidWeapons = innerElement.ValidWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
-            FarmableAmmo = innerElement.FarmableAmmo.ToHashSet().AsReadOnly();
+            GroupedEnemyNames = sourceElement.GroupedEnemyNames.Select(group => group.AsReadOnly()).ToList().AsReadOnly();
+            GroupedEnemies = sourceElement.GroupedEnemies.Select(group => group.Select(enemy => enemy.Finalize(mappings)).ToList().AsReadOnly()).ToList().AsReadOnly();
+            ExplicitWeapons = sourceElement.ExplicitWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            ExcludedWeapons = sourceElement.ExcludedWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            ValidWeapons = sourceElement.ValidWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            FarmableAmmo = sourceElement.FarmableAmmo.ToHashSet().AsReadOnly();
         }
 
         public IReadOnlyList<IReadOnlyList<string>> GroupedEnemyNames { get; }

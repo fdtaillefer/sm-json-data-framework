@@ -16,12 +16,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
     /// </summary>
     public class EnemyDamage : AbstractObjectLogicalElement<UnfinalizedEnemyDamage, EnemyDamage>
     {
-        public EnemyDamage(UnfinalizedEnemyDamage innerElement, Action<EnemyDamage> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public EnemyDamage(UnfinalizedEnemyDamage sourceElement, Action<EnemyDamage> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Hits = innerElement.Hits;
-            Enemy = innerElement.Enemy.Finalize(mappings);
-            Attack = innerElement.Attack.Finalize(mappings);
+            Hits = sourceElement.Hits;
+            Enemy = sourceElement.Enemy.Finalize(mappings);
+            Attack = sourceElement.Attack.Finalize(mappings);
         }
 
         /// <summary>

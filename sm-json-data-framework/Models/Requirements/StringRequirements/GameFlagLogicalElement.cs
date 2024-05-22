@@ -16,10 +16,10 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
     /// </summary>
     public class GameFlagLogicalElement : AbstractStringLogicalElement<UnfinalizedGameFlagLogicalElement, GameFlagLogicalElement>
     {
-        public GameFlagLogicalElement(UnfinalizedGameFlagLogicalElement innerElement, Action<GameFlagLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public GameFlagLogicalElement(UnfinalizedGameFlagLogicalElement sourceElement, Action<GameFlagLogicalElement> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            GameFlag = innerElement.GameFlag.Finalize(mappings);
+            GameFlag = sourceElement.GameFlag.Finalize(mappings);
         }
 
         /// <summary>

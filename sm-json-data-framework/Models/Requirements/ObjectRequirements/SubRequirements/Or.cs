@@ -9,8 +9,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
 {
     public class Or : AbstractObjectLogicalElementWithSubRequirements<UnfinalizedOr, Or>
     {
-        public Or(UnfinalizedOr innerElement, Action<Or> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback, mappings)
+        public Or(UnfinalizedOr sourceElement, Action<Or> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback, mappings)
         {
 
         }

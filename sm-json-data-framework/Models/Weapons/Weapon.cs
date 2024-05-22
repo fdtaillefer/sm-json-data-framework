@@ -14,18 +14,18 @@ namespace sm_json_data_framework.Models.Weapons
     /// </summary>
     public class Weapon : AbstractModelElement<UnfinalizedWeapon, Weapon>
     {
-        public Weapon(UnfinalizedWeapon innerElement, Action<Weapon> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Weapon(UnfinalizedWeapon sourceElement, Action<Weapon> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Id = innerElement.Id;
-            Name = innerElement.Name;
-            Damage = innerElement.Damage;
-            CooldownFrames = innerElement.CooldownFrames;
-            Situational = innerElement.Situational;
-            HitsGroup = innerElement.HitsGroup;
-            UseRequires = innerElement.UseRequires.Finalize(mappings);
-            ShotRequires = innerElement.ShotRequires.Finalize(mappings);
-            Categories = innerElement.Categories.AsReadOnly();
+            Id = sourceElement.Id;
+            Name = sourceElement.Name;
+            Damage = sourceElement.Damage;
+            CooldownFrames = sourceElement.CooldownFrames;
+            Situational = sourceElement.Situational;
+            HitsGroup = sourceElement.HitsGroup;
+            UseRequires = sourceElement.UseRequires.Finalize(mappings);
+            ShotRequires = sourceElement.ShotRequires.Finalize(mappings);
+            Categories = sourceElement.Categories.AsReadOnly();
         }
 
         /// <summary>

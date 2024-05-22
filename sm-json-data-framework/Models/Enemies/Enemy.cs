@@ -19,23 +19,23 @@ namespace sm_json_data_framework.Models.Enemies
     /// </summary>
     public class Enemy : AbstractModelElement<UnfinalizedEnemy, Enemy>
     {
-        public Enemy(UnfinalizedEnemy innerElement, Action<Enemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public Enemy(UnfinalizedEnemy sourceElement, Action<Enemy> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            Id = innerElement.Id;
-            Name = innerElement.Name;
-            Hp = innerElement.Hp;
-            AmountOfDrops = innerElement.AmountOfDrops;
-            Drops = innerElement.Drops;
-            FarmableDrops = innerElement.FarmableDrops;
-            Freezable = innerElement.Freezable;
-            Grapplable = innerElement.Grapplable;
-            Attacks = innerElement.Attacks.Values.Select(attack => attack.Finalize(mappings)).ToDictionary(attack => attack.Name);
-            Dimensions = innerElement.Dimensions.Finalize(mappings);
-            InvulnerableWeapons = innerElement.InvulnerableWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
-            WeaponMultipliers = innerElement.WeaponMultipliers.Select(kvp => new KeyValuePair<string, WeaponMultiplier>(kvp.Key, kvp.Value.Finalize(mappings))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
-            WeaponSusceptibilities = innerElement.WeaponSusceptibilities.Select(kvp => new KeyValuePair<string, WeaponSusceptibility>(kvp.Key, kvp.Value.Finalize(mappings))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
-            Areas = innerElement.Areas.AsReadOnly();
+            Id = sourceElement.Id;
+            Name = sourceElement.Name;
+            Hp = sourceElement.Hp;
+            AmountOfDrops = sourceElement.AmountOfDrops;
+            Drops = sourceElement.Drops;
+            FarmableDrops = sourceElement.FarmableDrops;
+            Freezable = sourceElement.Freezable;
+            Grapplable = sourceElement.Grapplable;
+            Attacks = sourceElement.Attacks.Values.Select(attack => attack.Finalize(mappings)).ToDictionary(attack => attack.Name);
+            Dimensions = sourceElement.Dimensions.Finalize(mappings);
+            InvulnerableWeapons = sourceElement.InvulnerableWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
+            WeaponMultipliers = sourceElement.WeaponMultipliers.Select(kvp => new KeyValuePair<string, WeaponMultiplier>(kvp.Key, kvp.Value.Finalize(mappings))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
+            WeaponSusceptibilities = sourceElement.WeaponSusceptibilities.Select(kvp => new KeyValuePair<string, WeaponSusceptibility>(kvp.Key, kvp.Value.Finalize(mappings))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
+            Areas = sourceElement.Areas.AsReadOnly();
         }
 
         /// <summary>

@@ -33,17 +33,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public bool CanShinespark => AppliedLogicalOptions.CanShinespark;
 
-        public CanShineCharge(UnfinalizedCanShineCharge innerElement, Action<CanShineCharge> mappingsInsertionCallback) : base(innerElement, mappingsInsertionCallback)
+        public CanShineCharge(UnfinalizedCanShineCharge sourceElement, Action<CanShineCharge> mappingsInsertionCallback) : base(sourceElement, mappingsInsertionCallback)
         {
-            Length = innerElement.Length;
-            EndingUpTiles = innerElement.EndingUpTiles;
-            GentleUpTiles = innerElement.GentleUpTiles;
-            GentleDownTiles = innerElement.GentleDownTiles;
-            SteepUpTiles = innerElement.SteepUpTiles;
-            SteepDownTiles = innerElement.SteepDownTiles;
-            StartingDownTiles = innerElement.StartingDownTiles;
-            OpenEnds = innerElement.OpenEnds;
-            ShinesparkFrames = innerElement.ShinesparkFrames;
+            Length = sourceElement.Length;
+            EndingUpTiles = sourceElement.EndingUpTiles;
+            GentleUpTiles = sourceElement.GentleUpTiles;
+            GentleDownTiles = sourceElement.GentleDownTiles;
+            SteepUpTiles = sourceElement.SteepUpTiles;
+            SteepDownTiles = sourceElement.SteepDownTiles;
+            StartingDownTiles = sourceElement.StartingDownTiles;
+            OpenEnds = sourceElement.OpenEnds;
+            ShinesparkFrames = sourceElement.ShinesparkFrames;
         }
 
         public int Length { get; }

@@ -17,8 +17,8 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
 
         }
 
-        public NeverLogicalElement(UnfinalizedNeverLogicalElement innerElement, Action<NeverLogicalElement> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public NeverLogicalElement(UnfinalizedNeverLogicalElement sourceElement, Action<NeverLogicalElement> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

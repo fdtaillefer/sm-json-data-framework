@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
     /// </summary>
     public class DraygonElectricityFrames : AbstractDamageNumericalValueLogicalElement<UnfinalizedDraygonElectricityFrames, DraygonElectricityFrames>
     {
-        public DraygonElectricityFrames(UnfinalizedDraygonElectricityFrames innerElement, Action<DraygonElectricityFrames> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public DraygonElectricityFrames(UnfinalizedDraygonElectricityFrames sourceElement, Action<DraygonElectricityFrames> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
 
         }

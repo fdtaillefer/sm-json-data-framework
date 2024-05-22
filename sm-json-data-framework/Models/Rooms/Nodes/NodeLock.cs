@@ -19,16 +19,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class NodeLock : AbstractModelElement<UnfinalizedNodeLock, NodeLock>
     {
-        public NodeLock(UnfinalizedNodeLock innerElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
-            : base(innerElement, mappingsInsertionCallback)
+        public NodeLock(UnfinalizedNodeLock sourceElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
+            : base(sourceElement, mappingsInsertionCallback)
         {
-            LockType = innerElement.LockType;
-            Name = innerElement.Name;
-            Lock = innerElement.Lock.Finalize(mappings);
-            UnlockStrats = innerElement.UnlockStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            BypassStrats = innerElement.BypassStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
-            Yields = innerElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
-            Node = innerElement.Node.Finalize(mappings);
+            LockType = sourceElement.LockType;
+            Name = sourceElement.Name;
+            Lock = sourceElement.Lock.Finalize(mappings);
+            UnlockStrats = sourceElement.UnlockStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            BypassStrats = sourceElement.BypassStrats.Values.Select(strat => strat.Finalize(mappings)).ToDictionary(strat => strat.Name).AsReadOnly();
+            Yields = sourceElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
+            Node = sourceElement.Node.Finalize(mappings);
         }
 
         /// <summary>

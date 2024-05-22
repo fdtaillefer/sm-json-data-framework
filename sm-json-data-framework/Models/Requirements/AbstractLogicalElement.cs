@@ -25,8 +25,8 @@ namespace sm_json_data_framework.Models.Requirements
 
         }
 
-        public AbstractLogicalElement(SourceType innerElement, Action<ConcreteType> mappingsInsertionCallback)
-            : base(innerElement, mappingsInsertionCallback)
+        public AbstractLogicalElement(SourceType sourceElement, Action<ConcreteType> mappingsInsertionCallback)
+            : base(sourceElement, mappingsInsertionCallback)
         {
             
         }
