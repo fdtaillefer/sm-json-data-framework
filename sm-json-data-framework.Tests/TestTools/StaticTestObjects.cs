@@ -19,7 +19,8 @@ namespace sm_json_data_framework.Tests.TestTools
         /// <summary>
         /// A mostly unmodifiable SuperMetroidModel, created with no customizations - so it uses all default rules and logical elements.
         /// Though mostly unmodifiable, there is a risk of side-effects if you apply logical options on this and don't undo them, so take care with that.
+        /// It's strongly recommended to use a different instance instead.
         /// </summary>
-        public static readonly SuperMetroidModel UnmodifiableModel = new SuperMetroidModel(new UnfinalizedSuperMetroidModel(RawModel));
+        public static readonly SuperMetroidModel UnmodifiableModel = new UnfinalizedSuperMetroidModel(RawModel).Finalize();
     }
 }

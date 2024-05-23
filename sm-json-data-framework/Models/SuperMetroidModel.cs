@@ -508,6 +508,17 @@ namespace sm_json_data_framework.Models
             InitializeBaseModel();
         }
 
+        /// <summary>
+        /// Finalizes this model into a SuperMetroidModel, whose rom-equivalent data can no longer be modified.
+        /// </summary>
+        /// <param name="logicalOptions">A set of logical options to apply.
+        /// Can be null, in which case default options (allowing pretty much everything) will be used.</param>
+        /// <returns></returns>
+        public SuperMetroidModel Finalize(LogicalOptions logicalOptions = null)
+        {
+            return new SuperMetroidModel(this, logicalOptions);
+        }
+
         // Make this private once we get rid of the ModelReader code?
         /// <summary>
         /// <para>

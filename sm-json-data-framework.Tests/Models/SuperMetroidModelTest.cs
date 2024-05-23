@@ -28,7 +28,7 @@ namespace sm_json_data_framework.Tests.Models
 {
     public class SuperMetroidModelTest
     {
-        private static SuperMetroidModel ModelForApplyLogicalOptions = new SuperMetroidModel(new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel));
+        private static SuperMetroidModel ModelForApplyLogicalOptions = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel).Finalize();
 
         #region Tests for Ctor(SuperMetroidModel)
 
