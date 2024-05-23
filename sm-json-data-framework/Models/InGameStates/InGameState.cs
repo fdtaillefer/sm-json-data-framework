@@ -206,7 +206,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
 
-        protected IDictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
+        protected Dictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
         public ReadOnlyDictionary<string, GameFlag> ActiveGameFlags => InternalActiveGameFlags.AsReadOnly();
 
         public Dictionary<string, GameFlag> GetActiveGameFlagsExceptIn(ReadOnlyInGameState other)

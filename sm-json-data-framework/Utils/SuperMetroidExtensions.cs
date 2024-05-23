@@ -96,112 +96,112 @@ namespace sm_json_data_framework.Utils
             return elements.Where(element => element.LogicallyRelevant);
         }
 
-        public static bool ContainsFlag(this IDictionary<string, UnfinalizedGameFlag> flagDictionary, string gameFlagName)
+        public static bool ContainsFlag(this IReadOnlyDictionary<string, UnfinalizedGameFlag> flagDictionary, string gameFlagName)
         {
             return flagDictionary.ContainsKey(gameFlagName);
         }
 
-        public static bool ContainsFlag(this IDictionary<string, UnfinalizedGameFlag> flagDictionary, UnfinalizedGameFlag gameFlag)
+        public static bool ContainsFlag(this IReadOnlyDictionary<string, UnfinalizedGameFlag> flagDictionary, UnfinalizedGameFlag gameFlag)
         {
             return flagDictionary.ContainsKey(gameFlag.Name);
         }
 
-        public static bool ContainsLock(this IDictionary<string, UnfinalizedNodeLock> lockDictionary, string lockName)
+        public static bool ContainsLock(this IReadOnlyDictionary<string, UnfinalizedNodeLock> lockDictionary, string lockName)
         {
             return lockDictionary.ContainsKey(lockName);
         }
 
-        public static bool ContainsLock(this IDictionary<string, UnfinalizedNodeLock> lockDictionary, UnfinalizedNodeLock nodeLock)
+        public static bool ContainsLock(this IReadOnlyDictionary<string, UnfinalizedNodeLock> lockDictionary, UnfinalizedNodeLock nodeLock)
         {
             return lockDictionary.ContainsKey(nodeLock.Name);
         }
 
-        public static bool ContainsNode(this IDictionary<string, UnfinalizedRoomNode> nodeDictionary, string nodeName)
+        public static bool ContainsNode(this IReadOnlyDictionary<string, UnfinalizedRoomNode> nodeDictionary, string nodeName)
         {
             return nodeDictionary.ContainsKey(nodeName);
         }
 
-        public static bool ContainsNode(this IDictionary<string, UnfinalizedRoomNode> nodeDictionary, UnfinalizedRoomNode node)
+        public static bool ContainsNode(this IReadOnlyDictionary<string, UnfinalizedRoomNode> nodeDictionary, UnfinalizedRoomNode node)
         {
             return nodeDictionary.ContainsKey(node.Name);
         }
 
-        public static bool ContainsItem(this IDictionary<string, UnfinalizedItem> itemDictionary, string itemName)
+        public static bool ContainsItem(this IReadOnlyDictionary<string, UnfinalizedItem> itemDictionary, string itemName)
         {
             return itemDictionary.ContainsKey(itemName);
         }
 
-        public static bool ContainsItem(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
+        public static bool ContainsItem(this IReadOnlyDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsKey(item.Name);
         }
 
-        public static bool ContainsVariaSuit(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
+        public static bool ContainsVariaSuit(this IReadOnlyDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.VARIA_SUIT_NAME);
         }
 
-        public static bool ContainsGravitySuit(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
+        public static bool ContainsGravitySuit(this IReadOnlyDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
         }
 
-        public static bool ContainsSpeedBooster(this IDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
+        public static bool ContainsSpeedBooster(this IReadOnlyDictionary<string, UnfinalizedItem> itemDictionary, UnfinalizedItem item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }
 
-        public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, string gameFlagName)
+        public static bool ContainsFlag(this IReadOnlyDictionary<string, GameFlag> flagDictionary, string gameFlagName)
         {
             return flagDictionary.ContainsKey(gameFlagName);
         }
 
-        public static bool ContainsFlag(this IDictionary<string, GameFlag> flagDictionary, GameFlag gameFlag)
+        public static bool ContainsFlag(this IReadOnlyDictionary<string, GameFlag> flagDictionary, GameFlag gameFlag)
         {
             return flagDictionary.ContainsKey(gameFlag.Name);
         }
 
-        public static bool ContainsLock(this IDictionary<string, NodeLock> lockDictionary, string lockName)
+        public static bool ContainsLock(this IReadOnlyDictionary<string, NodeLock> lockDictionary, string lockName)
         {
             return lockDictionary.ContainsKey(lockName);
         }
 
-        public static bool ContainsLock(this IDictionary<string, NodeLock> lockDictionary, NodeLock nodeLock)
+        public static bool ContainsLock(this IReadOnlyDictionary<string, NodeLock> lockDictionary, NodeLock nodeLock)
         {
             return lockDictionary.ContainsKey(nodeLock.Name);
         }
 
-        public static bool ContainsNode(this IDictionary<string, RoomNode> nodeDictionary, string nodeName)
+        public static bool ContainsNode(this IReadOnlyDictionary<string, RoomNode> nodeDictionary, string nodeName)
         {
             return nodeDictionary.ContainsKey(nodeName);
         }
 
-        public static bool ContainsNode(this IDictionary<string, RoomNode> nodeDictionary, RoomNode node)
+        public static bool ContainsNode(this IReadOnlyDictionary<string, RoomNode> nodeDictionary, RoomNode node)
         {
             return nodeDictionary.ContainsKey(node.Name);
         }
 
-        public static bool ContainsItem(this IDictionary<string, Item> itemDictionary, string itemName)
+        public static bool ContainsItem(this IReadOnlyDictionary<string, Item> itemDictionary, string itemName)
         {
             return itemDictionary.ContainsKey(itemName);
         }
 
-        public static bool ContainsItem(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsItem(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
         {
             return itemDictionary.ContainsKey(item.Name);
         }
 
-        public static bool ContainsVariaSuit(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsVariaSuit(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.VARIA_SUIT_NAME);
         }
 
-        public static bool ContainsGravitySuit(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsGravitySuit(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
         }
 
-        public static bool ContainsSpeedBooster(this IDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsSpeedBooster(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }

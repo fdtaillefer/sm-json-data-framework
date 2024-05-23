@@ -71,7 +71,7 @@ namespace sm_json_data_framework.Models.GameFlags
         protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // Game flag is always enabled if the game always starts with it
-            return AppliedLogicalOptions.StartConditions.StartingGameFlags.ContainsKey(Name);
+            return AppliedLogicalOptions.StartConditions.StartingGameFlags.ContainsFlag(this);
         }
 
         /// <summary>
