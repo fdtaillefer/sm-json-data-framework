@@ -77,7 +77,7 @@ namespace sm_json_data_framework.Models
             Rules = sourceModel.Rules;
             InternalStartConditions = sourceModel.StartConditions.Finalize(mappings);
             // Initialize logical state so that all elements of the model always have logical options available
-            ApplyLogicalOptions(logicalOptions);
+            ApplyLogicalOptions(logicalOptions, mappings);
         }
 
         /// <summary>
@@ -195,20 +195,31 @@ namespace sm_json_data_framework.Models
         }
 
         /// <summary>
-        /// Clones the provided LogicalOptions, and applies then to this model.
+        /// Internal method for applying logical options on this model.
+        /// This is able to interpret <see cref="UnfinalizedStartConditions"/> in the logical options.
         /// </summary>
-        /// <param name="logicalOptions">The LogicalOptions to apply.
+        /// <param name="logicalOptions">The LogicalOptions to apply.</param>
+        /// <param name="mappings">If model finalization is ongoing, these are the mappings used for it. Leave null otherwise.</param>
         /// If null, this instead removes all alterations made by logical options, by applying default logical options.</param>
-        public void ApplyLogicalOptions(LogicalOptions logicalOptions)
+        private void ApplyLogicalOptions(LogicalOptions logicalOptions, ModelFinalizationMappings mappings)
         {
             // Clone the logical options. If null, clone the default logical options instead.
-            LogicalOptions logicalOptionsToApply = (logicalOptions ?? LogicalOptions.DefaultLogicalOptions).Clone();
+            // Once we've cloned, we're free to make any alterations we want without impacting the calling.
+            logicalOptions = (logicalOptions ?? LogicalOptions.DefaultLogicalOptions).Clone();
+
+            // If we're applying logical options during model finalization, then we must interpret only the options' UnfinalizedStartConditions
+            // If it's not during model finalization, then we must interpret only the options' StartConditions
+            if (mappings != null)
+            {
+                logicalOptions.InternalStartConditions = logicalOptions.InternalUnfinalizedStartConditions?.Finalize(mappings);
+            }
+            logicalOptions.InternalUnfinalizedStartConditions = null;
 
             // We want the operation that applies logical options to have access to whatever the StartConditions are,
             // so even though they're optional, we'll replace them with the model's internal StartConditions if null
-            logicalOptionsToApply.InternalStartConditions ??= InternalStartConditions;
+            logicalOptions.InternalStartConditions ??= InternalStartConditions;
 
-            AppliedLogicalOptions = logicalOptionsToApply?.AsReadOnly();
+            AppliedLogicalOptions = logicalOptions.AsReadOnly();
 
             foreach (GameFlag gameFlag in GameFlags.Values)
             {
@@ -249,6 +260,16 @@ namespace sm_json_data_framework.Models
             {
                 room.ApplyLogicalOptions(AppliedLogicalOptions);
             }
+        }
+
+        /// <summary>
+        /// Clones the provided LogicalOptions, and applies them to this model.
+        /// </summary>
+        /// <param name="logicalOptions">The LogicalOptions to apply.
+        /// If null, this instead removes all alterations made by logical options, by applying default logical options.</param>
+        public void ApplyLogicalOptions(LogicalOptions logicalOptions)
+        {
+            ApplyLogicalOptions(logicalOptions, null);
         }
 
         /// <summary>

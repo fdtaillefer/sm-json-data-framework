@@ -71,6 +71,7 @@ namespace sm_json_data_framework.Options
             AcidLeniencyMultiplier = other.AcidLeniencyMultiplier;
             InternalSpawnerFarmingOptions = other.InternalSpawnerFarmingOptions.Clone();
             InternalStartConditions = other.InternalStartConditions?.Clone();
+            InternalUnfinalizedStartConditions = other.InternalUnfinalizedStartConditions?.Clone();
         }
 
         public LogicalOptions Clone()
@@ -332,8 +333,23 @@ namespace sm_json_data_framework.Options
         public SpawnerFarmingOptions InternalSpawnerFarmingOptions { get; set; } = DefaultSpawnerFarmingOptions.Clone();
         public ReadOnlySpawnerFarmingOptions SpawnerFarmingOptions => InternalSpawnerFarmingOptions.AsReadOnly();
 
+        /// <summary>
+        /// <para>
+        /// Start conditions that should be logically considered. If no start conditions are supplied, default start conditions will be used.
+        /// </para>
+        /// <para>
+        /// Note that when supplying start conditions for a model before it has been finalized, you should use the
+        /// <see cref="InternalUnfinalizedStartConditions"/> property instead.
+        /// </para>
+        /// </summary>
         public StartConditions InternalStartConditions { get; set; }
         public StartConditions StartConditions => InternalStartConditions;
+
+        /// <summary>
+        /// This property is used to communicate start conditions before a finalized model exists, with the intent to apply the start conditions during finalization.
+        /// If the finalized model already exists, this property is entirely ignored and only <see cref="InternalStartConditions"/> matters.
+        /// </summary>
+        public UnfinalizedStartConditions InternalUnfinalizedStartConditions { get; set; }
     }
 
     /// <summary>
