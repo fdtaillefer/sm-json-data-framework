@@ -20,12 +20,12 @@ namespace sm_json_data_framework.Reading
 {
     public class ModelReaderTest
     {
-        #region Tests for ReadModel()
+        #region Tests for ReadUnfinalizedModel()
         [Fact]
-        public void ReadModel_ReadsAllData()
+        public void ReadUnfinalizedModel_ReadsAllData()
         {
             // When
-            UnfinalizedSuperMetroidModel model = ModelReader.ReadModel();
+            UnfinalizedSuperMetroidModel model = ModelReader.ReadUnfinalizedModel();
 
             // Expect
             // Room counts
@@ -107,10 +107,10 @@ namespace sm_json_data_framework.Reading
         }
 
         [Fact]
-        public void ReadModel_UsesOptionalParameters()
+        public void ReadUnfinalizedModel_UsesOptionalParameters()
         {
             // When
-            UnfinalizedSuperMetroidModel model = ModelReader.ReadModel(rules: new RandoSuperMetroidRules(),
+            UnfinalizedSuperMetroidModel model = ModelReader.ReadUnfinalizedModel(rules: new RandoSuperMetroidRules(),
                 basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(), 
                 overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 

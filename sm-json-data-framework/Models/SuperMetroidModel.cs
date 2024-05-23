@@ -32,28 +32,6 @@ using System.Text.Json;
 
 namespace sm_json_data_framework.Models
 {
-    // STITCHME This idea doesn't belong here, but there' no place to put it yet.
-    // Maybe one way to go is figure out the direct requirements to get back to the start for all nodes, by moving backwards from the start.
-    // If we can remember this cost for every node, then it'd be easy to know at any time what is required to be able to get out after reaching it.
-    // And if we know we can get out, we know an acquired item, flag, or lock break is in logic.
-    // This should pretty much do every possible route and stop evaluating any branch once it reaches the same situation a second time.
-    // It can also stop evaluating anytime it reaches a point with a known escape that is strictly <= the current accumulated escape requirements.
-    // Doing this will also require the ability to simplify logical requirements.
-    //
-    // The thing this will not account for is indirect route that use refills - that's another level.
-    // I guess one way to do that would be to figure out the cost of reaching refill spots (maybe just from a given number of nodes or rooms away).
-    // Then we could pick out nodes whose escape resource cost is above a given threshold and evaluate the option of going to the refill + escaping.
-    // This will need a distinction between having X current resource and having a max of Y resource.
-    // Example: I'm sitting somewhere in Norfair. I need to have 240 current energy to reach a refill, then I need at least 412 max energy to escape from there.
-    //
-    // Once that's all done, there would still be a forward movement pass to reach absolute requirements for putting anything in full logic w/ included escape.
-    //
-    // The SMZ3 version of this would evaluate not only from the ship, but also from all cross-game portals, because reaching LttP should count as a successful escape.
-    // Should probably jump from one escape point to the next so that the later parts of one point's evaluation can run into the already-computed simpler escapes
-    // around the portals, and stop processing.
-    //
-    // This whole process can probably still be applied if I decide to preprocess rooms to eliminate issues of in-room movement with obstacles.
-
     /// <summary>
     /// <para>
     /// Represents a Super Metroid world, possibly altered by a set of logical options. Think of this as being able to represent the ROM of
@@ -398,6 +376,15 @@ namespace sm_json_data_framework.Models
         }
     }
 
+    /// <summary>
+    /// <para>
+    /// An unfinalized Super Metroid model, representing the game's ROM. It has fully-formed model elements that cross-reference each other, 
+    /// but allows modifications (at the caller's own risk of introducing inconsistencies). 
+    /// </para>
+    /// <para>
+    /// An UnfinalizedSuperMetroidModel can be finalized into a <see cref="SuperMetroidModel"/>.
+    /// </para>
+    /// </summary>
     public class UnfinalizedSuperMetroidModel
     {
         public UnfinalizedSuperMetroidModel()
