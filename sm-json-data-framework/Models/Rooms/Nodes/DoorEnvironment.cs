@@ -41,12 +41,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode Node { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // There's nothing that can make a door environment irrelevant
             return true;

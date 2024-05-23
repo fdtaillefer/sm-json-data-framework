@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -81,21 +82,21 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            Requires.ApplyLogicalOptions(logicalOptions);
-            Bypass?.ApplyLogicalOptions(logicalOptions);
-            Obstacle.ApplyLogicalOptions(logicalOptions);
+            Requires.ApplyLogicalOptions(logicalOptions, rules);
+            Bypass?.ApplyLogicalOptions(logicalOptions, rules);
+            Obstacle.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
-            LogicallyNeverFromHere = CalculateLogicallyNeverFromHere();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyNeverFromHere = CalculateLogicallyNeverFromHere(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A StratObstacle is always relevant - even if impossible because it blocks the path, and even if free because it's a way to destroy the obstacle.
             return true;
@@ -109,8 +110,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // This StratObstacle becomes impossible to fulfill ever if the obstacle can never be destroyed, and can't be bypassed from here
             bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
@@ -126,8 +128,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNeverFromHere"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNeverFromHere()
+        protected bool CalculateLogicallyNeverFromHere(SuperMetroidRules rules)
         {
             bool indestructibleHere = Obstacle.LogicallyIndestructible || Requires.LogicallyNever;
             bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;

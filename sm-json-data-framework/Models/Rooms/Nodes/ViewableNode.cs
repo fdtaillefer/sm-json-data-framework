@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,24 +33,24 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public IReadOnlyDictionary<string, Strat> Strats { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             foreach (Strat strat in Strats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions);
+                strat.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // If a viewableNode cannot be used, it may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // A viewableNode is impossible to use if it has no strats that can be executed
             return !Strats.Values.WhereLogicallyRelevant().Any();

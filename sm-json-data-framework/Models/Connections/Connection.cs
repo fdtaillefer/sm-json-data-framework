@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Connections;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,13 +37,13 @@ namespace sm_json_data_framework.Models.Connections
         /// </summary>
         public ConnectionNode ToNode { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            FromNode.ApplyLogicalOptions(logicalOptions);
-            ToNode.ApplyLogicalOptions(logicalOptions);
+            FromNode.ApplyLogicalOptions(logicalOptions, rules);
+            ToNode.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // Arguably a connection might not be relevant if on a node that's impossible to interact with,
             // but that's a matter of layout and not logic, and is out of scope here.

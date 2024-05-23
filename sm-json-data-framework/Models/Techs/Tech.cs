@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Techs;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,28 +47,28 @@ namespace sm_json_data_framework.Models.Techs
             return ExtensionTechs.SelectMany(tech => tech.Value.SelectWithExtensions()).Prepend(this).ToList();
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Propagate to requirements
-            Requires.ApplyLogicalOptions(logicalOptions);
+            Requires.ApplyLogicalOptions(logicalOptions, rules);
 
             // Don't propagate to extension techs. They don't "belong" to this, and they will depend on the logical state of this to be up-to-date
             // in order to update their own logical state, so we don't want to be in this halfway state when that happens.
             // This all assumes that no Tech can ever depend on itself by any circular logic.
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A tech that can't be executed may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
-            LogicallyAlways = CalculateLogicallyAlways();
-            LogicallyFree = CalculateLogicallyFree();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         /// <summary>
@@ -78,8 +79,9 @@ namespace sm_json_data_framework.Models.Techs
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // Tech is impossible if it's disabled or if its requirements are impossible
             return !AppliedLogicalOptions.IsTechEnabled(this) || Requires.LogicallyNever;
@@ -93,8 +95,9 @@ namespace sm_json_data_framework.Models.Techs
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways()
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // A Tech is always possible it's enabled and its requirements are always possible
             return AppliedLogicalOptions.IsTechEnabled(this) && Requires.LogicallyAlways;
@@ -109,8 +112,9 @@ namespace sm_json_data_framework.Models.Techs
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree()
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // A Tech is always free it's enabled and its requirements are free
             return AppliedLogicalOptions.IsTechEnabled(this) && Requires.LogicallyFree;

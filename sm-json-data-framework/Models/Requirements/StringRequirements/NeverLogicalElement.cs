@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,24 +29,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return null;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever()
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // Never is always never
             return true;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // Never is never always
             return false;
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // Never is never possible, let alone free
             return false;

@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,12 +51,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public bool ClearsPreviousNode { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            Cost.ApplyLogicalOptions(logicalOptions);
+            Cost.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A StratFailure remains relevant even if it describes an effective softlock
             return true;

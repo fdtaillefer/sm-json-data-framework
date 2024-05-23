@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,25 +58,25 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever()
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // This could become impossible if the minimum damage it can inflict is more than the max energy we can ever get,
             // but max energy is not available in logical options.
             return false;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // This could be always if it ends up being to 0 damage suitless, but that would be defined by the rules, which aren't available here
             return false;
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // This could be free if it ends up being to 0 damage suitless, but that would be defined by the rules, which aren't available here
             return false;

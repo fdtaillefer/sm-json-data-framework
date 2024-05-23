@@ -4,6 +4,7 @@ using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequireme
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,26 +67,26 @@ namespace sm_json_data_framework.Models.Requirements
             return result;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             foreach (ILogicalElement logicalElement in LogicalElements)
             {
-                logicalElement.ApplyLogicalOptions(logicalOptions);
+                logicalElement.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
-            LogicallyOrNever = CalculateLogicallyOrNever();
-            LogicallyAlways = CalculateLogicallyAlways();
-            LogicallyOrAlways = CalculateLogicallyOrAlways();
-            LogicallyFree = CalculateLogicallyFree();
-            LogicallyOrFree = CalculateLogicallyOrFree();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyOrNever = CalculateLogicallyOrNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyOrAlways = CalculateLogicallyOrAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
+            LogicallyOrFree = CalculateLogicallyOrFree(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // Logical requirements are always relevant, even when free or impossible
             return true;
@@ -99,8 +100,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // Since executing logical requirements means executing all logical elements, this becomes impossible if any child is impossible
             return LogicalElements.Any(element =>  element.LogicallyNever);
@@ -115,8 +117,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyOrNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyOrNever()
+        protected bool CalculateLogicallyOrNever(SuperMetroidRules rules)
         {
             // An empty Or makes little sense - interpret it as being possible to fulfill
             if(!LogicalElements.Any())
@@ -136,8 +139,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways()
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // Since executing logical requirements means executing all logical elements,
             // this only becomes "always" if all child elements also are (but also if empty)
@@ -153,8 +157,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyOrAlways"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyOrAlways()
+        protected bool CalculateLogicallyOrAlways(SuperMetroidRules rules)
         {
             // An empty Or makes little sense - interpret it as always being possible to fulfill
             if (!LogicalElements.Any())
@@ -175,8 +180,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree()
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // Since executing logical requirements means executing all logical elements,
             // this only becomes free if all child elements also are (but also if empty)
@@ -192,8 +198,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyOrFree"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyOrFree()
+        protected bool CalculateLogicallyOrFree(SuperMetroidRules rules)
         {
             // An empty Or makes little sense - interpret it as always being free
             if (!LogicalElements.Any())

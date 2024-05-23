@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -46,13 +47,13 @@ namespace sm_json_data_framework.Models.Enemies
             return WeaponMultiplier.NumberOfHits(enemyHp);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // The state of the weapon itself is useful to calculate logical relevance, so propagate to it to be sure it's up-to-date when we calculate.
-            Weapon.ApplyLogicalOptions(logicalOptions);
+            Weapon.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // If our weapon isn't relevant, neither is a susceptibility involving it.
             return Weapon.LogicallyRelevant;

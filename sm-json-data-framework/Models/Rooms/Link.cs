@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -30,15 +31,15 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IReadOnlyDictionary<int, LinkTo> To { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             foreach (LinkTo linkTo in To.Values)
             {
-                linkTo.ApplyLogicalOptions(logicalOptions);
+                linkTo.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A link has no logical relevance if it has no destination that can logically be reached
             return To.Values.WhereLogicallyRelevant().Any();

@@ -256,15 +256,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             Predicate<ReadOnlyInGameState> hasEnergyForShinespark, bool runwaysReversible
         )
         {
-            Func<IRunway, decimal, decimal> calculateRunwayLength = runwaysReversible ? model.Rules.CalculateEffectiveReversibleRunwayLength :
-                 model.Rules.CalculateEffectiveRunwayLength;
-
             // Obtain info about all runways that can be used without dropping below the energy needed to shinespark
             var usableRunways =
                 from runway in runways
                 let executionResult = runway.Execute(model, inGameState, comingIn: false, times, previousRoomCount)
                 where executionResult != null && hasEnergyForShinespark(executionResult.ResultingState)
-                select (runway, executionResult, length: calculateRunwayLength(runway, TilesSavedWithStutter));
+                select (runway, executionResult, length: runwaysReversible?runway.LogicalEffectiveReversibleRunwayLength:runway.LogicalEffectiveRunwayLength);
 
             // Find the best resulting state among all provided runways whose length is enough to fulfill this CanComeInCharged
             var bestResult = (
@@ -277,12 +274,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return (usableRunways, bestResult);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever()
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             bool impossible = false;
             if (MustShinespark && !CanShinespark)
@@ -294,14 +291,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return impossible;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // This could be always possible based on layout and not logic, but that part is beyond the scope of this method.
             // It would also require SpeedBooster to always be available and to not require a shinespark.
             return false;
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // This could be always free based on layout and not logic, but that part is beyond the scope of this method.
             // It would also need SpeedBooster to always be available and it would need to not require a shinespark.

@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -129,28 +130,28 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            Lock.ApplyLogicalOptions(logicalOptions);
+            Lock.ApplyLogicalOptions(logicalOptions, rules);
 
             foreach (Strat strat in UnlockStrats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions);
+                strat.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (Strat strat in BypassStrats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions);
+                strat.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A lock that's impossible to open remains logically relevant.
             // A lock that is free to open is still arguably relevant in that it does get unlocked which is arguably a logical change
@@ -167,8 +168,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // To be fully impossible to pass, a lock must not only be impossible to open or bypass, but must also always be active
             return Lock.LogicallyAlways && !UnlockStrats.Values.WhereLogicallyRelevant().Any() && !BypassStrats.Values.WhereLogicallyRelevant().Any();

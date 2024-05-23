@@ -67,7 +67,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Find all runways from the previous room that can be retroactively attempted and are long enough.
             // We're calculating runway length to account for open ends, but using 0 for tilesSavedWithStutter because no charging is involved.
             IEnumerable<Runway> retroactiveRunways = inGameState.GetRetroactiveRunways(requiredInRoomPath, Physics, previousRoomCount)
-                .Where(r => model.Rules.CalculateEffectiveRunwayLength(r, tilesSavedWithStutter: 0) >= UsedTiles);
+                .Where(r => r.LogicalEffectiveRunwayLengthNoCharge >= UsedTiles);
 
             // If we found no usable runways, give up
             if (!retroactiveRunways.Any())
@@ -122,24 +122,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever()
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // This could be impossible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // This could be always possible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // This could be always free (using an adjacent runway never costs resources), but that depends on layout and not logic, and is beyond the scope of this method.
             return false;

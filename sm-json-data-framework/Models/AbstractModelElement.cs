@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace sm_json_data_framework.Models
         /// Note that this will not be called for a LogicalOptions instance that is already altering this model.
         /// </para>
         /// <para>
-        /// Concrete implementations of this method should call <see cref="ApplyLogicalOptions(ReadOnlyLogicalOptions)"/> on:
+        /// Concrete implementations of this method should call <see cref="ApplyLogicalOptions(ReadOnlyLogicalOptions, SuperMetroidRules)"/> on:
         /// <list type="bullet">
         /// <item>All owned sub-models</item>
         /// <item>All non-owned sub-models whose logically-updated behavior they need to rely in order to properly apply logical options on themselves,
@@ -51,15 +52,16 @@ namespace sm_json_data_framework.Models
         /// </para>
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>
-        protected abstract void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        protected abstract void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules);
 
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             if (logicalOptions != AppliedLogicalOptions)
             {
                 AppliedLogicalOptions = logicalOptions;
-                PropagateLogicalOptions(logicalOptions);
-                UpdateLogicalProperties();
+                PropagateLogicalOptions(logicalOptions, rules);
+                UpdateLogicalProperties(rules);
             }
         }
 
@@ -67,9 +69,10 @@ namespace sm_json_data_framework.Models
         /// Updates any logical property of this model, as a result of logical options being applied.
         /// Any override of this method should call the base implementation first.
         /// </summary>
-        protected virtual void UpdateLogicalProperties()
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        protected virtual void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            LogicallyRelevant = CalculateLogicallyRelevant();
+            LogicallyRelevant = CalculateLogicallyRelevant(rules);
         }
 
         public bool LogicallyRelevant { get; private set; }
@@ -78,7 +81,7 @@ namespace sm_json_data_framework.Models
         /// Calculates and returns what the value of <see cref="LogicallyRelevant"/> should be.
         /// </summary>
         /// <returns></returns>
-        public abstract bool CalculateLogicallyRelevant();
+        public abstract bool CalculateLogicallyRelevant(SuperMetroidRules rules);
     }
 
     /// <summary>
@@ -95,7 +98,8 @@ namespace sm_json_data_framework.Models
         /// as that could leave the model in an inconsistent state.
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions);
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules);
 
         /// <summary>
         /// <para>

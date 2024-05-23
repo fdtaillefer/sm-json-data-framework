@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,18 +52,18 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public Room Room { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            Requires.ApplyLogicalOptions(logicalOptions);
+            Requires.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyIndestructible = CalculateLogicallyIndestructible();
+            base.UpdateLogicalProperties(rules);
+            LogicallyIndestructible = CalculateLogicallyIndestructible(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // An obstacle is always relevant.
             // Even if indestructible, and even if it has base requirements that are always free (because specific strats likely define additional requirements).
@@ -78,8 +79,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyIndestructible"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyIndestructible()
+        protected bool CalculateLogicallyIndestructible(SuperMetroidRules rules)
         {
             // If the base destruction requirements are impossible to fulfill, this can never be destroyed
             // If they are possible to fulfill, the obstacle might still be indestructible but we can't tell based on the data we have here.

@@ -6,6 +6,7 @@ using sm_json_data_framework.Models.Raw.Requirements;
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -201,50 +202,50 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            InteractionRequires.ApplyLogicalOptions(logicalOptions);
+            InteractionRequires.ApplyLogicalOptions(logicalOptions, rules);
 
             foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
             {
-                canLeaveCharged.ApplyLogicalOptions(logicalOptions);
+                canLeaveCharged.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
             {
-                doorEnvironment.ApplyLogicalOptions(logicalOptions);
+                doorEnvironment.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (ViewableNode viewableNode in ViewableNodes)
             {
-                viewableNode.ApplyLogicalOptions(logicalOptions);
+                viewableNode.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (NodeLock nodeLock in Locks.Values)
             {
-                nodeLock.ApplyLogicalOptions(logicalOptions);
+                nodeLock.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (Runway runway in Runways.Values)
             {
-                runway.ApplyLogicalOptions(logicalOptions);
+                runway.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (TwinDoorAddress twinDoorAddress in TwinDoorAddresses)
             {
-                twinDoorAddress.ApplyLogicalOptions(logicalOptions);
+                twinDoorAddress.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't need the information.
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNeverInteract = CalculateLogicallyNeverInteract();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNeverInteract = CalculateLogicallyNeverInteract(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A node always has relevance
             return true;
@@ -258,8 +259,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNeverInteract"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNeverInteract()
+        protected bool CalculateLogicallyNeverInteract(SuperMetroidRules rules)
         {
             // A node is impossible to interact with if it has impossible interaction requirements or a lock that can't be taken care of
             return InteractionRequires.LogicallyNever || Locks.Values.Any(nodeLock => nodeLock.LogicallyNever);

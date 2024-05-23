@@ -127,7 +127,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // If the player is unable to charge a shinespark with the available runway, this is not usable
-            if (model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter) < TilesToShineCharge)
+            if (LogicalEffectiveRunwayLength < TilesToShineCharge)
             {
                 return null;
             }
@@ -161,28 +161,32 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return result;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            InitiateRemotely?.ApplyLogicalOptions(logicalOptions);
+            InitiateRemotely?.ApplyLogicalOptions(logicalOptions, rules);
 
             foreach (Strat strat in Strats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions);
+                strat.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
-
-            // We could also pre-calculate an effective runway length if we had the rules
+            LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        /// <summary>
+        /// The effective runway length of this CanLeaveCharged, given the current logical options.
+        /// </summary>
+        public decimal LogicalEffectiveRunwayLength { get; private set; }
+
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // If a CanLeaveCharged is impossible to execute, it may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
         /// <summary>
@@ -193,14 +197,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // There's three separate things that can make a CanLeaveCharged impossible to execute:
+            // There's four separate things that can make a CanLeaveCharged impossible to execute:
             // - It must be initiated remotely, but that remote initiation is impossible
             // - It has no possible strats
             // - It requires a shinespark but shinesparks are logically disabled
-            return (InitiateRemotely?.LogicallyNever is true) || !Strats.Values.WhereLogicallyRelevant().Any() || (MustShinespark && !CanShinespark);
+            // - It's too short to shine charge on given the logical options
+            return (InitiateRemotely?.LogicallyNever is true) 
+                || !Strats.Values.WhereLogicallyRelevant().Any() 
+                || (MustShinespark && !CanShinespark)
+                || LogicalEffectiveRunwayLength < TilesToShineCharge;
         }
     }
 

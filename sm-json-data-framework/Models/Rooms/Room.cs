@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,35 +109,35 @@ namespace sm_json_data_framework.Models.Rooms
             return null;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
             {
-                roomEnvironment.ApplyLogicalOptions(logicalOptions);
+                roomEnvironment.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (RoomNode node in Nodes.Values)
             {
-                node.ApplyLogicalOptions(logicalOptions);
+                node.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (RoomObstacle obstacle in Obstacles.Values)
             {
-                obstacle.ApplyLogicalOptions(logicalOptions);
+                obstacle.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (Link link in Links.Values)
             {
-                link.ApplyLogicalOptions(logicalOptions);
+                link.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (RoomEnemy enemy in Enemies.Values)
             {
-                enemy.ApplyLogicalOptions(logicalOptions);
+                enemy.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A room always has relevance
             return true;

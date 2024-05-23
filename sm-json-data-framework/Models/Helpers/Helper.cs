@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,24 +31,24 @@ namespace sm_json_data_framework.Models.Helpers
         /// </summary>
         public LogicalRequirements Requires { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Propagate to requirements
-            Requires.ApplyLogicalOptions(logicalOptions);
+            Requires.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
-            LogicallyAlways = CalculateLogicallyAlways();
-            LogicallyFree = CalculateLogicallyFree();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A helper that can't be executed may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
         /// <summary>
@@ -58,8 +59,9 @@ namespace sm_json_data_framework.Models.Helpers
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // Helper is impossible if its requirements also are.
             return Requires.LogicallyNever;
@@ -73,8 +75,9 @@ namespace sm_json_data_framework.Models.Helpers
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways()
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             return Requires.LogicallyAlways;
         }
@@ -88,8 +91,9 @@ namespace sm_json_data_framework.Models.Helpers
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree()
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // A helper is always free if its requirements are free
             return Requires.LogicallyFree;

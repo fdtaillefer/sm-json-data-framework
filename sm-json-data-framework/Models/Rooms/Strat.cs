@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -108,32 +109,32 @@ namespace sm_json_data_framework.Models.Rooms
             return result;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            Requires.ApplyLogicalOptions(logicalOptions);
+            Requires.ApplyLogicalOptions(logicalOptions, rules);
 
             foreach (StratFailure failure in Failures.Values)
             {
-                failure.ApplyLogicalOptions(logicalOptions);
+                failure.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (StratObstacle stratObstacle in Obstacles.Values)
             {
-                stratObstacle.ApplyLogicalOptions(logicalOptions);
-                stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions);
+                stratObstacle.ApplyLogicalOptions(logicalOptions, rules);
+                stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A strat that can never be executed may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
         /// <summary>
@@ -144,8 +145,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // A strat is impossible to execute if it has impossible requirements, but also if it has any impossible obstacle
             // or if it's just logically disabled

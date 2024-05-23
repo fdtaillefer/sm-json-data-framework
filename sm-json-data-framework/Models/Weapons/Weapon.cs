@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Weapons;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -75,24 +76,24 @@ namespace sm_json_data_framework.Models.Weapons
         /// </summary>
         public IReadOnlySet<WeaponCategoryEnum> Categories { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            UseRequires.ApplyLogicalOptions(logicalOptions);
-            ShotRequires.ApplyLogicalOptions(logicalOptions);
+            UseRequires.ApplyLogicalOptions(logicalOptions, rules);
+            ShotRequires.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
-            LogicallyAlways = CalculateLogicallyAlways();
-            LogicallyFree = CalculateLogicallyFree();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // A weapon that can never be used may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
         /// <summary>
@@ -100,7 +101,12 @@ namespace sm_json_data_framework.Models.Weapons
         /// </summary>
         public bool LogicallyNever { get; private set; }
 
-        protected bool CalculateLogicallyNever()
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // Weapon is impossible to use if either using it altogether, or doing an individual shot, becomes impossible
             return UseRequires.LogicallyNever || ShotRequires.LogicallyNever;
@@ -115,7 +121,7 @@ namespace sm_json_data_framework.Models.Weapons
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways()
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // Weapon is always possible to use if using it altogether, and doing an individual shot, are both always possible
             return UseRequires.LogicallyAlways && ShotRequires.LogicallyAlways;
@@ -131,7 +137,7 @@ namespace sm_json_data_framework.Models.Weapons
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree()
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // Weapon is always free to use if using it altogether, and doing an individual shot, are both always free
             return UseRequires.LogicallyFree && ShotRequires.LogicallyFree;

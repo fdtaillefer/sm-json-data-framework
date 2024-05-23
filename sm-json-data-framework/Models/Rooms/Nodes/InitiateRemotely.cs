@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode ExitNode { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // If this contains strats, they belong to a LinkTo.
             // However, we need to apply the logical options to them to calculate if they become impossible
@@ -56,19 +57,19 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 var (_, strats) = PathToDoor[i];
                 foreach (Strat strat in strats.Values)
                 {
-                    strat.ApplyLogicalOptions(logicalOptions);
+                    strat.ApplyLogicalOptions(logicalOptions, rules);
                 }
 
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // An InitiateRemotely is logically relevant even if impossible, because its existence indicates that its CanLeaveCharged is impossible
             return true;
@@ -82,8 +83,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // If there is any node in the path that has no possible strat, then it's impossible to execute this InitiateRemotely
             return PathToDoor.Any(pathNode => !pathNode.strats.Values.WhereLogicallyRelevant().Any());

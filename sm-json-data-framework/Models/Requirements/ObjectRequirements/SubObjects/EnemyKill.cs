@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
@@ -135,16 +136,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return result;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Propagate to all valid weapons, so we can tell if any of them is still usable
             foreach (Weapon weapon in ValidWeapons.Values)
             {
-                weapon.ApplyLogicalOptions(logicalOptions);
+                weapon.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override bool CalculateLogicallyNever()
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // Can't fulfill this if none of the valid weapons are usable
             bool unkillable = !ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever);
@@ -155,7 +156,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return unkillable;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // This is always possible if any of the valid weapons also is
             bool alwaysKillable = ValidWeapons.Values.Any(weapon => weapon.LogicallyAlways);
@@ -163,7 +164,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return alwaysKillable;
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // This is always free if any of the valid weapons also is
             bool free = ValidWeapons.Values.Any(weapon => weapon.LogicallyFree);

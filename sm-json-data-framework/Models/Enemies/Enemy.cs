@@ -11,6 +11,7 @@ using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Raw.Enemies;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Models.Rooms;
+using sm_json_data_framework.Rules;
 
 namespace sm_json_data_framework.Models.Enemies
 {
@@ -141,27 +142,27 @@ namespace sm_json_data_framework.Models.Enemies
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             foreach (EnemyAttack attack in Attacks.Values)
             {
-                attack.ApplyLogicalOptions(logicalOptions);
+                attack.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (WeaponMultiplier weaponMultiplier in WeaponMultipliers.Values)
             {
-                weaponMultiplier.ApplyLogicalOptions(logicalOptions);
+                weaponMultiplier.ApplyLogicalOptions(logicalOptions, rules);
             }
 
             foreach (WeaponSusceptibility weaponSusceptibility in WeaponSusceptibilities.Values)
             {
-                weaponSusceptibility.ApplyLogicalOptions(logicalOptions);
+                weaponSusceptibility.ApplyLogicalOptions(logicalOptions, rules);
             }
 
-            Dimensions.ApplyLogicalOptions(logicalOptions);
+            Dimensions.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // An enemy always has some relevance
             return true;

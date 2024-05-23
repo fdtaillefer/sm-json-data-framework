@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Raw.Enemies;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,12 +41,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         public bool AffectedByGravity { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant()
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // An enemy attack always has some relevance
             return true;

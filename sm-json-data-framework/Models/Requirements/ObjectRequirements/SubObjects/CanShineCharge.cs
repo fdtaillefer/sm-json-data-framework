@@ -7,6 +7,7 @@ using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -81,7 +82,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // The runway must be long enough to charge
-            if (model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter) < TilesToShineCharge)
+            if (LogicalEffectiveRunwayLength < TilesToShineCharge)
             {
                 return null;
             }
@@ -106,14 +107,23 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
         }
 
-        // We could override UpdateLogicalProperties() to pre-calculate an effective runway length here if we had the rules...
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        {
+            LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
+            base.UpdateLogicalProperties(rules);
+        }
 
-        protected override bool CalculateLogicallyNever()
+        /// <summary>
+        /// The effective runway length of this CanShineCharge, given the current logical options.
+        /// </summary>
+        public decimal LogicalEffectiveRunwayLength { get; private set; }
+
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             bool impossible = false;
             if (MustShinespark && !CanShinespark)
@@ -121,26 +131,41 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 impossible = true;
             }
 
-            // Since this is an in-room shine charge, its required number of tiles is constant.
-            // As such, we could check here whether the logical options make the shine too short to be possible.
-            // However, this requires access to the game rules, which we don't have here.
-            // Improve this if we decide to pass the rules here.
+            if (LogicalEffectiveRunwayLength < TilesToShineCharge)
+            {
+                impossible = true;
+            }
+
             return impossible;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // Since this is an in-room shine charge, its required number of tiles is constant.
-            // As such, we could check here whether the logical options make the shine long enough to always be possible.
-            // However, this requires access to the game rules, which we don't have here.
-            // It would also need SpeedBooster to always be available and it would need to not require a shinespark.
-            return false;
+            return CalculateLogicallyFree(rules);
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // This could be free if it's always possible, but the same caveats as described in CalculateLogicallyAlways() apply
-            return false;
+            // If SpeedBooster isn't always available then this is not free
+            if (!AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster())
+            {
+                return false;
+            }
+
+            // Shinespark frames need energy, which is not free
+            if (MustShinespark)
+            {
+                return false;
+            }
+
+            // If the runway is too short to shine charge, this is actually never possible
+            if (LogicalEffectiveRunwayLength < TilesToShineCharge)
+            {
+                return false;
+            }
+
+            // If we can use the runway, always have SpeedBooster, and don't need to shinespark, then using this is free
+            return true;
         }
     }
 

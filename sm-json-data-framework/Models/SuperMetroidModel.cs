@@ -223,42 +223,42 @@ namespace sm_json_data_framework.Models
 
             foreach (GameFlag gameFlag in GameFlags.Values)
             {
-                gameFlag.ApplyLogicalOptions(AppliedLogicalOptions);
+                gameFlag.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Helper helper in Helpers.Values)
             {
-                helper.ApplyLogicalOptions(AppliedLogicalOptions);
+                helper.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Item item in Items.Values)
             {
-                item.ApplyLogicalOptions(AppliedLogicalOptions);
+                item.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Tech tech in Techs.Values)
             {
-                tech.ApplyLogicalOptions(AppliedLogicalOptions);
+                tech.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Weapon weapon in Weapons.Values)
             {
-                weapon.ApplyLogicalOptions(AppliedLogicalOptions);
+                weapon.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Enemy enemy in Enemies.Values)
             {
-                enemy.ApplyLogicalOptions(AppliedLogicalOptions);
+                enemy.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Connection connection in Connections.Values)
             {
-                connection.ApplyLogicalOptions(AppliedLogicalOptions);
+                connection.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
             foreach (Room room in Rooms.Values)
             {
-                room.ApplyLogicalOptions(AppliedLogicalOptions);
+                room.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
         }
 

@@ -18,6 +18,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// </summary>
     public class Runway : AbstractModelElement<UnfinalizedRunway, Runway>, IRunway
     {
+        /// <summary>
+        /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
+        /// </summary>
+        public decimal TilesSavedWithStutter => AppliedLogicalOptions.TilesSavedWithStutter;
+
+        /// <summary>
+        /// Smallest number of tiles the player is expected to be able to obtain a shine charge with (before applying stutter), as per applied logical options.
+        /// </summary>
+        public decimal TilesToShineCharge => AppliedLogicalOptions.TilesToShineCharge;
+
         public Runway(UnfinalizedRunway sourceElement, Action<Runway> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
         {
@@ -121,26 +131,44 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return new ExecutableRunway(this, comingIn);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             foreach (Strat strat in Strats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions);
+                strat.ApplyLogicalOptions(logicalOptions, rules);
             }
         }
 
-        protected override void UpdateLogicalProperties()
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {
-            base.UpdateLogicalProperties();
-            LogicallyNever = CalculateLogicallyNever();
+            LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
+            LogicalEffectiveReversibleRunwayLength = rules.CalculateEffectiveReversibleRunwayLength(this, TilesSavedWithStutter);
+            LogicalEffectiveRunwayLengthNoCharge = rules.CalculateEffectiveRunwayLength(this, tilesSavedWithStutter: 0);
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
 
             // We could pre-calculate an effective runway length here if we had the rules.
         }
 
-        public override bool CalculateLogicallyRelevant()
+        /// <summary>
+        /// The effective runway length of this Runway, given the current logical options.
+        /// </summary>
+        public decimal LogicalEffectiveRunwayLength { get; private set; }
+
+        /// <summary>
+        /// The effective runway length of this Runway if considered reversible, given the current logical options.
+        /// </summary>
+        public decimal LogicalEffectiveReversibleRunwayLength { get; private set; }
+
+        /// <summary>
+        /// The effective runway length of this Runway when used just to run and not to shine charge, given the current logical options.
+        /// </summary>
+        public decimal LogicalEffectiveRunwayLengthNoCharge { get; private set; }
+
+        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
             // If a runway cannot be used, it may as well not exist
-            return !CalculateLogicallyNever();
+            return !CalculateLogicallyNever(rules);
         }
 
         /// <summary>
@@ -151,8 +179,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever()
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // A runway is impossible to use if it has no strats that can be executed
             return !Strats.Values.WhereLogicallyRelevant().Any();

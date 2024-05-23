@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
+using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,24 +35,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return Helper.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            Helper.ApplyLogicalOptions(logicalOptions);
+            Helper.ApplyLogicalOptions(logicalOptions, rules);
         }
 
-        protected override bool CalculateLogicallyNever()
+        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // This is impossible if the helper itself is impossible
             return Helper.LogicallyNever;
         }
 
-        protected override bool CalculateLogicallyAlways()
+        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // This is always possible if the helper itself also is
             return Helper.LogicallyAlways;
         }
 
-        protected override bool CalculateLogicallyFree()
+        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // This is always possible if the helper itself also is
             return Helper.LogicallyFree;
