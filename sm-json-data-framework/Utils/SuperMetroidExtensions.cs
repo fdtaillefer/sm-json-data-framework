@@ -96,6 +96,28 @@ namespace sm_json_data_framework.Utils
             return elements.Where(element => element.LogicallyRelevant);
         }
 
+        /// <summary>
+        /// Returns an enumeration of the provided ILogicalExecutionPreProcessable objects, containing only those that are logically always possible to execute
+        /// given the current logical options, regardless of in-game state.
+        /// </summary>
+        /// <param name="elements">Enumeration of elements to filter</param>
+        /// <returns></returns>
+        public static IEnumerable<T> WhereLogicallyAlways<T>(this IEnumerable<T> elements) where T : ILogicalExecutionPreProcessable
+        {
+            return elements.Where(element => element.LogicallyAlways);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of the provided ILogicalExecutionPreProcessable objects, containing only those that are logically always possible to execute for free
+        /// given the current logical options, regardless of in-game state.
+        /// </summary>
+        /// <param name="elements">Enumeration of elements to filter</param>
+        /// <returns></returns>
+        public static IEnumerable<T> WhereLogicallyFree<T>(this IEnumerable<T> elements) where T : ILogicalExecutionPreProcessable
+        {
+            return elements.Where(element => element.LogicallyFree);
+        }
+
         public static bool ContainsFlag(this IReadOnlyDictionary<string, UnfinalizedGameFlag> flagDictionary, string gameFlagName)
         {
             return flagDictionary.ContainsKey(gameFlagName);

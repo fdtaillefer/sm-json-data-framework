@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// Represents a way that Samus can leave the room through this node with a number of frames remaining on a charged shinespark, or with an active shinespark.
     /// A CanLeaveCharged is not needed to implicitly use a door's runway to achieve a shine charge, and it describes other kinds of scenarios.
     /// </summary>
-    public class CanLeaveCharged : AbstractModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, IRunway, IExecutable
+    public class CanLeaveCharged : AbstractModelElement<UnfinalizedCanLeaveCharged, CanLeaveCharged>, IRunway, IExecutable, ILogicalExecutionPreProcessable
     {
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
@@ -132,9 +132,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 return null;
             }
 
-            // STITCHME Is there any remote initiation check anywhere? If this is remote it should only be executable if the path followed in the room matches the remote config
-            // I think there were checks elsewhere though, I think it's in InGameState.GetRetroactiveCanLeaveChargeds().
-            // Should consider whether that logic belongs here instead.
+            // There is no check related to an in-room path here, because a CanLeaveCharged has no knowledge of retroactive use.
+            // That's why such logic is in InGameState.GetRetroactiveCanLeaveChargeds()
 
             // Figure out how much energy we will need to have for the shinespark
             int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
@@ -176,6 +175,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         /// <summary>
@@ -210,6 +211,46 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 || !Strats.Values.WhereLogicallyRelevant().Any() 
                 || (MustShinespark && !CanShinespark)
                 || LogicalEffectiveRunwayLength < TilesToShineCharge;
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            // There's four separate conditions that must be met to always be possible
+            // - Remove initiation is unneeded OR always possible
+            // - At least one strat is always possible
+            // - Does not require a shinespark (if it does, there's energy costs that are not always possible)
+            // - There is enough room logically to shine charge
+            return (InitiateRemotely == null || InitiateRemotely.LogicallyAlways)
+                && Strats.Values.WhereLogicallyAlways().Any()
+                && !MustShinespark
+                && LogicalEffectiveRunwayLength >= TilesToShineCharge;
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            // There's four separate conditions that must be met to always be possible
+            // - Remove initiation is unneeded OR free
+            // - At least one strat is free
+            // - Does not require a shinespark (if it does, there's energy costs so it's not free)
+            // - There is enough room logically to shine charge
+            return (InitiateRemotely == null || InitiateRemotely.LogicallyFree)
+                && Strats.Values.WhereLogicallyFree().Any()
+                && !MustShinespark
+                && LogicalEffectiveRunwayLength >= TilesToShineCharge;
         }
     }
 

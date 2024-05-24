@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// A container class for a series of logical elements.
     /// </summary>
-    public class LogicalRequirements : AbstractModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutable
+    public class LogicalRequirements : AbstractModelElement<UnfinalizedLogicalRequirements, LogicalRequirements>, IExecutable, ILogicalExecutionPreProcessable
     {
         internal class NeverRequirements
         {
@@ -107,9 +107,6 @@ namespace sm_json_data_framework.Models.Requirements
             return true;
         }
 
-        /// <summary>
-        /// If true, then it is known that this logical element given the current logical options can never ever be executed.
-        /// </summary>
         public bool LogicallyNever { get; private set; }
 
         /// <summary>
@@ -146,9 +143,6 @@ namespace sm_json_data_framework.Models.Requirements
             return LogicalElements.All(element => element.LogicallyNever);
         }
 
-        /// <summary>
-        /// If true, this this can always be fulfilled, regardless of in-game state, given the current logical options.
-        /// </summary>
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
@@ -186,10 +180,6 @@ namespace sm_json_data_framework.Models.Requirements
             return LogicalElements.Any(element => element.LogicallyAlways);
         }
 
-        /// <summary>
-        /// If true, not only can this these requirements always be executed given the current logical options, regardless of in-game state,
-        /// but that fulfillment is also guaranteed to cost no resources.
-        /// </summary>
         public bool LogicallyFree { get; private set; }
 
         /// <summary>

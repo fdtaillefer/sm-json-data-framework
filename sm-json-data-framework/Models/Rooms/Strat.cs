@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// Represents a specific way to do something in a specific room, in order to do things like move between nodes or unlock a node.
     /// </summary>
-    public class Strat : AbstractModelElement<UnfinalizedStrat, Strat>, IExecutable
+    public class Strat : AbstractModelElement<UnfinalizedStrat, Strat>, IExecutable, ILogicalExecutionPreProcessable
     {
 
         /// <summary>
@@ -129,6 +129,8 @@ namespace sm_json_data_framework.Models.Rooms
         {
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
@@ -153,6 +155,32 @@ namespace sm_json_data_framework.Models.Rooms
             // or if it's just logically disabled
             return Requires.LogicallyNever || Obstacles.Values.Any(obstacle => obstacle.LogicallyNever)
                 || !AppliedLogicalOptions.IsStratEnabled(this);
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            // Can always be fulfilled if enabled, and its requirements can always be done, and its obstacles can always be destroyed or bypassed
+            return AppliedLogicalOptions.IsStratEnabled(this) && Requires.LogicallyAlways && !Obstacles.Values.Any(obstacle => !obstacle.LogicallyAlways);
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            // Free if enabled, has free requirements, and its obstacles can always be destroyed or bypassed for free
+            return AppliedLogicalOptions.IsStratEnabled(this) && Requires.LogicallyFree && !Obstacles.Values.Any(obstacle => !obstacle.LogicallyFree);
         }
     }
 

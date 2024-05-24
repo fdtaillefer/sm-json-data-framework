@@ -13,7 +13,7 @@ using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Rooms.Nodes
 {
-    public class InitiateRemotely : AbstractModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>
+    public class InitiateRemotely : AbstractModelElement<UnfinalizedInitiateRemotely, InitiateRemotely>, ILogicalExecutionPreProcessable
     {
         public InitiateRemotely(UnfinalizedInitiateRemotely sourceElement, Action<InitiateRemotely> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -67,6 +67,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
@@ -89,6 +91,34 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // If there is any node in the path that has no possible strat, then it's impossible to execute this InitiateRemotely
             return PathToDoor.Any(pathNode => !pathNode.strats.Values.WhereLogicallyRelevant().Any());
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            // This is always possible if all nodes in the path have an always possible strat.
+            // Note that this makes no statement on whether it can be used retroactively - that's not a concept this element has.
+            return PathToDoor.All(pathNode => pathNode.strats.Values.WhereLogicallyAlways().Any());
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            // This is free if all nodes in the path have a free strat.
+            // Note that this makes no statement on whether it can be used retroactively - that's not a concept this element has.
+            return PathToDoor.All(pathNode => pathNode.strats.Values.WhereLogicallyFree().Any());
         }
     }
 

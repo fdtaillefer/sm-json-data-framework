@@ -14,7 +14,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// <summary>
     /// Represents the possibility of viewing a node from another node (presumably to see what item is there).
     /// </summary>
-    public class ViewableNode : AbstractModelElement<UnfinalizedViewableNode, ViewableNode>
+    public class ViewableNode : AbstractModelElement<UnfinalizedViewableNode, ViewableNode>, ILogicalExecutionPreProcessable
     {
         public ViewableNode(UnfinalizedViewableNode sourceElement, Action<ViewableNode> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -45,6 +45,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
@@ -66,6 +68,32 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // A viewableNode is impossible to use if it has no strats that can be executed
             return !Strats.Values.WhereLogicallyRelevant().Any();
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            // Always possible as long as at least one strat is
+            return Strats.Values.WhereLogicallyAlways().Any();
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            // Free as long as at least one strat is
+            return Strats.Values.WhereLogicallyFree().Any();
         }
     }
 

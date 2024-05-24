@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// <summary>
     /// Represents a sequence of contiguous tiles directly connected to a door, which Samus can use to accumulate speed when running out of or (possibly) into a room.
     /// </summary>
-    public class Runway : AbstractModelElement<UnfinalizedRunway, Runway>, IRunway
+    public class Runway : AbstractModelElement<UnfinalizedRunway, Runway>, IRunway, ILogicalExecutionPreProcessable
     {
         /// <summary>
         /// Number of tiles the player is expected to be able save if stutter is possible on a runway, as per applied logical options.
@@ -146,8 +146,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             LogicalEffectiveRunwayLengthNoCharge = rules.CalculateEffectiveRunwayLength(this, tilesSavedWithStutter: 0);
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
-
-            // We could pre-calculate an effective runway length here if we had the rules.
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         /// <summary>
@@ -185,6 +185,32 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // A runway is impossible to use if it has no strats that can be executed
             return !Strats.Values.WhereLogicallyRelevant().Any();
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            // We only need one always possible strat in order to always be possible
+            return Strats.Values.WhereLogicallyAlways().Any();
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            // We only need one free strat in order to be free
+            return Strats.Values.WhereLogicallyFree().Any();
         }
     }
 

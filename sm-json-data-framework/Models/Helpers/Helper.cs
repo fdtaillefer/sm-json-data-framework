@@ -12,7 +12,7 @@ namespace sm_json_data_framework.Models.Helpers
     /// <summary>
     /// A helper is a container for a common set of logical requirements, which can be referenced many times across the model.
     /// </summary>
-    public class Helper : AbstractModelElement<UnfinalizedHelper, Helper>
+    public class Helper : AbstractModelElement<UnfinalizedHelper, Helper>, ILogicalExecutionPreProcessable
     {
         public Helper(UnfinalizedHelper sourceElement, Action<Helper> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -51,9 +51,6 @@ namespace sm_json_data_framework.Models.Helpers
             return !CalculateLogicallyNever(rules);
         }
 
-        /// <summary>
-        /// If true, then this helper is impossible to execute given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyNever { get; private set; }
 
         /// <summary>
@@ -67,9 +64,6 @@ namespace sm_json_data_framework.Models.Helpers
             return Requires.LogicallyNever;
         }
 
-        /// <summary>
-        /// If true, then this Helper is always possible to execute given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
@@ -82,10 +76,6 @@ namespace sm_json_data_framework.Models.Helpers
             return Requires.LogicallyAlways;
         }
 
-        /// <summary>
-        /// If true, not only can this helper always be executed given the current logical options, regardless of in-game state,
-        /// but that fulfillment is also guaranteed to cost no resources.
-        /// </summary>
         public bool LogicallyFree { get; private set; }
 
         /// <summary>

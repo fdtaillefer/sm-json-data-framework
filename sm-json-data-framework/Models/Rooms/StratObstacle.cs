@@ -17,7 +17,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// Represents the need for an obstacle to be destroyed (or bypassed) in order to fulfill a strat.
     /// Destruction may be done as part of the strat or have been done previously.
     /// </summary>
-    public class StratObstacle : AbstractModelElement<UnfinalizedStratObstacle, StratObstacle>
+    public class StratObstacle : AbstractModelElement<UnfinalizedStratObstacle, StratObstacle>, ILogicalExecutionPreProcessable
     {
         public StratObstacle(UnfinalizedStratObstacle sourceElement, Action<StratObstacle> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -94,6 +94,8 @@ namespace sm_json_data_framework.Models.Rooms
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
             LogicallyNeverFromHere = CalculateLogicallyNeverFromHere(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
@@ -136,6 +138,30 @@ namespace sm_json_data_framework.Models.Rooms
             bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
             // This StratObstacle becomes impossible to fulfill locally (so - impossible unless the obstacle is destroyed elsewhere) if it can be neither destroyed or bypassed from here
             return indestructibleHere && unbypassableHere;
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            return (Obstacle.LogicallyAlwaysDestructible && Requires.LogicallyAlways) || Bypass?.LogicallyAlways is true;
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            return (Obstacle.LogicallyDestructibleForFree && Requires.LogicallyFree) || Bypass?.LogicallyFree is true;
         }
     }
 

@@ -61,6 +61,8 @@ namespace sm_json_data_framework.Models.Rooms
         {
             base.UpdateLogicalProperties(rules);
             LogicallyIndestructible = CalculateLogicallyIndestructible(rules);
+            LogicallyAlwaysDestructible = CalculateLogicallyAlwaysDestructible(rules);
+            LogicallyDestructibleForFree = CalculateLogicallyDestructibleForFree(rules);
         }
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
@@ -86,6 +88,38 @@ namespace sm_json_data_framework.Models.Rooms
             // If the base destruction requirements are impossible to fulfill, this can never be destroyed
             // If they are possible to fulfill, the obstacle might still be indestructible but we can't tell based on the data we have here.
             return Requires.LogicallyNever;
+        }
+
+        /// <summary>
+        /// If true, the "common" requirements for destroying this obstacle are always possible (though not necessarily for free) given the current logical options,
+        /// regardless of in-game state. This makes no statement on any strat's additional destruction requirements
+        /// </summary>
+        public bool LogicallyAlwaysDestructible { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlwaysDestructible"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlwaysDestructible(SuperMetroidRules rules)
+        {
+            return Requires.LogicallyAlways;
+        }
+
+        /// <summary>
+        /// If true, the "common" requirements for destroying this obstacle are always possible for free given the current logical options,
+        /// regardless of in-game state. This makes no statement on any strat's additional destruction requirements
+        /// </summary>
+        public bool LogicallyDestructibleForFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyDestructibleForFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyDestructibleForFree(SuperMetroidRules rules)
+        {
+            return Requires.LogicallyFree;
         }
     }
 

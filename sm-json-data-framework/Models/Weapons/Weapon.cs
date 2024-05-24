@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Weapons
     /// <summary>
     /// Represents a way Samus can cause damage to enemies.
     /// </summary>
-    public class Weapon : AbstractModelElement<UnfinalizedWeapon, Weapon>
+    public class Weapon : AbstractModelElement<UnfinalizedWeapon, Weapon>, ILogicalExecutionPreProcessable
     {
         public Weapon(UnfinalizedWeapon sourceElement, Action<Weapon> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -96,9 +96,6 @@ namespace sm_json_data_framework.Models.Weapons
             return !CalculateLogicallyNever(rules);
         }
 
-        /// <summary>
-        /// If true, then this weapon is impossible to use given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyNever { get; private set; }
 
         /// <summary>
@@ -112,9 +109,6 @@ namespace sm_json_data_framework.Models.Weapons
             return UseRequires.LogicallyNever || ShotRequires.LogicallyNever;
         }
 
-        /// <summary>
-        /// If true, then this weapon is always possible to use given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
@@ -127,10 +121,6 @@ namespace sm_json_data_framework.Models.Weapons
             return UseRequires.LogicallyAlways && ShotRequires.LogicallyAlways;
         }
 
-        /// <summary>
-        /// If true, not only can this weapon always be used given the current logical options, regardless of in-game state,
-        /// but that fulfillment is also guaranteed to cost no resources.
-        /// </summary>
         public bool LogicallyFree { get; private set; }
 
         /// <summary>

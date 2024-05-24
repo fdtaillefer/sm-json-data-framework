@@ -11,7 +11,7 @@ namespace sm_json_data_framework.Models.GameFlags
     /// <summary>
     /// A game flag, which gets toggled when the player does something and is read elsewhere in the game.
     /// </summary>
-    public class GameFlag : AbstractModelElement<UnfinalizedGameFlag, GameFlag>
+    public class GameFlag : AbstractModelElement<UnfinalizedGameFlag, GameFlag>, ILogicalExecutionPreProcessable
     {
         public GameFlag(UnfinalizedGameFlag sourceElement, Action<GameFlag> mappingsInsertionCallback)
             : base(sourceElement, mappingsInsertionCallback)
@@ -42,9 +42,6 @@ namespace sm_json_data_framework.Models.GameFlags
             return !CalculateLogicallyNever(rules);
         }
 
-        /// <summary>
-        /// If true, then this GameFlag is impossible to enable given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyNever { get; private set; }
 
         /// <summary>
@@ -58,9 +55,6 @@ namespace sm_json_data_framework.Models.GameFlags
             return !AppliedLogicalOptions.IsGameFlagEnabled(this);
         }
 
-        /// <summary>
-        /// If true, then this Gameflag is always enabled given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
@@ -74,10 +68,6 @@ namespace sm_json_data_framework.Models.GameFlags
             return AppliedLogicalOptions.StartConditions.StartingGameFlags.ContainsFlag(this);
         }
 
-        /// <summary>
-        /// If true, not only is this GameFlag always enabled given the current logical options, regardless of in-game state,
-        /// but that enabled state is also guaranteed to cost no resources.
-        /// </summary>
         public bool LogicallyFree => LogicallyAlways; // Just having a gameFlag enabled can never cost resources
     }
 

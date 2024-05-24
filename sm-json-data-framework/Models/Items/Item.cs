@@ -10,7 +10,7 @@ namespace sm_json_data_framework.Models.Items
     /// <summary>
     /// Represents an item, regardless of whether this is explicitly an item in the game or just implicitly an item.
     /// </summary>
-    public class Item : AbstractModelElement<UnfinalizedItem, Item>
+    public class Item : AbstractModelElement<UnfinalizedItem, Item>, ILogicalExecutionPreProcessable
     {
         public Item(UnfinalizedItem sourceElement, Action<Item> mappingsInsertionCallback)
             : base(sourceElement, mappingsInsertionCallback)
@@ -41,9 +41,6 @@ namespace sm_json_data_framework.Models.Items
             return !CalculateLogicallyNever(rules);
         }
 
-        /// <summary>
-        /// If true, then this item is impossible to use given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyNever { get; private set; }
 
         /// <summary>
@@ -57,9 +54,6 @@ namespace sm_json_data_framework.Models.Items
             return false;
         }
 
-        /// <summary>
-        /// If true, then this item is always possible to use given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
@@ -73,10 +67,6 @@ namespace sm_json_data_framework.Models.Items
             return AppliedLogicalOptions.StartConditions.StartingInventory.HasItem(this);
         }
 
-        /// <summary>
-        /// If true, not only is this item always available given the current logical options, regardless of in-game state,
-        /// but that availability is also guaranteed to cost no resources.
-        /// </summary>
         public bool LogicallyFree => LogicallyAlways; // Just owning an item can never cost resources
     }
 

@@ -100,24 +100,9 @@ namespace sm_json_data_framework.Models.Requirements
     /// <summary>
     /// The untyped interface portion of <see cref="AbstractLogicalElement{SourceType, ConcreteType}"/>.
     /// </summary>
-    public interface ILogicalElement : IExecutable, IModelElement
+    public interface ILogicalElement : IExecutable, IModelElement, ILogicalExecutionPreProcessable
     {
 
-        /// <summary>
-        /// If true, this logical element can never be fulfilled given the current logical options, regardless of in-game state.
-        /// </summary>
-        public bool LogicallyNever { get; }
-
-        /// <summary>
-        /// If true, this logical element can always be fulfilled given the current logical options, regardless of in-game state.
-        /// </summary>
-        public bool LogicallyAlways { get; }
-
-        /// <summary>
-        /// If true, not only can this logical element always be fulfilled given the current logical options, regardless of in-game state,
-        /// but that fulfillment is also guaranteed to cost no resources.
-        /// </summary>
-        public bool LogicallyFree { get; }
     }
 
     public abstract class AbstractUnfinalizedLogicalElement<ConcreteType, TargetType> : AbstractUnfinalizedModelElement<ConcreteType, TargetType>, IUnfinalizedLogicalElement

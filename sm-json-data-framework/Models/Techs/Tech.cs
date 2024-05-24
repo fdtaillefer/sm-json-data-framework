@@ -13,7 +13,7 @@ namespace sm_json_data_framework.Models.Techs
     /// Represents a technique that a player may learn to execute. 
     /// Techs can have logical requirements involving items, ammo, or other techs, and may be turned off logically.
     /// </summary>
-    public class Tech : AbstractModelElement<UnfinalizedTech, Tech>
+    public class Tech : AbstractModelElement<UnfinalizedTech, Tech>, ILogicalExecutionPreProcessable
     {
         public Tech(UnfinalizedTech sourceElement, Action<Tech> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -71,9 +71,6 @@ namespace sm_json_data_framework.Models.Techs
             LogicallyFree = CalculateLogicallyFree(rules);
         }
 
-        /// <summary>
-        /// If true, then this tech is impossible to execute given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyNever { get; private set; }
 
         /// <summary>
@@ -87,9 +84,6 @@ namespace sm_json_data_framework.Models.Techs
             return !AppliedLogicalOptions.IsTechEnabled(this) || Requires.LogicallyNever;
         }
 
-        /// <summary>
-        /// If true, then this tech is always possible to execute given the current logical options, regardless of in-game state.
-        /// </summary>
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
@@ -103,10 +97,6 @@ namespace sm_json_data_framework.Models.Techs
             return AppliedLogicalOptions.IsTechEnabled(this) && Requires.LogicallyAlways;
         }
 
-        /// <summary>
-        /// If true, not only can this tech always be executed given the current logical options, regardless of in-game state,
-        /// but that fulfillment is also guaranteed to cost no resources.
-        /// </summary>
         public bool LogicallyFree { get; private set; }
 
         /// <summary>
