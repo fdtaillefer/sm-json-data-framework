@@ -111,12 +111,10 @@ namespace sm_json_data_framework.Reading
         {
             // When
             UnfinalizedSuperMetroidModel model = ModelReader.ReadUnfinalizedModel(rules: new RandoSuperMetroidRules(),
-                basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(), 
                 overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) });
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
-            Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
             Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].LinksTo[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
         }
         #endregion

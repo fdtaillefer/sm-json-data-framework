@@ -420,8 +420,6 @@ namespace sm_json_data_framework.Models
         /// <param name="rawModel">Raw model containing raw data presumably obtained from json model</param>
         /// <param name="rules">A repository of game rules to operate by.
         /// If null, will use the default constructor of SuperMetroidRules, giving vanilla rules.</param>
-        /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
-        /// be created and assigned to this model.</param>
         /// <param name="overrideObjectTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
         /// to represent that ObjectLogicalElementTypeEnum when converting logical requirements from a raw equivalent.
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
@@ -430,7 +428,6 @@ namespace sm_json_data_framework.Models
         /// The provided C# types must extend the default type that is normally used for any given StringLogicalElementTypeEnum.</param>
         /// <exception cref="Exception">If this method fails to interpret any logical element</exception>
         public UnfinalizedSuperMetroidModel(RawSuperMetroidModel rawModel, SuperMetroidRules rules = null,
-            IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
@@ -451,9 +448,7 @@ namespace sm_json_data_framework.Models
                 .ToDictionary(f => f.Name);
 
             // Put basic starting conditions in model
-            BasicStartConditions basicStartConditions = new BasicStartConditions(rawModel.ItemContainer);
-            basicStartConditionsCustomizer?.Customize(basicStartConditions);
-            BasicStartConditions = basicStartConditions;
+            BasicStartConditions = new BasicStartConditions(rawModel.ItemContainer);
 
             // Put helpers in model
             Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new UnfinalizedHelper(rawHelper)).ToDictionary(h => h.Name);

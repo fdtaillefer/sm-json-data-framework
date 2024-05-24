@@ -118,6 +118,27 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
+        public void Ctor_AppliesLogicalOptions()
+        {
+            // Given
+            UnfinalizedSuperMetroidModel unfinalizedModel = StaticTestObjects.UnfinalizedModel;
+            UnfinalizedStartConditions startConditions = UnfinalizedStartConditions.CreateVanillaStartConditions(unfinalizedModel);
+            startConditions.StartingGameFlags = new List<UnfinalizedGameFlag> { unfinalizedModel.GameFlags["f_ZebesAwake"] };
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalUnfinalizedStartConditions = startConditions;
+            logicalOptions.TilesToShineCharge = 20;
+            
+            // When
+            SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel, logicalOptions);
+
+            // Expect
+            ReadOnlyLogicalOptions appliedOptions = model.Rooms["Landing Site"].AppliedLogicalOptions;
+            Assert.NotSame(logicalOptions, appliedOptions);
+            Assert.Equal(20, appliedOptions.TilesToShineCharge);
+            Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Values.Select(flag => flag.Name));
+        }
+
+        [Fact]
         public void Ctor_CreatesOneInstancePerUnfinalizedRoom()
         {
             // Given  When
@@ -452,7 +473,7 @@ namespace sm_json_data_framework.Tests.Models
 
         #endregion
 
-        #region Tests for ApplyLogicalOptiopns()
+        #region Tests for ApplyLogicalOptions()
         [Fact]
         public void ApplyLogicalOptions_AppliesCloneToSuperMetroidModelProperties()
         {
@@ -460,12 +481,10 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.TilesToShineCharge = 20;
 
-
             // When
             ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-
             ReadOnlyLogicalOptions appliedOptions = ModelForApplyLogicalOptions.Rooms["Landing Site"].AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);

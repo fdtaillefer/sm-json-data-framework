@@ -120,14 +120,12 @@ namespace sm_json_data_framework.Tests.Models
 
             // When
             UnfinalizedSuperMetroidModel model = new UnfinalizedSuperMetroidModel(rawModel, rules: new RandoSuperMetroidRules(),
-                basicStartConditionsCustomizer: new RandoBasicStartConditionsCustomizer(),
                 overrideObjectTypes: new List<(ObjectLogicalElementTypeEnum typeEnum, Type type)> { (ObjectLogicalElementTypeEnum.AcidFrames, typeof(ExtendedAcidFrames)) },
                 overrideStringTypes: new List<(StringLogicalElementTypeEnum typeEnum, Type type)> { (StringLogicalElementTypeEnum.Item, typeof(ExtendedItemLogicalElement)) });
 
 
             // Expect
             Assert.True(model.Rules is RandoSuperMetroidRules);
-            Assert.Contains("f_ZebesAwake", model.StartConditions.StartingGameFlags.Select(flag => flag.Name));
             Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].LinksTo[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
             Assert.NotEmpty(model.Rooms["Parlor and Alcatraz"].Nodes[5].LinksTo[8].Strats["Alcatraz Escape"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedItemLogicalElement)));
         }

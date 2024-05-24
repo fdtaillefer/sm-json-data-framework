@@ -285,6 +285,7 @@ namespace sm_json_data_framework.Rules.InitialState
 
         public UnfinalizedStartConditions(UnfinalizedStartConditions other)
         {
+            BaseResourceMaximums = other.BaseResourceMaximums.Clone();
             StartingGameFlags = new List<UnfinalizedGameFlag>(other.StartingGameFlags);
             StartingInventory = other.StartingInventory?.Clone();
             StartingNode = other.StartingNode;

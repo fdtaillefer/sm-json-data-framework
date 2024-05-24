@@ -17,6 +17,13 @@ namespace sm_json_data_framework.Tests.TestTools
         public static readonly RawSuperMetroidModel RawModel = ModelReader.ReadRawModel();
 
         /// <summary>
+        /// A modifiable, unfinalized model built using <see cref="RawModel"/>. 
+        /// Please do not modify this as this will have side-effects on other tests.
+        /// If you need to modify an unfinalized model, create your own.
+        /// </summary>
+        public static readonly UnfinalizedSuperMetroidModel UnfinalizedModel = new UnfinalizedSuperMetroidModel(RawModel);
+
+        /// <summary>
         /// A mostly unmodifiable SuperMetroidModel, created with no customizations - so it uses all default rules and logical elements.
         /// Though mostly unmodifiable, there is a risk of side-effects if you apply logical options on this and don't undo them, so take care with that.
         /// It's strongly recommended to use a different instance instead.

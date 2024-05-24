@@ -44,8 +44,6 @@ namespace sm_json_data_framework.Reading
         /// Returns that.
         /// </summary>
         /// <param name="rules">A repository of game rules to operate by. If null, will use vanilla rules.</param>
-        /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
-        /// be created and assigned to the model.</param>
         /// <param name="baseDirectory">An override of the path to the base directory of the data model to read.
         /// If left null, this method will use the path of the model included with this project.</param>
         /// <param name="overrideObjectTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
@@ -53,20 +51,17 @@ namespace sm_json_data_framework.Reading
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
         public static SuperMetroidModel ReadFinalizedModel(SuperMetroidRules rules = null,
-            IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             string baseDirectory = null,
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
-            return ReadUnfinalizedModel(rules, basicStartConditionsCustomizer, baseDirectory, overrideObjectTypes, overrideStringTypes).Finalize();
+            return ReadUnfinalizedModel(rules, baseDirectory, overrideObjectTypes, overrideStringTypes).Finalize();
         }
 
         /// <summary>
         /// Executes the first 2 of the 3 steps of model creation: Reads the json files into a raw model, then creates an unfinalized model out of it. Returns that.
         /// </summary>
         /// <param name="rules">A repository of game rules to operate by. If null, will use vanilla rules.</param>
-        /// <param name="basicStartConditionsCustomizer">An optional object that can apply modifications to the <see cref="BasicStartConditions"/> that will
-        /// be created and assigned to the model.</param>
         /// <param name="baseDirectory">An override of the path to the base directory of the data model to read.
         /// If left null, this method will use the path of the model included with this project.</param>
         /// <param name="overrideObjectTypes">A sequence of tuples, pairing together an ObjectLogicalElementTypeEnum and the C# type that should be used to 
@@ -74,13 +69,12 @@ namespace sm_json_data_framework.Reading
         /// The provided C# types must extend the default type that is normally used for any given ObjectLogicalElementTypeEnum.</param>
         /// <returns>The generated SuperMetroidModel</returns>
         public static UnfinalizedSuperMetroidModel ReadUnfinalizedModel(SuperMetroidRules rules = null,
-            IBasicStartConditionsCustomizer basicStartConditionsCustomizer = null,
             string baseDirectory = null, 
             IEnumerable<(ObjectLogicalElementTypeEnum typeEnum, Type type)> overrideObjectTypes = null,
             IEnumerable<(StringLogicalElementTypeEnum typeEnum, Type type)> overrideStringTypes = null)
         {
             RawSuperMetroidModel rawModel = ReadRawModel(baseDirectory);
-            return new UnfinalizedSuperMetroidModel(rawModel, rules, basicStartConditionsCustomizer, overrideObjectTypes, overrideStringTypes);
+            return new UnfinalizedSuperMetroidModel(rawModel, rules, overrideObjectTypes, overrideStringTypes);
         }
 
         private static JsonSerializerOptions CreateJsonSerializerOptionsForRawModel()
