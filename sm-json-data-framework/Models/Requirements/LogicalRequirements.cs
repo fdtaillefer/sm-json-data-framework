@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Converters;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
@@ -65,6 +66,20 @@ namespace sm_json_data_framework.Models.Requirements
         {
             (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;
+        }
+
+        /// <summary>
+        /// Returns the nth (based on index) logical element of type T found within this LogicalRequirements, if found. Return null otherwise.
+        /// </summary>
+        /// <typeparam name="T">The type of logical element to find</typeparam>
+        /// <param name="index">The 0-based index of the element to return, among those of type T</param>
+        /// <returns></returns>
+        public T LogicalElement<T>(int index) where T: ILogicalElement
+        {
+            return LogicalElements
+                .OfType<T>()
+                .Skip(0)
+                .FirstOrDefault();
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)

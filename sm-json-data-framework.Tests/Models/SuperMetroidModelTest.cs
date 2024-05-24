@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
@@ -232,34 +233,24 @@ namespace sm_json_data_framework.Tests.Models
             // Nodes in logical elements
             // PreviousNode
             RoomNode arbitraryNode10 = model.GetNodeInRoom("Pink Brinstar Power Bomb Room", 4);
-            PreviousNode previousNodeLogicalElement = (PreviousNode)model.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"].Requires.LogicalElements
-                .Where(element => typeof(PreviousNode).IsAssignableFrom(element.GetType()))
-                .First();
+            PreviousNode previousNodeLogicalElement = model.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"].Requires.LogicalElement<PreviousNode>(0);
             Assert.Same(arbitraryNode10, previousNodeLogicalElement.Node);
 
             // AdjacentRunway
             RoomNode arbitraryNode11 = model.GetNodeInRoom("Construction Zone", 3);
-            AdjacentRunway adjacentRunway = (AdjacentRunway)model.Rooms["Construction Zone"].Links[3].To[4].Strats["Construction Room X-Ray Climb"].Requires.LogicalElements
-                .Where(element => typeof(AdjacentRunway).IsAssignableFrom(element.GetType()))
-                .First();
+            AdjacentRunway adjacentRunway = model.Rooms["Construction Zone"].Links[3].To[4].Strats["Construction Room X-Ray Climb"].Requires.LogicalElement<AdjacentRunway>(0);
             Assert.Same(arbitraryNode11, adjacentRunway.FromNode);
             // ResetRoom
-            ResetRoom resetRoom = (ResetRoom)model.Rooms["Construction Zone"].Links[3].To[4].Strats["Construction Room X-Ray Climb"].Requires.LogicalElements
-                .Where(element => typeof(ResetRoom).IsAssignableFrom(element.GetType()))
-                .First();
+            ResetRoom resetRoom = model.Rooms["Construction Zone"].Links[3].To[4].Strats["Construction Room X-Ray Climb"].Requires.LogicalElement<ResetRoom>(0);
             Assert.Same(arbitraryNode11, resetRoom.Nodes[3]);
 
             RoomNode arbitraryNode12 = model.GetNodeInRoom("Big Pink", 13);
-            resetRoom = (ResetRoom)model.Rooms["Big Pink"].Links[5].To[4].Strats["Big Pink Left-Side X-Ray Climb"].Requires.LogicalElements
-                .Where(element => typeof(ResetRoom).IsAssignableFrom(element.GetType()))
-                .First();
+            resetRoom = model.Rooms["Big Pink"].Links[5].To[4].Strats["Big Pink Left-Side X-Ray Climb"].Requires.LogicalElement<ResetRoom>(0);
             Assert.Same(arbitraryNode12, resetRoom.NodesToAvoid[13]);
 
             // CanComeInCharged
             RoomNode arbitraryNode13 = model.GetNodeInRoom("Green Brinstar Main Shaft / Etecoon Room", 10);
-            CanComeInCharged canComeInCharged = (CanComeInCharged)model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Links[10].To[9].Strats["Shinespark"].Requires.LogicalElements
-                .Where(element => typeof(CanComeInCharged).IsAssignableFrom(element.GetType()))
-                .First();
+            CanComeInCharged canComeInCharged = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Links[10].To[9].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
             Assert.Same(arbitraryNode13, canComeInCharged.FromNode);
         }
 
@@ -286,14 +277,10 @@ namespace sm_json_data_framework.Tests.Models
             RoomEnemy roomEnemy = model.RoomEnemies["Morph Ball Room Sidehoppers"];
             Assert.Same(arbitraryEnemy, roomEnemy.Enemy);
 
-            EnemyDamage enemyDamage = (EnemyDamage) model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["Run Through"].Requires.LogicalElements
-                .Where(element => typeof(EnemyDamage).IsAssignableFrom(element.GetType()))
-                .First();
+            EnemyDamage enemyDamage = model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["Run Through"].Requires.LogicalElement<EnemyDamage>(0);
             Assert.Same(arbitraryEnemy, enemyDamage.Enemy);
 
-            EnemyKill enemyKill = (EnemyKill)model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["PB Sidehopper Kill with Bomb Blocks"].Obstacles["C"].Requires.LogicalElements
-                .Where(element => typeof(EnemyKill).IsAssignableFrom(element.GetType()))
-                .First();
+            EnemyKill enemyKill = model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["PB Sidehopper Kill with Bomb Blocks"].Obstacles["C"].Requires.LogicalElement<EnemyKill>(0);
             Assert.Same(arbitraryEnemy, enemyKill.GroupedEnemies.First().First());
         }
 
@@ -314,16 +301,12 @@ namespace sm_json_data_framework.Tests.Models
             Enemy enemy = model.Enemies["Boyon"];
             Assert.Same(arbitraryWeapon, enemy.InvulnerableWeapons["Missile"]);
 
-            EnemyKill enemyKill = (EnemyKill)model.Rooms["Pink Brinstar Power Bomb Room"].Links[1].To[4].Strats["Good Weapon Sidehopper Kill"].Obstacles["A"].Requires.LogicalElements
-                .Where(element => typeof(EnemyKill).IsAssignableFrom(element.GetType()))
-                .First();
+            EnemyKill enemyKill = model.Rooms["Pink Brinstar Power Bomb Room"].Links[1].To[4].Strats["Good Weapon Sidehopper Kill"].Obstacles["A"].Requires.LogicalElement<EnemyKill>(0);
             Assert.Same(arbitraryWeapon, enemyKill.ExplicitWeapons["Missile"]);
 
             Assert.Same(arbitraryWeapon, enemyKill.ValidWeapons["Missile"]);
 
-            enemyKill = (EnemyKill)model.Rooms["Metroid Room 1"].Links[1].To[3].Strats["Tank and PB Kill"].Requires.LogicalElements
-                .Where(element => typeof(EnemyKill).IsAssignableFrom(element.GetType()))
-                .First();
+            enemyKill = model.Rooms["Metroid Room 1"].Links[1].To[3].Strats["Tank and PB Kill"].Requires.LogicalElement<EnemyKill>(0);
             Assert.Same(arbitraryWeapon, enemyKill.ExcludedWeapons["Missile"]);
         }
 
@@ -347,9 +330,7 @@ namespace sm_json_data_framework.Tests.Models
 
             // Expect all properties that reference a tech, to have the same instance as the one in the main model
             Tech arbitraryTech = model.Techs["canDelayedWalljump"];
-            TechLogicalElement techLogicalElement = (TechLogicalElement)model.Rooms["Landing Site"].Links[5].To[7].Strats["Gauntlet Walljumps"].Requires.LogicalElements
-                .Where(element => typeof(TechLogicalElement).IsAssignableFrom(element.GetType()))
-                .First();
+            TechLogicalElement techLogicalElement = model.Rooms["Landing Site"].Links[5].To[7].Strats["Gauntlet Walljumps"].Requires.LogicalElement<TechLogicalElement>(0);
             Assert.Same(arbitraryTech, techLogicalElement.Tech);
             Tech tech = model.Techs["canPreciseWalljump"];
             Assert.Same(arbitraryTech, tech.ExtensionTechs["canDelayedWalljump"]);
@@ -363,9 +344,7 @@ namespace sm_json_data_framework.Tests.Models
 
             // Expect all properties that reference a helper, to have the same instance as the one in the main model
             Helper arbitraryHelper = model.Helpers["h_canDestroyBombWalls"];
-            HelperLogicalElement helperLogicalElement = (HelperLogicalElement)model.Rooms["Landing Site"].Links[1].To[7].Strats["Base"].Obstacles["A"].Requires.LogicalElements
-                .Where(element => typeof(HelperLogicalElement).IsAssignableFrom(element.GetType()))
-                .First();
+            HelperLogicalElement helperLogicalElement = model.Rooms["Landing Site"].Links[1].To[7].Strats["Base"].Obstacles["A"].Requires.LogicalElement<HelperLogicalElement>(0);
             Assert.Same(arbitraryHelper, helperLogicalElement.Helper);
         }
 
@@ -380,9 +359,7 @@ namespace sm_json_data_framework.Tests.Models
             RoomNode node = model.GetNodeInRoom("Morph Ball Room", 4);
             Assert.Same(arbitraryItem, node.NodeItem);
 
-            ItemLogicalElement itemLogicalElement = (ItemLogicalElement)model.Rooms["Parlor and Alcatraz"].Links[2].To[8].Strats["Base"].Requires.LogicalElements
-                .Where(element => typeof(ItemLogicalElement).IsAssignableFrom(element.GetType()))
-                .First();
+            ItemLogicalElement itemLogicalElement = model.Rooms["Parlor and Alcatraz"].Links[2].To[8].Strats["Base"].Requires.LogicalElement<ItemLogicalElement>(0);
             Assert.Same(arbitraryItem, itemLogicalElement.Item);
         }
 
@@ -401,9 +378,7 @@ namespace sm_json_data_framework.Tests.Models
             RoomNode node = model.GetNodeInRoom("Spore Spawn Room", 3);
             Assert.Same(arbitraryGameFlag2, node.Yields["f_DefeatedSporeSpawn"]);
 
-            GameFlagLogicalElement gameFlagLogicalElement = (GameFlagLogicalElement)model.RoomEnemies["Spore Spawn"].StopSpawn.LogicalElements
-                .Where(element => typeof(GameFlagLogicalElement).IsAssignableFrom(element.GetType()))
-                .First();
+            GameFlagLogicalElement gameFlagLogicalElement = model.RoomEnemies["Spore Spawn"].StopSpawn.LogicalElement<GameFlagLogicalElement>(0);
             Assert.Same(arbitraryGameFlag2, gameFlagLogicalElement.GameFlag);
         }
 
@@ -429,9 +404,7 @@ namespace sm_json_data_framework.Tests.Models
 
             // Expect all properties that reference a room obstacle, to have the same instance as the one in the room
             RoomObstacle arbitraryObstacle = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Obstacles["A"];
-            ResetRoom resetRoom = (ResetRoom)model.Runways["Base Runway - Green Shaft Mid-Low Left Door (to Firefleas)"].Strats["Base"].Requires.LogicalElements
-                .Where(element => typeof(ResetRoom).IsAssignableFrom(element.GetType()))
-                .First();
+            ResetRoom resetRoom = model.Runways["Base Runway - Green Shaft Mid-Low Left Door (to Firefleas)"].Strats["Base"].Requires.LogicalElement<ResetRoom>(0);
             Assert.Same(arbitraryObstacle, resetRoom.ObstaclesToAvoid["A"]);
 
             RoomObstacle arbitraryObstacle2 = model.Rooms["Morph Ball Room"].Obstacles["A"];
@@ -473,7 +446,7 @@ namespace sm_json_data_framework.Tests.Models
 
         #endregion
 
-        #region Tests for ApplyLogicalOptions()
+        #region Tests for ApplyLogicalOptions() that check propagation of the logical options
         [Fact]
         public void ApplyLogicalOptions_AppliesCloneToSuperMetroidModelProperties()
         {
@@ -863,7 +836,7 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_AppliesCloneToAndOrProperties()
+        public void ApplyLogicalOptions_AppliesCloneToOrProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
@@ -892,13 +865,374 @@ namespace sm_json_data_framework.Tests.Models
             ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            And arbitraryAnd = (And)((Or)ModelForApplyLogicalOptions.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(Or).IsAssignableFrom(element.GetType())).First())
-                .LogicalRequirements.LogicalElements.Where(element => typeof(And).IsAssignableFrom(element.GetType())).First();
+            And arbitraryAnd = ModelForApplyLogicalOptions.Helpers["h_canPassBombPassages"].Requires.LogicalElement<Or>(0)
+                .LogicalRequirements.LogicalElement<And>(0);
             ReadOnlyLogicalOptions appliedOptions = arbitraryAnd.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
 
             Assert.Same(appliedOptions, arbitraryAnd.AppliedLogicalOptions);
+        }
+
+        #endregion
+
+        #region Tests for ApplyLogicalOptions() that check applied logical properties
+
+        // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTechs()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterDisabledTech("canPreciseWalljump");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Morph"])
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Bombs"])
+                )
+                .Build();
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Tech disabledTech = ModelForApplyLogicalOptions.Techs["canPreciseWalljump"];
+            Assert.False(disabledTech.LogicallyRelevant);
+            Assert.False(disabledTech.LogicallyAlways);
+            Assert.False(disabledTech.LogicallyFree);
+            Assert.True(disabledTech.LogicallyNever);
+
+            Tech impossibleSubTech = ModelForApplyLogicalOptions.Techs["canDelayedWalljump"];
+            Assert.False(impossibleSubTech.LogicallyRelevant);
+            Assert.False(impossibleSubTech.LogicallyAlways);
+            Assert.False(impossibleSubTech.LogicallyFree);
+            Assert.True(impossibleSubTech.LogicallyNever);
+
+            Tech nonFreeTech = ModelForApplyLogicalOptions.Techs["canGrappleClip"];
+            Assert.True(nonFreeTech.LogicallyRelevant);
+            Assert.False(nonFreeTech.LogicallyAlways);
+            Assert.False(nonFreeTech.LogicallyFree);
+            Assert.False(nonFreeTech.LogicallyNever);
+
+            Tech freeTech = ModelForApplyLogicalOptions.Techs["canWalljump"];
+            Assert.True(freeTech.LogicallyRelevant);
+            Assert.True(freeTech.LogicallyAlways);
+            Assert.True(freeTech.LogicallyFree);
+            Assert.False(freeTech.LogicallyNever);
+
+            Tech freeByStartItemTech = ModelForApplyLogicalOptions.Techs["canIBJ"];
+            Assert.True(freeByStartItemTech.LogicallyRelevant);
+            Assert.True(freeByStartItemTech.LogicallyAlways);
+            Assert.True(freeByStartItemTech.LogicallyFree);
+            Assert.False(freeByStartItemTech.LogicallyNever);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelpers()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterDisabledTech("canGateGlitch");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Morph"])
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Bombs"])
+                )
+                .Build();
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Helper impossibleHelper = ModelForApplyLogicalOptions.Helpers["h_canBlueGateGlitch"];
+            Assert.False(impossibleHelper.LogicallyRelevant);
+            Assert.False(impossibleHelper.LogicallyAlways);
+            Assert.False(impossibleHelper.LogicallyFree);
+            Assert.True(impossibleHelper.LogicallyNever);
+
+            Helper nonFreeHelper = ModelForApplyLogicalOptions.Helpers["h_hasBeamUpgrade"];
+            Assert.True(nonFreeHelper.LogicallyRelevant);
+            Assert.False(nonFreeHelper.LogicallyAlways);
+            Assert.False(nonFreeHelper.LogicallyFree);
+            Assert.False(nonFreeHelper.LogicallyNever);
+
+            Helper freeHelper = ModelForApplyLogicalOptions.Helpers["h_canUseMorphBombs"];
+            Assert.True(freeHelper.LogicallyRelevant);
+            Assert.True(freeHelper.LogicallyAlways);
+            Assert.True(freeHelper.LogicallyFree);
+            Assert.False(freeHelper.LogicallyNever);
+            
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemiesAndSubProperties()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyAttacks()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyDimensions()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeaponMultipliers()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeaponSusceptibilities()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnections()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnectionNodes()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRooms()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinks()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinkTos()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnStrats()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnStratFailures()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnStratObstacles()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomObstacles()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnemies()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnvironments()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnFarmCycles()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodes()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnDoorEnvironments()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRunways()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnCanLeaveChargeds()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnInitiateRemotelys()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnViewableNodes()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTwinDoorAddresses()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodeLocks()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnOrs()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAnds()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTechLogicalElements()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNeverLogicalElements()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnItemLogicalElements()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelperLogicalElements()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnGameFlagLogicalElements()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnDamageLogicalElements ()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnergyAtMost()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnPreviousNodes()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAdjacentRunways()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmo()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmoDrain()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnCanComeInCharged()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnCanShineCharge()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyDamage()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyKill()
+        {
+
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnResetRoom()
+        {
+
         }
 
         #endregion

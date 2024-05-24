@@ -140,9 +140,11 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="techName">The name of the tech</param>
         /// <param name="numberOfTries">The number of times the tech must be tried before an expected success</param>
-        public void RegisterTechTries(string techName, int numberOfTries)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterTechTries(string techName, int numberOfTries)
         {
             TriesByTech.Add(techName, numberOfTries);
+            return this;
         }
 
         public int NumberOfTries(Tech tech)
@@ -171,9 +173,11 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="helperName">The name of the helper</param>
         /// <param name="numberOfTries">The number of times the helper must be tried before an expected success</param>
-        public void RegisterHelperTries(string helperName, int numberOfTries)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterHelperTries(string helperName, int numberOfTries)
         {
             TriesByHelper.Add(helperName, numberOfTries);
+            return this;
         }
 
         public int NumberOfTries(Helper helper)
@@ -201,9 +205,11 @@ namespace sm_json_data_framework.Options
         /// </summary>
         /// <param name="stratName">The name of the strat</param>
         /// <param name="numberOfTries">The number of times the strat must be tried before an expected success</param>
-        public void RegisterStratTries(string stratName, int numberOfTries)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterStratTries(string stratName, int numberOfTries)
         {
             TriesByStrat.Add(stratName, numberOfTries);
+            return this;
         }
 
         public int NumberOfTries(Strat strat)
@@ -232,27 +238,33 @@ namespace sm_json_data_framework.Options
         /// Registers the provided tech name as a disabled tech.
         /// </summary>
         /// <param name="techName">Name of the tech to disable</param>
-        public void RegisterDisabledTech(string techName)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterDisabledTech(string techName)
         {
             InternalDisabledTechs.Add(techName);
+            return this;
         }
 
         /// <summary>
         /// Unregisters the provided tech name as a disabled tech.
         /// </summary>
         /// <param name="techName">Name of the tech to un-disable</param>
-        public void UnregisterDisabledTech(string techName)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions UnregisterDisabledTech(string techName)
         {
             InternalDisabledTechs.Remove(techName);
+            return this;
         }
 
         /// <summary>
         /// Registers the provided tech name as an enabled tech (used when techs <see cref="TechsEnabledByDefault"/> is false).
         /// </summary>
         /// <param name="techName">Name of the tech to enable</param>
-        public void RegisterEnabledTech(string techName)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterEnabledTech(string techName)
         {
             InternalEnabledTechs.Add(techName);
+            return this;
         }
 
         /// <summary>
@@ -287,9 +299,11 @@ namespace sm_json_data_framework.Options
         /// Registers the provided strat name as a disabled strat.
         /// </summary>
         /// <param name="stratName">Name of the strat to disable</param>
-        public void RegisterDisabledStrat(string stratName)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterDisabledStrat(string stratName)
         {
             InternalDisabledStrats.Add(stratName);
+            return this;
         }
 
         /// <summary>
@@ -311,9 +325,11 @@ namespace sm_json_data_framework.Options
         /// Registers the provided game flag name as a disabled flag.
         /// </summary>
         /// <param name="flagName">Name of the flag to disable</param>
-        public void RegisterDisabledGameFlag(string flagName)
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterDisabledGameFlag(string flagName)
         {
             InternalRemovedGameFlags.Add(flagName);
+            return this;
         }
 
         /// <summary>
