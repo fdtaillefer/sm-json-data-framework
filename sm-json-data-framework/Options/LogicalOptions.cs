@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
@@ -58,6 +59,7 @@ namespace sm_json_data_framework.Options
             InternalDisabledTechs = new HashSet<string>(other.InternalDisabledTechs);
             InternalEnabledTechs = new HashSet<string>(other.InternalEnabledTechs);
             InternalDisabledStrats = new HashSet<string>(other.InternalDisabledStrats);
+            InternalRemovedItems = new HashSet<string>(other.InternalRemovedItems);
             InternalRemovedGameFlags = new HashSet<string>(other.InternalRemovedGameFlags);
             TilesToShineCharge = other.TilesToShineCharge;
             TilesSavedWithStutter = other.TilesSavedWithStutter;
@@ -87,23 +89,32 @@ namespace sm_json_data_framework.Options
         public bool TechsEnabledByDefault { get; set; } = true;
 
         /// <summary>
-        /// A sequence of tech names that are disabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is false.
+        /// A set of tech names that are disabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is false.
         /// </summary>
         private ISet<string> InternalDisabledTechs { get; set; } = new HashSet<string>();
         public IReadOnlySet<string> DisabledTechs => InternalDisabledTechs.AsReadOnly();
 
         /// <summary>
-        /// A sequence of tech names that are enabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is true.
+        /// A set of tech names that are enabled. Irrelevant if <see cref="TechsEnabledByDefault"/> is true.
         /// </summary>
         private ISet<string> InternalEnabledTechs { get; set; } = new HashSet<string>();
         public IReadOnlySet<string> EnabledTechs => InternalEnabledTechs.AsReadOnly();
 
         /// <summary>
-        /// A sequence of strat names that are disabled, regardless of their requirements. Only notable strats can be disabled.
+        /// A set of strat names that are disabled, regardless of their requirements. Only notable strats can be disabled.
         /// </summary>
         private ISet<string> InternalDisabledStrats { get; set; } = new HashSet<string>();
         public IReadOnlySet<string> DisabledStrats => InternalDisabledStrats.AsReadOnly();
 
+        /// <summary>
+        /// A set of item names that are logically removed, causing logic to expect it to never be obtained.
+        /// </summary>
+        private ISet<string> InternalRemovedItems { get; set; } = new HashSet<string>();
+        public IReadOnlySet<string> RemovedItems => InternalRemovedItems.AsReadOnly();
+
+        /// <summary>
+        /// A set of game flag names that are logically removed, causing logic to expect it to never be enabled.
+        /// </summary>
         private ISet<string> InternalRemovedGameFlags { get; set; } = new HashSet<string>();
         public IReadOnlySet<string> RemovedGameFlags => InternalRemovedGameFlags.AsReadOnly();
 
@@ -322,6 +333,33 @@ namespace sm_json_data_framework.Options
         }
 
         /// <summary>
+        /// Registers the provided item name as a removed item.
+        /// </summary>
+        /// <param name="itemName">Name of the item to register</param>
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions RegisterRemovedItem(string itemName)
+        {
+            InternalRemovedItems.Add(itemName);
+            return this;
+        }
+
+        /// <summary>
+        /// Unregisters the provided item name as a removed item.
+        /// </summary>
+        /// <param name="itemName">Name of the item to unregister</param>
+        /// <returns>This, for chaining</returns>
+        public LogicalOptions UnregisterRemovedItem(string itemName)
+        {
+            InternalRemovedItems.Remove(itemName);
+            return this;
+        }
+
+        public bool IsItemInGame(Item item)
+        {
+            return !InternalRemovedItems.Contains(item.Name);
+        }
+
+        /// <summary>
         /// Registers the provided game flag name as a disabled flag.
         /// </summary>
         /// <param name="flagName">Name of the flag to disable</param>
@@ -404,6 +442,11 @@ namespace sm_json_data_framework.Options
         /// A set of strat names that are considered to be unattainable.
         /// </summary>
         public IReadOnlySet<string> RemovedGameFlags { get; }
+
+        /// <summary>
+        /// A set of item names that are considered to be removed from the game and impossible to obtain.
+        /// </summary>
+        public IReadOnlySet<string> RemovedItems { get; }
 
         /// <summary>
         /// The number of tiles needed for the charging of a shinespark to be expected.
@@ -494,6 +537,13 @@ namespace sm_json_data_framework.Options
         /// <param name="strat">Strat to check for</param>
         /// <returns></returns>
         public bool IsStratEnabled(Strat strat);
+
+        /// <summary>
+        /// Indicates whether the provided item is considered to be possible to find in the game according to this LogicalOptions.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool IsItemInGame(Item item);
 
         /// <summary>
         /// Indicates whether the player is expected to be able to enable the provided GameFlag according to this LogicalOptions.

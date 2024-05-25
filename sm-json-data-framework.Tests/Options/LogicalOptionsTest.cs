@@ -1,6 +1,7 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Techs;
@@ -18,6 +19,8 @@ namespace sm_json_data_framework.Tests.Options
     {
         // Use a static model to build it only once.
         private static SuperMetroidModel Model { get; set; } = StaticTestObjects.UnmodifiableModel;
+
+        #region Tests for NumberOfTries(Tech)
 
         [Fact]
         public void NumberOfTries_TechWithRegisteredNumber_ReturnsRegisteredValue()
@@ -49,6 +52,10 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
 
+        #endregion
+
+        #region Tests for NumberOfTries(Helper)
+
         [Fact]
         public void NumberOfTries_HelperWithRegisteredTries_ReturnsRegisteredValue()
         {
@@ -78,6 +85,10 @@ namespace sm_json_data_framework.Tests.Options
             // Expect
             Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
+
+        #endregion
+
+        #region Tests for NumberOfTries(Strat)
 
         [Fact]
         public void NumberOfTries_StratWithRegisteredNumber_ReturnsRegisteredValue()
@@ -123,6 +134,10 @@ namespace sm_json_data_framework.Tests.Options
             // Expect
             Assert.Equal(LogicalOptions.DefaultNumberOfTries, result);
         }
+
+        #endregion
+
+        #region Tests for IsTechEnabled()
 
         [Fact]
         public void IsTechEnabled_TechsEnabledByDefaultAndNoMention_ReturnsTrue()
@@ -217,6 +232,10 @@ namespace sm_json_data_framework.Tests.Options
             Assert.False(result);
         }
 
+        #endregion
+
+        #region Tests for IsStratEnabled()
+
         [Fact]
         public void IsStratEnabled_NoMention_ReturnsTrue()
         {
@@ -277,6 +296,59 @@ namespace sm_json_data_framework.Tests.Options
             Assert.True(result);
         }
 
+        #endregion
+
+        #region Tests for IsItemInGame()
+
+        [Fact]
+        public void IsItemInGame_NoMention_ReturnsTrue()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            LogicalOptions logicalOptions = new LogicalOptions();
+
+            // When
+            bool result = logicalOptions.IsItemInGame(item);
+
+            // Expect
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsItemInGame_ExplicitlyRemoved_ReturnsFalse()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem(item.Name);
+
+            // When
+            bool result = logicalOptions.IsItemInGame(item);
+
+            // Expect
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void IsItemInGame_Readded_ReturnsTrue()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem(item.Name);
+            logicalOptions.UnregisterRemovedItem(item.Name);
+
+            // When
+            bool result = logicalOptions.IsItemInGame(item);
+
+            // Expect
+            Assert.True(result);
+        }
+
+        #endregion
+
+        #region Tests for IsGameFlagEnabled()
+
         [Fact]
         public void IsGameFlagEnabled_NoMention_ReturnsTrue()
         {
@@ -322,6 +394,10 @@ namespace sm_json_data_framework.Tests.Options
             Assert.True(result);
         }
 
+        #endregion
+
+        #region Tests for Clone()
+
         [Fact]
         public void Clone_CopiesCorectly()
         {
@@ -329,6 +405,7 @@ namespace sm_json_data_framework.Tests.Options
             Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             Tech disabledTech = Model.Techs["canWalljump"];
             Tech enabledTech = Model.Techs["canIBJ"];
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
             GameFlag flag = Model.GameFlags["f_ZebesAwake"];
             Helper helper = Model.Helpers["h_canBombThings"];
 
@@ -343,6 +420,7 @@ namespace sm_json_data_framework.Tests.Options
             logicalOptions.RegisterDisabledStrat(strat.Name);
             logicalOptions.RegisterEnabledTech(enabledTech.Name);
             logicalOptions.RegisterDisabledTech(disabledTech.Name);
+            logicalOptions.RegisterRemovedItem(item.Name);
             logicalOptions.RegisterDisabledGameFlag(flag.Name);
 
             int expectedHelperTries = 5;
@@ -380,6 +458,7 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Contains(strat.Name, clone.DisabledStrats);
             Assert.Contains(enabledTech.Name, clone.EnabledTechs);
             Assert.Contains(disabledTech.Name, clone.DisabledTechs);
+            Assert.Contains(item.Name, clone.RemovedItems);
             Assert.Contains(flag.Name, clone.RemovedGameFlags);
 
             Assert.Equal(expectedHelperTries, clone.NumberOfTries(helper));
@@ -409,6 +488,7 @@ namespace sm_json_data_framework.Tests.Options
             Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
             Tech disabledTech = Model.Techs["canWalljump"];
             Tech enabledTech = Model.Techs["canIBJ"];
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
             GameFlag flag = Model.GameFlags["f_ZebesAwake"];
             Helper helper = Model.Helpers["h_canBombThings"];
 
@@ -418,6 +498,7 @@ namespace sm_json_data_framework.Tests.Options
             clone.RegisterDisabledStrat(strat.Name);
             clone.RegisterEnabledTech(enabledTech.Name);
             clone.RegisterDisabledTech(disabledTech.Name);
+            clone.RegisterRemovedItem(item.Name);
             clone.RegisterDisabledGameFlag(flag.Name);
 
             clone.RegisterHelperTries(helper.Name, 5);
@@ -444,6 +525,7 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Empty(logicalOptions.DisabledStrats);
             Assert.Empty(logicalOptions.EnabledTechs);
             Assert.Empty(logicalOptions.DisabledTechs);
+            Assert.Empty(logicalOptions.RemovedItems);
             Assert.Empty(logicalOptions.RemovedGameFlags);
 
             Assert.Equal(LogicalOptions.DefaultNumberOfTries, logicalOptions.NumberOfTries(helper));
@@ -458,5 +540,8 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Equal(10, logicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[ConsumableResourceEnum.Energy]);
             Assert.Equal(10, logicalOptions.SpawnerFarmingOptions.SafetyMarginPercent);
         }
+
+        #endregion
+
     }
 }
