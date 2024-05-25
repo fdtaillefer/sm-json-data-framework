@@ -126,6 +126,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             bool impossible = false;
+
+            if (!AppliedLogicalOptions.IsSpeedBoosterInGame())
+            {
+                impossible = true;
+            }
+
             if (MustShinespark && !CanShinespark)
             {
                 impossible = true;
@@ -146,8 +152,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // If SpeedBooster isn't always available then this is not free
-            if (!AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster())
+            // If SpeedBooster isn't in-game and always available then this is not free
+            if (!AppliedLogicalOptions.IsSpeedBoosterInGame() || !AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster())
             {
                 return false;
             }

@@ -281,27 +281,32 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            bool impossible = false;
+            if(!AppliedLogicalOptions.IsSpeedBoosterInGame())
+            {
+                return true;
+            }
+
             if (MustShinespark && !CanShinespark)
             {
-                impossible = true;
+                return true;
             }
 
             // This could also become impossible based on layout and not logic, but that part is beyond the scope of this method.
-            return impossible;
+
+            return false;
         }
 
         protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
             // This could be always possible based on layout and not logic, but that part is beyond the scope of this method.
-            // It would also require SpeedBooster to always be available and to not require a shinespark.
+            // It would also require SpeedBooster to always be available (and not removed) and to not require a shinespark.
             return false;
         }
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
             // This could be always free based on layout and not logic, but that part is beyond the scope of this method.
-            // It would also need SpeedBooster to always be available and it would need to not require a shinespark.
+            // It would also need SpeedBooster to always be available (and not removed) and it would need to not require a shinespark.
             return false;
         }
     }

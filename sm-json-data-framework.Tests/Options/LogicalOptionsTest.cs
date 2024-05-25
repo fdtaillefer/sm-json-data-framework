@@ -347,6 +347,55 @@ namespace sm_json_data_framework.Tests.Options
 
         #endregion
 
+        #region Tests for IsSpeedBoosterInGame()
+
+        [Fact]
+        public void IsSpeedBoosterInGame_NoMention_ReturnsTrue()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            LogicalOptions logicalOptions = new LogicalOptions();
+
+            // When
+            bool result = logicalOptions.IsSpeedBoosterInGame();
+
+            // Expect
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsSpeedBoosterInGame_ExplicitlyRemoved_ReturnsFalse()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem(item.Name);
+
+            // When
+            bool result = logicalOptions.IsSpeedBoosterInGame();
+
+            // Expect
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void IsSpeedBoosterInGame_Readded_ReturnsTrue()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem(item.Name);
+            logicalOptions.UnregisterRemovedItem(item.Name);
+
+            // When
+            bool result = logicalOptions.IsSpeedBoosterInGame();
+
+            // Expect
+            Assert.True(result);
+        }
+
+        #endregion
+
         #region Tests for IsGameFlagEnabled()
 
         [Fact]

@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.GameFlags;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
@@ -359,6 +360,11 @@ namespace sm_json_data_framework.Options
             return !InternalRemovedItems.Contains(item.Name);
         }
 
+        public bool IsSpeedBoosterInGame()
+        {
+            return !InternalRemovedItems.Contains(SuperMetroidModel.SPEED_BOOSTER_NAME);
+        }
+
         /// <summary>
         /// Registers the provided game flag name as a disabled flag.
         /// </summary>
@@ -544,6 +550,12 @@ namespace sm_json_data_framework.Options
         /// <param name="item"></param>
         /// <returns></returns>
         public bool IsItemInGame(Item item);
+
+        /// <summary>
+        /// Indicates whether Speed Booster is considered to be possible to find in the game according to this LogicalOptions.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSpeedBoosterInGame();
 
         /// <summary>
         /// Indicates whether the player is expected to be able to enable the provided GameFlag according to this LogicalOptions.

@@ -50,8 +50,8 @@ namespace sm_json_data_framework.Models.Items
         /// <returns></returns>
         protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // Logical options can't currently take away items
-            return false;
+            // If the item is logically removed, it can never be used.
+            return !AppliedLogicalOptions.IsItemInGame(this);
         }
 
         public bool LogicallyAlways { get; private set; }
@@ -63,8 +63,8 @@ namespace sm_json_data_framework.Models.Items
         /// <returns></returns>
         protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // Item is always usable if the game always starts with it
-            return AppliedLogicalOptions.StartConditions.StartingInventory.HasItem(this);
+            // Item is always usable if the game always starts with it (and it's not logically removed)
+            return AppliedLogicalOptions.IsItemInGame(this) && AppliedLogicalOptions.StartConditions.StartingInventory.HasItem(this);
         }
 
         public bool LogicallyFree => LogicallyAlways; // Just owning an item can never cost resources
