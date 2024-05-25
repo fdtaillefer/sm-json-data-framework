@@ -75,6 +75,8 @@ namespace sm_json_data_framework.Options
             InternalSpawnerFarmingOptions = other.InternalSpawnerFarmingOptions.Clone();
             InternalStartConditions = other.InternalStartConditions?.Clone();
             InternalUnfinalizedStartConditions = other.InternalUnfinalizedStartConditions?.Clone();
+            InternalAvailableResourceInventory = other.InternalAvailableResourceInventory?.Clone();
+            InternalUnfinalizedAvailableResourceInventory = other.InternalUnfinalizedAvailableResourceInventory?.Clone();
         }
 
         public LogicalOptions Clone()
@@ -410,6 +412,29 @@ namespace sm_json_data_framework.Options
         /// If the finalized model already exists, this property is entirely ignored and only <see cref="InternalStartConditions"/> matters.
         /// </summary>
         public UnfinalizedStartConditions InternalUnfinalizedStartConditions { get; set; }
+
+        /// <summary>
+        /// An optional ResourceItemInventory which, if provided, expresses the max available number of each expansion item.
+        /// It also 
+        /// </summary>
+        public ResourceItemInventory InternalAvailableResourceInventory { get; set; }
+        public ReadOnlyResourceItemInventory AvailableResourceInventory => InternalAvailableResourceInventory?.AsReadOnly();
+
+        /// <summary>
+        /// This property is used to communicate available expansion item counts before a finalized model exists, with the intent to apply the start conditions during finalization.
+        /// If the finalized model already exists, this property is entirely ignored and only <see cref="InternalAvailableResourceInventory"/> matters.
+        /// </summary>
+        public UnfinalizedResourceItemInventory InternalUnfinalizedAvailableResourceInventory { get; set; }
+
+        public int? MaxPossibleAmount(ConsumableResourceEnum resource)
+        {
+            return AvailableResourceInventory?.ResourceMaximums.GetAmount(resource);
+        }
+
+        public int? MaxPossibleAmount(RechargeableResourceEnum resource)
+        {
+            return AvailableResourceInventory?.ResourceMaximums.GetAmount(resource);
+        }
     }
 
     /// <summary>
@@ -573,5 +598,27 @@ namespace sm_json_data_framework.Options
         /// Some start conditions that can override a model's usual start conditions. Can be null to not override.
         /// </summary>
         public StartConditions StartConditions { get; }
+
+        /// <summary>
+        /// An optional ResourceItemInventory which, if provided, expresses the max available number of each expansion item.
+        /// It also 
+        /// </summary>
+        public ReadOnlyResourceItemInventory AvailableResourceInventory { get; }
+
+        /// <summary>
+        /// Returns the max possible amount of the provided resource according to these logical options, if configured.
+        /// Returns null otherwise.
+        /// </summary>
+        /// <param name="resource">Resource to get the max amount of</param>
+        /// <returns></returns>
+        public int? MaxPossibleAmount(ConsumableResourceEnum resource);
+
+        /// <summary>
+        /// Returns the max possible amount of the provided resource according to these logical options, if configured.
+        /// Returns null otherwise.
+        /// </summary>
+        /// <param name="resource">Resource to get the max amount of</param>
+        /// <returns></returns>
+        public int? MaxPossibleAmount(RechargeableResourceEnum resource);
     }
 }

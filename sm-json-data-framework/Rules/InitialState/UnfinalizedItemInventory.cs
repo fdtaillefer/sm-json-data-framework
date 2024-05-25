@@ -12,7 +12,7 @@ namespace sm_json_data_framework.Rules.InitialState
     /// <summary>
     /// A very simple inventory that contains <see cref="UnfinalizedItem"/>s and no logic.
     /// </summary>
-    public class UnfinalizedItemInventory
+    public class UnfinalizedItemInventory: UnfinalizedResourceItemInventory
     {
         /// <summary>
         /// Creates and returns an inventory representing the vanilla starting inventory.
@@ -31,22 +31,18 @@ namespace sm_json_data_framework.Rules.InitialState
 
         }
 
-        public UnfinalizedItemInventory(UnfinalizedItemInventory other)
+        public UnfinalizedItemInventory(UnfinalizedItemInventory other): base(other)
         {
             InternalNonConsumableItems = new Dictionary<string, UnfinalizedItem>(other.InternalNonConsumableItems);
-            InternalExpansionItems = new Dictionary<string, (UnfinalizedExpansionItem item, int count)>(other.InternalExpansionItems);
         }
 
-        public UnfinalizedItemInventory Clone()
+        public override UnfinalizedItemInventory Clone()
         {
             return new UnfinalizedItemInventory(this);
         }
 
         protected IDictionary<string, UnfinalizedItem> InternalNonConsumableItems { get; } = new Dictionary<string, UnfinalizedItem>();
         public ReadOnlyDictionary<string, UnfinalizedItem> NonConsumableItems => InternalNonConsumableItems.AsReadOnly();
-
-        protected IDictionary<string, (UnfinalizedExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (UnfinalizedExpansionItem item, int count)>();
-        public ReadOnlyDictionary<string, (UnfinalizedExpansionItem item, int count)> ExpansionItems => InternalExpansionItems.AsReadOnly();
 
         /// <summary>
         /// Adds the provided item to this inventory.
@@ -55,21 +51,10 @@ namespace sm_json_data_framework.Rules.InitialState
         /// <returns>This, for chaining</returns>
         public UnfinalizedItemInventory ApplyAddItem(UnfinalizedItem item)
         {
-            // Expansion items have a count
+            // Expansion items are handled by base class
             if (item is UnfinalizedExpansionItem expansionItem)
             {
-                if (!InternalExpansionItems.ContainsKey(expansionItem.Name))
-                {
-                    // Add item with an initial quantity of 1
-                    InternalExpansionItems.Add(expansionItem.Name, (expansionItem, 1));
-                }
-                else
-                {
-                    // Increment count
-                    var itemWithCount = InternalExpansionItems[expansionItem.Name];
-                    itemWithCount.count++;
-                    InternalExpansionItems[expansionItem.Name] = itemWithCount;
-                }
+                ApplyAddExpansionItem(expansionItem);
             }
             // Regular items don't have a count
             else
@@ -91,23 +76,10 @@ namespace sm_json_data_framework.Rules.InitialState
         /// <returns>This, for chaining</returns>
         public UnfinalizedItemInventory ApplyRemoveItem(UnfinalizedItem item)
         {
-            // Expansion items have a count
+            // Expansion items are handled by base class
             if (item is UnfinalizedExpansionItem expansionItem)
             {
-                if (InternalExpansionItems.ContainsKey(expansionItem.Name))
-                {
-                    // Decrement count
-                    var itemWithCount = InternalExpansionItems[expansionItem.Name];
-                    itemWithCount.count--;
-                    if (itemWithCount.count <= 0)
-                    {
-                        InternalExpansionItems.Remove(item.Name);
-                    }
-                    else
-                    {
-                        InternalExpansionItems[expansionItem.Name] = itemWithCount;
-                    }
-                }
+                ApplyRemoveExpansionItem(expansionItem);
             }
             // Regular items don't have a count
             else

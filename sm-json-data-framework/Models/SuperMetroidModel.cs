@@ -219,6 +219,22 @@ namespace sm_json_data_framework.Models
             // so even though they're optional, we'll replace them with the model's internal StartConditions if null
             logicalOptions.InternalStartConditions ??= InternalStartConditions;
 
+            // If we're applying logical options during model finalization, then we must interpret only the options' UnfinalizedAvailableResourceInventory
+            // If it's not during model finalization, then we must interpret only the options' AvailableResourceInventory
+            if (mappings != null)
+            {
+                if (logicalOptions.InternalUnfinalizedAvailableResourceInventory == null)
+                {
+                    logicalOptions.InternalAvailableResourceInventory = null;
+                }
+                else
+                {
+                    logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(logicalOptions.InternalUnfinalizedAvailableResourceInventory,
+                        logicalOptions.InternalStartConditions.BaseResourceMaximums, mappings);
+                }
+            }
+            logicalOptions.InternalUnfinalizedAvailableResourceInventory = null;
+
             AppliedLogicalOptions = logicalOptions.AsReadOnly();
 
             foreach (GameFlag gameFlag in GameFlags.Values)
