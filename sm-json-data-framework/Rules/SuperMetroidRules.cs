@@ -267,7 +267,7 @@ namespace sm_json_data_framework.Rules
             bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
-                return baseDamage / 4;
+                return CalculateBestCaseEnvironmentalDamage(baseDamage);
             }
             else if (hasVaria)
             {
@@ -275,8 +275,32 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return baseDamage;
+                return CalculateWorstCaseEnvironmentalDamage(baseDamage);
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the environmental damage Samus would take for the provided base environmental damage, in the best case scenario
+        /// (presumably, both suits).
+        /// This method is intended for environment-based punctual hits, not damage over time.
+        /// </summary>
+        /// <param name="baseDamage">The base damage</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseEnvironmentalDamage(int baseDamage)
+        {
+            return baseDamage / 4;
+        }
+
+        /// <summary>
+        /// Calculates and returns the environmental damage Samus would take for the provided base environmental damage, in the worst case scenario
+        /// (presumably, suitless).
+        /// This method is intended for environment-based punctual hits, not damage over time.
+        /// </summary>
+        /// <param name="baseDamage">The base damage</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseEnvironmentalDamage(int baseDamage)
+        {
+            return baseDamage;
         }
 
         /// <summary>
@@ -305,12 +329,34 @@ namespace sm_json_data_framework.Rules
             bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity || hasVaria)
             {
-                return 0;
+                return CalculateBestCaseHeatDamage(heatFrames);
             }
             else
             {
-                return heatFrames / 4;
+                return CalculateWorstCaseHeatDamage(heatFrames);
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in a heated room, in the best case scenario
+        /// (presumably both suits).
+        /// </summary>
+        /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseHeatDamage(int heatFrames)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in a heated room, in the worst case scenario
+        /// (presumably suitless).
+        /// </summary>
+        /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseHeatDamage(int heatFrames)
+        {
+            return heatFrames / 4;
         }
 
         /// <summary>
@@ -339,7 +385,7 @@ namespace sm_json_data_framework.Rules
             bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
-                return 0;
+                return CalculateBestCaseLavaDamage(lavaFrames);
             }
             else if (hasVaria)
             {
@@ -347,8 +393,30 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return lavaFrames / 2;
+                return CalculateWorstCaseLavaDamage(lavaFrames);
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in lava, in the best case scenario
+        /// (presumably both suits).
+        /// </summary>
+        /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseLavaDamage(int lavaFrames)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in lava, in the worst case scenario
+        /// (presumably suitless).
+        /// </summary>
+        /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseLavaDamage(int lavaFrames)
+        {
+            return lavaFrames / 2;
         }
 
         /// <summary>
@@ -363,12 +431,34 @@ namespace sm_json_data_framework.Rules
             bool hasVaria = inGameState.Inventory.HasVariaSuit();
             if (hasVaria)
             {
-                return lavaPhysicsFrames / 4;
+                return CalculateBestCaseLavaPhysicsDamage(lavaPhysicsFrames);
             }
             else
             {
-                return lavaPhysicsFrames / 2;
+                return CalculateWorstCaseLavaPhysicsDamage(lavaPhysicsFrames);
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in lava while undergoing lava physics 
+        /// (i.e. with Gravity Suit turned off if available), in the best case scenario (presumably with Varia).
+        /// </summary>
+        /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseLavaPhysicsDamage(int lavaPhysicsFrames)
+        {
+            return lavaPhysicsFrames / 4;
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in lava while undergoing lava physics 
+        /// (i.e. with Gravity Suit turned off if available), in the worst case scenario (presumably suitless).
+        /// </summary>
+        /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseLavaPhysicsDamage(int lavaPhysicsFrames)
+        {
+            return lavaPhysicsFrames / 2;
         }
 
         /// <summary>
@@ -411,7 +501,7 @@ namespace sm_json_data_framework.Rules
             bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
-                return acidFrames * 3 / 8;
+                return CalculateBestCaseAcidDamage(acidFrames);
             }
             else if (hasVaria)
             {
@@ -419,8 +509,30 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return acidFrames * 6 / 4;
+                return CalculateWorstCaseAcidDamage(acidFrames);
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in acid, in the best case scenario
+        /// (presumably both suits).
+        /// </summary>
+        /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseAcidDamage(int acidFrames)
+        {
+            return acidFrames * 3 / 8;
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in acid, in the worst case scenario
+        /// (presumably suitless).
+        /// </summary>
+        /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseAcidDamage(int acidFrames)
+        {
+            return acidFrames * 6 / 4;
         }
 
         /// <summary>
@@ -449,7 +561,7 @@ namespace sm_json_data_framework.Rules
             bool hasGravity = inGameState.Inventory.HasGravitySuit();
             if (hasGravity)
             {
-                return electricityFrames / 4;
+                return CalculateBestCaseElectricityGrappleDamage(electricityFrames);
             }
             else if (hasVaria)
             {
@@ -457,8 +569,30 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return electricityFrames;
+                return CalculateWorstCaseElectricityGrappleDamage(electricityFrames);
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration grappled to a broken Draygon turret, in the best case scenario
+        /// (presumably both suits).
+        /// </summary>
+        /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseElectricityGrappleDamage(int electricityFrames)
+        {
+            return electricityFrames / 4;
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration grappled to a broken Draygon turret, in the worst case scenario
+        /// (presumably suitless).
+        /// </summary>
+        /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseElectricityGrappleDamage(int electricityFrames)
+        {
+            return electricityFrames;
         }
 
         /// <summary>
@@ -484,7 +618,29 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateShinesparkDamage(ReadOnlyInGameState inGameState, int shinesparkFrames, int times = 1)
         {
-            return shinesparkFrames * times;
+            return CalculateWorstCaseShinesparkDamage(shinesparkFrames) * times;
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for executing a shinespark of the provided duration n times, in the best case scenario
+        /// (though vanilla has only one case).
+        /// </summary>
+        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseShinesparkDamage(int shinesparkFrames)
+        {
+            return CalculateWorstCaseShinesparkDamage(shinesparkFrames);
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for executing a shinespark of the provided duration n times, in the worst case scenario
+        /// (though vanilla has only one case).
+        /// </summary>
+        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseShinesparkDamage(int shinesparkFrames)
+        {
+            return shinesparkFrames;
         }
 
         /// <summary>
@@ -513,7 +669,7 @@ namespace sm_json_data_framework.Rules
 
             if (hasGravity && attack.AffectedByGravity)
             {
-                return attack.BaseDamage / 4;
+                return CalculateBestCaseEnemyDamage(attack);
             }
             else if (hasVaria && attack.AffectedByVaria)
             {
@@ -521,8 +677,39 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
+                return CalculateWorstCaseEnemyDamage(attack);
+            }
+        }
+
+        /// <summary>
+        /// Calculates and returns how much damage the provided enemy attack would do to Samus, in the best case scenario (presumably with both suits).
+        /// </summary>
+        /// <param name="attack">The enemy attack whose damage to calculate</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseEnemyDamage(EnemyAttack attack)
+        {
+            if (attack.AffectedByGravity)
+            {
+                return attack.BaseDamage / 4;
+            }
+            else if (attack.AffectedByVaria)
+            {
+                return attack.BaseDamage / 2;
+            }
+            else
+            {
                 return attack.BaseDamage;
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns how much damage the provided enemy attack would do to Samus, in the worst case scenario (presumably suitless).
+        /// </summary>
+        /// <param name="attack">The enemy attack whose damage to calculate</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseEnemyDamage(EnemyAttack attack)
+        {
+            return attack.BaseDamage;
         }
 
         /// <summary>
