@@ -35,6 +35,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return (int)(baseDamage * HeatLeniencyMultiplier);
         }
 
+        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        {
+            return (int)(rules.CalculateBestCaseHeatDamage(Value) * HeatLeniencyMultiplier);
+        }
+
+        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        {
+            return (int)(rules.CalculateWorstCaseHeatDamage(Value) * HeatLeniencyMultiplier);
+        }
+
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetHeatDamageReducingItems(model, inGameState);

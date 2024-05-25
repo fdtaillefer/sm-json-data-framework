@@ -26,6 +26,19 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return Math.Max(0, currentRegularEnergy - Value);
         }
 
+        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        {
+            return 0;
+        }
+
+        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        {
+            // There's no proper answer to give here as worst case is the maxPossibleEnergy - Value, which we can't know here.
+            // We just know this can never kill.
+            // Return something arbitrary...
+            return 1;
+        }
+
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // This brings energy down to a specific level, and has no cares for damage reduction items

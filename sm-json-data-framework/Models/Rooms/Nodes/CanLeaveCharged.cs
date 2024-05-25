@@ -202,16 +202,17 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
+            int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
             // There's five separate things that can make a CanLeaveCharged impossible to execute:
             // - Speed Booster is removed from the game
             // - It must be initiated remotely, but that remote initiation is impossible
             // - It has no possible strats
-            // - It requires a shinespark but shinesparks are logically disabled
+            // - It requires a shinespark, but shinesparks are logically disabled OR the shinespark uses more energy than we can ever have
             // - It's too short to shine charge on given the logical options
             return !AppliedLogicalOptions.IsSpeedBoosterInGame()
                 || (InitiateRemotely?.LogicallyNever is true) 
                 || !Strats.Values.WhereLogicallyRelevant().Any() 
-                || (MustShinespark && !CanShinespark)
+                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value <= rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames))))
                 || LogicalEffectiveRunwayLength < TilesToShineCharge;
         }
 
@@ -224,13 +225,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // There's five our separate conditions that must be met to always be possible
+            // Besides not being never, there's five our separate conditions that must be met to always be possible
             // - Speed Booster is in-game and always available
             // - Remove initiation is unneeded OR always possible
             // - At least one strat is always possible
             // - Does not require a shinespark (if it does, there's energy costs that are not always possible)
             // - There is enough room logically to shine charge
-            return AppliedLogicalOptions.IsSpeedBoosterInGame() && AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster()
+            return !CalculateLogicallyNever(rules)
+                && AppliedLogicalOptions.IsSpeedBoosterInGame() && AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster()
                 && (InitiateRemotely == null || InitiateRemotely.LogicallyAlways)
                 && Strats.Values.WhereLogicallyAlways().Any()
                 && !MustShinespark
@@ -246,13 +248,14 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // There's five separate conditions that must be met to always be possible
+            // Besides not being never, there's five separate conditions that must be met to always be possible
             // - Speed Booster is in-game and always available
             // - Remove initiation is unneeded OR free
             // - At least one strat is free
             // - Does not require a shinespark (if it does, there's energy costs so it's not free)
             // - There is enough room logically to shine charge
-            return AppliedLogicalOptions.IsSpeedBoosterInGame() && AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster()
+            return !CalculateLogicallyNever(rules)
+                && AppliedLogicalOptions.IsSpeedBoosterInGame() && AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster()
                 && (InitiateRemotely == null || InitiateRemotely.LogicallyFree)
                 && Strats.Values.WhereLogicallyFree().Any()
                 && !MustShinespark

@@ -55,6 +55,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         public abstract int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         /// <summary>
+        /// Calculates the amount of damage that fulfilling this logical element will inflict on Samus, in the best case scenario.
+        /// </summary>
+        /// <param name="rules">Active game rules, to be used as a reference</param>
+        public abstract int CalculateBestCastDamage(SuperMetroidRules rules);
+
+        /// <summary>
+        /// Calculates the amount of damage that fulfilling this logical element will inflict on Samus, in the worst case scenario.
+        /// </summary>
+        /// <param name="rules">Active game rules, to be used as a reference</param>
+        public abstract int CalculateWorstCastDamage(SuperMetroidRules rules);
+
+        /// <summary>
         /// Returns the enumeration of items that are responsible for reducing incurred damage, 
         /// given the execution described by the provided parameters.
         /// </summary>
@@ -65,9 +77,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // A damage element could become impossible if the minimum damage it can inflict is more than the max energy we can ever get,
-            // but max energy is not available in logical options.
-            return false;
+            // This could be impossible if the smallest possible damage is more than the max we can get
+            int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
+            // We can't check that if the max possible energy isn't provided
+            if(maxEnergy == null)
+            {
+                return false;
+            }
+            return CalculateBestCastDamage(rules) >= maxEnergy;
         }
 
         protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)

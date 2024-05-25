@@ -24,6 +24,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.HibashiDamage) * Value * times;
         }
 
+        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        {
+            return rules.CalculateBestCaseEnvironmentalDamage(rules.HibashiDamage * Value);
+        }
+
+        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        {
+            return rules.CalculateWorstCaseEnvironmentalDamage(rules.HibashiDamage * Value);
+        }
+
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetEnvironmentalDamageReducingItems(model, inGameState);

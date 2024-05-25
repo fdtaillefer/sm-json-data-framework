@@ -132,9 +132,21 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 impossible = true;
             }
 
-            if (MustShinespark && !CanShinespark)
+            if (MustShinespark)
             {
-                impossible = true;
+                if(!CanShinespark)
+                {
+                    impossible = true;
+                }
+                else
+                {
+                    // If the shinespark damage is more than the possible max energy, this is impossible
+                    int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
+                    if(maxEnergy != null && rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames) >= maxEnergy.Value)
+                    {
+                        impossible = true;
+                    }
+                }
             }
 
             if (LogicalEffectiveRunwayLength < TilesToShineCharge)
@@ -152,6 +164,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
+            if (CalculateLogicallyNever(rules))
+            {
+                return false;
+            }
+
             // If SpeedBooster isn't in-game and always available then this is not free
             if (!AppliedLogicalOptions.IsSpeedBoosterInGame() || !AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster())
             {

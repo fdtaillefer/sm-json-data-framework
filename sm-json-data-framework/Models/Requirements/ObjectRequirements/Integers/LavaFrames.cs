@@ -35,6 +35,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return (int)(baseDamage * LavaLeniencyMultiplier);
         }
 
+        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        {
+            return (int)(rules.CalculateBestCaseLavaDamage(Value) * LavaLeniencyMultiplier);
+        }
+
+        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        {
+            return (int)(rules.CalculateWorstCaseLavaDamage(Value) * LavaLeniencyMultiplier);
+        }
+
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             return model.Rules.GetLavaDamageReducingItems(model, inGameState);

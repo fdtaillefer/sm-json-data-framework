@@ -286,9 +286,21 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 return true;
             }
 
-            if (MustShinespark && !CanShinespark)
+            if (MustShinespark)
             {
-                return true;
+                if (!CanShinespark)
+                {
+                    return true;
+                }
+                else
+                {
+                    // If the shinespark damage is more than the possible max energy, this is impossible
+                    int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
+                    if (maxEnergy != null && rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames) >= maxEnergy.Value)
+                    {
+                        return true;
+                    }
+                }
             }
 
             // This could also become impossible based on layout and not logic, but that part is beyond the scope of this method.

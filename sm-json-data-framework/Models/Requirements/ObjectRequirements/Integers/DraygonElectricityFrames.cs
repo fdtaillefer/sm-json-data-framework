@@ -29,6 +29,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.GetElectricityGrappleDamageReducingItems(model, inGameState);
         }
 
+        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        {
+            return rules.CalculateBestCaseElectricityGrappleDamage(Value);
+        }
+
+        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        {
+            return rules.CalculateWorstCaseElectricityGrappleDamage(Value);
+        }
+
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Nothing to do here
