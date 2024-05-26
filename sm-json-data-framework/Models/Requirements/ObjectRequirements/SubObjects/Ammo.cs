@@ -54,9 +54,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // This could become impossible if the required ammo is more than the max ammo we can ever get,
-            // but max ammo is not available in logical options.
-            return false;
+            int? maxPossibleAmmo = AppliedLogicalOptions.MaxPossibleAmount(AmmoType.GetConsumableResourceEnum());
+            if(maxPossibleAmmo == null)
+            {
+                return false;
+            }
+            // This becomes impossible if the required ammo is more than the max ammo we can ever get
+            return Count > maxPossibleAmmo.Value;
         }
 
         protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)

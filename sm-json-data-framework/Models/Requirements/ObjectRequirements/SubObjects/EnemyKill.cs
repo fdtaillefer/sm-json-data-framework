@@ -62,34 +62,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             ExecutionResult result = new ExecutionResult(inGameState.Clone());
 
             // Filter the list of valid weapons, to keep only those we can actually use right now
-            IEnumerable<Weapon> usableWeapons = ValidWeapons.Values.WhereLogicallyRelevant().Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null);
-
-            // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
-            // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),
-            // this wouldn't work. Should that be a worry?
-            IEnumerable<Weapon> freeWeapons = usableWeapons.Where(w => !w.ShotRequires.LogicalElements.Where(le => le is Ammo ammo && !FarmableAmmo.Contains(ammo.AmmoType)).Any());
+            IList<Weapon> usableWeapons = ValidWeapons.Values
+                .WhereLogicallyRelevant()
+                .Where(w => w.UseRequires.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount) != null)
+                .ToList();
 
             // Remove all enemies that can be killed by free weapons
-            IEnumerable<IList<Enemy>> nonFreeGroups = GroupedEnemies
-                .RemoveEnemies(e =>
-                {
-                    // Look for a free usable weapon this enemy is susceptible to.
-                    var firstWeaponSusceptibility = e.WeaponSusceptibilities.Values
-                        .Where(ws => freeWeapons.Contains(ws.Weapon, ReferenceEqualityComparer.Instance))
-                        .FirstOrDefault();
-
-                    // If we found a weapon, record a kill and return true (to remove the enemy)
-                    if (firstWeaponSusceptibility != null)
-                    {
-                        result.AddKilledEnemy(e, firstWeaponSusceptibility.Weapon, firstWeaponSusceptibility.Shots);
-                        return true;
-                    }
-                    // If we didn't find a weapon, return false (to retain the enemy)
-                    else
-                    {
-                        return false;
-                    }
-                });
+            IList<IList<Enemy>> nonFreeGroups = KillEnemiesWithFreeWeapons(usableWeapons, out IList<Weapon> freeWeapons, result);
 
             // If there are no enemies left, we are done!
             if (!nonFreeGroups.Any())
@@ -136,6 +115,47 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return result;
         }
 
+        /// <summary>
+        /// Attempts to kill all enemies of this EnemyKill using anyw of the free weapons among the provided usable weapons.
+        /// Returns the enemies that aren't killed. If an execution result is provided, records the kills in it.
+        /// </summary>
+        /// <param name="usableWeapons">The list of weapons to try to use for free</param>
+        /// <param name="freeWeapons">Returns a list containing the weapons (among the provided usable ones) that were considered free for this EnemyKill</param>
+        /// <param name="result">An optional ExecutionResult in which to record the kills</param>
+        /// <returns></returns>
+        protected IList<IList<Enemy>> KillEnemiesWithFreeWeapons(IList<Weapon> usableWeapons, out IList<Weapon> freeWeapons, ExecutionResult result = null)
+        {
+            // Find all usable weapons that are free to use. That's all weapons without an ammo cost, plus all weapons whose ammo is farmable in this EnemyKill
+            // Technically if a weapon were to exist with a shot cost that requires something other than ammo (something like energy or ammo drain?),
+            // this wouldn't work. Should that be a worry?
+            IList<Weapon> innerFreeWeapons = usableWeapons.Where(w => !w.ShotRequires.LogicalElements.Where(le => le is Ammo ammo && !FarmableAmmo.Contains(ammo.AmmoType)).Any()).ToList();
+
+            // Remove all enemies that can be killed by free weapons
+            IEnumerable<IList<Enemy>> nonFreeGroups = GroupedEnemies
+                .RemoveEnemies(e =>
+                {
+                    // Look for a free usable weapon this enemy is susceptible to.
+                    var firstWeaponSusceptibility = e.WeaponSusceptibilities.Values
+                        .Where(ws => innerFreeWeapons.Contains(ws.Weapon, ReferenceEqualityComparer.Instance))
+                        .FirstOrDefault();
+
+                    // If we found a weapon, record a kill and return true (to remove the enemy)
+                    if (firstWeaponSusceptibility != null)
+                    {
+                        result?.AddKilledEnemy(e, firstWeaponSusceptibility.Weapon, firstWeaponSusceptibility.Shots);
+                        return true;
+                    }
+                    // If we didn't find a weapon, return false (to retain the enemy)
+                    else
+                    {
+                        return false;
+                    }
+                });
+
+            freeWeapons = innerFreeWeapons;
+            return nonFreeGroups.ToList();
+        }
+
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // Propagate to all valid weapons, so we can tell if any of them is still usable
@@ -145,31 +165,38 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
+
+
         protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // Can't fulfill this if none of the valid weapons are usable
-            bool unkillable = !ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever);
+            // Can't fulfill this if none of the valid weapons are possible to use
+            if (!ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever))
+            {
+                return true;
+            }
 
-            // This could also become impossible by requiring more ammo than the max ammo we can ever get,
-            // but max ammo is not available in logical options.
-
-            return unkillable;
+            // This could also be impossible if we are forced to use more ammo than can be obtained,
+            // but that's really hard to pin down with the possibility of different weapons with different ammo costs.
+            // We'll let it be for now.
+            return false;
         }
 
         protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // This is always possible if any of the valid weapons also is
-            bool alwaysKillable = ValidWeapons.Values.Any(weapon => weapon.LogicallyAlways);
+            // If all enemies can be killed by always available weapons that cost no non-farmable ammo, then this is always possible
+            return !KillEnemiesWithFreeWeapons(ValidWeapons.Values.WhereLogicallyAlways().ToList(), out var _).Any();
 
-            return alwaysKillable;
+            // This currently does not support a case where we start with an expansion item that is farmable in this EnemyKill...
+            // It won't identify it as always
         }
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // This is always free if any of the valid weapons also is
-            bool free = ValidWeapons.Values.Any(weapon => weapon.LogicallyFree);
+            // If all enemies can be killed by always available and free weapons, then this is always possible
+            return !KillEnemiesWithFreeWeapons(ValidWeapons.Values.WhereLogicallyFree().ToList(), out var _).Any();
 
-            return free;
+            // This currently does not support a case where we start with an expansion item that is farmable in this EnemyKill...
+            // It won't identify it as free
         }
     }
 
