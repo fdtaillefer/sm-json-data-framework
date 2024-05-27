@@ -15,7 +15,7 @@ namespace sm_json_data_framework.Models.Rooms
     /// <summary>
     /// Represents how a parent <see cref="Link"/> can lead to a given node, and how to get there.
     /// </summary>
-    public class LinkTo : AbstractModelElement<UnfinalizedLinkTo, LinkTo>
+    public class LinkTo : AbstractModelElement<UnfinalizedLinkTo, LinkTo>, ILogicalExecutionPreProcessable
     {
         public LinkTo(UnfinalizedLinkTo sourceElement, Action<LinkTo> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -42,10 +42,60 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
+        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        {
+            base.UpdateLogicalProperties(rules);
+            LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
+        }
+
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
-            // A linkTo has no logical relevance if there are no strats that can be executed to follow it
-            return Strats.Values.WhereLogicallyRelevant().Any();
+            // A linkTo has no logical relevance if it's impossible to follow
+            return !CalculateLogicallyNever(rules);
+        }
+
+        /// <summary>
+        /// If true, then this strat is impossible to execute given the current logical options, regardless of in-game state.
+        /// </summary>
+        public bool LogicallyNever { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        {
+            // A LinkTo is impossible if it has no possible strats
+            return !Strats.Values.Any(strat => !strat.LogicallyNever);
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            // A LinkTo is always possible if it at least one strat that also is
+            return Strats.Values.WhereLogicallyAlways().Any();
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            // A LinkTo is free if it at least one strat that also is
+            return Strats.Values.WhereLogicallyFree().Any();
         }
     }
 

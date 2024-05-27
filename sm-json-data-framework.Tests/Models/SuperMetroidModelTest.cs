@@ -150,7 +150,7 @@ namespace sm_json_data_framework.Tests.Models
             RoomNode node = model.GetNodeInRoom("Climb", 1);
             Assert.Same(arbitraryRoom, node.Room);
 
-            RoomEnvironment roomEnvironment = model.Rooms["Climb"].RoomEnvironments[0];
+            RoomEnvironment roomEnvironment = model.Rooms["Climb"].RoomEnvironments.First();
             Assert.Same(arbitraryRoom, roomEnvironment.Room);
 
             RoomEnemy roomEnemy = model.RoomEnemies["Climb Pirates"];
@@ -181,13 +181,13 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Same(arbitraryNode, model.Nodes["Big Pink X-Ray Climb Setup Junction"]);
 
             RoomNode arbitraryNode2 = model.GetNodeInRoom("Landing Site", 1);
-            CanLeaveCharged canLeaveCharged = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged[0];
+            CanLeaveCharged canLeaveCharged = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First();
             Assert.Same(arbitraryNode2, canLeaveCharged.Node);
 
-            InitiateRemotely initiateRemotely = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged[0].InitiateRemotely;
+            InitiateRemotely initiateRemotely = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First().InitiateRemotely;
             Assert.Same(arbitraryNode2, initiateRemotely.ExitNode);
 
-            DoorEnvironment doorEnvironment = model.GetNodeInRoom("Landing Site", 1).DoorEnvironments[0];
+            DoorEnvironment doorEnvironment = model.GetNodeInRoom("Landing Site", 1).DoorEnvironments.First();
             Assert.Same(arbitraryNode2, doorEnvironment.Node);
 
             NodeLock nodeLock = model.Locks["Landing Site Top Left Escape Lock (to Gauntlet)"];
@@ -200,7 +200,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Same(arbitraryNode2, runway.Node);
 
             RoomNode arbitraryNode3 = model.GetNodeInRoom("Landing Site", 3);
-            initiateRemotely = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged[0].InitiateRemotely;
+            initiateRemotely = model.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First().InitiateRemotely;
             Assert.Same(arbitraryNode3, initiateRemotely.InitiateAtNode);
 
             RoomNode arbitraryNode4 = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
@@ -586,7 +586,7 @@ namespace sm_json_data_framework.Tests.Models
 
             Assert.Same(appliedOptions, arbitraryRoom.Nodes[1].AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryRoom.Links[1].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryRoom.RoomEnvironments[0].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, arbitraryRoom.RoomEnvironments.First().AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryRoom.Obstacles["A"].AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryRoom.Enemies["e1"].AppliedLogicalOptions);
         }
@@ -727,8 +727,8 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
 
             Assert.Same(appliedOptions, arbitraryNode.Locks["Landing Site Top Left Escape Lock (to Gauntlet)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryNode.DoorEnvironments[0].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, arbitraryNode.CanLeaveCharged[0].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, arbitraryNode.DoorEnvironments.First().AppliedLogicalOptions);
+            Assert.Same(appliedOptions, arbitraryNode.CanLeaveCharged.First().AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryNode.InteractionRequires.AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryNode.Runways["Base Runway - Landing Site Top Left Door (to Gauntlet)"].AppliedLogicalOptions);
             Assert.Same(appliedOptions, ModelForApplyLogicalOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0].AppliedLogicalOptions);
@@ -968,109 +968,408 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
 
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Wave"])
+                )
+                .Build();
+
+            logicalOptions.RegisterRemovedItem("Ice");
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Weapon impossibleUseWeapon = ModelForApplyLogicalOptions.Weapons["Ice"];
+            Assert.False(impossibleUseWeapon.LogicallyRelevant);
+            Assert.False(impossibleUseWeapon.LogicallyAlways);
+            Assert.False(impossibleUseWeapon.LogicallyFree);
+            Assert.True(impossibleUseWeapon.LogicallyNever);
+
+            Weapon impossibleShootWeapon = ModelForApplyLogicalOptions.Weapons["Missile"];
+            Assert.False(impossibleShootWeapon.LogicallyRelevant);
+            Assert.False(impossibleShootWeapon.LogicallyAlways);
+            Assert.False(impossibleShootWeapon.LogicallyFree);
+            Assert.True(impossibleShootWeapon.LogicallyNever);
+
+            Weapon nonFreeWeapon = ModelForApplyLogicalOptions.Weapons["Charge+Wave"];
+            Assert.True(nonFreeWeapon.LogicallyRelevant);
+            Assert.False(nonFreeWeapon.LogicallyAlways);
+            Assert.False(nonFreeWeapon.LogicallyFree);
+            Assert.False(nonFreeWeapon.LogicallyNever);
+
+            Weapon freeWeapon = ModelForApplyLogicalOptions.Weapons["Wave"];
+            Assert.True(freeWeapon.LogicallyRelevant);
+            Assert.True(freeWeapon.LogicallyAlways);
+            Assert.True(freeWeapon.LogicallyFree);
+            Assert.False(freeWeapon.LogicallyNever);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemiesAndSubProperties()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem("Ice");
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Enemy enemy = ModelForApplyLogicalOptions.Enemies["Evir"];
+            Assert.True(enemy.LogicallyRelevant);
+            Assert.True(enemy.Attacks["contact"].LogicallyRelevant);
+            Assert.False(enemy.Dimensions.LogicallyRelevant);
+            Assert.False(enemy.InvulnerableWeapons["Ice"].LogicallyRelevant);
+            Assert.True(enemy.InvulnerableWeapons["Grapple"].LogicallyRelevant);
+
+            Enemy multiplierEnemy = ModelForApplyLogicalOptions.Enemies["Kihunter (red)"];
+            Assert.False(multiplierEnemy.WeaponSusceptibilities["Ice"].LogicallyRelevant);
+            Assert.False(multiplierEnemy.WeaponMultipliers["Ice"].LogicallyRelevant);
+            Assert.True(multiplierEnemy.WeaponSusceptibilities["Spazer"].LogicallyRelevant);
+            Assert.True(multiplierEnemy.WeaponMultipliers["Spazer"].LogicallyRelevant);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyAttacks()
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnectionsAndNodes()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
 
-        }
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
 
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyDimensions()
-        {
+            // Expect
+            Connection unfollowableconnection = ModelForApplyLogicalOptions.Connections[ModelForApplyLogicalOptions.GetNodeInRoom("Big Pink", 8).IdentifyingString];
+            // Followability is not considered in-scope for logical relevance
+            Assert.True(unfollowableconnection.LogicallyRelevant);
+            Assert.True(unfollowableconnection.FromNode.LogicallyRelevant);
+            Assert.True(unfollowableconnection.ToNode.LogicallyRelevant);
 
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeaponMultipliers()
-        {
-
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeaponSusceptibilities()
-        {
-
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnections()
-        {
-
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnectionNodes()
-        {
-
+            Connection followableconnection = ModelForApplyLogicalOptions.Connections[ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
+            Assert.True(followableconnection.LogicallyRelevant);
+            Assert.True(followableconnection.FromNode.LogicallyRelevant);
+            Assert.True(followableconnection.ToNode.LogicallyRelevant);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRooms()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Room unreachableRoom = ModelForApplyLogicalOptions.Rooms["Norfair Map Room"];
+            // Room accessibility is not considered in-scope for logical relevance
+            Assert.True(unreachableRoom.LogicallyRelevant);
+
+            Room reachableRoom = ModelForApplyLogicalOptions.Rooms["Landing Site"];
+            Assert.True(reachableRoom.LogicallyRelevant);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinks()
+        public void ApplyLogicalOptions_ImpossibleObstacleCommonRequirements_SetsLogicalPropertiesOnRoomObstacles()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .RegisterRemovedItem("ScrewAttack")
+                .RegisterRemovedItem("Morph")
+                .RegisterDisabledGameFlag("f_ZebesSetAblaze");
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            RoomObstacle obstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Obstacles["A"];
+            Assert.True(obstacle.LogicallyRelevant);
+            Assert.True(obstacle.LogicallyIndestructible);
+            Assert.False(obstacle.LogicallyAlwaysDestructible);
+            Assert.False(obstacle.LogicallyDestructibleForFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinkTos()
+        public void ApplyLogicalOptions_FreeObstacleCommonRequirements_SetsLogicalPropertiesOnRoomObstacles()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["ScrewAttack"])
+            )
+            .Build();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            RoomObstacle obstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Obstacles["A"];
+            Assert.True(obstacle.LogicallyRelevant);
+            Assert.False(obstacle.LogicallyIndestructible);
+            Assert.True(obstacle.LogicallyAlwaysDestructible);
+            Assert.True(obstacle.LogicallyDestructibleForFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnStrats()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Grapple")
+                .RegisterDisabledStrat("Ceiling E-Tank Dboost");
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Strat impossibleRequirementsStrat = ModelForApplyLogicalOptions.Rooms["Pants Room"].Links[4].To[5].Strats["Base"];
+            Assert.False(impossibleRequirementsStrat.LogicallyRelevant);
+            Assert.False(impossibleRequirementsStrat.LogicallyAlways);
+            Assert.False(impossibleRequirementsStrat.LogicallyFree);
+            Assert.True(impossibleRequirementsStrat.LogicallyNever);
+
+            Strat disabledStrat = ModelForApplyLogicalOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
+            Assert.False(disabledStrat.LogicallyRelevant);
+            Assert.False(disabledStrat.LogicallyAlways);
+            Assert.False(disabledStrat.LogicallyFree);
+            Assert.True(disabledStrat.LogicallyNever);
+
+            Strat nonFreeStrat = ModelForApplyLogicalOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Speed Jump"];
+            Assert.True(nonFreeStrat.LogicallyRelevant);
+            Assert.False(nonFreeStrat.LogicallyAlways);
+            Assert.False(nonFreeStrat.LogicallyFree);
+            Assert.False(nonFreeStrat.LogicallyNever);
+
+            Strat freeStrat = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
+            Assert.True(freeStrat.LogicallyRelevant);
+            Assert.True(freeStrat.LogicallyAlways);
+            Assert.True(freeStrat.LogicallyFree);
+            Assert.False(freeStrat.LogicallyNever);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnStratFailures()
         {
 
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            StratFailure stratFailure = ModelForApplyLogicalOptions.Rooms["Early Supers Room"].Links[3].To[1].Strats["Early Supers Quick Crumble Escape (Space)"].Failures["Crumble Failure"];
+            Assert.True(stratFailure.LogicallyRelevant);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnStratObstacles()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .RegisterRemovedItem("ScrewAttack")
+                .RegisterRemovedItem("Bombs")
+                .RegisterDisabledGameFlag("f_ZebesSetAblaze");
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Morph"])
+                )
+                .Build();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            StratObstacle fullyImpossibleStratObstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Links[2].To[6].Strats["Base"].Obstacles["A"];
+            Assert.True(fullyImpossibleStratObstacle.LogicallyRelevant);
+            Assert.True(fullyImpossibleStratObstacle.LogicallyNever);
+            Assert.True(fullyImpossibleStratObstacle.LogicallyNeverFromHere);
+            Assert.False(fullyImpossibleStratObstacle.LogicallyAlways);
+            Assert.False(fullyImpossibleStratObstacle.LogicallyFree);
+
+            StratObstacle locallyIndestructibleFreeToBypassStratObstacle = ModelForApplyLogicalOptions.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"].Obstacles["B"];
+            Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyRelevant);
+            Assert.False(locallyIndestructibleFreeToBypassStratObstacle.LogicallyNever);
+            Assert.False(locallyIndestructibleFreeToBypassStratObstacle.LogicallyNeverFromHere);
+            Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyAlways);
+            Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyFree);
+
+            StratObstacle locallyImpossibleStratObstacle = ModelForApplyLogicalOptions.Rooms["Post Crocomire Jump Room"].Nodes[2].CanLeaveCharged.First().Strats["Speed Blocks Broken"].Obstacles["B"];
+            Assert.True(locallyImpossibleStratObstacle.LogicallyRelevant);
+            Assert.False(locallyImpossibleStratObstacle.LogicallyNever);
+            Assert.True(locallyImpossibleStratObstacle.LogicallyNeverFromHere);
+            Assert.False(locallyImpossibleStratObstacle.LogicallyAlways);
+            Assert.False(locallyImpossibleStratObstacle.LogicallyFree);
+
+            StratObstacle freeToDestroyStratObstacle = ModelForApplyLogicalOptions.Rooms["Pink Brinstar Hopper Room"].Links[2].To[1].Strats["Base"].Obstacles["B"];
+            Assert.True(freeToDestroyStratObstacle.LogicallyRelevant);
+            Assert.False(freeToDestroyStratObstacle.LogicallyNever);
+            Assert.False(freeToDestroyStratObstacle.LogicallyNeverFromHere);
+            Assert.True(freeToDestroyStratObstacle.LogicallyAlways);
+            Assert.True(freeToDestroyStratObstacle.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomObstacles()
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinks()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Gravity")
+                .RegisterDisabledTech("canSuitlessMaridia");
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Link noDestinationsLink = ModelForApplyLogicalOptions.Rooms["Crab Shaft"].Links[2];
+            Assert.False(noDestinationsLink.LogicallyRelevant);
+
+            Link possibleLink = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[1];
+            Assert.True(possibleLink.LogicallyRelevant);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinkTos()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Gravity")
+                .RegisterDisabledTech("canSuitlessMaridia");
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            LinkTo noDestinationsLinkTo = ModelForApplyLogicalOptions.Rooms["Crab Shaft"].Links[2].To[1];
+            Assert.False(noDestinationsLinkTo.LogicallyRelevant);
+            Assert.False(noDestinationsLinkTo.LogicallyAlways);
+            Assert.False(noDestinationsLinkTo.LogicallyFree);
+            Assert.True(noDestinationsLinkTo.LogicallyNever);
+
+            LinkTo possibleLinkTo = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[1].To[7];
+            Assert.True(possibleLinkTo.LogicallyRelevant);
+            Assert.False(possibleLinkTo.LogicallyAlways);
+            Assert.False(possibleLinkTo.LogicallyFree);
+            Assert.False(possibleLinkTo.LogicallyNever);
+
+            LinkTo freeLinkTo = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[5].To[4];
+            Assert.True(freeLinkTo.LogicallyRelevant);
+            Assert.True(freeLinkTo.LogicallyAlways);
+            Assert.True(freeLinkTo.LogicallyFree);
+            Assert.False(freeLinkTo.LogicallyNever);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnemies()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Bombs");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions)
+                .StartingGameFlags(new List<GameFlag> { ModelForApplyLogicalOptions.GameFlags["f_DefeatedRidley"] })
+                .Build();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            RoomEnemy alwaysSpawns = ModelForApplyLogicalOptions.RoomEnemies["Post Crocomire Farming Room Ripper 2"];
+            Assert.True(alwaysSpawns.LogicallyRelevant);
+            Assert.True(alwaysSpawns.LogicallyAlwaysSpawns);
+            Assert.False(alwaysSpawns.LogicallyNeverSpawns);
+
+            RoomEnemy neverMeetsSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Bomb Torizo"];
+            Assert.False(neverMeetsSpawnConditions.LogicallyRelevant);
+            Assert.False(neverMeetsSpawnConditions.LogicallyAlwaysSpawns);
+            Assert.True(neverMeetsSpawnConditions.LogicallyNeverSpawns);
+
+            RoomEnemy alwaysMeetsStopSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Ridley"];
+            Assert.False(alwaysMeetsStopSpawnConditions.LogicallyRelevant);
+            Assert.False(alwaysMeetsStopSpawnConditions.LogicallyAlwaysSpawns);
+            Assert.True(alwaysMeetsStopSpawnConditions.LogicallyNeverSpawns);
+
+            RoomEnemy notAlwaysSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Attic Atomics"];
+            Assert.True(notAlwaysSpawnConditions.LogicallyRelevant);
+            Assert.False(notAlwaysSpawnConditions.LogicallyAlwaysSpawns);
+            Assert.False(notAlwaysSpawnConditions.LogicallyNeverSpawns);
+
+            RoomEnemy alwaysSpawnNotAlwaysStopSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Flyway Mellows"];
+            Assert.True(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyRelevant);
+            Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyAlwaysSpawns);
+            Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyNeverSpawns);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnvironments()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Bombs");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions)
+                .StartingGameFlags(new List<GameFlag> { ModelForApplyLogicalOptions.GameFlags["f_DefeatedRidley"] })
+                .Build();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            foreach(RoomEnvironment roomEnvironment in ModelForApplyLogicalOptions.Rooms["Volcano Room"].RoomEnvironments)
+            {
+                Assert.True(roomEnvironment.LogicallyRelevant);
+            }
+            
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnFarmCycles()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Grapple");
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            FarmCycle impossibleCycle = ModelForApplyLogicalOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
+            Assert.False(impossibleCycle.LogicallyRelevant);
+            Assert.True(impossibleCycle.LogicallyNever);
+
+            FarmCycle possibleCycle = ModelForApplyLogicalOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
+            Assert.True(possibleCycle.LogicallyRelevant);
+            Assert.False(possibleCycle.LogicallyNever);
         }
 
         [Fact]

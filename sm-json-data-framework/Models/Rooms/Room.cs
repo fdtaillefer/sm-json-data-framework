@@ -139,7 +139,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
-            // A room always has relevance
+            // A room always has relevance.
+            // A room could technically be unreachable, but that's a matter of layout on top of logic, so out of scope here.
             return true;
         }
     }

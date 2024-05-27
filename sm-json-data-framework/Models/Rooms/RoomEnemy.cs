@@ -156,8 +156,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
-            // There's nothing that can make a room enemy irrelevant
-            return true;
+            // A room enemy that never ever spawns may as well not exist
+            return !CalculateLogicallyNeverSpawns(rules);
         }
 
         /// <summary>
@@ -172,7 +172,8 @@ namespace sm_json_data_framework.Models.Rooms
         /// <returns></returns>
         protected bool CalculateLogicallyNeverSpawns(SuperMetroidRules rules)
         {
-            return Spawn.LogicallyNever;
+            // We never spawn if spawn conditions are never met OR if conditions to stop spwaning are always met
+            return Spawn.LogicallyNever || StopSpawn?.LogicallyAlways is true;
         }
 
         /// <summary>
@@ -187,7 +188,8 @@ namespace sm_json_data_framework.Models.Rooms
         /// <returns></returns>
         protected bool CalculateLogicallyAlwaysSpawns(SuperMetroidRules rules)
         {
-            return Spawn.LogicallyFree;
+            // To always spawn, we must always meet the spawn conditions but also never meet stop spawn conditions
+            return Spawn.LogicallyFree && (StopSpawn == null || StopSpawn.LogicallyNever);
         }
     }
 

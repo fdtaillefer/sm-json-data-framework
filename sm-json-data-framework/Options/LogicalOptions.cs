@@ -359,6 +359,12 @@ namespace sm_json_data_framework.Options
 
         public bool IsItemInGame(Item item)
         {
+            // Expansion items are not in-game if no pickups of them are
+            if(item is ExpansionItem expansionItem && AvailableResourceInventory != null)
+            {
+                return !AvailableResourceInventory.HasItem(expansionItem);
+            }
+            // Items of all types are not in-game if explicitly disabled
             return !InternalRemovedItems.Contains(item.Name);
         }
 
