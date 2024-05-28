@@ -128,7 +128,7 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalUnfinalizedStartConditions = startConditions;
             logicalOptions.TilesToShineCharge = 20;
-            
+
             // When
             SuperMetroidModel model = new SuperMetroidModel(unfinalizedModel, logicalOptions);
 
@@ -962,7 +962,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.True(freeHelper.LogicallyAlways);
             Assert.True(freeHelper.LogicallyFree);
             Assert.False(freeHelper.LogicallyNever);
-            
+
         }
 
         [Fact]
@@ -1341,7 +1341,7 @@ namespace sm_json_data_framework.Tests.Models
             ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            foreach(RoomEnvironment roomEnvironment in ModelForApplyLogicalOptions.Rooms["Volcano Room"].RoomEnvironments)
+            foreach (RoomEnvironment roomEnvironment in ModelForApplyLogicalOptions.Rooms["Volcano Room"].RoomEnvironments)
             {
                 Assert.True(roomEnvironment.LogicallyRelevant);
             }
@@ -1444,21 +1444,150 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnCanLeaveChargeds()
-        {
-
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnInitiateRemotelys()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Morph");
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            InitiateRemotely neverInitiateRemotely = ModelForApplyLogicalOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
+            Assert.True(neverInitiateRemotely.LogicallyRelevant);
+            Assert.False(neverInitiateRemotely.LogicallyAlways);
+            Assert.False(neverInitiateRemotely.LogicallyFree);
+            Assert.True(neverInitiateRemotely.LogicallyNever);
+
+            InitiateRemotely freeInitiateRemotely = ModelForApplyLogicalOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
+            Assert.True(freeInitiateRemotely.LogicallyRelevant);
+            Assert.True(freeInitiateRemotely.LogicallyAlways);
+            Assert.True(freeInitiateRemotely.LogicallyFree);
+            Assert.False(freeInitiateRemotely.LogicallyNever);
+
+            InitiateRemotely possibleInitiateRemotely = ModelForApplyLogicalOptions.Rooms["Early Supers Room"].Nodes[2].CanLeaveCharged.First().InitiateRemotely;
+            Assert.True(possibleInitiateRemotely.LogicallyRelevant);
+            Assert.False(possibleInitiateRemotely.LogicallyAlways);
+            Assert.False(possibleInitiateRemotely.LogicallyFree);
+            Assert.False(possibleInitiateRemotely.LogicallyNever);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnViewableNodes()
+        public void ApplyLogicalOptions_SpeedBoosterPossible_SetsLogicalPropertiesOnCanLeaveChargeds()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Morph")
+                .RegisterRemovedItem("Gravity")
+                .RegisterDisabledTech("canShinespark");
+            logicalOptions.TilesSavedWithStutter = 0;
+            logicalOptions.TilesToShineCharge = 19;
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanLeaveCharged neverByImpossibleRemote = ModelForApplyLogicalOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First();
+            Assert.False(neverByImpossibleRemote.LogicallyRelevant);
+            Assert.False(neverByImpossibleRemote.LogicallyAlways);
+            Assert.False(neverByImpossibleRemote.LogicallyFree);
+            Assert.True(neverByImpossibleRemote.LogicallyNever);
+            Assert.Equal(31.5M, neverByImpossibleRemote.LogicalEffectiveRunwayLength);
+
+            CanLeaveCharged neverByImpossibleStrat = ModelForApplyLogicalOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
+            Assert.False(neverByImpossibleStrat.LogicallyRelevant);
+            Assert.False(neverByImpossibleStrat.LogicallyAlways);
+            Assert.False(neverByImpossibleStrat.LogicallyFree);
+            Assert.True(neverByImpossibleStrat.LogicallyNever);
+            Assert.Equal(20.5M, neverByImpossibleStrat.LogicalEffectiveRunwayLength);
+
+            CanLeaveCharged neverByImpossibleShinespark = ModelForApplyLogicalOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.False(neverByImpossibleShinespark.LogicallyRelevant);
+            Assert.False(neverByImpossibleShinespark.LogicallyAlways);
+            Assert.False(neverByImpossibleShinespark.LogicallyFree);
+            Assert.True(neverByImpossibleShinespark.LogicallyNever);
+            Assert.Equal(19M + 2 * 4M / 3M, neverByImpossibleShinespark.LogicalEffectiveRunwayLength);
+
+            CanLeaveCharged neverByShortRunway = ModelForApplyLogicalOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
+            Assert.False(neverByShortRunway.LogicallyRelevant);
+            Assert.False(neverByShortRunway.LogicallyAlways);
+            Assert.False(neverByShortRunway.LogicallyFree);
+            Assert.True(neverByShortRunway.LogicallyNever);
+            Assert.Equal(17.5M, neverByShortRunway.LogicalEffectiveRunwayLength);
+
+            CanLeaveCharged notFreeBecauseSpeedNotFree = ModelForApplyLogicalOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            Assert.True(notFreeBecauseSpeedNotFree.LogicallyRelevant);
+            Assert.False(notFreeBecauseSpeedNotFree.LogicallyAlways);
+            Assert.False(notFreeBecauseSpeedNotFree.LogicallyFree);
+            Assert.False(notFreeBecauseSpeedNotFree.LogicallyNever);
+            Assert.Equal(30, notFreeBecauseSpeedNotFree.LogicalEffectiveRunwayLength);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SpeedBoosterRemoved_SetsLogicalPropertiesOnViewableNodes()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("SpeedBooster");
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanLeaveCharged neverByNoSpeedBooster = ModelForApplyLogicalOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            Assert.False(neverByNoSpeedBooster.LogicallyRelevant);
+            Assert.False(neverByNoSpeedBooster.LogicallyAlways);
+            Assert.False(neverByNoSpeedBooster.LogicallyFree);
+            Assert.True(neverByNoSpeedBooster.LogicallyNever);
+            Assert.Equal(30, neverByNoSpeedBooster.LogicalEffectiveRunwayLength);
+        }
+        [Fact]
+        public void ApplyLogicalOptions_SpeedBoosterFree_SetsLogicalPropertiesOnViewableNodes()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+                )
+                .Build();
+
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanLeaveCharged free = ModelForApplyLogicalOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
+            Assert.True(free.LogicallyRelevant);
+            Assert.True(free.LogicallyAlways);
+            Assert.True(free.LogicallyFree);
+            Assert.False(free.LogicallyNever);
+            Assert.Equal(20.5M, free.LogicalEffectiveRunwayLength);
+
+            // Expect
+            CanLeaveCharged notFreeBecauseShinespark = ModelForApplyLogicalOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.True(notFreeBecauseShinespark.LogicallyRelevant);
+            Assert.False(notFreeBecauseShinespark.LogicallyAlways);
+            Assert.False(notFreeBecauseShinespark.LogicallyFree);
+            Assert.False(notFreeBecauseShinespark.LogicallyNever);
+            Assert.Equal(19M + 2 * 4M / 3M, notFreeBecauseShinespark.LogicalEffectiveRunwayLength);
+
+            // Expect
+            CanLeaveCharged notFreeBecauseStratNotFree = ModelForApplyLogicalOptions.Rooms["Botwoon's Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.True(notFreeBecauseStratNotFree.LogicallyRelevant);
+            Assert.False(notFreeBecauseStratNotFree.LogicallyAlways);
+            Assert.False(notFreeBecauseStratNotFree.LogicallyFree);
+            Assert.False(notFreeBecauseStratNotFree.LogicallyNever);
+            Assert.Equal(16, notFreeBecauseStratNotFree.LogicalEffectiveRunwayLength);
+
+            // Expect
+            CanLeaveCharged notFreeBecauseRemoteNotFree = ModelForApplyLogicalOptions.Rooms["Red Brinstar Fireflea Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.True(notFreeBecauseRemoteNotFree.LogicallyRelevant);
+            Assert.False(notFreeBecauseRemoteNotFree.LogicallyAlways);
+            Assert.False(notFreeBecauseRemoteNotFree.LogicallyFree);
+            Assert.False(notFreeBecauseRemoteNotFree.LogicallyNever);
+            Assert.Equal(13, notFreeBecauseRemoteNotFree.LogicalEffectiveRunwayLength);
         }
 
         [Fact]

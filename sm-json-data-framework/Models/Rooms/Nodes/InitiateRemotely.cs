@@ -90,7 +90,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
             // If there is any node in the path that has no possible strat, then it's impossible to execute this InitiateRemotely
-            return PathToDoor.Any(pathNode => !pathNode.strats.Values.WhereLogicallyRelevant().Any());
+            return PathToDoor.Any(pathNode => !pathNode.strats.Values.Any(strat => !strat.LogicallyNever));
         }
 
         public bool LogicallyAlways { get; private set; }
@@ -102,9 +102,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // This is always possible if all nodes in the path have an always possible strat.
+            // This is always possible if all nodes in the path have an always possible strat and there's no need to open the door first (which we can't tell if that's always or not).
             // Note that this makes no statement on whether it can be used retroactively - that's not a concept this element has.
-            return PathToDoor.All(pathNode => pathNode.strats.Values.WhereLogicallyAlways().Any());
+            return !MustOpenDoorFirst && PathToDoor.All(pathNode => pathNode.strats.Values.WhereLogicallyAlways().Any());
         }
 
         public bool LogicallyFree { get; private set; }
@@ -116,9 +116,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <returns></returns>
         protected bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // This is free if all nodes in the path have a free strat.
+            // This is free if all nodes in the path have a free strat and there's no need to open the door first (which we can't tell if that's free or not).
             // Note that this makes no statement on whether it can be used retroactively - that's not a concept this element has.
-            return PathToDoor.All(pathNode => pathNode.strats.Values.WhereLogicallyFree().Any());
+            return !MustOpenDoorFirst &&  PathToDoor.All(pathNode => pathNode.strats.Values.WhereLogicallyFree().Any());
         }
     }
 
