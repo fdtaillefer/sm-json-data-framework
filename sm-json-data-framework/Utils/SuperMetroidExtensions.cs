@@ -213,19 +213,44 @@ namespace sm_json_data_framework.Utils
             return itemDictionary.ContainsKey(item.Name);
         }
 
-        public static bool ContainsVariaSuit(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsVariaSuit(this IReadOnlyDictionary<string, Item> itemDictionary)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.VARIA_SUIT_NAME);
         }
 
-        public static bool ContainsGravitySuit(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsGravitySuit(this IReadOnlyDictionary<string, Item> itemDictionary)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
         }
 
-        public static bool ContainsSpeedBooster(this IReadOnlyDictionary<string, Item> itemDictionary, Item item)
+        public static bool ContainsSpeedBooster(this IReadOnlyDictionary<string, Item> itemDictionary)
         {
             return itemDictionary.ContainsItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
+        }
+
+        public static bool ContainsItem(this IReadOnlySet<string> itemNameSet, string itemName)
+        {
+            return itemNameSet.Contains(itemName);
+        }
+
+        public static bool ContainsItem(this IReadOnlySet<string> itemNameSet, Item item)
+        {
+            return itemNameSet.Contains(item.Name);
+        }
+
+        public static bool ContainsVariaSuit(this IReadOnlySet<string> itemNameSet)
+        {
+            return itemNameSet.Contains(SuperMetroidModel.VARIA_SUIT_NAME);
+        }
+
+        public static bool ContainsGravitySuit(this IReadOnlySet<string> itemNameSet)
+        {
+            return itemNameSet.Contains(SuperMetroidModel.GRAVITY_SUIT_NAME);
+        }
+
+        public static bool ContainsSpeedBooster(this IReadOnlySet<string> itemNameSet)
+        {
+            return itemNameSet.Contains(SuperMetroidModel.SPEED_BOOSTER_NAME);
         }
     }
 }

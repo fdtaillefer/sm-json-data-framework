@@ -26,12 +26,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateBestCaseEnvironmentalDamage(rules.SpikeDamage * Value);
+            return rules.CalculateBestCaseEnvironmentalDamage(rules.SpikeDamage * Value, AppliedLogicalOptions.RemovedItems);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateWorstCaseEnvironmentalDamage(rules.SpikeDamage * Value);
+            return rules.CalculateWorstCaseEnvironmentalDamage(rules.SpikeDamage * Value, AppliedLogicalOptions.StartConditions.StartingInventory);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

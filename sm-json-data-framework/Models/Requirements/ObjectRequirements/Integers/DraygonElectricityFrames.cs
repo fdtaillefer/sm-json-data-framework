@@ -31,12 +31,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateBestCaseElectricityGrappleDamage(Value);
+            return rules.CalculateBestCaseElectricityGrappleDamage(Value, AppliedLogicalOptions.RemovedItems);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateWorstCaseElectricityGrappleDamage(Value);
+            return rules.CalculateWorstCaseElectricityGrappleDamage(Value, AppliedLogicalOptions.StartConditions.StartingInventory);
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)

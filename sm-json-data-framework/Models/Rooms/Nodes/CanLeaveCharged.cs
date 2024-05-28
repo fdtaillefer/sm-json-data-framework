@@ -212,7 +212,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return !AppliedLogicalOptions.IsSpeedBoosterInGame()
                 || (InitiateRemotely?.LogicallyNever is true) 
                 || !Strats.Values.WhereLogicallyRelevant().Any() 
-                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value <= rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames))))
+                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value <= rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames, AppliedLogicalOptions.RemovedItems))))
                 || LogicalEffectiveRunwayLength < TilesToShineCharge;
         }
 

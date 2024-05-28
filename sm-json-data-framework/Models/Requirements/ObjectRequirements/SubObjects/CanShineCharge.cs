@@ -142,7 +142,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 {
                     // If the shinespark damage is more than the possible max energy, this is impossible
                     int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
-                    if(maxEnergy != null && rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames) >= maxEnergy.Value)
+                    if(maxEnergy != null && rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames, AppliedLogicalOptions.RemovedItems) >= maxEnergy.Value)
                     {
                         impossible = true;
                     }

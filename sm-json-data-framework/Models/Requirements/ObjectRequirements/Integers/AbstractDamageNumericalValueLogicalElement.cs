@@ -89,16 +89,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // This could be always if it ends up being 0 damage suitless, but you can't check that easily with the rules without an inGameState
-            // and besides it's quite unlikely - probably not worth the effort
-            return false;
+            return CalculateWorstCastDamage(rules) <= 0;
         }
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // This could be free if it ends up being 0 damage suitless, but you can't check that easily with the rules without an inGameState
-            // and besides it's quite unlikely - probably not worth the effort
-            return false;
+            return CalculateWorstCastDamage(rules) <= 0;
         }
     }
 

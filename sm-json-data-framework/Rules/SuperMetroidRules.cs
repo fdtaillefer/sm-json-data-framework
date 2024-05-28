@@ -3,7 +3,9 @@ using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Models.Rooms.Nodes;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -263,20 +265,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateEnvironmentalDamage(ReadOnlyInGameState inGameState, int baseDamage)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return CalculateBestCaseEnvironmentalDamage(baseDamage);
-            }
-            else if (hasVaria)
-            {
-                return baseDamage / 2;
-            }
-            else
-            {
-                return CalculateWorstCaseEnvironmentalDamage(baseDamage);
-            }
+            return CalculateEnvironmentalDamage(baseDamage, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
         /// <summary>
@@ -285,10 +274,11 @@ namespace sm_json_data_framework.Rules
         /// This method is intended for environment-based punctual hits, not damage over time.
         /// </summary>
         /// <param name="baseDamage">The base damage</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseEnvironmentalDamage(int baseDamage)
+        public virtual int CalculateBestCaseEnvironmentalDamage(int baseDamage, IReadOnlySet<string> removedItems)
         {
-            return baseDamage / 4;
+            return CalculateEnvironmentalDamage(baseDamage, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
         }
 
         /// <summary>
@@ -297,10 +287,27 @@ namespace sm_json_data_framework.Rules
         /// This method is intended for environment-based punctual hits, not damage over time.
         /// </summary>
         /// <param name="baseDamage">The base damage</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseEnvironmentalDamage(int baseDamage)
+        public virtual int CalculateWorstCaseEnvironmentalDamage(int baseDamage, ReadOnlyItemInventory startingInventory)
         {
-            return baseDamage;
+            return CalculateEnvironmentalDamage(baseDamage, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateEnvironmentalDamage(int baseDamage, bool hasVaria, bool hasGravity)
+        {
+            if (hasGravity)
+            {
+                return baseDamage / 4;
+            }
+            else if (hasVaria)
+            {
+                return baseDamage / 2;
+            }
+            else
+            {
+                return baseDamage;
+            }
         }
 
         /// <summary>
@@ -325,16 +332,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateHeatDamage(ReadOnlyInGameState inGameState, int heatFrames)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity || hasVaria)
-            {
-                return CalculateBestCaseHeatDamage(heatFrames);
-            }
-            else
-            {
-                return CalculateWorstCaseHeatDamage(heatFrames);
-            }
+            return CalculateHeatDamage(heatFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
         /// <summary>
@@ -342,10 +340,11 @@ namespace sm_json_data_framework.Rules
         /// (presumably both suits).
         /// </summary>
         /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseHeatDamage(int heatFrames)
+        public virtual int CalculateBestCaseHeatDamage(int heatFrames, IReadOnlySet<string> removedItems)
         {
-            return 0;
+            return CalculateHeatDamage(heatFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
         }
 
         /// <summary>
@@ -353,10 +352,23 @@ namespace sm_json_data_framework.Rules
         /// (presumably suitless).
         /// </summary>
         /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseHeatDamage(int heatFrames)
+        public virtual int CalculateWorstCaseHeatDamage(int heatFrames, ReadOnlyItemInventory startingInventory)
         {
-            return heatFrames / 4;
+            return CalculateHeatDamage(heatFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateHeatDamage(int heatFrames, bool hasVaria, bool hasGravity)
+        {
+            if (hasGravity || hasVaria)
+            {
+                return 0;
+            }
+            else
+            {
+                return heatFrames / 4;
+            }
         }
 
         /// <summary>
@@ -381,20 +393,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateLavaDamage(ReadOnlyInGameState inGameState, int lavaFrames)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return CalculateBestCaseLavaDamage(lavaFrames);
-            }
-            else if (hasVaria)
-            {
-                return lavaFrames / 4;
-            }
-            else
-            {
-                return CalculateWorstCaseLavaDamage(lavaFrames);
-            }
+            return CalculateLavaDamage(lavaFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
         /// <summary>
@@ -402,10 +401,11 @@ namespace sm_json_data_framework.Rules
         /// (presumably both suits).
         /// </summary>
         /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseLavaDamage(int lavaFrames)
+        public virtual int CalculateBestCaseLavaDamage(int lavaFrames, IReadOnlySet<string> removedItems)
         {
-            return 0;
+            return CalculateLavaDamage(lavaFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
         }
 
         /// <summary>
@@ -413,10 +413,27 @@ namespace sm_json_data_framework.Rules
         /// (presumably suitless).
         /// </summary>
         /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseLavaDamage(int lavaFrames)
+        public virtual int CalculateWorstCaseLavaDamage(int lavaFrames, ReadOnlyItemInventory startingInventory)
         {
-            return lavaFrames / 2;
+            return CalculateLavaDamage(lavaFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateLavaDamage(int lavaFrames, bool hasVaria, bool hasGravity)
+        {
+            if (hasGravity)
+            {
+                return 0;
+            }
+            else if (hasVaria)
+            {
+                return lavaFrames / 4;
+            }
+            else
+            {
+                return lavaFrames / 2;
+            }
         }
 
         /// <summary>
@@ -428,15 +445,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateLavaPhysicsDamage(ReadOnlyInGameState inGameState, int lavaPhysicsFrames)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            if (hasVaria)
-            {
-                return CalculateBestCaseLavaPhysicsDamage(lavaPhysicsFrames);
-            }
-            else
-            {
-                return CalculateWorstCaseLavaPhysicsDamage(lavaPhysicsFrames);
-            }
+            return CalculateLavaPhysicsDamage(lavaPhysicsFrames, inGameState.Inventory.HasVariaSuit());
         }
 
         /// <summary>
@@ -444,10 +453,11 @@ namespace sm_json_data_framework.Rules
         /// (i.e. with Gravity Suit turned off if available), in the best case scenario (presumably with Varia).
         /// </summary>
         /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseLavaPhysicsDamage(int lavaPhysicsFrames)
+        public virtual int CalculateBestCaseLavaPhysicsDamage(int lavaPhysicsFrames, IReadOnlySet<string> removedItems)
         {
-            return lavaPhysicsFrames / 4;
+            return CalculateLavaPhysicsDamage(lavaPhysicsFrames, !removedItems.ContainsVariaSuit());
         }
 
         /// <summary>
@@ -455,10 +465,23 @@ namespace sm_json_data_framework.Rules
         /// (i.e. with Gravity Suit turned off if available), in the worst case scenario (presumably suitless).
         /// </summary>
         /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseLavaPhysicsDamage(int lavaPhysicsFrames)
+        public virtual int CalculateWorstCaseLavaPhysicsDamage(int lavaPhysicsFrames, ReadOnlyItemInventory startingInventory)
         {
-            return lavaPhysicsFrames / 2;
+            return CalculateLavaPhysicsDamage(lavaPhysicsFrames, startingInventory.HasVariaSuit());
+        }
+
+        private int CalculateLavaPhysicsDamage(int lavaPhysicsFrames, bool hasVaria)
+        {
+            if (hasVaria)
+            {
+                return lavaPhysicsFrames / 4;
+            }
+            else
+            {
+                return lavaPhysicsFrames / 2;
+            }
         }
 
         /// <summary>
@@ -497,20 +520,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateAcidDamage(ReadOnlyInGameState inGameState, int acidFrames)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return CalculateBestCaseAcidDamage(acidFrames);
-            }
-            else if (hasVaria)
-            {
-                return acidFrames * 3 / 4;
-            }
-            else
-            {
-                return CalculateWorstCaseAcidDamage(acidFrames);
-            }
+            return CalculateAcidDamage(acidFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
         /// <summary>
@@ -518,10 +528,11 @@ namespace sm_json_data_framework.Rules
         /// (presumably both suits).
         /// </summary>
         /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseAcidDamage(int acidFrames)
+        public virtual int CalculateBestCaseAcidDamage(int acidFrames, IReadOnlySet<string> removedItems)
         {
-            return acidFrames * 3 / 8;
+            return CalculateAcidDamage(acidFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
         }
 
         /// <summary>
@@ -529,10 +540,27 @@ namespace sm_json_data_framework.Rules
         /// (presumably suitless).
         /// </summary>
         /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseAcidDamage(int acidFrames)
+        public virtual int CalculateWorstCaseAcidDamage(int acidFrames, ReadOnlyItemInventory startingInventory)
         {
-            return acidFrames * 6 / 4;
+            return CalculateAcidDamage(acidFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateAcidDamage(int acidFrames, bool hasVaria, bool hasGravity)
+        {
+            if (hasGravity)
+            {
+                return acidFrames * 3 / 8;
+            }
+            else if (hasVaria)
+            {
+                return acidFrames * 3 / 4;
+            }
+            else
+            {
+                return acidFrames * 6 / 4;
+            }
         }
 
         /// <summary>
@@ -557,20 +585,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateElectricityGrappleDamage(ReadOnlyInGameState inGameState, int electricityFrames)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
-            if (hasGravity)
-            {
-                return CalculateBestCaseElectricityGrappleDamage(electricityFrames);
-            }
-            else if (hasVaria)
-            {
-                return electricityFrames / 2;
-            }
-            else
-            {
-                return CalculateWorstCaseElectricityGrappleDamage(electricityFrames);
-            }
+            return CalculateElectricityGrappleDamage(electricityFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
         /// <summary>
@@ -578,10 +593,11 @@ namespace sm_json_data_framework.Rules
         /// (presumably both suits).
         /// </summary>
         /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseElectricityGrappleDamage(int electricityFrames)
+        public virtual int CalculateBestCaseElectricityGrappleDamage(int electricityFrames, IReadOnlySet<string> removedItems)
         {
-            return electricityFrames / 4;
+            return CalculateElectricityGrappleDamage(electricityFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
         }
 
         /// <summary>
@@ -589,10 +605,27 @@ namespace sm_json_data_framework.Rules
         /// (presumably suitless).
         /// </summary>
         /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseElectricityGrappleDamage(int electricityFrames)
+        public virtual int CalculateWorstCaseElectricityGrappleDamage(int electricityFrames, ReadOnlyItemInventory startingInventory)
         {
-            return electricityFrames;
+            return CalculateElectricityGrappleDamage(electricityFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateElectricityGrappleDamage(int electricityFrames, bool hasVaria, bool hasGravity)
+        {
+            if (hasGravity)
+            {
+                return electricityFrames / 4;
+            }
+            else if (hasVaria)
+            {
+                return electricityFrames / 2;
+            }
+            else
+            {
+                return electricityFrames;
+            }
         }
 
         /// <summary>
@@ -618,7 +651,7 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateShinesparkDamage(ReadOnlyInGameState inGameState, int shinesparkFrames, int times = 1)
         {
-            return CalculateWorstCaseShinesparkDamage(shinesparkFrames) * times;
+            return CalculateShinesparkDamage(shinesparkFrames) * times;
         }
 
         /// <summary>
@@ -626,10 +659,11 @@ namespace sm_json_data_framework.Rules
         /// (though vanilla has only one case).
         /// </summary>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseShinesparkDamage(int shinesparkFrames)
+        public virtual int CalculateBestCaseShinesparkDamage(int shinesparkFrames, IReadOnlySet<string> removedItems)
         {
-            return CalculateWorstCaseShinesparkDamage(shinesparkFrames);
+            return CalculateShinesparkDamage(shinesparkFrames);
         }
 
         /// <summary>
@@ -637,8 +671,14 @@ namespace sm_json_data_framework.Rules
         /// (though vanilla has only one case).
         /// </summary>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseShinesparkDamage(int shinesparkFrames)
+        public virtual int CalculateWorstCaseShinesparkDamage(int shinesparkFrames, ReadOnlyItemInventory startingInventory)
+        {
+            return CalculateShinesparkDamage(shinesparkFrames);
+        }
+
+        private int CalculateShinesparkDamage(int shinesparkFrames)
         {
             return shinesparkFrames;
         }
@@ -653,7 +693,7 @@ namespace sm_json_data_framework.Rules
         /// <returns></returns>
         public virtual int CalculateEnergyNeededForShinespark(int shinesparkFrames, int times = 1)
         {
-            return shinesparkFrames == 0 ? 0 : shinesparkFrames*times + ShinesparkEnergyLimit;
+            return shinesparkFrames == 0 ? 0 : CalculateShinesparkDamage(shinesparkFrames)*times + ShinesparkEnergyLimit;
         }
 
         /// <summary>
@@ -664,12 +704,36 @@ namespace sm_json_data_framework.Rules
         /// <returns>The calculated damage</returns>
         public virtual int CalculateEnemyDamage(ReadOnlyInGameState inGameState, EnemyAttack attack)
         {
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            bool hasGravity = inGameState.Inventory.HasGravitySuit();
+            return CalculateEnemyDamage(attack, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
+        }
 
+        /// <summary>
+        /// Calculates and returns how much damage the provided enemy attack would do to Samus, in the best case scenario (presumably with both suits).
+        /// </summary>
+        /// <param name="attack">The enemy attack whose damage to calculate</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseEnemyDamage(EnemyAttack attack, IReadOnlySet<string> removedItems)
+        {
+            return CalculateEnemyDamage(attack, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
+        }
+
+        /// <summary>
+        /// Calculates and returns how much damage the provided enemy attack would do to Samus, in the worst case scenario (presumably suitless).
+        /// </summary>
+        /// <param name="attack">The enemy attack whose damage to calculate</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseEnemyDamage(EnemyAttack attack, ReadOnlyItemInventory startingInventory)
+        {
+            return CalculateEnemyDamage(attack, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateEnemyDamage(EnemyAttack attack, bool hasVaria, bool hasGravity)
+        {
             if (hasGravity && attack.AffectedByGravity)
             {
-                return CalculateBestCaseEnemyDamage(attack);
+                return attack.BaseDamage / 4;
             }
             else if (hasVaria && attack.AffectedByVaria)
             {
@@ -677,39 +741,8 @@ namespace sm_json_data_framework.Rules
             }
             else
             {
-                return CalculateWorstCaseEnemyDamage(attack);
-            }
-        }
-
-        /// <summary>
-        /// Calculates and returns how much damage the provided enemy attack would do to Samus, in the best case scenario (presumably with both suits).
-        /// </summary>
-        /// <param name="attack">The enemy attack whose damage to calculate</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseEnemyDamage(EnemyAttack attack)
-        {
-            if (attack.AffectedByGravity)
-            {
-                return attack.BaseDamage / 4;
-            }
-            else if (attack.AffectedByVaria)
-            {
-                return attack.BaseDamage / 2;
-            }
-            else
-            {
                 return attack.BaseDamage;
             }
-        }
-
-        /// <summary>
-        /// Calculates and returns how much damage the provided enemy attack would do to Samus, in the worst case scenario (presumably suitless).
-        /// </summary>
-        /// <param name="attack">The enemy attack whose damage to calculate</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseEnemyDamage(EnemyAttack attack)
-        {
-            return attack.BaseDamage;
         }
 
         /// <summary>

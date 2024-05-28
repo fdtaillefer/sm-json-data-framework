@@ -1335,11 +1335,7 @@ namespace sm_json_data_framework.Tests.Models
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnvironments()
         {
             // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelForApplyLogicalOptions.GameFlags["f_DefeatedRidley"] })
-                .Build();
+            LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
             ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
@@ -1349,7 +1345,6 @@ namespace sm_json_data_framework.Tests.Models
             {
                 Assert.True(roomEnvironment.LogicallyRelevant);
             }
-            
         }
 
         [Fact]
@@ -1375,19 +1370,77 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodes()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            RoomNode node = ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 5);
+            Assert.True(node.LogicallyRelevant);
+            Assert.False(node.LogicallyNeverInteract);
+            // Model doesn't contain a InteractRequires value so no way to test for its never...
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnDoorEnvironments()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            foreach (DoorEnvironment doorEnvironment in ModelForApplyLogicalOptions.Rooms["Volcano Room"].Nodes[2].DoorEnvironments)
+            {
+                Assert.True(doorEnvironment.LogicallyRelevant);
+            }
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRunways()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
+                    .ApplyAddItem(ModelForApplyLogicalOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
+                )
+                .Build();
 
+            // When
+            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Runway freeRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Fast Pillars Setup Room", 2).Runways["Base Runway - Fast Pillars Setup Room Bottom Left Door (to Fast Rippers)"];
+            Assert.True(freeRunway.LogicallyRelevant);
+            Assert.True(freeRunway.LogicallyAlways);
+            Assert.True(freeRunway.LogicallyFree);
+            Assert.False(freeRunway.LogicallyNever);
+            Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveRunwayLength);
+            Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveReversibleRunwayLength);
+            Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveRunwayLengthNoCharge);
+
+            Runway neverRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Oasis", 2).Runways["Base Runway - Oasis Right Door (to East Sand Hall)"];
+            Assert.False(neverRunway.LogicallyRelevant);
+            Assert.False(neverRunway.LogicallyAlways);
+            Assert.False(neverRunway.LogicallyFree);
+            Assert.True(neverRunway.LogicallyNever);
+            Assert.Equal(12, neverRunway.LogicalEffectiveRunwayLength);
+            Assert.Equal(12, neverRunway.LogicalEffectiveReversibleRunwayLength);
+            Assert.Equal(12, neverRunway.LogicalEffectiveRunwayLengthNoCharge);
+
+            Runway possibleRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Golden Torizo's Room", 2).Runways["Base Runway - Golden Torizo Room Right Door (to Screw Attack)"];
+            Assert.True(possibleRunway.LogicallyRelevant);
+            Assert.False(possibleRunway.LogicallyAlways);
+            Assert.False(possibleRunway.LogicallyFree);
+            Assert.False(possibleRunway.LogicallyNever);
+            Assert.Equal(28, possibleRunway.LogicalEffectiveRunwayLength);
+            Assert.Equal(28, possibleRunway.LogicalEffectiveReversibleRunwayLength);
+            Assert.Equal(28, possibleRunway.LogicalEffectiveRunwayLengthNoCharge);
         }
 
         [Fact]

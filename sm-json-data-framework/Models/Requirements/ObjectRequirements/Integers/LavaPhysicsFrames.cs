@@ -32,12 +32,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateBestCaseLavaPhysicsDamage(Value) * LavaLeniencyMultiplier);
+            return (int)(rules.CalculateBestCaseLavaPhysicsDamage(Value, AppliedLogicalOptions.RemovedItems) * LavaLeniencyMultiplier);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateWorstCaseLavaPhysicsDamage(Value) * LavaLeniencyMultiplier);
+            return (int)(rules.CalculateWorstCaseLavaPhysicsDamage(Value, AppliedLogicalOptions.StartConditions.StartingInventory) * LavaLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
