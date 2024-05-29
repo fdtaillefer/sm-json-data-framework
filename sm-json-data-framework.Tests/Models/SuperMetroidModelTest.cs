@@ -929,6 +929,74 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnItems()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem("Bombs");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                )
+                .Build();
+
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Item freeItem = ModelWithOptions.Items["Morph"];
+            Assert.True(freeItem.LogicallyRelevant);
+            Assert.False(freeItem.LogicallyNever);
+            Assert.True(freeItem.LogicallyAlways);
+            Assert.True(freeItem.LogicallyFree);
+
+            Item removedItem = ModelWithOptions.Items["Bombs"];
+            Assert.False(removedItem.LogicallyRelevant);
+            Assert.True(removedItem.LogicallyNever);
+            Assert.False(removedItem.LogicallyAlways);
+            Assert.False(removedItem.LogicallyFree);
+
+            Item obtainableItem = ModelWithOptions.Items["Charge"];
+            Assert.True(obtainableItem.LogicallyRelevant);
+            Assert.False(obtainableItem.LogicallyNever);
+            Assert.False(obtainableItem.LogicallyAlways);
+            Assert.False(obtainableItem.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnGameFlags()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterDisabledGameFlag("f_AnimalsSaved");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedCeresRidley"] })
+                .Build();
+
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            GameFlag alwaysFlag = ModelWithOptions.GameFlags["f_DefeatedCeresRidley"];
+            Assert.True(alwaysFlag.LogicallyRelevant);
+            Assert.False(alwaysFlag.LogicallyNever);
+            Assert.True(alwaysFlag.LogicallyAlways);
+            Assert.True(alwaysFlag.LogicallyFree);
+
+            GameFlag removedFlag = ModelWithOptions.GameFlags["f_AnimalsSaved"];
+            Assert.False(removedFlag.LogicallyRelevant);
+            Assert.True(removedFlag.LogicallyNever);
+            Assert.False(removedFlag.LogicallyAlways);
+            Assert.False(removedFlag.LogicallyFree);
+
+            GameFlag obtainableFlag = ModelWithOptions.GameFlags["f_ZebesAwake"];
+            Assert.True(obtainableFlag.LogicallyRelevant);
+            Assert.False(obtainableFlag.LogicallyNever);
+            Assert.False(obtainableFlag.LogicallyAlways);
+            Assert.False(obtainableFlag.LogicallyFree);
+        }
+
+        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelpers()
         {
             // Given
@@ -962,7 +1030,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.True(freeHelper.LogicallyAlways);
             Assert.True(freeHelper.LogicallyFree);
             Assert.False(freeHelper.LogicallyNever);
-
         }
 
         [Fact]
@@ -1777,10 +1844,9 @@ namespace sm_json_data_framework.Tests.Models
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            And oneFreeOneNeverSomePossible = ModelWithOptions.Rooms["Metal Pirates Room"].Obstacles["A"].Requires
-                .LogicalElements.OfType<Or>().Where(or => or.LogicalRequirements.LogicalElements.Count() == 3).First()
-                .LogicalRequirements.LogicalElements.OfType<And>().Where(element => element.LogicalRequirements.LogicalElements.Count() == 5)
-                .First();
+            And oneFreeOneNeverSomePossible = ModelWithOptions.Rooms["Metal Pirates Room"].Obstacles["A"].Requires.LogicalElement<Or>(1)
+                .LogicalRequirements.LogicalElement<And>(1);
+            Assert.Equal(5, oneFreeOneNeverSomePossible.LogicalRequirements.LogicalElements.Count()); // Sanity check to make sure we have the right And
             Assert.True(oneFreeOneNeverSomePossible.LogicallyRelevant);
             Assert.True(oneFreeOneNeverSomePossible.LogicallyNever);
             Assert.False(oneFreeOneNeverSomePossible.LogicallyAlways);
@@ -1809,31 +1875,171 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnTechLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterDisabledTech("canPreciseWalljump");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            TechLogicalElement disabledTechElement = ModelWithOptions.Techs["canDelayedWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canPreciseWalljump");
+            Assert.True(disabledTechElement.LogicallyRelevant);
+            Assert.False(disabledTechElement.LogicallyAlways);
+            Assert.False(disabledTechElement.LogicallyFree);
+            Assert.True(disabledTechElement.LogicallyNever);
+
+            TechLogicalElement impossibleSubTechElement = ModelWithOptions.Techs["canInsaneWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canDelayedWalljump");
+            Assert.True(impossibleSubTechElement.LogicallyRelevant);
+            Assert.False(impossibleSubTechElement.LogicallyAlways);
+            Assert.False(impossibleSubTechElement.LogicallyFree);
+            Assert.True(impossibleSubTechElement.LogicallyNever);
+
+            TechLogicalElement nonFreeTechElement = ModelWithOptions.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"].BypassStrats["Bowling Skip"]
+                .Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canGrappleClip");
+            Assert.True(nonFreeTechElement.LogicallyRelevant);
+            Assert.False(nonFreeTechElement.LogicallyAlways);
+            Assert.False(nonFreeTechElement.LogicallyFree);
+            Assert.False(nonFreeTechElement.LogicallyNever);
+
+            TechLogicalElement freeTechElement = ModelWithOptions.Techs["canPreciseWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canWalljump");
+            Assert.True(freeTechElement.LogicallyRelevant);
+            Assert.True(freeTechElement.LogicallyAlways);
+            Assert.True(freeTechElement.LogicallyFree);
+            Assert.False(freeTechElement.LogicallyNever);
+            
+            TechLogicalElement freeByStartItemTechElement = ModelWithOptions.Techs["canJumpIntoIBJ"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canIBJ");
+            Assert.True(freeByStartItemTechElement.LogicallyRelevant);
+            Assert.True(freeByStartItemTechElement.LogicallyAlways);
+            Assert.True(freeByStartItemTechElement.LogicallyFree);
+            Assert.False(freeByStartItemTechElement.LogicallyNever);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnNeverLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            NeverLogicalElement never = ModelWithOptions.Locks["Etecoon Exit Grey Lock"].UnlockStrats["Base"].Requires.LogicalElement<NeverLogicalElement>(0);
+            Assert.True(never.LogicallyRelevant);
+            Assert.False(never.LogicallyAlways);
+            Assert.False(never.LogicallyFree);
+            Assert.True(never.LogicallyNever);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnItemLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterRemovedItem("Bombs");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            ItemLogicalElement freeItemElement = ModelWithOptions.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
+            Assert.True(freeItemElement.LogicallyRelevant);
+            Assert.False(freeItemElement.LogicallyNever);
+            Assert.True(freeItemElement.LogicallyAlways);
+            Assert.True(freeItemElement.LogicallyFree);
+
+            ItemLogicalElement removedItemElement = ModelWithOptions.Helpers["h_canUseMorphBombs"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Bombs");
+            Assert.True(removedItemElement.LogicallyRelevant);
+            Assert.True(removedItemElement.LogicallyNever);
+            Assert.False(removedItemElement.LogicallyAlways);
+            Assert.False(removedItemElement.LogicallyFree);
+
+            ItemLogicalElement obtainableItemElement = ModelWithOptions.Helpers["h_canUseSpringBall"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "SpringBall");
+            Assert.True(obtainableItemElement.LogicallyRelevant);
+            Assert.False(obtainableItemElement.LogicallyNever);
+            Assert.False(obtainableItemElement.LogicallyAlways);
+            Assert.False(obtainableItemElement.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelperLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterDisabledTech("canGateGlitch");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            HelperLogicalElement impossibleHelperElement = ModelWithOptions.Helpers["h_canHeatedBlueGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canBlueGateGlitch");
+            Assert.True(impossibleHelperElement.LogicallyRelevant);
+            Assert.False(impossibleHelperElement.LogicallyAlways);
+            Assert.False(impossibleHelperElement.LogicallyFree);
+            Assert.True(impossibleHelperElement.LogicallyNever);
+
+            HelperLogicalElement nonFreeHelperElement = ModelWithOptions.Helpers["h_canOpenYellowDoors"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUsePowerBombs");
+            Assert.True(nonFreeHelperElement.LogicallyRelevant);
+            Assert.False(nonFreeHelperElement.LogicallyAlways);
+            Assert.False(nonFreeHelperElement.LogicallyFree);
+            Assert.False(nonFreeHelperElement.LogicallyNever);
+
+            HelperLogicalElement freeHelperElement = ModelWithOptions.Techs["canHBJ"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUseMorphBombs");
+            Assert.True(freeHelperElement.LogicallyRelevant);
+            Assert.True(freeHelperElement.LogicallyAlways);
+            Assert.True(freeHelperElement.LogicallyFree);
+            Assert.False(freeHelperElement.LogicallyNever);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnGameFlagLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.RegisterDisabledGameFlag("f_AnimalsSaved");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedCeresRidley"] })
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            GameFlagLogicalElement alwaysFlagElement = ModelWithOptions.Locks["Ceres Ridley Room Grey Lock (to 58 Escape)"].UnlockStrats["Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
+            Assert.True(alwaysFlagElement.LogicallyRelevant);
+            Assert.False(alwaysFlagElement.LogicallyNever);
+            Assert.True(alwaysFlagElement.LogicallyAlways);
+            Assert.True(alwaysFlagElement.LogicallyFree);
+
+            GameFlagLogicalElement removedFlagElement = ModelWithOptions.Locks["Animal Escape Grey Lock (to Flyway)"].UnlockStrats["Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
+            Assert.True(removedFlagElement.LogicallyRelevant);
+            Assert.True(removedFlagElement.LogicallyNever);
+            Assert.False(removedFlagElement.LogicallyAlways);
+            Assert.False(removedFlagElement.LogicallyFree);
+
+            GameFlagLogicalElement obtainableFlagElement = ModelWithOptions.Locks["Blue Brinstar Power Bombs Spawn Lock"].UnlockStrats["Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
+            Assert.True(obtainableFlagElement.LogicallyRelevant);
+            Assert.False(obtainableFlagElement.LogicallyNever);
+            Assert.False(obtainableFlagElement.LogicallyAlways);
+            Assert.False(obtainableFlagElement.LogicallyFree);
         }
 
         [Fact]

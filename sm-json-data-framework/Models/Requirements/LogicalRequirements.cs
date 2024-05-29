@@ -69,17 +69,38 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// Returns the nth (based on index) logical element of type T found within this LogicalRequirements, if found. Return null otherwise.
+        /// Returns the nth (based on index) logical element of type T found within this LogicalRequirements 
+        /// (and which also optionally respects the provided predicate), if found. Return null otherwise.
         /// </summary>
         /// <typeparam name="T">The type of logical element to find</typeparam>
-        /// <param name="index">The 0-based index of the element to return, among those of type T</param>
+        /// <param name="index">The 0-based index of the element to return, among those of type T which respect the predicate (if provided)</param>
+        /// <param name="predicate">An optional preidcate which, if provided, will filter the T instances that are found.</param>
         /// <returns></returns>
-        public T LogicalElement<T>(int index) where T: ILogicalElement
+        public T LogicalElement<T>(int index, Func<T, bool> predicate = null) where T: ILogicalElement
+        {
+            IEnumerable<T> elements = LogicalElements
+                .OfType<T>();
+            if(predicate != null)
+            {
+                elements = elements.Where(predicate);
+            }
+
+            return elements
+                .Skip(index)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Returns all logical elements of type T within this LogicalRequirements which respect the provided predicate
+        /// </summary>
+        /// <typeparam name="T">The type of logical elements to find</typeparam>
+        /// <param name="predicate">The predicate to filter by</param>
+        /// <returns></returns>
+        public IEnumerable<T> LogicalElementsWhere<T>(Func<T, bool> predicate) where T : ILogicalElement
         {
             return LogicalElements
                 .OfType<T>()
-                .Skip(0)
-                .FirstOrDefault();
+                .Where(predicate);
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
