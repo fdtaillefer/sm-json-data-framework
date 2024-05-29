@@ -1656,8 +1656,7 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledGameFlag("f_ZebesAwake")
                 .RegisterDisabledTech("canCrouchJump")
-                .RegisterDisabledTech("canDownGrab")
-                ;
+                .RegisterDisabledTech("canDownGrab");
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
                 ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
                     .ApplyAddItem(ModelWithOptions.Items["Morph"])
@@ -1718,13 +1717,93 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnOrs()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Spazer")
+                .RegisterRemovedItem("Wave");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Plasma"])
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Or oneFreeOneNeverOnePossible = ModelWithOptions.Helpers["h_hasBeamUpgrade"].Requires.LogicalElement<Or>(0);
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyRelevant);
+            Assert.False(oneFreeOneNeverOnePossible.LogicallyNever);
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyAlways);
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyFree);
+
+            Or allFree = ModelWithOptions.Helpers["h_heatProof"].Requires.LogicalElement<Or>(0);
+            Assert.True(allFree.LogicallyRelevant);
+            Assert.False(allFree.LogicallyNever);
+            Assert.True(allFree.LogicallyAlways);
+            Assert.True(allFree.LogicallyFree);
+
+            Or allNever = ModelWithOptions.Rooms["Morph Ball Room"].Links[1].To[6].Strats["Medium Sidehopper Kill"].Obstacles["C"].Requires.LogicalElement<Or>(0);
+            Assert.True(allNever.LogicallyRelevant);
+            Assert.True(allNever.LogicallyNever);
+            Assert.False(allNever.LogicallyAlways);
+            Assert.False(allNever.LogicallyFree);
+
+            Or allPossible = ModelWithOptions.Rooms["Morph Ball Room"].Links[5].To[6].Strats["Bomb the Blocks"].Obstacles["A"].Requires.LogicalElement<Or>(0);
+            Assert.True(allPossible.LogicallyRelevant);
+            Assert.False(allPossible.LogicallyNever);
+            Assert.False(allPossible.LogicallyAlways);
+            Assert.False(allPossible.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAnds()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Spazer")
+                .RegisterRemovedItem("HiJump")
+                .RegisterDisabledTech("canSuitlessMaridia");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Charge"])
+                    .ApplyAddItem(ModelWithOptions.Items["SpeedBooster"])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            And oneFreeOneNeverSomePossible = ModelWithOptions.Rooms["Metal Pirates Room"].Obstacles["A"].Requires
+                .LogicalElements.OfType<Or>().Where(or => or.LogicalRequirements.LogicalElements.Count() == 3).First()
+                .LogicalRequirements.LogicalElements.OfType<And>().Where(element => element.LogicalRequirements.LogicalElements.Count() == 5)
+                .First();
+            Assert.True(oneFreeOneNeverSomePossible.LogicallyRelevant);
+            Assert.True(oneFreeOneNeverSomePossible.LogicallyNever);
+            Assert.False(oneFreeOneNeverSomePossible.LogicallyAlways);
+            Assert.False(oneFreeOneNeverSomePossible.LogicallyFree);
+
+            And allFree = ModelWithOptions.Rooms["Green Hill Zone"].Links[1].To[2].Strats["Base"].Requires.LogicalElement<Or>(0).LogicalRequirements.LogicalElement<And>(0);
+            Assert.True(allFree.LogicallyRelevant);
+            Assert.False(allFree.LogicallyNever);
+            Assert.True(allFree.LogicallyAlways);
+            Assert.True(allFree.LogicallyFree);
+
+            And allNever = ModelWithOptions.Rooms["West Sand Hole"].Links[7].To[5].Strats["Left Sand Pit Initial MidAir Morph"].Requires.LogicalElement<Or>(0).LogicalRequirements.LogicalElement<And>(0);
+            Assert.True(allNever.LogicallyRelevant);
+            Assert.True(allNever.LogicallyNever);
+            Assert.False(allNever.LogicallyAlways);
+            Assert.False(allNever.LogicallyFree);
+
+            And allPossible = ModelWithOptions.Helpers["h_canBombThings"].Requires.LogicalElement<Or>(0).LogicalRequirements.LogicalElement<And>(0);
+            Assert.True(allPossible.LogicallyRelevant);
+            Assert.False(allPossible.LogicallyNever);
+            Assert.False(allPossible.LogicallyAlways);
+            Assert.False(allPossible.LogicallyFree);
+            
         }
 
         [Fact]
