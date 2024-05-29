@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Raw;
+using sm_json_data_framework.Options;
 using sm_json_data_framework.Reading;
 using System;
 using System.Collections.Generic;
@@ -25,9 +26,15 @@ namespace sm_json_data_framework.Tests.TestTools
 
         /// <summary>
         /// A mostly unmodifiable SuperMetroidModel, created with no customizations - so it uses all default rules and logical elements.
-        /// Though mostly unmodifiable, there is a risk of side-effects if you apply logical options on this and don't undo them, so take care with that.
-        /// It's strongly recommended to use a different instance instead.
+        /// To avoid causing side-effects to other tests, do not apply <see cref="LogicalOptions"/> to this model.
+        /// If there is a need to do that, use <see cref="ModelWithOptions"/>.
         /// </summary>
         public static readonly SuperMetroidModel UnmodifiableModel = new UnfinalizedSuperMetroidModel(RawModel).Finalize();
+        
+        /// <summary>
+        /// A SuperMetroidModel instance intended to have <see cref="LogicalOptions"/> applied to it during a test.
+        /// If there is no need to apply logical options, consider using <see cref="UnfinalizedModel"/> instead.
+        /// </summary>
+        public static readonly SuperMetroidModel ModelWithOptions = new UnfinalizedSuperMetroidModel(RawModel).Finalize();
     }
 }

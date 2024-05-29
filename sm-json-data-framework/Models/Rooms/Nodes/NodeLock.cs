@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
     /// <summary>
     /// Represents a lock on a node. When active, a lock prevents interaction with a node until unlocked or unless bypassed.
     /// </summary>
-    public class NodeLock : AbstractModelElement<UnfinalizedNodeLock, NodeLock>
+    public class NodeLock : AbstractModelElement<UnfinalizedNodeLock, NodeLock>, ILogicalExecutionPreProcessable
     {
         public NodeLock(UnfinalizedNodeLock sourceElement, Action<NodeLock> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
@@ -149,6 +149,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             base.UpdateLogicalProperties(rules);
             LogicallyNever = CalculateLogicallyNever(rules);
+            LogicallyAlways = CalculateLogicallyAlways(rules);
+            LogicallyFree = CalculateLogicallyFree(rules);
         }
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
@@ -174,6 +176,30 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         {
             // To be fully impossible to pass, a lock must not only be impossible to open or bypass, but must also always be active
             return Lock.LogicallyAlways && !UnlockStrats.Values.WhereLogicallyRelevant().Any() && !BypassStrats.Values.WhereLogicallyRelevant().Any();
+        }
+
+        public bool LogicallyAlways { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        {
+            return Lock.LogicallyNever || UnlockStrats.Values.WhereLogicallyAlways().Any() || BypassStrats.Values.WhereLogicallyAlways().Any();
+        }
+
+        public bool LogicallyFree { get; private set; }
+
+        /// <summary>
+        /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
+        /// </summary>
+        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <returns></returns>
+        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        {
+            return Lock.LogicallyNever || UnlockStrats.Values.WhereLogicallyFree().Any() || BypassStrats.Values.WhereLogicallyFree().Any();
         }
     }
 

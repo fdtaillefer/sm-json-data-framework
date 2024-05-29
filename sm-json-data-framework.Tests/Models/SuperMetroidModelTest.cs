@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Tests.Models
 {
     public class SuperMetroidModelTest
     {
-        private static SuperMetroidModel ModelForApplyLogicalOptions = new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel).Finalize();
+        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.ModelWithOptions;
 
         #region Tests for Ctor(SuperMetroidModel)
 
@@ -455,20 +455,20 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            ReadOnlyLogicalOptions appliedOptions = ModelForApplyLogicalOptions.Rooms["Landing Site"].AppliedLogicalOptions;
+            ReadOnlyLogicalOptions appliedOptions = ModelWithOptions.Rooms["Landing Site"].AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
 
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.Weapons["Wave"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.Enemies["Geemer (blue)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.Items["SpeedBooster"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.GameFlags["f_ZebesSetAblaze"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.Techs["canWalljump"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.Helpers["h_canOpenZebetites"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.Connections[ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.Weapons["Wave"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.Enemies["Geemer (blue)"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.Items["SpeedBooster"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.GameFlags["f_ZebesSetAblaze"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.Techs["canWalljump"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.Helpers["h_canOpenZebetites"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString].AppliedLogicalOptions);
         }
 
         [Fact]
@@ -479,10 +479,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Tech arbitraryTech = ModelForApplyLogicalOptions.Techs["canWalljump"];
+            Tech arbitraryTech = ModelWithOptions.Techs["canWalljump"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryTech.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -498,10 +498,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Helper arbitraryHelper = ModelForApplyLogicalOptions.Helpers["h_canOpenZebetites"];
+            Helper arbitraryHelper = ModelWithOptions.Helpers["h_canOpenZebetites"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryHelper.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -517,10 +517,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Weapon arbitraryWeapon = ModelForApplyLogicalOptions.Weapons["Wave"];
+            Weapon arbitraryWeapon = ModelWithOptions.Weapons["Wave"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryWeapon.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -537,10 +537,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Enemy arbitraryEnemy = ModelForApplyLogicalOptions.Enemies["Geemer (blue)"];
+            Enemy arbitraryEnemy = ModelWithOptions.Enemies["Geemer (blue)"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryEnemy.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -556,10 +556,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Connection arbitraryConnection = ModelForApplyLogicalOptions.Connections[ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
+            Connection arbitraryConnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
             ReadOnlyLogicalOptions appliedOptions = arbitraryConnection.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -576,10 +576,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Room arbitraryRoom = ModelForApplyLogicalOptions.Rooms["Climb"];
+            Room arbitraryRoom = ModelWithOptions.Rooms["Climb"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRoom.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -599,10 +599,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Link arbitraryLink = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[1];
+            Link arbitraryLink = ModelWithOptions.Rooms["Landing Site"].Links[1];
             ReadOnlyLogicalOptions appliedOptions = arbitraryLink.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -618,10 +618,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LinkTo arbitraryLinkTo = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[1].To[4];
+            LinkTo arbitraryLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[1].To[4];
             ReadOnlyLogicalOptions appliedOptions = arbitraryLinkTo.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -637,10 +637,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Strat arbitraryStrat = ModelForApplyLogicalOptions.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"];
+            Strat arbitraryStrat = ModelWithOptions.Rooms["Pink Brinstar Power Bomb Room"].Links[3].To[4].Strats["Mission Impossible"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryStrat.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -658,10 +658,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomObstacle arbitraryRoomObstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Obstacles["A"];
+            RoomObstacle arbitraryRoomObstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRoomObstacle.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -677,10 +677,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomEnemy arbitraryRoomEnemy = ModelForApplyLogicalOptions.Rooms["Early Supers Room"].Enemies["e1"];
+            RoomEnemy arbitraryRoomEnemy = ModelWithOptions.Rooms["Early Supers Room"].Enemies["e1"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRoomEnemy.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -699,10 +699,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            FarmCycle arbitraryFarmCycle = ModelForApplyLogicalOptions.Rooms["Early Supers Room"].Enemies["e1"].FarmCycles["Crouch over spawn point"];
+            FarmCycle arbitraryFarmCycle = ModelWithOptions.Rooms["Early Supers Room"].Enemies["e1"].FarmCycles["Crouch over spawn point"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryFarmCycle.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -718,10 +718,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomNode arbitraryNode = ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 1);
+            RoomNode arbitraryNode = ModelWithOptions.GetNodeInRoom("Landing Site", 1);
             ReadOnlyLogicalOptions appliedOptions = arbitraryNode.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -731,7 +731,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Same(appliedOptions, arbitraryNode.CanLeaveCharged.First().AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryNode.InteractionRequires.AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryNode.Runways["Base Runway - Landing Site Top Left Door (to Gauntlet)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelForApplyLogicalOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0].AppliedLogicalOptions);
         }
 
         [Fact]
@@ -742,10 +742,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Runway arbitraryRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Climb", 5).Runways["Base Runway - Climb Bottom Right Door (to Pit Room)"];
+            Runway arbitraryRunway = ModelWithOptions.GetNodeInRoom("Climb", 5).Runways["Base Runway - Climb Bottom Right Door (to Pit Room)"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryRunway.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -761,10 +761,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged arbitraryCanLeaveCharged = ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First();
+            CanLeaveCharged arbitraryCanLeaveCharged = ModelWithOptions.GetNodeInRoom("Landing Site", 1).CanLeaveCharged.First();
             ReadOnlyLogicalOptions appliedOptions = arbitraryCanLeaveCharged.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -781,10 +781,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            ViewableNode arbitraryViewableNode = ModelForApplyLogicalOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
+            ViewableNode arbitraryViewableNode = ModelWithOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
             ReadOnlyLogicalOptions appliedOptions = arbitraryViewableNode.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -800,10 +800,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            NodeLock arbitraryLock = ModelForApplyLogicalOptions.GetNodeInRoom("West Ocean", 4).Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            NodeLock arbitraryLock = ModelWithOptions.GetNodeInRoom("West Ocean", 4).Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
             ReadOnlyLogicalOptions appliedOptions = arbitraryLock.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -821,10 +821,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LogicalRequirements arbitraryLogicalRequirements = ModelForApplyLogicalOptions.Rooms["Climb"].Links[6].To[3].Strats["Behemoth Spark Top"].Requires;
+            LogicalRequirements arbitraryLogicalRequirements = ModelWithOptions.Rooms["Climb"].Links[6].To[3].Strats["Behemoth Spark Top"].Requires;
             ReadOnlyLogicalOptions appliedOptions = arbitraryLogicalRequirements.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -843,10 +843,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Or arbitraryOr = (Or)ModelForApplyLogicalOptions.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(Or).IsAssignableFrom(element.GetType())).First();
+            Or arbitraryOr = (Or)ModelWithOptions.Helpers["h_canPassBombPassages"].Requires.LogicalElements.Where(element => typeof(Or).IsAssignableFrom(element.GetType())).First();
             ReadOnlyLogicalOptions appliedOptions = arbitraryOr.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -862,10 +862,10 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 20;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            And arbitraryAnd = ModelForApplyLogicalOptions.Helpers["h_canPassBombPassages"].Requires.LogicalElement<Or>(0)
+            And arbitraryAnd = ModelWithOptions.Helpers["h_canPassBombPassages"].Requires.LogicalElement<Or>(0)
                 .LogicalRequirements.LogicalElement<And>(0);
             ReadOnlyLogicalOptions appliedOptions = arbitraryAnd.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
@@ -886,42 +886,42 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledTech("canPreciseWalljump");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Morph"])
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Tech disabledTech = ModelForApplyLogicalOptions.Techs["canPreciseWalljump"];
+            Tech disabledTech = ModelWithOptions.Techs["canPreciseWalljump"];
             Assert.False(disabledTech.LogicallyRelevant);
             Assert.False(disabledTech.LogicallyAlways);
             Assert.False(disabledTech.LogicallyFree);
             Assert.True(disabledTech.LogicallyNever);
 
-            Tech impossibleSubTech = ModelForApplyLogicalOptions.Techs["canDelayedWalljump"];
+            Tech impossibleSubTech = ModelWithOptions.Techs["canDelayedWalljump"];
             Assert.False(impossibleSubTech.LogicallyRelevant);
             Assert.False(impossibleSubTech.LogicallyAlways);
             Assert.False(impossibleSubTech.LogicallyFree);
             Assert.True(impossibleSubTech.LogicallyNever);
 
-            Tech nonFreeTech = ModelForApplyLogicalOptions.Techs["canGrappleClip"];
+            Tech nonFreeTech = ModelWithOptions.Techs["canGrappleClip"];
             Assert.True(nonFreeTech.LogicallyRelevant);
             Assert.False(nonFreeTech.LogicallyAlways);
             Assert.False(nonFreeTech.LogicallyFree);
             Assert.False(nonFreeTech.LogicallyNever);
 
-            Tech freeTech = ModelForApplyLogicalOptions.Techs["canWalljump"];
+            Tech freeTech = ModelWithOptions.Techs["canWalljump"];
             Assert.True(freeTech.LogicallyRelevant);
             Assert.True(freeTech.LogicallyAlways);
             Assert.True(freeTech.LogicallyFree);
             Assert.False(freeTech.LogicallyNever);
 
-            Tech freeByStartItemTech = ModelForApplyLogicalOptions.Techs["canIBJ"];
+            Tech freeByStartItemTech = ModelWithOptions.Techs["canIBJ"];
             Assert.True(freeByStartItemTech.LogicallyRelevant);
             Assert.True(freeByStartItemTech.LogicallyAlways);
             Assert.True(freeByStartItemTech.LogicallyFree);
@@ -934,30 +934,30 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canGateGlitch");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Morph"])
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Helper impossibleHelper = ModelForApplyLogicalOptions.Helpers["h_canBlueGateGlitch"];
+            Helper impossibleHelper = ModelWithOptions.Helpers["h_canBlueGateGlitch"];
             Assert.False(impossibleHelper.LogicallyRelevant);
             Assert.False(impossibleHelper.LogicallyAlways);
             Assert.False(impossibleHelper.LogicallyFree);
             Assert.True(impossibleHelper.LogicallyNever);
 
-            Helper nonFreeHelper = ModelForApplyLogicalOptions.Helpers["h_hasBeamUpgrade"];
+            Helper nonFreeHelper = ModelWithOptions.Helpers["h_hasBeamUpgrade"];
             Assert.True(nonFreeHelper.LogicallyRelevant);
             Assert.False(nonFreeHelper.LogicallyAlways);
             Assert.False(nonFreeHelper.LogicallyFree);
             Assert.False(nonFreeHelper.LogicallyNever);
 
-            Helper freeHelper = ModelForApplyLogicalOptions.Helpers["h_canUseMorphBombs"];
+            Helper freeHelper = ModelWithOptions.Helpers["h_canUseMorphBombs"];
             Assert.True(freeHelper.LogicallyRelevant);
             Assert.True(freeHelper.LogicallyAlways);
             Assert.True(freeHelper.LogicallyFree);
@@ -971,42 +971,42 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Wave"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Wave"])
                 )
                 .Build();
 
             logicalOptions.RegisterRemovedItem("Ice");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Weapon impossibleUseWeapon = ModelForApplyLogicalOptions.Weapons["Ice"];
+            Weapon impossibleUseWeapon = ModelWithOptions.Weapons["Ice"];
             Assert.False(impossibleUseWeapon.LogicallyRelevant);
             Assert.False(impossibleUseWeapon.LogicallyAlways);
             Assert.False(impossibleUseWeapon.LogicallyFree);
             Assert.True(impossibleUseWeapon.LogicallyNever);
 
-            Weapon impossibleShootWeapon = ModelForApplyLogicalOptions.Weapons["Missile"];
+            Weapon impossibleShootWeapon = ModelWithOptions.Weapons["Missile"];
             Assert.False(impossibleShootWeapon.LogicallyRelevant);
             Assert.False(impossibleShootWeapon.LogicallyAlways);
             Assert.False(impossibleShootWeapon.LogicallyFree);
             Assert.True(impossibleShootWeapon.LogicallyNever);
 
-            Weapon nonFreeWeapon = ModelForApplyLogicalOptions.Weapons["Charge+Wave"];
+            Weapon nonFreeWeapon = ModelWithOptions.Weapons["Charge+Wave"];
             Assert.True(nonFreeWeapon.LogicallyRelevant);
             Assert.False(nonFreeWeapon.LogicallyAlways);
             Assert.False(nonFreeWeapon.LogicallyFree);
             Assert.False(nonFreeWeapon.LogicallyNever);
 
-            Weapon freeWeapon = ModelForApplyLogicalOptions.Weapons["Wave"];
+            Weapon freeWeapon = ModelWithOptions.Weapons["Wave"];
             Assert.True(freeWeapon.LogicallyRelevant);
             Assert.True(freeWeapon.LogicallyAlways);
             Assert.True(freeWeapon.LogicallyFree);
@@ -1021,17 +1021,17 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.RegisterRemovedItem("Ice");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Enemy enemy = ModelForApplyLogicalOptions.Enemies["Evir"];
+            Enemy enemy = ModelWithOptions.Enemies["Evir"];
             Assert.True(enemy.LogicallyRelevant);
             Assert.True(enemy.Attacks["contact"].LogicallyRelevant);
             Assert.False(enemy.Dimensions.LogicallyRelevant);
             Assert.False(enemy.InvulnerableWeapons["Ice"].LogicallyRelevant);
             Assert.True(enemy.InvulnerableWeapons["Grapple"].LogicallyRelevant);
 
-            Enemy multiplierEnemy = ModelForApplyLogicalOptions.Enemies["Kihunter (red)"];
+            Enemy multiplierEnemy = ModelWithOptions.Enemies["Kihunter (red)"];
             Assert.False(multiplierEnemy.WeaponSusceptibilities["Ice"].LogicallyRelevant);
             Assert.False(multiplierEnemy.WeaponMultipliers["Ice"].LogicallyRelevant);
             Assert.True(multiplierEnemy.WeaponSusceptibilities["Spazer"].LogicallyRelevant);
@@ -1044,22 +1044,22 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Connection unfollowableconnection = ModelForApplyLogicalOptions.Connections[ModelForApplyLogicalOptions.GetNodeInRoom("Big Pink", 8).IdentifyingString];
+            Connection unfollowableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Big Pink", 8).IdentifyingString];
             // Followability is not considered in-scope for logical relevance
             Assert.True(unfollowableconnection.LogicallyRelevant);
             Assert.True(unfollowableconnection.FromNode.LogicallyRelevant);
             Assert.True(unfollowableconnection.ToNode.LogicallyRelevant);
 
-            Connection followableconnection = ModelForApplyLogicalOptions.Connections[ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
+            Connection followableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
             Assert.True(followableconnection.LogicallyRelevant);
             Assert.True(followableconnection.FromNode.LogicallyRelevant);
             Assert.True(followableconnection.ToNode.LogicallyRelevant);
@@ -1071,20 +1071,20 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Room unreachableRoom = ModelForApplyLogicalOptions.Rooms["Norfair Map Room"];
+            Room unreachableRoom = ModelWithOptions.Rooms["Norfair Map Room"];
             // Room accessibility is not considered in-scope for logical relevance
             Assert.True(unreachableRoom.LogicallyRelevant);
 
-            Room reachableRoom = ModelForApplyLogicalOptions.Rooms["Landing Site"];
+            Room reachableRoom = ModelWithOptions.Rooms["Landing Site"];
             Assert.True(reachableRoom.LogicallyRelevant);
         }
 
@@ -1098,16 +1098,16 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterRemovedItem("Morph")
                 .RegisterDisabledGameFlag("f_ZebesSetAblaze");
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomObstacle obstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Obstacles["A"];
+            RoomObstacle obstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
             Assert.True(obstacle.LogicallyRelevant);
             Assert.True(obstacle.LogicallyIndestructible);
             Assert.False(obstacle.LogicallyAlwaysDestructible);
@@ -1119,17 +1119,17 @@ namespace sm_json_data_framework.Tests.Models
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["ScrewAttack"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["ScrewAttack"])
             )
             .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomObstacle obstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Obstacles["A"];
+            RoomObstacle obstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
             Assert.True(obstacle.LogicallyRelevant);
             Assert.False(obstacle.LogicallyIndestructible);
             Assert.True(obstacle.LogicallyAlwaysDestructible);
@@ -1145,28 +1145,28 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterDisabledStrat("Ceiling E-Tank Dboost");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Strat impossibleRequirementsStrat = ModelForApplyLogicalOptions.Rooms["Pants Room"].Links[4].To[5].Strats["Base"];
+            Strat impossibleRequirementsStrat = ModelWithOptions.Rooms["Pants Room"].Links[4].To[5].Strats["Base"];
             Assert.False(impossibleRequirementsStrat.LogicallyRelevant);
             Assert.False(impossibleRequirementsStrat.LogicallyAlways);
             Assert.False(impossibleRequirementsStrat.LogicallyFree);
             Assert.True(impossibleRequirementsStrat.LogicallyNever);
 
-            Strat disabledStrat = ModelForApplyLogicalOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
+            Strat disabledStrat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
             Assert.False(disabledStrat.LogicallyRelevant);
             Assert.False(disabledStrat.LogicallyAlways);
             Assert.False(disabledStrat.LogicallyFree);
             Assert.True(disabledStrat.LogicallyNever);
 
-            Strat nonFreeStrat = ModelForApplyLogicalOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Speed Jump"];
+            Strat nonFreeStrat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Speed Jump"];
             Assert.True(nonFreeStrat.LogicallyRelevant);
             Assert.False(nonFreeStrat.LogicallyAlways);
             Assert.False(nonFreeStrat.LogicallyFree);
             Assert.False(nonFreeStrat.LogicallyNever);
 
-            Strat freeStrat = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
+            Strat freeStrat = ModelWithOptions.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
             Assert.True(freeStrat.LogicallyRelevant);
             Assert.True(freeStrat.LogicallyAlways);
             Assert.True(freeStrat.LogicallyFree);
@@ -1181,10 +1181,10 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            StratFailure stratFailure = ModelForApplyLogicalOptions.Rooms["Early Supers Room"].Links[3].To[1].Strats["Early Supers Quick Crumble Escape (Space)"].Failures["Crumble Failure"];
+            StratFailure stratFailure = ModelWithOptions.Rooms["Early Supers Room"].Links[3].To[1].Strats["Early Supers Quick Crumble Escape (Space)"].Failures["Crumble Failure"];
             Assert.True(stratFailure.LogicallyRelevant);
         }
 
@@ -1198,42 +1198,42 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterRemovedItem("Bombs")
                 .RegisterDisabledGameFlag("f_ZebesSetAblaze");
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelForApplyLogicalOptions.Items["ReserveTank"], 4);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items["Morph"])
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
                 )
                 .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            StratObstacle fullyImpossibleStratObstacle = ModelForApplyLogicalOptions.Rooms["Climb"].Links[2].To[6].Strats["Base"].Obstacles["A"];
+            StratObstacle fullyImpossibleStratObstacle = ModelWithOptions.Rooms["Climb"].Links[2].To[6].Strats["Base"].Obstacles["A"];
             Assert.True(fullyImpossibleStratObstacle.LogicallyRelevant);
             Assert.True(fullyImpossibleStratObstacle.LogicallyNever);
             Assert.True(fullyImpossibleStratObstacle.LogicallyNeverFromHere);
             Assert.False(fullyImpossibleStratObstacle.LogicallyAlways);
             Assert.False(fullyImpossibleStratObstacle.LogicallyFree);
 
-            StratObstacle locallyIndestructibleFreeToBypassStratObstacle = ModelForApplyLogicalOptions.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"].Obstacles["B"];
+            StratObstacle locallyIndestructibleFreeToBypassStratObstacle = ModelWithOptions.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"].Obstacles["B"];
             Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyRelevant);
             Assert.False(locallyIndestructibleFreeToBypassStratObstacle.LogicallyNever);
             Assert.False(locallyIndestructibleFreeToBypassStratObstacle.LogicallyNeverFromHere);
             Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyAlways);
             Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyFree);
 
-            StratObstacle locallyImpossibleStratObstacle = ModelForApplyLogicalOptions.Rooms["Post Crocomire Jump Room"].Nodes[2].CanLeaveCharged.First().Strats["Speed Blocks Broken"].Obstacles["B"];
+            StratObstacle locallyImpossibleStratObstacle = ModelWithOptions.Rooms["Post Crocomire Jump Room"].Nodes[2].CanLeaveCharged.First().Strats["Speed Blocks Broken"].Obstacles["B"];
             Assert.True(locallyImpossibleStratObstacle.LogicallyRelevant);
             Assert.False(locallyImpossibleStratObstacle.LogicallyNever);
             Assert.True(locallyImpossibleStratObstacle.LogicallyNeverFromHere);
             Assert.False(locallyImpossibleStratObstacle.LogicallyAlways);
             Assert.False(locallyImpossibleStratObstacle.LogicallyFree);
 
-            StratObstacle freeToDestroyStratObstacle = ModelForApplyLogicalOptions.Rooms["Pink Brinstar Hopper Room"].Links[2].To[1].Strats["Base"].Obstacles["B"];
+            StratObstacle freeToDestroyStratObstacle = ModelWithOptions.Rooms["Pink Brinstar Hopper Room"].Links[2].To[1].Strats["Base"].Obstacles["B"];
             Assert.True(freeToDestroyStratObstacle.LogicallyRelevant);
             Assert.False(freeToDestroyStratObstacle.LogicallyNever);
             Assert.False(freeToDestroyStratObstacle.LogicallyNeverFromHere);
@@ -1250,13 +1250,13 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterDisabledTech("canSuitlessMaridia");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Link noDestinationsLink = ModelForApplyLogicalOptions.Rooms["Crab Shaft"].Links[2];
+            Link noDestinationsLink = ModelWithOptions.Rooms["Crab Shaft"].Links[2];
             Assert.False(noDestinationsLink.LogicallyRelevant);
 
-            Link possibleLink = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[1];
+            Link possibleLink = ModelWithOptions.Rooms["Landing Site"].Links[1];
             Assert.True(possibleLink.LogicallyRelevant);
         }
 
@@ -1269,22 +1269,22 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterDisabledTech("canSuitlessMaridia");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LinkTo noDestinationsLinkTo = ModelForApplyLogicalOptions.Rooms["Crab Shaft"].Links[2].To[1];
+            LinkTo noDestinationsLinkTo = ModelWithOptions.Rooms["Crab Shaft"].Links[2].To[1];
             Assert.False(noDestinationsLinkTo.LogicallyRelevant);
             Assert.False(noDestinationsLinkTo.LogicallyAlways);
             Assert.False(noDestinationsLinkTo.LogicallyFree);
             Assert.True(noDestinationsLinkTo.LogicallyNever);
 
-            LinkTo possibleLinkTo = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[1].To[7];
+            LinkTo possibleLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[1].To[7];
             Assert.True(possibleLinkTo.LogicallyRelevant);
             Assert.False(possibleLinkTo.LogicallyAlways);
             Assert.False(possibleLinkTo.LogicallyFree);
             Assert.False(possibleLinkTo.LogicallyNever);
 
-            LinkTo freeLinkTo = ModelForApplyLogicalOptions.Rooms["Landing Site"].Links[5].To[4];
+            LinkTo freeLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[5].To[4];
             Assert.True(freeLinkTo.LogicallyRelevant);
             Assert.True(freeLinkTo.LogicallyAlways);
             Assert.True(freeLinkTo.LogicallyFree);
@@ -1297,35 +1297,35 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelForApplyLogicalOptions.GameFlags["f_DefeatedRidley"] })
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedRidley"] })
                 .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomEnemy alwaysSpawns = ModelForApplyLogicalOptions.RoomEnemies["Post Crocomire Farming Room Ripper 2"];
+            RoomEnemy alwaysSpawns = ModelWithOptions.RoomEnemies["Post Crocomire Farming Room Ripper 2"];
             Assert.True(alwaysSpawns.LogicallyRelevant);
             Assert.True(alwaysSpawns.LogicallyAlwaysSpawns);
             Assert.False(alwaysSpawns.LogicallyNeverSpawns);
 
-            RoomEnemy neverMeetsSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Bomb Torizo"];
+            RoomEnemy neverMeetsSpawnConditions = ModelWithOptions.RoomEnemies["Bomb Torizo"];
             Assert.False(neverMeetsSpawnConditions.LogicallyRelevant);
             Assert.False(neverMeetsSpawnConditions.LogicallyAlwaysSpawns);
             Assert.True(neverMeetsSpawnConditions.LogicallyNeverSpawns);
 
-            RoomEnemy alwaysMeetsStopSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Ridley"];
+            RoomEnemy alwaysMeetsStopSpawnConditions = ModelWithOptions.RoomEnemies["Ridley"];
             Assert.False(alwaysMeetsStopSpawnConditions.LogicallyRelevant);
             Assert.False(alwaysMeetsStopSpawnConditions.LogicallyAlwaysSpawns);
             Assert.True(alwaysMeetsStopSpawnConditions.LogicallyNeverSpawns);
 
-            RoomEnemy notAlwaysSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Attic Atomics"];
+            RoomEnemy notAlwaysSpawnConditions = ModelWithOptions.RoomEnemies["Attic Atomics"];
             Assert.True(notAlwaysSpawnConditions.LogicallyRelevant);
             Assert.False(notAlwaysSpawnConditions.LogicallyAlwaysSpawns);
             Assert.False(notAlwaysSpawnConditions.LogicallyNeverSpawns);
 
-            RoomEnemy alwaysSpawnNotAlwaysStopSpawnConditions = ModelForApplyLogicalOptions.RoomEnemies["Flyway Mellows"];
+            RoomEnemy alwaysSpawnNotAlwaysStopSpawnConditions = ModelWithOptions.RoomEnemies["Flyway Mellows"];
             Assert.True(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyRelevant);
             Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyAlwaysSpawns);
             Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyNeverSpawns);
@@ -1338,10 +1338,10 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            foreach (RoomEnvironment roomEnvironment in ModelForApplyLogicalOptions.Rooms["Volcano Room"].RoomEnvironments)
+            foreach (RoomEnvironment roomEnvironment in ModelWithOptions.Rooms["Volcano Room"].RoomEnvironments)
             {
                 Assert.True(roomEnvironment.LogicallyRelevant);
             }
@@ -1355,14 +1355,14 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterRemovedItem("Grapple");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            FarmCycle impossibleCycle = ModelForApplyLogicalOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
+            FarmCycle impossibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
             Assert.False(impossibleCycle.LogicallyRelevant);
             Assert.True(impossibleCycle.LogicallyNever);
 
-            FarmCycle possibleCycle = ModelForApplyLogicalOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
+            FarmCycle possibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
             Assert.True(possibleCycle.LogicallyRelevant);
             Assert.False(possibleCycle.LogicallyNever);
         }
@@ -1374,10 +1374,10 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomNode node = ModelForApplyLogicalOptions.GetNodeInRoom("Landing Site", 5);
+            RoomNode node = ModelWithOptions.GetNodeInRoom("Landing Site", 5);
             Assert.True(node.LogicallyRelevant);
             Assert.False(node.LogicallyNeverInteract);
             // Model doesn't contain a InteractRequires value so no way to test for its never...
@@ -1390,10 +1390,10 @@ namespace sm_json_data_framework.Tests.Models
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            foreach (DoorEnvironment doorEnvironment in ModelForApplyLogicalOptions.Rooms["Volcano Room"].Nodes[2].DoorEnvironments)
+            foreach (DoorEnvironment doorEnvironment in ModelWithOptions.Rooms["Volcano Room"].Nodes[2].DoorEnvironments)
             {
                 Assert.True(doorEnvironment.LogicallyRelevant);
             }
@@ -1405,17 +1405,17 @@ namespace sm_json_data_framework.Tests.Models
             // Given
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
                 )
                 .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Runway freeRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Fast Pillars Setup Room", 2).Runways["Base Runway - Fast Pillars Setup Room Bottom Left Door (to Fast Rippers)"];
+            Runway freeRunway = ModelWithOptions.GetNodeInRoom("Fast Pillars Setup Room", 2).Runways["Base Runway - Fast Pillars Setup Room Bottom Left Door (to Fast Rippers)"];
             Assert.True(freeRunway.LogicallyRelevant);
             Assert.True(freeRunway.LogicallyAlways);
             Assert.True(freeRunway.LogicallyFree);
@@ -1424,7 +1424,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveReversibleRunwayLength);
             Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveRunwayLengthNoCharge);
 
-            Runway neverRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Oasis", 2).Runways["Base Runway - Oasis Right Door (to East Sand Hall)"];
+            Runway neverRunway = ModelWithOptions.GetNodeInRoom("Oasis", 2).Runways["Base Runway - Oasis Right Door (to East Sand Hall)"];
             Assert.False(neverRunway.LogicallyRelevant);
             Assert.False(neverRunway.LogicallyAlways);
             Assert.False(neverRunway.LogicallyFree);
@@ -1433,7 +1433,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(12, neverRunway.LogicalEffectiveReversibleRunwayLength);
             Assert.Equal(12, neverRunway.LogicalEffectiveRunwayLengthNoCharge);
 
-            Runway possibleRunway = ModelForApplyLogicalOptions.GetNodeInRoom("Golden Torizo's Room", 2).Runways["Base Runway - Golden Torizo Room Right Door (to Screw Attack)"];
+            Runway possibleRunway = ModelWithOptions.GetNodeInRoom("Golden Torizo's Room", 2).Runways["Base Runway - Golden Torizo Room Right Door (to Screw Attack)"];
             Assert.True(possibleRunway.LogicallyRelevant);
             Assert.False(possibleRunway.LogicallyAlways);
             Assert.False(possibleRunway.LogicallyFree);
@@ -1451,22 +1451,22 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterRemovedItem("Morph");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            InitiateRemotely neverInitiateRemotely = ModelForApplyLogicalOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
+            InitiateRemotely neverInitiateRemotely = ModelWithOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
             Assert.True(neverInitiateRemotely.LogicallyRelevant);
             Assert.False(neverInitiateRemotely.LogicallyAlways);
             Assert.False(neverInitiateRemotely.LogicallyFree);
             Assert.True(neverInitiateRemotely.LogicallyNever);
 
-            InitiateRemotely freeInitiateRemotely = ModelForApplyLogicalOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
+            InitiateRemotely freeInitiateRemotely = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
             Assert.True(freeInitiateRemotely.LogicallyRelevant);
             Assert.True(freeInitiateRemotely.LogicallyAlways);
             Assert.True(freeInitiateRemotely.LogicallyFree);
             Assert.False(freeInitiateRemotely.LogicallyNever);
 
-            InitiateRemotely possibleInitiateRemotely = ModelForApplyLogicalOptions.Rooms["Early Supers Room"].Nodes[2].CanLeaveCharged.First().InitiateRemotely;
+            InitiateRemotely possibleInitiateRemotely = ModelWithOptions.Rooms["Early Supers Room"].Nodes[2].CanLeaveCharged.First().InitiateRemotely;
             Assert.True(possibleInitiateRemotely.LogicallyRelevant);
             Assert.False(possibleInitiateRemotely.LogicallyAlways);
             Assert.False(possibleInitiateRemotely.LogicallyFree);
@@ -1485,38 +1485,38 @@ namespace sm_json_data_framework.Tests.Models
             logicalOptions.TilesToShineCharge = 19;
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged neverByImpossibleRemote = ModelForApplyLogicalOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged neverByImpossibleRemote = ModelWithOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First();
             Assert.False(neverByImpossibleRemote.LogicallyRelevant);
             Assert.False(neverByImpossibleRemote.LogicallyAlways);
             Assert.False(neverByImpossibleRemote.LogicallyFree);
             Assert.True(neverByImpossibleRemote.LogicallyNever);
             Assert.Equal(31.5M, neverByImpossibleRemote.LogicalEffectiveRunwayLength);
 
-            CanLeaveCharged neverByImpossibleStrat = ModelForApplyLogicalOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged neverByImpossibleStrat = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
             Assert.False(neverByImpossibleStrat.LogicallyRelevant);
             Assert.False(neverByImpossibleStrat.LogicallyAlways);
             Assert.False(neverByImpossibleStrat.LogicallyFree);
             Assert.True(neverByImpossibleStrat.LogicallyNever);
             Assert.Equal(20.5M, neverByImpossibleStrat.LogicalEffectiveRunwayLength);
 
-            CanLeaveCharged neverByImpossibleShinespark = ModelForApplyLogicalOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged neverByImpossibleShinespark = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             Assert.False(neverByImpossibleShinespark.LogicallyRelevant);
             Assert.False(neverByImpossibleShinespark.LogicallyAlways);
             Assert.False(neverByImpossibleShinespark.LogicallyFree);
             Assert.True(neverByImpossibleShinespark.LogicallyNever);
             Assert.Equal(19M + 2 * 4M / 3M, neverByImpossibleShinespark.LogicalEffectiveRunwayLength);
 
-            CanLeaveCharged neverByShortRunway = ModelForApplyLogicalOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
+            CanLeaveCharged neverByShortRunway = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
             Assert.False(neverByShortRunway.LogicallyRelevant);
             Assert.False(neverByShortRunway.LogicallyAlways);
             Assert.False(neverByShortRunway.LogicallyFree);
             Assert.True(neverByShortRunway.LogicallyNever);
             Assert.Equal(17.5M, neverByShortRunway.LogicalEffectiveRunwayLength);
 
-            CanLeaveCharged notFreeBecauseSpeedNotFree = ModelForApplyLogicalOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseSpeedNotFree = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
             Assert.True(notFreeBecauseSpeedNotFree.LogicallyRelevant);
             Assert.False(notFreeBecauseSpeedNotFree.LogicallyAlways);
             Assert.False(notFreeBecauseSpeedNotFree.LogicallyFree);
@@ -1532,10 +1532,10 @@ namespace sm_json_data_framework.Tests.Models
                 .RegisterRemovedItem("SpeedBooster");
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged neverByNoSpeedBooster = ModelForApplyLogicalOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged neverByNoSpeedBooster = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
             Assert.False(neverByNoSpeedBooster.LogicallyRelevant);
             Assert.False(neverByNoSpeedBooster.LogicallyAlways);
             Assert.False(neverByNoSpeedBooster.LogicallyFree);
@@ -1547,18 +1547,18 @@ namespace sm_json_data_framework.Tests.Models
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelForApplyLogicalOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelForApplyLogicalOptions)
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                    .ApplyAddItem(ModelForApplyLogicalOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
                 )
                 .Build();
 
             // When
-            ModelForApplyLogicalOptions.ApplyLogicalOptions(logicalOptions);
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged free = ModelForApplyLogicalOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged free = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
             Assert.True(free.LogicallyRelevant);
             Assert.True(free.LogicallyAlways);
             Assert.True(free.LogicallyFree);
@@ -1566,7 +1566,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(20.5M, free.LogicalEffectiveRunwayLength);
 
             // Expect
-            CanLeaveCharged notFreeBecauseShinespark = ModelForApplyLogicalOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseShinespark = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(notFreeBecauseShinespark.LogicallyRelevant);
             Assert.False(notFreeBecauseShinespark.LogicallyAlways);
             Assert.False(notFreeBecauseShinespark.LogicallyFree);
@@ -1574,7 +1574,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(19M + 2 * 4M / 3M, notFreeBecauseShinespark.LogicalEffectiveRunwayLength);
 
             // Expect
-            CanLeaveCharged notFreeBecauseStratNotFree = ModelForApplyLogicalOptions.Rooms["Botwoon's Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseStratNotFree = ModelWithOptions.Rooms["Botwoon's Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(notFreeBecauseStratNotFree.LogicallyRelevant);
             Assert.False(notFreeBecauseStratNotFree.LogicallyAlways);
             Assert.False(notFreeBecauseStratNotFree.LogicallyFree);
@@ -1582,7 +1582,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(16, notFreeBecauseStratNotFree.LogicalEffectiveRunwayLength);
 
             // Expect
-            CanLeaveCharged notFreeBecauseRemoteNotFree = ModelForApplyLogicalOptions.Rooms["Red Brinstar Fireflea Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseRemoteNotFree = ModelWithOptions.Rooms["Red Brinstar Fireflea Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(notFreeBecauseRemoteNotFree.LogicallyRelevant);
             Assert.False(notFreeBecauseRemoteNotFree.LogicallyAlways);
             Assert.False(notFreeBecauseRemoteNotFree.LogicallyFree);
@@ -1593,19 +1593,126 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnTwinDoorAddresses()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            TwinDoorAddress twinDoorAddress = ModelWithOptions.Rooms["East Pants Room"].Nodes[2].TwinDoorAddresses.First();
+            Assert.False(twinDoorAddress.LogicallyRelevant);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodeLocks()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem("Bombs");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_ZebesAwake"] })
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            NodeLock neverActiveLock = ModelWithOptions.Rooms["Bomb Torizo Room"].Nodes[1].Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            Assert.False(neverActiveLock.LogicallyRelevant);
+            Assert.False(neverActiveLock.LogicallyNever);
+            Assert.True(neverActiveLock.LogicallyAlways);
+            Assert.True(neverActiveLock.LogicallyFree);
+
+            NodeLock unpassableLock = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[7].Locks["Etecoon Exit Grey Lock"];
+            Assert.True(unpassableLock.LogicallyRelevant);
+            Assert.True(unpassableLock.LogicallyNever);
+            Assert.False(unpassableLock.LogicallyAlways);
+            Assert.False(unpassableLock.LogicallyFree);
+
+            NodeLock greyPossibleBypassableLock = ModelWithOptions.Rooms["West Ocean"].Nodes[4].Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            Assert.True(greyPossibleBypassableLock.LogicallyRelevant);
+            Assert.False(greyPossibleBypassableLock.LogicallyNever);
+            Assert.False(greyPossibleBypassableLock.LogicallyAlways);
+            Assert.False(greyPossibleBypassableLock.LogicallyFree);
+
+            NodeLock freeUnlockLock = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[5].Locks["Blue Brinstar Power Bombs Spawn Lock"];
+            Assert.True(freeUnlockLock.LogicallyRelevant);
+            Assert.False(freeUnlockLock.LogicallyNever);
+            Assert.True(freeUnlockLock.LogicallyAlways);
+            Assert.True(freeUnlockLock.LogicallyFree);
+
+            NodeLock possibleUnlockableLock = ModelWithOptions.Rooms["Construction Zone"].Nodes[2].Locks["Construction Zone Red Lock (to Ceiling E-Tank)"];
+            Assert.True(possibleUnlockableLock.LogicallyRelevant);
+            Assert.False(possibleUnlockableLock.LogicallyNever);
+            Assert.False(possibleUnlockableLock.LogicallyAlways);
+            Assert.False(possibleUnlockableLock.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterDisabledGameFlag("f_ZebesAwake")
+                .RegisterDisabledTech("canCrouchJump")
+                .RegisterDisabledTech("canDownGrab")
+                ;
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            LogicalRequirements oneFreeOneNeverOnePossible = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"].Requires;
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyRelevant);
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyNever);
+            Assert.False(oneFreeOneNeverOnePossible.LogicallyAlways);
+            Assert.False(oneFreeOneNeverOnePossible.LogicallyFree);
+            Assert.False(oneFreeOneNeverOnePossible.LogicallyOrNever);
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyOrAlways);
+            Assert.True(oneFreeOneNeverOnePossible.LogicallyOrFree);
+
+            LogicalRequirements allFree = ModelWithOptions.Helpers["h_canUseMorphBombs"].Requires;
+            Assert.True(allFree.LogicallyRelevant);
+            Assert.False(allFree.LogicallyNever);
+            Assert.True(allFree.LogicallyAlways);
+            Assert.True(allFree.LogicallyFree);
+            Assert.False(allFree.LogicallyOrNever);
+            Assert.True(allFree.LogicallyOrAlways);
+            Assert.True(allFree.LogicallyOrFree);
+
+            LogicalRequirements allNever = ModelWithOptions.Helpers["h_canCrouchJumpDownGrab"].Requires;
+            Assert.True(allNever.LogicallyRelevant);
+            Assert.True(allNever.LogicallyNever);
+            Assert.False(allNever.LogicallyAlways);
+            Assert.False(allNever.LogicallyFree);
+            Assert.True(allNever.LogicallyOrNever);
+            Assert.False(allNever.LogicallyOrAlways);
+            Assert.False(allNever.LogicallyOrFree);
+
+            LogicalRequirements allPossible = ModelWithOptions.Helpers["h_canOpenGreenDoors"].Requires;
+            Assert.True(allPossible.LogicallyRelevant);
+            Assert.False(allPossible.LogicallyNever);
+            Assert.False(allPossible.LogicallyAlways);
+            Assert.False(allPossible.LogicallyFree);
+            Assert.False(allPossible.LogicallyOrNever);
+            Assert.False(allPossible.LogicallyOrAlways);
+            Assert.False(allPossible.LogicallyOrFree);
+
+            LogicalRequirements empty = ModelWithOptions.Techs["canSuitlessMaridia"].Requires;
+            Assert.True(empty.LogicallyRelevant);
+            Assert.False(empty.LogicallyNever);
+            Assert.True(empty.LogicallyAlways);
+            Assert.True(empty.LogicallyFree);
+            Assert.False(empty.LogicallyOrNever);
+            Assert.True(empty.LogicallyOrAlways);
+            Assert.True(empty.LogicallyOrFree);
         }
 
         [Fact]
