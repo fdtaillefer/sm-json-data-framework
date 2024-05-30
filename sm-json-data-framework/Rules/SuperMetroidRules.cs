@@ -688,10 +688,46 @@ namespace sm_json_data_framework.Rules
         /// By default, that is the energy cost of the shinespark * times + the energy at which a shinespark is interrupted.</para>
         /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
         /// </summary>
+        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark. 0 means no shinespark is being executed.</param>
         /// <param name="times">The number of times the shinespark will be performed.</param>
         /// <returns></returns>
-        public virtual int CalculateEnergyNeededForShinespark(int shinesparkFrames, int times = 1)
+        public virtual int CalculateEnergyNeededForShinespark(ReadOnlyInGameState inGameState, int shinesparkFrames, int times = 1)
+        {
+            return CalculateEnergyNeededForShinespark(shinesparkFrames, times);
+        }
+
+        /// <summary>
+        /// <para>Returns the minimum energy Samus must have before initiating a shinespark n times, for that shinespark to complete to the end all n times,
+        /// in the best case scenario.
+        /// By default, that is the energy cost of the shinespark * times + the energy at which a shinespark is interrupted.</para>
+        /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
+        /// </summary>
+        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
+        /// <param name="times">The number of times the shinespark will be performed.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseEnergyNeededForShinespark(int shinesparkFrames, IReadOnlySet<string> removedItems, int times = 1)
+        {
+            return CalculateEnergyNeededForShinespark(shinesparkFrames, times);
+        }
+
+        /// <summary>
+        /// <para>Returns the minimum energy Samus must have before initiating a shinespark n times, for that shinespark to complete to the end all n times,
+        /// in the worst case scenario.
+        /// By default, that is the energy cost of the shinespark * times + the energy at which a shinespark is interrupted.</para>
+        /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
+        /// </summary>
+        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
+        /// <param name="times">The number of times the shinespark will be performed.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseEnergyNeededForShinespark(int shinesparkFrames, ReadOnlyItemInventory startingInventory, int times = 1)
+        {
+            return CalculateEnergyNeededForShinespark(shinesparkFrames);
+        }
+
+        private int CalculateEnergyNeededForShinespark(int shinesparkFrames, int times = 1)
         {
             return shinesparkFrames == 0 ? 0 : CalculateShinesparkDamage(shinesparkFrames)*times + ShinesparkEnergyLimit;
         }

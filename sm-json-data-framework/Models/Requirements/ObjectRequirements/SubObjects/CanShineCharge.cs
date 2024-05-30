@@ -88,7 +88,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // If we have enough energy for the shinespark to go through, consume the energy cost and return the result
-            int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
+            int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(inGameState, ShinesparkFrames, times: times);
 
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
             if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
@@ -140,9 +140,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 }
                 else
                 {
-                    // If the shinespark damage is more than the possible max energy, this is impossible
+                    // If the shinespark requires having more than the possible max energy, this is impossible
                     int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
-                    if(maxEnergy != null && rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames, AppliedLogicalOptions.RemovedItems) >= maxEnergy.Value)
+                    if(maxEnergy != null && rules.CalculateBestCaseEnergyNeededForShinespark(ShinesparkFrames, AppliedLogicalOptions.RemovedItems) >= maxEnergy.Value)
                     {
                         impossible = true;
                     }

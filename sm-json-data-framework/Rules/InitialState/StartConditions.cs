@@ -122,6 +122,8 @@ namespace sm_json_data_framework.Rules.InitialState
 
         private ResourceCount _startingResources;
 
+        private ResourceCount _baseResourceMaximums;
+
         private IList<GameFlag> _startingGameFlags = new List<GameFlag>();
 
         private IList<NodeLock> _startingOpenLocks = new List<NodeLock>();
@@ -134,6 +136,12 @@ namespace sm_json_data_framework.Rules.InitialState
             return this;
         }
 
+        /// <summary>
+        /// Assigns the provided inventory as this builder's starting inventory.
+        /// Take note that if base resource maximums have been assigned to this builder, they'll have priority over the inventory's.
+        /// </summary>
+        /// <param name="startingInventory"></param>
+        /// <returns></returns>
         public StartConditionsBuilder StartingInventory(ItemInventory startingInventory)
         {
             _startingInventory = startingInventory;
@@ -165,29 +173,27 @@ namespace sm_json_data_framework.Rules.InitialState
         }
 
         /// <summary>
-        /// Assigns base resource maximums. Because this data is in the inventory, this will do nothing if there is not
-        /// inventory in this builder
+        /// Assigns base resource maximums. If not null, this will have priority over whatever's set in the starting inventory
         /// </summary>
         /// <param name="baseResourceMaximums"></param>
         /// <returns></returns>
         public StartConditionsBuilder BaseResourceMaximums(ResourceCount baseResourceMaximums)
         {
-            if (_startingInventory != null)
-            {
-                _startingInventory = _startingInventory.WithBaseResourceMaximums(baseResourceMaximums);
-            }
+            _baseResourceMaximums = baseResourceMaximums;
             return this;
         }
 
         public StartConditions Build()
         {
+            ItemInventory startingInventory = _baseResourceMaximums == null
+                ? _startingInventory : _startingInventory?.WithBaseResourceMaximums(_baseResourceMaximums);
             return new StartConditions(
                 startingNode: _startingNode,
-                startingInventory: _startingInventory.AsReadOnly(),
-                startingResources: _startingResources.AsReadOnly(),
-                startingGameFlags: _startingGameFlags.AsReadOnly(),
-                startingOpenLocks: _startingOpenLocks.AsReadOnly(),
-                startingTakenItemLocations: _startingTakenItemLocations.AsReadOnly()
+                startingInventory: startingInventory?.AsReadOnly(),
+                startingResources: _startingResources?.AsReadOnly(),
+                startingGameFlags: _startingGameFlags?.AsReadOnly(),
+                startingOpenLocks: _startingOpenLocks?.AsReadOnly(),
+                startingTakenItemLocations: _startingTakenItemLocations?.AsReadOnly()
             );
         }
     }

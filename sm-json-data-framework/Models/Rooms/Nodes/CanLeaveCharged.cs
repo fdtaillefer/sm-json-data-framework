@@ -136,7 +136,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // That's why such logic is in InGameState.GetRetroactiveCanLeaveChargeds()
 
             // Figure out how much energy we will need to have for the shinespark
-            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(ShinesparkFrames, times: times);
+            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(inGameState, ShinesparkFrames, times: times);
             int shinesparkEnergyToSpend = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
 
             // Try to execute all strats, 
@@ -207,12 +207,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // - Speed Booster is removed from the game
             // - It must be initiated remotely, but that remote initiation is impossible
             // - It has no possible strats
-            // - It requires a shinespark, but shinesparks are logically disabled OR the shinespark uses more energy than we can ever have
+            // - It requires a shinespark, but shinesparks are logically disabled OR the shinespark needs more energy than we can ever have
             // - It's too short to shine charge on given the logical options
             return !AppliedLogicalOptions.IsSpeedBoosterInGame()
                 || (InitiateRemotely?.LogicallyNever is true) 
                 || !Strats.Values.WhereLogicallyRelevant().Any() 
-                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value <= rules.CalculateBestCaseShinesparkDamage(ShinesparkFrames, AppliedLogicalOptions.RemovedItems))))
+                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value <= rules.CalculateBestCaseEnergyNeededForShinespark(ShinesparkFrames, AppliedLogicalOptions.RemovedItems))))
                 || LogicalEffectiveRunwayLength < TilesToShineCharge;
         }
 

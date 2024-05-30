@@ -203,39 +203,7 @@ namespace sm_json_data_framework.Models
         /// If null, this instead removes all alterations made by logical options, by applying default logical options.</param>
         private void ApplyLogicalOptions(LogicalOptions logicalOptions, ModelFinalizationMappings mappings)
         {
-            // Clone the logical options. If null, clone the default logical options instead.
-            // Once we've cloned, we're free to make any alterations we want without impacting the calling.
-            logicalOptions = (logicalOptions ?? LogicalOptions.DefaultLogicalOptions).Clone();
-
-            // If we're applying logical options during model finalization, then we must interpret only the options' UnfinalizedStartConditions
-            // If it's not during model finalization, then we must interpret only the options' StartConditions
-            if (mappings != null)
-            {
-                logicalOptions.InternalStartConditions = logicalOptions.InternalUnfinalizedStartConditions?.Finalize(mappings);
-            }
-            logicalOptions.InternalUnfinalizedStartConditions = null;
-
-            // We want the operation that applies logical options to have access to whatever the StartConditions are,
-            // so even though they're optional, we'll replace them with the model's internal StartConditions if null
-            logicalOptions.InternalStartConditions ??= InternalStartConditions;
-
-            // If we're applying logical options during model finalization, then we must interpret only the options' UnfinalizedAvailableResourceInventory
-            // If it's not during model finalization, then we must interpret only the options' AvailableResourceInventory
-            if (mappings != null)
-            {
-                if (logicalOptions.InternalUnfinalizedAvailableResourceInventory == null)
-                {
-                    logicalOptions.InternalAvailableResourceInventory = null;
-                }
-                else
-                {
-                    logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(logicalOptions.InternalUnfinalizedAvailableResourceInventory,
-                        logicalOptions.InternalStartConditions.BaseResourceMaximums, mappings);
-                }
-            }
-            logicalOptions.InternalUnfinalizedAvailableResourceInventory = null;
-
-            AppliedLogicalOptions = logicalOptions.AsReadOnly();
+            AppliedLogicalOptions = PrepareLogicalOptionsToApply(logicalOptions, mappings);
 
             foreach (GameFlag gameFlag in GameFlags.Values)
             {
@@ -276,6 +244,57 @@ namespace sm_json_data_framework.Models
             {
                 room.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
+        }
+
+        /// <summary>
+        /// Does all pre-processing on the provided logical options to apply, including cloning, replacing nulls with defaults, 
+        /// and enforcing consistency on some redundant values. Does not apply the logical options.
+        /// </summary>
+        /// <param name="logicalOptions">Logical options to prepare</param>
+        /// <param name="mappings">If model finalization is ongoing, these are the mappings used for it. Null otherwise.</param>
+        /// <returns>The new, prepares instance as ReadOnlyLogicalOptions</returns>
+        private ReadOnlyLogicalOptions PrepareLogicalOptionsToApply(LogicalOptions logicalOptions, ModelFinalizationMappings mappings)
+        {
+            // Clone the logical options. If null, clone the default logical options instead.
+            // Once we've cloned, we're free to make any alterations we want without impacting the calling.
+            logicalOptions = (logicalOptions ?? LogicalOptions.DefaultLogicalOptions).Clone();
+
+            // If we're applying logical options during model finalization, then we must interpret only the options' UnfinalizedStartConditions
+            // If it's not during model finalization, then we must interpret only the options' StartConditions
+            if (mappings != null)
+            {
+                logicalOptions.InternalStartConditions = logicalOptions.InternalUnfinalizedStartConditions?.Finalize(mappings);
+            }
+            logicalOptions.InternalUnfinalizedStartConditions = null;
+
+            // We want the operation that applies logical options to have access to whatever the StartConditions are,
+            // so even though they're optional, we'll replace them with the model's internal StartConditions if null
+            logicalOptions.InternalStartConditions ??= InternalStartConditions;
+
+            // If we're applying logical options during model finalization, then we must interpret only the options' UnfinalizedAvailableResourceInventory
+            // If it's not during model finalization, then we must interpret only the options' AvailableResourceInventory
+            if (mappings != null)
+            {
+                if (logicalOptions.InternalUnfinalizedAvailableResourceInventory == null)
+                {
+                    logicalOptions.InternalAvailableResourceInventory = null;
+                }
+                else
+                {
+                    logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(logicalOptions.InternalUnfinalizedAvailableResourceInventory,
+                        logicalOptions.InternalStartConditions.BaseResourceMaximums, mappings);
+                }
+            }
+            logicalOptions.InternalUnfinalizedAvailableResourceInventory = null;
+
+            // Enforce base resource maximum consistency
+            if(logicalOptions.InternalAvailableResourceInventory != null)
+            {
+                logicalOptions.InternalAvailableResourceInventory 
+                    = logicalOptions.InternalAvailableResourceInventory.WithBaseResourceMaximums(logicalOptions.StartConditions.BaseResourceMaximums);
+            }
+
+            return logicalOptions.AsReadOnly();
         }
 
         /// <summary>

@@ -65,21 +65,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
         protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // This could become impossible if the minimum damage it can inflict is more than the max energy we can ever get,
-            // but max energy is not available in logical options.
-            return false;
+            // This could be impossible if the smallest possible damage is more than the max we can get
+            int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
+            // We can't check that if the max possible energy isn't provided
+            if (maxEnergy == null)
+            {
+                return false;
+            }
+            return rules.CalculateBestCaseEnemyDamage(Attack, AppliedLogicalOptions.RemovedItems) * Hits >= maxEnergy;
         }
 
         protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
         {
-            // This could be always if it ends up being to 0 damage suitless, but that would be defined by the rules, which aren't available here
-            return false;
+            return rules.CalculateWorstCaseEnemyDamage(Attack, AppliedLogicalOptions.StartConditions.StartingInventory) * Hits <= 0;
         }
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // This could be free if it ends up being to 0 damage suitless, but that would be defined by the rules, which aren't available here
-            return false;
+            return rules.CalculateWorstCaseEnemyDamage(Attack, AppliedLogicalOptions.StartConditions.StartingInventory) * Hits <= 0;
         }
     }
 

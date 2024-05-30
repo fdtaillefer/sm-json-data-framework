@@ -2043,9 +2043,305 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnDamageLogicalElements ()
+        public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
+                .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingInventory(
+                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                )
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10);
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
+            Assert.True(acidFrames.LogicallyRelevant);
+            Assert.True(acidFrames.LogicallyNever);
+            Assert.False(acidFrames.LogicallyAlways);
+            Assert.False(acidFrames.LogicallyFree);
+
+            DraygonElectricityFrames electricityFrames = ModelWithOptions.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
+            Assert.True(electricityFrames.LogicallyRelevant);
+            Assert.True(electricityFrames.LogicallyNever);
+            Assert.False(electricityFrames.LogicallyAlways);
+            Assert.False(electricityFrames.LogicallyFree);
+
+            HeatFrames heatFrames = ModelWithOptions.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
+            Assert.True(heatFrames.LogicallyRelevant);
+            Assert.True(heatFrames.LogicallyNever);
+            Assert.False(heatFrames.LogicallyAlways);
+            Assert.False(heatFrames.LogicallyFree);
+
+            LavaFrames lavaFrames = ModelWithOptions.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.True(lavaFrames.LogicallyRelevant);
+            Assert.True(lavaFrames.LogicallyNever);
+            Assert.False(lavaFrames.LogicallyAlways);
+            Assert.False(lavaFrames.LogicallyFree);
+
+            LavaPhysicsFrames lavaPhysicsFrames = ModelWithOptions.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive Gravity Jump"].Requires.LogicalElement<LavaPhysicsFrames>(0);
+            Assert.True(lavaPhysicsFrames.LogicallyRelevant);
+            Assert.True(lavaPhysicsFrames.LogicallyNever);
+            Assert.False(lavaPhysicsFrames.LogicallyAlways);
+            Assert.False(lavaPhysicsFrames.LogicallyFree);
+
+            HibashiHits hibashiHits = ModelWithOptions.Rooms["Wasteland"].Links[7].To[2].Strats["Morph Bombs"].Requires.LogicalElement<HibashiHits>(0);
+            Assert.True(hibashiHits.LogicallyRelevant);
+            Assert.True(hibashiHits.LogicallyNever);
+            Assert.False(hibashiHits.LogicallyAlways);
+            Assert.False(hibashiHits.LogicallyFree);
+
+            SpikeHits spikeHits = ModelWithOptions.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
+            Assert.True(spikeHits.LogicallyRelevant);
+            Assert.True(spikeHits.LogicallyNever);
+            Assert.False(spikeHits.LogicallyAlways);
+            Assert.False(spikeHits.LogicallyFree);
+
+            EnemyDamage enemyDamage = ModelWithOptions.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Tank the Damage"].Requires.LogicalElement<EnemyDamage>(0);
+            Assert.True(enemyDamage.LogicallyRelevant);
+            Assert.True(enemyDamage.LogicallyNever);
+            Assert.False(enemyDamage.LogicallyAlways);
+            Assert.False(enemyDamage.LogicallyFree);
+
+            // Can't test for ThornHits, there's none of them in the model
+
+            CanShineCharge canShineCharge = ModelWithOptions.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.True(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
+
+            CanShineCharge noSparkCanShineCharge = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(noSparkCanShineCharge.LogicallyRelevant);
+            Assert.False(noSparkCanShineCharge.LogicallyNever);
+            Assert.True(noSparkCanShineCharge.LogicallyAlways);
+            Assert.True(noSparkCanShineCharge.LogicallyFree);
+
+            CanComeInCharged canComeInCharged = ModelWithOptions.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.True(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+
+            CanComeInCharged noSparkCanComeInCharged = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(noSparkCanComeInCharged.LogicallyRelevant);
+            Assert.False(noSparkCanComeInCharged.LogicallyNever);
+            Assert.False(noSparkCanComeInCharged.LogicallyAlways);
+            Assert.False(noSparkCanComeInCharged.LogicallyFree);
+
+            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.False(canLeaveCharged.LogicallyRelevant);
+            Assert.True(canLeaveCharged.LogicallyNever);
+            Assert.False(canLeaveCharged.LogicallyAlways);
+            Assert.False(canLeaveCharged.LogicallyFree);
+
+            CanLeaveCharged freeCanLeaveCharged = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            Assert.True(freeCanLeaveCharged.LogicallyRelevant);
+            Assert.False(freeCanLeaveCharged.LogicallyNever);
+            Assert.True(freeCanLeaveCharged.LogicallyAlways);
+            Assert.True(freeCanLeaveCharged.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_NormalPossibleEnergy_SetsLogicalPropertiesOnDamageLogicalElements()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
+                .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingInventory(
+                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                )
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
+            Assert.True(acidFrames.LogicallyRelevant);
+            Assert.False(acidFrames.LogicallyNever);
+            Assert.False(acidFrames.LogicallyAlways);
+            Assert.False(acidFrames.LogicallyFree);
+
+            DraygonElectricityFrames electricityFrames = ModelWithOptions.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
+            Assert.True(electricityFrames.LogicallyRelevant);
+            Assert.False(electricityFrames.LogicallyNever);
+            Assert.False(electricityFrames.LogicallyAlways);
+            Assert.False(electricityFrames.LogicallyFree);
+
+            HeatFrames heatFrames = ModelWithOptions.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
+            Assert.True(heatFrames.LogicallyRelevant);
+            Assert.False(heatFrames.LogicallyNever);
+            Assert.False(heatFrames.LogicallyAlways);
+            Assert.False(heatFrames.LogicallyFree);
+
+            LavaFrames lavaFrames = ModelWithOptions.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.True(lavaFrames.LogicallyRelevant);
+            Assert.False(lavaFrames.LogicallyNever);
+            Assert.False(lavaFrames.LogicallyAlways);
+            Assert.False(lavaFrames.LogicallyFree);
+
+            LavaPhysicsFrames lavaPhysicsFrames = ModelWithOptions.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive Gravity Jump"].Requires.LogicalElement<LavaPhysicsFrames>(0);
+            Assert.True(lavaPhysicsFrames.LogicallyRelevant);
+            Assert.False(lavaPhysicsFrames.LogicallyNever);
+            Assert.False(lavaPhysicsFrames.LogicallyAlways);
+            Assert.False(lavaPhysicsFrames.LogicallyFree);
+
+            HibashiHits hibashiHits = ModelWithOptions.Rooms["Wasteland"].Links[7].To[2].Strats["Morph Bombs"].Requires.LogicalElement<HibashiHits>(0);
+            Assert.True(hibashiHits.LogicallyRelevant);
+            Assert.False(hibashiHits.LogicallyNever);
+            Assert.False(hibashiHits.LogicallyAlways);
+            Assert.False(hibashiHits.LogicallyFree);
+
+            SpikeHits spikeHits = ModelWithOptions.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
+            Assert.True(spikeHits.LogicallyRelevant);
+            Assert.False(spikeHits.LogicallyNever);
+            Assert.False(spikeHits.LogicallyAlways);
+            Assert.False(spikeHits.LogicallyFree);
+
+            EnemyDamage enemyDamage = ModelWithOptions.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Tank the Damage"].Requires.LogicalElement<EnemyDamage>(0);
+            Assert.True(enemyDamage.LogicallyRelevant);
+            Assert.False(enemyDamage.LogicallyNever);
+            Assert.False(enemyDamage.LogicallyAlways);
+            Assert.False(enemyDamage.LogicallyFree);
+
+            // Can't test for ThornHits, there's none of them in the model
+
+            CanShineCharge canShineCharge = ModelWithOptions.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.False(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
+
+            CanComeInCharged canComeInCharged = ModelWithOptions.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.False(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+
+            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.True(canLeaveCharged.LogicallyRelevant);
+            Assert.False(canLeaveCharged.LogicallyNever);
+            Assert.False(canLeaveCharged.LogicallyAlways);
+            Assert.False(canLeaveCharged.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_BothSuitsFree_SetsLogicalPropertiesOnDamageLogicalElements()
+        {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+                .StartingInventory(
+                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
+                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+                )
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
+            Assert.True(acidFrames.LogicallyRelevant);
+            Assert.False(acidFrames.LogicallyNever);
+            Assert.False(acidFrames.LogicallyAlways);
+            Assert.False(acidFrames.LogicallyFree);
+
+            DraygonElectricityFrames electricityFrames = ModelWithOptions.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
+            Assert.True(electricityFrames.LogicallyRelevant);
+            Assert.False(electricityFrames.LogicallyNever);
+            Assert.False(electricityFrames.LogicallyAlways);
+            Assert.False(electricityFrames.LogicallyFree);
+
+            HeatFrames heatFrames = ModelWithOptions.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
+            Assert.True(heatFrames.LogicallyRelevant);
+            Assert.False(heatFrames.LogicallyNever);
+            Assert.True(heatFrames.LogicallyAlways);
+            Assert.True(heatFrames.LogicallyFree);
+
+            LavaFrames lavaFrames = ModelWithOptions.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.True(lavaFrames.LogicallyRelevant);
+            Assert.False(lavaFrames.LogicallyNever);
+            Assert.True(lavaFrames.LogicallyAlways);
+            Assert.True(lavaFrames.LogicallyFree);
+
+            LavaPhysicsFrames lavaPhysicsFrames = ModelWithOptions.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive Gravity Jump"].Requires.LogicalElement<LavaPhysicsFrames>(0);
+            Assert.True(lavaPhysicsFrames.LogicallyRelevant);
+            Assert.False(lavaPhysicsFrames.LogicallyNever);
+            Assert.False(lavaPhysicsFrames.LogicallyAlways);
+            Assert.False(lavaPhysicsFrames.LogicallyFree);
+
+            HibashiHits hibashiHits = ModelWithOptions.Rooms["Wasteland"].Links[7].To[2].Strats["Morph Bombs"].Requires.LogicalElement<HibashiHits>(0);
+            Assert.True(hibashiHits.LogicallyRelevant);
+            Assert.False(hibashiHits.LogicallyNever);
+            Assert.False(hibashiHits.LogicallyAlways);
+            Assert.False(hibashiHits.LogicallyFree);
+
+            SpikeHits spikeHits = ModelWithOptions.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
+            Assert.True(spikeHits.LogicallyRelevant);
+            Assert.False(spikeHits.LogicallyNever);
+            Assert.False(spikeHits.LogicallyAlways);
+            Assert.False(spikeHits.LogicallyFree);
+
+            EnemyDamage enemyDamage = ModelWithOptions.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Tank the Damage"].Requires.LogicalElement<EnemyDamage>(0);
+            Assert.True(enemyDamage.LogicallyRelevant);
+            Assert.False(enemyDamage.LogicallyNever);
+            Assert.False(enemyDamage.LogicallyAlways);
+            Assert.False(enemyDamage.LogicallyFree);
+
+            // Can't test for ThornHits, there's none of them in the model
+
+            CanShineCharge canShineCharge = ModelWithOptions.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.False(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
+
+            CanComeInCharged canComeInCharged = ModelWithOptions.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.False(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+
+            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            Assert.True(canLeaveCharged.LogicallyRelevant);
+            Assert.False(canLeaveCharged.LogicallyNever);
+            Assert.False(canLeaveCharged.LogicallyAlways);
+            Assert.False(canLeaveCharged.LogicallyFree);
         }
 
         [Fact]
