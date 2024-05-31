@@ -10,8 +10,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     /// <summary>
     /// A logical element which requires Samus to take damage down to a fixed amount. It can always be fulfilled, but the cost can vary.
+    /// This ignores reserves.
     /// </summary>
-    public class EnergyAtMost : AbstractDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>
+    public class EnergyAtMost : AbstractObjectLogicalElementWithNumericalIntegerValue<UnfinalizedEnergyAtMost, EnergyAtMost>
     {
         public EnergyAtMost(UnfinalizedEnergyAtMost sourceElement, Action<EnergyAtMost> mappingsInsertionCallback) 
             : base(sourceElement, mappingsInsertionCallback)
@@ -19,30 +20,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
-        public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int currentRegularEnergy = inGameState.Resources.GetAmount(Items.RechargeableResourceEnum.RegularEnergy);
             // Don't take damage if we've already reached the threshold
-            return Math.Max(0, currentRegularEnergy - Value);
-        }
+            int damage = Math.Max(0, currentRegularEnergy - Value);
 
-        public override int CalculateBestCastDamage(SuperMetroidRules rules)
-        {
-            return 0;
-        }
 
-        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
-        {
-            // There's no proper answer to give here as worst case is the maxPossibleEnergy - Value, which we can't know here.
-            // We just know this can never kill.
-            // Return something arbitrary...
-            return 1;
-        }
-
-        public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // This brings energy down to a specific level, and has no cares for damage reduction items
-            return new Item[] { };
+            var resultingState = inGameState.Clone();
+            resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, damage);
+            ExecutionResult result = new ExecutionResult(resultingState);
+            return result;
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
@@ -64,12 +52,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
         {
-            // While always possible, this can cost energy
-            return false;
+            // This could be free if the highest non-reserve energy we can get is still no more than the threshold
+            int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(RechargeableResourceEnum.RegularEnergy);
+            // We can't check that if the max possible energy isn't provided
+            if (maxEnergy == null)
+            {
+                return false;
+            }
+            return maxEnergy <= Value;
         }
     }
 
-    public class UnfinalizedEnergyAtMost : AbstractUnfinalizedDamageNumericalValueLogicalElement<UnfinalizedEnergyAtMost, EnergyAtMost>
+    public class UnfinalizedEnergyAtMost : AbstractUnfinalizedObjectLogicalElementWithNumericalIntegerValue<UnfinalizedEnergyAtMost, EnergyAtMost>
     {
         public UnfinalizedEnergyAtMost()
         {

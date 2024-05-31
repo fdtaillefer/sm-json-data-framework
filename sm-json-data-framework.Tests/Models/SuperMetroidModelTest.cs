@@ -2118,6 +2118,18 @@ namespace sm_json_data_framework.Tests.Models
 
             // Can't test for ThornHits, there's none of them in the model
 
+            EnergyAtMost freeEnergyAtMost = ModelWithOptions.Locks["Ceres Ridley Fight"].UnlockStrats["Base"].Requires.LogicalElement<EnergyAtMost>(0);
+            Assert.True(freeEnergyAtMost.LogicallyRelevant);
+            Assert.False(freeEnergyAtMost.LogicallyNever);
+            Assert.True(freeEnergyAtMost.LogicallyAlways);
+            Assert.True(freeEnergyAtMost.LogicallyFree);
+
+            EnergyAtMost possibleEnergyAtMost = ModelWithOptions.Rooms["Big Boy Room"].Links[2].To[1].Strats["Get Drained"].Requires.LogicalElement<EnergyAtMost>(0);
+            Assert.True(possibleEnergyAtMost.LogicallyRelevant);
+            Assert.False(possibleEnergyAtMost.LogicallyNever);
+            Assert.True(possibleEnergyAtMost.LogicallyAlways);
+            Assert.False(possibleEnergyAtMost.LogicallyFree);
+
             CanShineCharge canShineCharge = ModelWithOptions.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
             Assert.True(canShineCharge.LogicallyRelevant);
             Assert.True(canShineCharge.LogicallyNever);
@@ -2342,12 +2354,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(canLeaveCharged.LogicallyNever);
             Assert.False(canLeaveCharged.LogicallyAlways);
             Assert.False(canLeaveCharged.LogicallyFree);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnergyAtMost()
-        {
-
         }
 
         [Fact]

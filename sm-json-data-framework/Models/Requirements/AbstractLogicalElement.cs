@@ -65,7 +65,8 @@ namespace sm_json_data_framework.Models.Requirements
 
         public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
         {
-            // There's always situations where a logical element (even one that's logically free or logically never) has some relevance
+            // There's always situations where a logical element (even one that's logically free or logically never) has some relevance,
+            // such as adding data to an ExecutionResult or affecting a containing And/Or.
             return true;
         }
 
