@@ -66,6 +66,7 @@ namespace sm_json_data_framework.Models
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
             Enemies = sourceModel.Enemies.Values.Select(enemy => enemy.Finalize(mappings)).ToDictionary(enemy => enemy.Name).AsReadOnly();
             Helpers = sourceModel.Helpers.Values.Select(helper => helper.Finalize(mappings)).ToDictionary(helper => helper.Name).AsReadOnly();
+            TechCategories = sourceModel.TechCategories.Values.Select(techCategory => techCategory.Finalize(mappings)).ToDictionary(techCategory => techCategory.Name).AsReadOnly();
             Techs = sourceModel.Techs.Values.Select(tech => tech.Finalize(mappings)).ToDictionary(tech => tech.Name).AsReadOnly();
             Rooms = sourceModel.Rooms.Values.Select(room => room.Finalize(mappings)).ToDictionary(room => room.Name).AsReadOnly();
             Nodes = sourceModel.Nodes.Values.Select(node => node.Finalize(mappings)).ToDictionary(node => node.Name).AsReadOnly();
@@ -115,6 +116,11 @@ namespace sm_json_data_framework.Models
         /// The helpers in this model, mapped by name.
         /// </summary>
         public IReadOnlyDictionary<string, Helper> Helpers { get; }
+
+        /// <summary>
+        /// The tech categories in this model, mapped by name.
+        /// </summary>
+        public IReadOnlyDictionary<string, TechCategory> TechCategories { get; }
 
         /// <summary>
         /// The techs in this model, mapped by name.
@@ -488,9 +494,10 @@ namespace sm_json_data_framework.Models
             // Put helpers in model
             Helpers = rawModel.HelperContainer.Helpers.Select(rawHelper => new UnfinalizedHelper(rawHelper)).ToDictionary(h => h.Name);
 
-            // Put techs in model
-            Techs = rawModel.TechContainer.SelectTopLevelTechs()
-                .Select(rawTech => new UnfinalizedTech(rawTech))
+            // Put techs and techCategories in model
+            TechCategories = rawModel.TechContainer.TechCategories
+                .Select(rawTechCategory => new UnfinalizedTechCategory(rawTechCategory)).ToDictionary(techCategory => techCategory.Name);
+            Techs = TechCategories.Values.SelectMany(techCategory => techCategory.Techs)
                 .SelectMany(tech => tech.SelectWithExtensions())
                 .ToDictionary(tech => tech.Name);
 
@@ -667,6 +674,11 @@ namespace sm_json_data_framework.Models
         /// The helpers in this model, mapped by name.
         /// </summary>
         public IDictionary<string, UnfinalizedHelper> Helpers { get; set; } = new Dictionary<string, UnfinalizedHelper>();
+
+        /// <summary>
+        /// Tech tech categories in this model, mapped by name.
+        /// </summary>
+        public IDictionary<string, UnfinalizedTechCategory> TechCategories { get; set; } = new Dictionary<string, UnfinalizedTechCategory>();
 
         /// <summary>
         /// The techs in this model, mapped by name.

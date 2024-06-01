@@ -62,6 +62,7 @@ namespace sm_json_data_framework.Reading
 
             Assert.Equal(25, model.Helpers.Count);
 
+            Assert.Equal(8, model.TechCategories.Count);
             Assert.Equal(91, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
