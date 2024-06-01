@@ -1869,7 +1869,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(allPossible.LogicallyNever);
             Assert.False(allPossible.LogicallyAlways);
             Assert.False(allPossible.LogicallyFree);
-            
+
         }
 
         [Fact]
@@ -1913,7 +1913,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.True(freeTechElement.LogicallyAlways);
             Assert.True(freeTechElement.LogicallyFree);
             Assert.False(freeTechElement.LogicallyNever);
-            
+
             TechLogicalElement freeByStartItemTechElement = ModelWithOptions.Techs["canJumpIntoIBJ"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canIBJ");
             Assert.True(freeByStartItemTechElement.LogicallyRelevant);
             Assert.True(freeByStartItemTechElement.LogicallyAlways);
@@ -2359,55 +2359,237 @@ namespace sm_json_data_framework.Tests.Models
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnPreviousNodes()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            PreviousNode previousNode = ModelWithOptions.Rooms["Early Supers Room"].Links[3].To[1].Strats["Early Supers Quick Crumble Escape (Dual Quick Crumble)"].Requires.LogicalElement<PreviousNode>(0);
+            Assert.True(previousNode.LogicallyRelevant);
+            Assert.False(previousNode.LogicallyNever);
+            Assert.False(previousNode.LogicallyAlways);
+            Assert.False(previousNode.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAdjacentRunways()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            AdjacentRunway adjacentRunway = ModelWithOptions.Rooms["Screw Attack Room"].Links[2].To[3].Strats["Screw Attack Room Transition Screwjump"].Requires.LogicalElement<AdjacentRunway>(0);
+            Assert.True(adjacentRunway.LogicallyRelevant);
+            Assert.False(adjacentRunway.LogicallyNever);
+            Assert.False(adjacentRunway.LogicallyAlways);
+            Assert.False(adjacentRunway.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmo()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 1)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            Ammo impossibleAmmo = ModelWithOptions.Techs["canCrystalFlash"].Requires.LogicalElement<Ammo>(0);
+            Assert.True(impossibleAmmo.LogicallyRelevant);
+            Assert.True(impossibleAmmo.LogicallyNever);
+            Assert.False(impossibleAmmo.LogicallyAlways);
+            Assert.False(impossibleAmmo.LogicallyFree);
+
+            Ammo possibleAmmo = ModelWithOptions.Techs["canCrystalFlash"].Requires.LogicalElement<Ammo>(1);
+            Assert.True(possibleAmmo.LogicallyRelevant);
+            Assert.False(possibleAmmo.LogicallyNever);
+            Assert.False(possibleAmmo.LogicallyAlways);
+            Assert.False(possibleAmmo.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmoDrain()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            AmmoDrain freeAmmoDrain = ModelWithOptions.Locks["Mother Brain 2 and 3 Fight"].UnlockStrats["Base"].Requires.LogicalElement<AmmoDrain>(0);
+            Assert.True(freeAmmoDrain.LogicallyRelevant);
+            Assert.False(freeAmmoDrain.LogicallyNever);
+            Assert.True(freeAmmoDrain.LogicallyAlways);
+            Assert.True(freeAmmoDrain.LogicallyFree);
+
+            AmmoDrain nonFreeAmmoDrain = ModelWithOptions.Locks["Mother Brain 2 and 3 Fight"].UnlockStrats["Base"].Requires.LogicalElement<AmmoDrain>(1);
+            Assert.True(nonFreeAmmoDrain.LogicallyRelevant);
+            Assert.False(nonFreeAmmoDrain.LogicallyNever);
+            Assert.True(nonFreeAmmoDrain.LogicallyAlways);
+            Assert.False(nonFreeAmmoDrain.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnCanComeInCharged()
+        public void ApplyLogicalOptions_NoSpeedBooster_SetsLogicalPropertiesOnShineChargeLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanComeInCharged canComeInCharged = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.True(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+
+            CanShineCharge canShineCharge = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.True(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnCanShineCharge()
+        public void ApplyLogicalOptions_FreeSpeedNoShinespark_SetsLogicalPropertiesOnShineChargeLogicalElements()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions()
+                .RegisterDisabledTech("canShinespark");
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                )
+                .Build();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanComeInCharged noSparkCanComeInCharged = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(noSparkCanComeInCharged.LogicallyRelevant);
+            Assert.False(noSparkCanComeInCharged.LogicallyNever);
+            Assert.False(noSparkCanComeInCharged.LogicallyAlways);
+            Assert.False(noSparkCanComeInCharged.LogicallyFree);
+
+            CanComeInCharged canComeInCharged = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Links[10].To[9].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.True(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+
+            CanShineCharge noSparkCanShineCharge = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(noSparkCanShineCharge.LogicallyRelevant);
+            Assert.False(noSparkCanShineCharge.LogicallyNever);
+            Assert.True(noSparkCanShineCharge.LogicallyAlways);
+            Assert.True(noSparkCanShineCharge.LogicallyFree);
+
+            CanShineCharge canShineCharge = ModelWithOptions.Rooms["Landing Site"].Links[7].To[1].Strats["Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.True(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyDamage()
+        public void ApplyLogicalOptions_NeedsMoreTilesToCharge_SetsLogicalPropertiesOnCanShineCharges()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                )
+                .Build();
+            logicalOptions.ShineChargesWithStutter = false;
+            logicalOptions.TilesToShineCharge = 35;
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanShineCharge canShineCharge = ModelWithOptions.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.True(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyKill()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
+                    .ApplyAddItem(ModelWithOptions.Items["Spazer"])
+                )
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            EnemyKill impossibleEnemyKill = ModelWithOptions.Rooms["Morph Ball Room"].Links[1].To[6].Strats["PB Sidehopper Kill with Bomb Blocks"].Obstacles["C"].Requires.LogicalElement<EnemyKill>(0);
+            Assert.True(impossibleEnemyKill.LogicallyRelevant);
+            Assert.True(impossibleEnemyKill.LogicallyNever);
+            Assert.False(impossibleEnemyKill.LogicallyAlways);
+            Assert.False(impossibleEnemyKill.LogicallyFree);
+
+            EnemyKill possibleEnemyKill = ModelWithOptions.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Kill the Beetoms"].Requires.LogicalElement<EnemyKill>(0);
+            Assert.True(possibleEnemyKill.LogicallyRelevant);
+            Assert.False(possibleEnemyKill.LogicallyNever);
+            Assert.False(possibleEnemyKill.LogicallyAlways);
+            Assert.False(possibleEnemyKill.LogicallyFree);
+
+            EnemyKill freeEnemyKill = ModelWithOptions.Rooms["Baby Kraid Room"].Links[1].To[2].Strats["Kill the Enemies"].Obstacles["A"].Requires.LogicalElement<EnemyKill>(0);
+            Assert.True(freeEnemyKill.LogicallyRelevant);
+            Assert.False(freeEnemyKill.LogicallyNever);
+            Assert.True(freeEnemyKill.LogicallyAlways);
+            Assert.True(freeEnemyKill.LogicallyFree);
         }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnResetRoom()
         {
+            // Given
+            LogicalOptions logicalOptions = new LogicalOptions();
 
+            // When
+            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            ResetRoom resetRoom = ModelWithOptions.Runways["Base Runway - Green Shaft Mid-Low Left Door (to Firefleas)"].Strats["Base"].Requires.LogicalElement<ResetRoom>(0);
+            Assert.True(resetRoom.LogicallyRelevant);
+            Assert.False(resetRoom.LogicallyNever);
+            Assert.False(resetRoom.LogicallyAlways);
+            Assert.False(resetRoom.LogicallyFree);
         }
 
         #endregion

@@ -164,7 +164,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // In either case, the inner maximum of the proper resource should increase
-            ResourceCapacityChanges.ApplyAmountIncrease(expansionItem.Resource, expansionItem.ResourceAmount);
+            ResourceCapacityChanges.ApplyAmountIncrease(expansionItem.Resource, expansionItem.ResourceAmount * count);
 
             // Capacity pickups may add current resources as well, but they are not repeatable so by default we don't want logic to rely on them.
             // So we will not alter current resources.
