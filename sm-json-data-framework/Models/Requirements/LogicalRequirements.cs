@@ -6,6 +6,7 @@ using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
+using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +49,7 @@ namespace sm_json_data_framework.Models.Requirements
             {
                 return null;
             }
-            return model.ExecuteAll(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
+            return LogicalElements.ExecuteAll(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 
         /// <summary>
@@ -64,7 +65,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns></returns>
         public ExecutionResult ExecuteOne(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            (_, ExecutionResult result) = model.ExecuteBest(LogicalElements, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (_, ExecutionResult result) = LogicalElements.ExecuteBest(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;
         }
 

@@ -99,8 +99,9 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 .Append((splashWeapon: null, splashShots: 0));
 
                 // Evaluate all combinations and apply the cheapest to our current resulting state
-                (_, ExecutionResult killResult) = model.ExecuteBest(splashCombinations.Select(combination => new EnemyGroupAmmoExecutable(currentEnemyGroup, nonFreeIndividualWeapons, combination.splashWeapon, combination.splashShots)),
-                    result.ResultingState, times: times, previousRoomCount: previousRoomCount);
+                (_, ExecutionResult killResult) = splashCombinations
+                    .Select(combination => new EnemyGroupAmmoExecutable(currentEnemyGroup, nonFreeIndividualWeapons, combination.splashWeapon, combination.splashShots))
+                    .ExecuteBest(model, result.ResultingState, times: times, previousRoomCount: previousRoomCount);
 
                 // If we failed to kill an enemy group, we can't kill all enemies
                 if (killResult == null)
@@ -316,8 +317,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Iterate over each remaining enemy, killing it with the cheapest non-splash weapon
             foreach (EnemyWithHealth currentEnemy in enemiesWithHealth)
             {
-                var (_, killResult) = model.ExecuteBest(NonSplashWeapons.Select(weapon => currentEnemy.ToExecutable(weapon, SplashWeapon, SplashShots)),
-                    result?.ResultingState ?? inGameState, times: times, previousRoomCount: previousRoomCount);
+                var (_, killResult) = NonSplashWeapons.Select(weapon => currentEnemy.ToExecutable(weapon, SplashWeapon, SplashShots))
+                    .ExecuteBest(model, result?.ResultingState ?? inGameState, times: times, previousRoomCount: previousRoomCount);
 
                 // If we can't kill one of the enemies, give up
                 if (killResult == null)

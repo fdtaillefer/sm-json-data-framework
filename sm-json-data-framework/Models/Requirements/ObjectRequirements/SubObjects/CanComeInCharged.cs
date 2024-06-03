@@ -161,7 +161,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // remaining and leaves Samus with enough energy for the shinespark
             var usableCanLeaveChargeds = inGameState.GetRetroactiveCanLeaveChargeds(model, requiredInRoomPath, previousRoomCount: previousRoomCount)
                 .Where(clc => clc.FramesRemaining >= FramesRemaining);
-            (_, ExecutionResult bestLeaveChargedResult) = model.ExecuteBest(usableCanLeaveChargeds, inGameState, times: times,
+            (_, ExecutionResult bestLeaveChargedResult) = usableCanLeaveChargeds.ExecuteBest(model, inGameState, times: times,
                 previousRoomCount: previousRoomCount, hasEnergyForShinespark);
 
             // If using this CanLeaveCharged cost nothing, spend the shinespark and return
@@ -198,8 +198,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                     from r in usableInRoomRunwayEvaluations
                     where r.length >= requiredInRoomLength
                     select r.runway;
-                var (_, bestCombinationResult) = model.ExecuteBest(adequateRunways.Select(runway => runway.AsExecutable(comingIn: true)),
-                    currentAdjacentRunwayResult.ResultingState, times: times, previousRoomCount: previousRoomCount, hasEnergyForShinespark);
+                var (_, bestCombinationResult) = adequateRunways.Select(runway => runway.AsExecutable(comingIn: true))
+                    .ExecuteBest(model, currentAdjacentRunwayResult.ResultingState, times: times, previousRoomCount: previousRoomCount, hasEnergyForShinespark);
 
                 // If the best combination we found is free, spend energy for the shinespark and return it.
                 // Make sure to apply the in-room runway result on top of the adjacent runway result.

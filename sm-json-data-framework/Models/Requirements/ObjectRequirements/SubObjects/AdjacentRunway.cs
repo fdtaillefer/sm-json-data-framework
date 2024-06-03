@@ -83,8 +83,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
             else
             {
-                (_, executionResult) = model.ExecuteBest(retroactiveRunways.Select(runway => runway.AsExecutable(comingIn: false)),
-                    inGameState, times: times, previousRoomCount: previousRoomCount);
+                (_, executionResult) = retroactiveRunways.Select(runway => runway.AsExecutable(comingIn: false))
+                    .ExecuteBest(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             }
 
             // If retroactive runway execution failed, give up
@@ -173,7 +173,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 frameExecutables.Add(new HeatFrames(Frames));
             }
 
-            return model.ExecuteAll(frameExecutables, inGameState, previousRoomCount: previousRoomCount);
+            return frameExecutables.ExecuteAll(model, inGameState, previousRoomCount: previousRoomCount);
         }
     }
 

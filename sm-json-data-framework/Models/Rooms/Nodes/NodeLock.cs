@@ -224,7 +224,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best unlock strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.UnlockStrats.Values.WhereLogicallyRelevant(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = NodeLock.UnlockStrats.Values.WhereLogicallyRelevant()
+                .ExecuteBest(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyOpenedLock(NodeLock, bestStrat);
@@ -258,7 +259,8 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Look for the best bypass strat
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(NodeLock.BypassStrats.Values.WhereLogicallyRelevant(), inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = NodeLock.BypassStrats.Values.WhereLogicallyRelevant()
+                .ExecuteBest(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result != null)
             {
                 result.ApplyBypassedLock(NodeLock, bestStrat);

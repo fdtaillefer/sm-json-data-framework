@@ -177,7 +177,7 @@ namespace sm_json_data_framework.Models.Navigation
                     potentialStrats = filter.Apply(potentialStrats);
                 }
             }
-            var (strat, result) = GameModel.ExecuteBest(potentialStrats.Select(kvp => kvp.Value), CurrentInGameState);
+            var (strat, result) = potentialStrats.Select(kvp => kvp.Value).ExecuteBest(GameModel, CurrentInGameState);
             
             // If no strat of the link was successful, this is a failure
             if (strat == null)

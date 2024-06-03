@@ -108,7 +108,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
 
             // Return the result of the best strat execution
-            (Strat bestStrat, ExecutionResult result) = model.ExecuteBest(Strats.Values, inGameState, times: times, previousRoomCount: previousRoomCount);
+            (Strat bestStrat, ExecutionResult result) = Strats.Values.ExecuteBest(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             if (result == null)
             {
                 return null;
