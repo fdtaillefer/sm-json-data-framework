@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 
 namespace sm_json_data_framework.Tests.Models.Connections
 {
-    public class ConnectionTest
+    public class ConnectionNodeTest
     {
         private static SuperMetroidModel ModelWithOptions = StaticTestObjects.ModelWithOptions;
 
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnections()
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnectionNodes()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
@@ -35,12 +35,15 @@ namespace sm_json_data_framework.Tests.Models.Connections
             // Expect
             Connection unfollowableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Big Pink", 8).IdentifyingString];
             // Followability is not considered in-scope for logical relevance
-            Assert.True(unfollowableconnection.LogicallyRelevant);
+            Assert.True(unfollowableconnection.FromNode.LogicallyRelevant);
+            Assert.True(unfollowableconnection.ToNode.LogicallyRelevant);
 
             Connection followableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
-            Assert.True(followableconnection.LogicallyRelevant);
+            Assert.True(followableconnection.FromNode.LogicallyRelevant);
+            Assert.True(followableconnection.ToNode.LogicallyRelevant);
         }
 
         #endregion
+
     }
 }
