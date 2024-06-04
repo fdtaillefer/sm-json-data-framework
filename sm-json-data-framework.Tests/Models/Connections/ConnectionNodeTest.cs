@@ -16,9 +16,9 @@ namespace sm_json_data_framework.Tests.Models.Connections
     public class ConnectionNodeTest
     {
         private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.ModelWithOptions;
+        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
 
-        #region Tests for construction from 
+        #region Tests for construction from unfinalized model
 
         [Fact]
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()

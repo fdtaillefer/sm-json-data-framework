@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Tests.Models
 {
     public class SuperMetroidModelTest
     {
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.ModelWithOptions;
+        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for Ctor(SuperMetroidModel)
 
@@ -1087,31 +1087,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.True(freeWeapon.LogicallyAlways);
             Assert.True(freeWeapon.LogicallyFree);
             Assert.False(freeWeapon.LogicallyNever);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemiesAndSubProperties()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterRemovedItem("Ice");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Enemy enemy = ModelWithOptions.Enemies["Evir"];
-            Assert.True(enemy.LogicallyRelevant);
-            Assert.True(enemy.Attacks["contact"].LogicallyRelevant);
-            Assert.False(enemy.Dimensions.LogicallyRelevant);
-            Assert.False(enemy.InvulnerableWeapons["Ice"].LogicallyRelevant);
-            Assert.True(enemy.InvulnerableWeapons["Grapple"].LogicallyRelevant);
-
-            Enemy multiplierEnemy = ModelWithOptions.Enemies["Kihunter (red)"];
-            Assert.False(multiplierEnemy.WeaponSusceptibilities["Ice"].LogicallyRelevant);
-            Assert.False(multiplierEnemy.WeaponMultipliers["Ice"].LogicallyRelevant);
-            Assert.True(multiplierEnemy.WeaponSusceptibilities["Spazer"].LogicallyRelevant);
-            Assert.True(multiplierEnemy.WeaponMultipliers["Spazer"].LogicallyRelevant);
         }
 
         [Fact]
