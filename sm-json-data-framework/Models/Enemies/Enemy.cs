@@ -123,7 +123,7 @@ namespace sm_json_data_framework.Models.Enemies
         }
 
         /// <summary>
-        /// Creates and returns an instance of EnemyDrops reprenting this enemy's effective drop rates,
+        /// Returns an instance of EnemyDrops representing this enemy's effective drop rates,
         /// given that the provided resources are full.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -138,7 +138,7 @@ namespace sm_json_data_framework.Models.Enemies
             }
             else
             {
-                return Drops.Clone();
+                return Drops;
             }
         }
 
@@ -290,7 +290,7 @@ namespace sm_json_data_framework.Models.Enemies
         }
 
         /// <summary>
-        /// Creates and returns an instance of EnemyDrops reprenting this enemy's effective drop rates,
+        /// Returns an instance of EnemyDrops representing this enemy's effective drop rates,
         /// given that the provided resources are full.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
@@ -305,7 +305,7 @@ namespace sm_json_data_framework.Models.Enemies
             }
             else
             {
-                return Drops.Clone();
+                return Drops;
             }
         }
     }

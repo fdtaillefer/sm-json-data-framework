@@ -47,16 +47,6 @@ namespace sm_json_data_framework.Models.Enemies
 
         }
 
-        public EnemyDrops(EnemyDrops other)
-        {
-            NoDrop = other.NoDrop;
-            SmallEnergy = other.SmallEnergy;
-            BigEnergy = other.BigEnergy;
-            Missile = other.Missile;
-            Super = other.Super;
-            PowerBomb = other.PowerBomb;
-        }
-
         public EnemyDrops(RawEnemyDrops drops)
         {
             NoDrop = drops.NoDrop;
@@ -75,11 +65,6 @@ namespace sm_json_data_framework.Models.Enemies
             Missile = missile;
             Super = super;
             PowerBomb = powerBomb;
-        }
-
-        public EnemyDrops Clone()
-        {
-            return new EnemyDrops(this);
         }
 
         /// <summary>
