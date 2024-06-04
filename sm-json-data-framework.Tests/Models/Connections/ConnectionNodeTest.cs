@@ -7,6 +7,7 @@ using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +15,29 @@ namespace sm_json_data_framework.Tests.Models.Connections
 {
     public class ConnectionNodeTest
     {
+        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
         private static SuperMetroidModel ModelWithOptions = StaticTestObjects.ModelWithOptions;
+
+        #region Tests for construction from 
+
+        [Fact]
+        public void CtorFromUnfinalized_SetsPropertiesCorrectly()
+        {
+            // Given/when standard model creation
+
+            // Expect
+            ConnectionNode connectionNode = Model.Connections[Model.Rooms["Parlor and Alcatraz"].Nodes[7].IdentifyingString].FromNode;
+
+            Assert.Equal("Crateria", connectionNode.Area);
+            Assert.Equal("Central", connectionNode.Subarea);
+            Assert.Equal(10, connectionNode.Roomid);
+            Assert.Equal("Parlor and Alcatraz", connectionNode.RoomName);
+            Assert.Equal(7, connectionNode.Nodeid);
+            Assert.Equal("Parlor Bottom Door (to Climb)", connectionNode.NodeName);
+            Assert.Equal(ConnectionNodePositionEnum.Top, connectionNode.Position);
+        }
+
+        #endregion
 
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 

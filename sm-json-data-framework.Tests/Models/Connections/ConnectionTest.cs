@@ -14,7 +14,25 @@ namespace sm_json_data_framework.Tests.Models.Connections
 {
     public class ConnectionTest
     {
+        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
         private static SuperMetroidModel ModelWithOptions = StaticTestObjects.ModelWithOptions;
+
+        #region Tests for construction from 
+
+        [Fact]
+        public void CtorFromUnfinalized_SetsPropertiesCorrectly()
+        {
+            // Given/when standard model creation
+
+            // Expect
+            Connection connection = Model.Connections[Model.Rooms["Parlor and Alcatraz"].Nodes[7].IdentifyingString];
+
+            Assert.Equal(ConnectionTypeEnum.VerticalDoor, connection.ConnectionType);
+            Assert.Equal("Parlor and Alcatraz", connection.FromNode.RoomName);
+            Assert.Equal("Climb", connection.ToNode.RoomName);
+        }
+
+        #endregion
 
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
