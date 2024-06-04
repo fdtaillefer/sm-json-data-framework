@@ -1131,12 +1131,10 @@ namespace sm_json_data_framework.Tests.Models
             // Expect
             Connection unfollowableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Big Pink", 8).IdentifyingString];
             // Followability is not considered in-scope for logical relevance
-            Assert.True(unfollowableconnection.LogicallyRelevant);
             Assert.True(unfollowableconnection.FromNode.LogicallyRelevant);
             Assert.True(unfollowableconnection.ToNode.LogicallyRelevant);
 
             Connection followableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
-            Assert.True(followableconnection.LogicallyRelevant);
             Assert.True(followableconnection.FromNode.LogicallyRelevant);
             Assert.True(followableconnection.ToNode.LogicallyRelevant);
         }

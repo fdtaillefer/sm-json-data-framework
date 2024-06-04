@@ -335,7 +335,6 @@ namespace sm_json_data_framework.Models
 
         /// <summary>
         /// Creates and returns a game navigator at the starting location and with starting resources.
-        /// Requires this model to have been initialized.
         /// </summary>
         /// <param name="maxPreviousStatesSize">The maximum number of previous states that the created navigator
         /// should keep in memory.</param>
