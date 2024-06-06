@@ -55,7 +55,6 @@ namespace sm_json_data_framework.Models.Techs
             // A cateogry with no relevant techs may as well not exist.
             return Techs.Values.WhereLogicallyRelevant().Any();
         }
-
     }
 
     public class UnfinalizedTechCategory : AbstractUnfinalizedModelElement<UnfinalizedTechCategory, TechCategory>

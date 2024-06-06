@@ -231,6 +231,11 @@ namespace sm_json_data_framework.Models
                 tech.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
             }
 
+            foreach (TechCategory techCategory in TechCategories.Values)
+            {
+                techCategory.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+            }
+
             foreach (Weapon weapon in Weapons.Values)
             {
                 weapon.ApplyLogicalOptions(AppliedLogicalOptions, Rules);

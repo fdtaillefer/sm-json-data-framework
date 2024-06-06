@@ -890,54 +890,6 @@ namespace sm_json_data_framework.Tests.Models
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTechs()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterDisabledTech("canPreciseWalljump");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Tech disabledTech = ModelWithOptions.Techs["canPreciseWalljump"];
-            Assert.False(disabledTech.LogicallyRelevant);
-            Assert.False(disabledTech.LogicallyAlways);
-            Assert.False(disabledTech.LogicallyFree);
-            Assert.True(disabledTech.LogicallyNever);
-
-            Tech impossibleSubTech = ModelWithOptions.Techs["canDelayedWalljump"];
-            Assert.False(impossibleSubTech.LogicallyRelevant);
-            Assert.False(impossibleSubTech.LogicallyAlways);
-            Assert.False(impossibleSubTech.LogicallyFree);
-            Assert.True(impossibleSubTech.LogicallyNever);
-
-            Tech nonFreeTech = ModelWithOptions.Techs["canGrappleClip"];
-            Assert.True(nonFreeTech.LogicallyRelevant);
-            Assert.False(nonFreeTech.LogicallyAlways);
-            Assert.False(nonFreeTech.LogicallyFree);
-            Assert.False(nonFreeTech.LogicallyNever);
-
-            Tech freeTech = ModelWithOptions.Techs["canWalljump"];
-            Assert.True(freeTech.LogicallyRelevant);
-            Assert.True(freeTech.LogicallyAlways);
-            Assert.True(freeTech.LogicallyFree);
-            Assert.False(freeTech.LogicallyNever);
-
-            Tech freeByStartItemTech = ModelWithOptions.Techs["canIBJ"];
-            Assert.True(freeByStartItemTech.LogicallyRelevant);
-            Assert.True(freeByStartItemTech.LogicallyAlways);
-            Assert.True(freeByStartItemTech.LogicallyFree);
-            Assert.False(freeByStartItemTech.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
         {
             // Given
