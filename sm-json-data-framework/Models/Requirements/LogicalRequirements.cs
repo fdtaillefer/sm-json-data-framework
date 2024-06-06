@@ -79,9 +79,8 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns></returns>
         public T LogicalElement<T>(int index, Func<T, bool> predicate = null) where T: ILogicalElement
         {
-            IEnumerable<T> elements = LogicalElements
-                .OfType<T>();
-            if(predicate != null)
+            IEnumerable<T> elements = LogicalElementsTyped<T>();
+            if (predicate != null)
             {
                 elements = elements.Where(predicate);
             }
@@ -92,16 +91,26 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
-        /// Returns all logical elements of type T within this LogicalRequirements which respect the provided predicate
+        /// Returns all logical elements of type T within this LogicalRequirements which respect the provided predicate.
         /// </summary>
         /// <typeparam name="T">The type of logical elements to find</typeparam>
         /// <param name="predicate">The predicate to filter by</param>
         /// <returns></returns>
         public IEnumerable<T> LogicalElementsWhere<T>(Func<T, bool> predicate) where T : ILogicalElement
         {
-            return LogicalElements
-                .OfType<T>()
+            return LogicalElementsTyped<T>()
                 .Where(predicate);
+        }
+
+        /// <summary>
+        /// Returns all logical elements of type T within this LogicalRequirements.
+        /// </summary>
+        /// <typeparam name="T">The type of logical elements to find</typeparam>
+        /// <returns></returns>
+        public IEnumerable<T> LogicalElementsTyped<T>() where T : ILogicalElement
+        {
+            return LogicalElements
+                .OfType<T>();
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)

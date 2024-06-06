@@ -33,7 +33,6 @@ namespace sm_json_data_framework.Tests.Models.Helpers
             Assert.NotNull(helper.Requires);
             Assert.Equal(1, helper.Requires.LogicalElements.Count());
             Assert.NotNull(helper.Requires.LogicalElement<Or>(0));
-
         }
 
         #endregion

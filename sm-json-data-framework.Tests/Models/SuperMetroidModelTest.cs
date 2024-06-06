@@ -890,54 +890,6 @@ namespace sm_json_data_framework.Tests.Models
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
-
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Wave"])
-                )
-                .Build();
-
-            logicalOptions.RegisterRemovedItem("Ice");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Weapon impossibleUseWeapon = ModelWithOptions.Weapons["Ice"];
-            Assert.False(impossibleUseWeapon.LogicallyRelevant);
-            Assert.False(impossibleUseWeapon.LogicallyAlways);
-            Assert.False(impossibleUseWeapon.LogicallyFree);
-            Assert.True(impossibleUseWeapon.LogicallyNever);
-
-            Weapon impossibleShootWeapon = ModelWithOptions.Weapons["Missile"];
-            Assert.False(impossibleShootWeapon.LogicallyRelevant);
-            Assert.False(impossibleShootWeapon.LogicallyAlways);
-            Assert.False(impossibleShootWeapon.LogicallyFree);
-            Assert.True(impossibleShootWeapon.LogicallyNever);
-
-            Weapon nonFreeWeapon = ModelWithOptions.Weapons["Charge+Wave"];
-            Assert.True(nonFreeWeapon.LogicallyRelevant);
-            Assert.False(nonFreeWeapon.LogicallyAlways);
-            Assert.False(nonFreeWeapon.LogicallyFree);
-            Assert.False(nonFreeWeapon.LogicallyNever);
-
-            Weapon freeWeapon = ModelWithOptions.Weapons["Wave"];
-            Assert.True(freeWeapon.LogicallyRelevant);
-            Assert.True(freeWeapon.LogicallyAlways);
-            Assert.True(freeWeapon.LogicallyFree);
-            Assert.False(freeWeapon.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRooms()
         {
             // Given
