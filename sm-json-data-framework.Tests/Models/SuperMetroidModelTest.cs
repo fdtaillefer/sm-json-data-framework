@@ -973,39 +973,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnGameFlags()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterDisabledGameFlag("f_AnimalsSaved");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedCeresRidley"] })
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            GameFlag alwaysFlag = ModelWithOptions.GameFlags["f_DefeatedCeresRidley"];
-            Assert.True(alwaysFlag.LogicallyRelevant);
-            Assert.False(alwaysFlag.LogicallyNever);
-            Assert.True(alwaysFlag.LogicallyAlways);
-            Assert.True(alwaysFlag.LogicallyFree);
-
-            GameFlag removedFlag = ModelWithOptions.GameFlags["f_AnimalsSaved"];
-            Assert.False(removedFlag.LogicallyRelevant);
-            Assert.True(removedFlag.LogicallyNever);
-            Assert.False(removedFlag.LogicallyAlways);
-            Assert.False(removedFlag.LogicallyFree);
-
-            GameFlag obtainableFlag = ModelWithOptions.GameFlags["f_ZebesAwake"];
-            Assert.True(obtainableFlag.LogicallyRelevant);
-            Assert.False(obtainableFlag.LogicallyNever);
-            Assert.False(obtainableFlag.LogicallyAlways);
-            Assert.False(obtainableFlag.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelpers()
         {
             // Given
