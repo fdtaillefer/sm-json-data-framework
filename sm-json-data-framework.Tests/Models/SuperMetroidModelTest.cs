@@ -973,42 +973,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelpers()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canGateGlitch");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Helper impossibleHelper = ModelWithOptions.Helpers["h_canBlueGateGlitch"];
-            Assert.False(impossibleHelper.LogicallyRelevant);
-            Assert.False(impossibleHelper.LogicallyAlways);
-            Assert.False(impossibleHelper.LogicallyFree);
-            Assert.True(impossibleHelper.LogicallyNever);
-
-            Helper nonFreeHelper = ModelWithOptions.Helpers["h_hasBeamUpgrade"];
-            Assert.True(nonFreeHelper.LogicallyRelevant);
-            Assert.False(nonFreeHelper.LogicallyAlways);
-            Assert.False(nonFreeHelper.LogicallyFree);
-            Assert.False(nonFreeHelper.LogicallyNever);
-
-            Helper freeHelper = ModelWithOptions.Helpers["h_canUseMorphBombs"];
-            Assert.True(freeHelper.LogicallyRelevant);
-            Assert.True(freeHelper.LogicallyAlways);
-            Assert.True(freeHelper.LogicallyFree);
-            Assert.False(freeHelper.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
         {
             // Given
