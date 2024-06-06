@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Tests.InGameStates
+namespace sm_json_data_framework.Tests.Models.InGameStates
 {
     public class ItemInventoryTest
     {
@@ -146,7 +146,7 @@ namespace sm_json_data_framework.Tests.InGameStates
 
             // When
             inventory.ApplyDisableItem(varia);
-            
+
             // Expect
             Assert.Empty(inventory.DisabledItemNames);
         }
@@ -399,7 +399,7 @@ namespace sm_json_data_framework.Tests.InGameStates
         {
             // Given
             int baseAmount = 5;
-            ExpansionItem item = (ExpansionItem) Model.Items[itemName];
+            ExpansionItem item = (ExpansionItem)Model.Items[itemName];
             ItemInventory inventory = new ItemInventory(new ResourceCount().ApplyAmount(resource, baseAmount))
                 .ApplyAddItem(item).ApplyAddItem(item);
 

@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace sm_json_data_framework.Tests.InGameStates
+namespace sm_json_data_framework.Tests.Models.InGameStates
 {
     public class ResourceCountTest
     {
@@ -71,7 +71,7 @@ namespace sm_json_data_framework.Tests.InGameStates
 
             foreach (ConsumableResourceEnum loopResource in Enum.GetValues(typeof(ConsumableResourceEnum)))
             {
-                if(loopResource != resource.ToConsumableResource())
+                if (loopResource != resource.ToConsumableResource())
                 {
                     // And when
                     result = resourceCount.GetAmount(loopResource);

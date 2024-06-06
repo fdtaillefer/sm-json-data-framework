@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace sm_json_data_framework.Tests.InGameStates
+namespace sm_json_data_framework.Tests.Models.InGameStates
 {
     public class InRoomStateTest
     {
@@ -467,7 +467,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             // Given
             RoomNode initialNode = Model.GetNodeInRoom("Parlor and Alcatraz", 4);
             InRoomState state = new InRoomState(initialNode);
-            
+
             // When and expect
             Assert.Throws<ArgumentException>(() => state.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
         }
@@ -743,7 +743,7 @@ namespace sm_json_data_framework.Tests.InGameStates
             RoomNode secondNode = Model.GetNodeInRoom("Landing Site", 3);
             Strat strat = node.LinksTo[3].Strats["Base"];
             NodeLock openedLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            NodeLock bypassedLock  = Model.Locks["Landing Site Top Right Escape Lock (to Power Bombs)"];
+            NodeLock bypassedLock = Model.Locks["Landing Site Top Right Escape Lock (to Power Bombs)"];
             InRoomState state = new InRoomState(node);
             state.ApplyDestroyObstacle("A");
             state.ApplyVisitNode(secondNode, strat);
@@ -752,7 +752,7 @@ namespace sm_json_data_framework.Tests.InGameStates
 
             // When
             InRoomState clone = state.Clone();
-            
+
             // Expect
             Assert.Same(secondNode, clone.CurrentNode);
             Assert.Same(secondNode.Room, clone.CurrentRoom);

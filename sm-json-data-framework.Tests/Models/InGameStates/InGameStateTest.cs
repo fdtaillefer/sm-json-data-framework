@@ -18,7 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.InGameStates
+namespace sm_json_data_framework.Tests.Models.InGameStates
 {
     public class InGameStateTest
     {
@@ -170,7 +170,7 @@ namespace sm_json_data_framework.InGameStates
 
             // When
             bool result = inGameState.IsResourceAvailable(resource.ToConsumableResource(), amountToRequest);
-            
+
             // Expect
             Assert.True(result);
         }
@@ -253,7 +253,7 @@ namespace sm_json_data_framework.InGameStates
 
             // When
             bool result = inGameState.IsResourceAvailable(ConsumableResourceEnum.Energy, amountToRequest);
-             // Expect
+            // Expect
             Assert.False(result);
         }
         #endregion
@@ -1348,7 +1348,7 @@ namespace sm_json_data_framework.InGameStates
 
             // When
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
-            
+
             // Expect
             Assert.Same(initialRoom, inGameState.PreviousRoomStates[0].CurrentRoom);
             Assert.NotSame(inGameState.InRoomState, inGameState.PreviousRoomStates[0]);
@@ -1709,7 +1709,7 @@ namespace sm_json_data_framework.InGameStates
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            for(int i = 0; i <= InGameState.MaxPreviousRooms; i++)
+            for (int i = 0; i <= InGameState.MaxPreviousRooms; i++)
             {
                 RoomNode node = i % 2 == 0 ? node2 : node1;
                 inGameState.ApplyEnterRoom(node);
@@ -3157,7 +3157,7 @@ namespace sm_json_data_framework.InGameStates
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
 
             // When
-            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.GetVisitedNodeIds()[0]}, acceptablePhysics: null);
+            IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.GetVisitedNodeIds()[0] }, acceptablePhysics: null);
 
             // Expect
             Assert.Empty(result);

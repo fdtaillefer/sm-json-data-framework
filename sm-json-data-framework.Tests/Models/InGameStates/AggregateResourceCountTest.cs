@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Tests.InGameStates
+namespace sm_json_data_framework.Tests.Models.InGameStates
 {
     public class AggregateResourceCountTest
     {
