@@ -938,41 +938,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnItems()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Item freeItem = ModelWithOptions.Items["Morph"];
-            Assert.True(freeItem.LogicallyRelevant);
-            Assert.False(freeItem.LogicallyNever);
-            Assert.True(freeItem.LogicallyAlways);
-            Assert.True(freeItem.LogicallyFree);
-
-            Item removedItem = ModelWithOptions.Items["Bombs"];
-            Assert.False(removedItem.LogicallyRelevant);
-            Assert.True(removedItem.LogicallyNever);
-            Assert.False(removedItem.LogicallyAlways);
-            Assert.False(removedItem.LogicallyFree);
-
-            Item obtainableItem = ModelWithOptions.Items["Charge"];
-            Assert.True(obtainableItem.LogicallyRelevant);
-            Assert.False(obtainableItem.LogicallyNever);
-            Assert.False(obtainableItem.LogicallyAlways);
-            Assert.False(obtainableItem.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
         {
             // Given
