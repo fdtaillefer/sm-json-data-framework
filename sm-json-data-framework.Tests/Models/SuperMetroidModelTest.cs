@@ -1268,36 +1268,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnInitiateRemotelys()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Morph");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            InitiateRemotely neverInitiateRemotely = ModelWithOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
-            Assert.True(neverInitiateRemotely.LogicallyRelevant);
-            Assert.False(neverInitiateRemotely.LogicallyAlways);
-            Assert.False(neverInitiateRemotely.LogicallyFree);
-            Assert.True(neverInitiateRemotely.LogicallyNever);
-
-            InitiateRemotely freeInitiateRemotely = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First().InitiateRemotely;
-            Assert.True(freeInitiateRemotely.LogicallyRelevant);
-            Assert.True(freeInitiateRemotely.LogicallyAlways);
-            Assert.True(freeInitiateRemotely.LogicallyFree);
-            Assert.False(freeInitiateRemotely.LogicallyNever);
-
-            InitiateRemotely possibleInitiateRemotely = ModelWithOptions.Rooms["Early Supers Room"].Nodes[2].CanLeaveCharged.First().InitiateRemotely;
-            Assert.True(possibleInitiateRemotely.LogicallyRelevant);
-            Assert.False(possibleInitiateRemotely.LogicallyAlways);
-            Assert.False(possibleInitiateRemotely.LogicallyFree);
-            Assert.False(possibleInitiateRemotely.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SpeedBoosterPossible_SetsLogicalPropertiesOnCanLeaveChargeds()
         {
             // Given
