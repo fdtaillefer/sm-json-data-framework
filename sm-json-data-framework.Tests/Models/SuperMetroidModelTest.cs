@@ -1268,57 +1268,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SpeedBoosterPossible_SetsLogicalPropertiesOnCanLeaveChargeds()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Morph")
-                .RegisterRemovedItem("Gravity")
-                .RegisterDisabledTech("canShinespark");
-            logicalOptions.TilesSavedWithStutter = 0;
-            logicalOptions.TilesToShineCharge = 19;
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            CanLeaveCharged neverByImpossibleRemote = ModelWithOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First();
-            Assert.False(neverByImpossibleRemote.LogicallyRelevant);
-            Assert.False(neverByImpossibleRemote.LogicallyAlways);
-            Assert.False(neverByImpossibleRemote.LogicallyFree);
-            Assert.True(neverByImpossibleRemote.LogicallyNever);
-            Assert.Equal(31.5M, neverByImpossibleRemote.LogicalEffectiveRunwayLength);
-
-            CanLeaveCharged neverByImpossibleStrat = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
-            Assert.False(neverByImpossibleStrat.LogicallyRelevant);
-            Assert.False(neverByImpossibleStrat.LogicallyAlways);
-            Assert.False(neverByImpossibleStrat.LogicallyFree);
-            Assert.True(neverByImpossibleStrat.LogicallyNever);
-            Assert.Equal(20.5M, neverByImpossibleStrat.LogicalEffectiveRunwayLength);
-
-            CanLeaveCharged neverByImpossibleShinespark = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
-            Assert.False(neverByImpossibleShinespark.LogicallyRelevant);
-            Assert.False(neverByImpossibleShinespark.LogicallyAlways);
-            Assert.False(neverByImpossibleShinespark.LogicallyFree);
-            Assert.True(neverByImpossibleShinespark.LogicallyNever);
-            Assert.Equal(19M + 2 * 4M / 3M, neverByImpossibleShinespark.LogicalEffectiveRunwayLength);
-
-            CanLeaveCharged neverByShortRunway = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
-            Assert.False(neverByShortRunway.LogicallyRelevant);
-            Assert.False(neverByShortRunway.LogicallyAlways);
-            Assert.False(neverByShortRunway.LogicallyFree);
-            Assert.True(neverByShortRunway.LogicallyNever);
-            Assert.Equal(17.5M, neverByShortRunway.LogicalEffectiveRunwayLength);
-
-            CanLeaveCharged notFreeBecauseSpeedNotFree = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
-            Assert.True(notFreeBecauseSpeedNotFree.LogicallyRelevant);
-            Assert.False(notFreeBecauseSpeedNotFree.LogicallyAlways);
-            Assert.False(notFreeBecauseSpeedNotFree.LogicallyFree);
-            Assert.False(notFreeBecauseSpeedNotFree.LogicallyNever);
-            Assert.Equal(30, notFreeBecauseSpeedNotFree.LogicalEffectiveRunwayLength);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SpeedBoosterRemoved_SetsLogicalPropertiesOnViewableNodes()
         {
             // Given
@@ -1880,18 +1829,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(noSparkCanComeInCharged.LogicallyNever);
             Assert.False(noSparkCanComeInCharged.LogicallyAlways);
             Assert.False(noSparkCanComeInCharged.LogicallyFree);
-
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
-            Assert.False(canLeaveCharged.LogicallyRelevant);
-            Assert.True(canLeaveCharged.LogicallyNever);
-            Assert.False(canLeaveCharged.LogicallyAlways);
-            Assert.False(canLeaveCharged.LogicallyFree);
-
-            CanLeaveCharged freeCanLeaveCharged = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
-            Assert.True(freeCanLeaveCharged.LogicallyRelevant);
-            Assert.False(freeCanLeaveCharged.LogicallyNever);
-            Assert.True(freeCanLeaveCharged.LogicallyAlways);
-            Assert.True(freeCanLeaveCharged.LogicallyFree);
         }
 
         [Fact]
@@ -1984,12 +1921,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(canComeInCharged.LogicallyNever);
             Assert.False(canComeInCharged.LogicallyAlways);
             Assert.False(canComeInCharged.LogicallyFree);
-
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
-            Assert.True(canLeaveCharged.LogicallyRelevant);
-            Assert.False(canLeaveCharged.LogicallyNever);
-            Assert.False(canLeaveCharged.LogicallyAlways);
-            Assert.False(canLeaveCharged.LogicallyFree);
         }
 
         [Fact]
@@ -2075,12 +2006,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(canComeInCharged.LogicallyNever);
             Assert.False(canComeInCharged.LogicallyAlways);
             Assert.False(canComeInCharged.LogicallyFree);
-
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
-            Assert.True(canLeaveCharged.LogicallyRelevant);
-            Assert.False(canLeaveCharged.LogicallyNever);
-            Assert.False(canLeaveCharged.LogicallyAlways);
-            Assert.False(canLeaveCharged.LogicallyFree);
         }
 
         [Fact]

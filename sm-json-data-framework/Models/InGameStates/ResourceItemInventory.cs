@@ -105,6 +105,8 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
+        public virtual bool Empty => InternalExpansionItems.Count == 0;
+
         protected IDictionary<string, (ExpansionItem item, int count)> InternalExpansionItems { get; } = new Dictionary<string, (ExpansionItem item, int count)>();
         public ReadOnlyDictionary<string, (ExpansionItem item, int count)> ExpansionItems => InternalExpansionItems.AsReadOnly();
 
@@ -184,6 +186,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <returns>The new copy, as a full-fledged (not just read-only) inventory</returns>
         public ResourceItemInventory Clone();
+
+        /// <summary>
+        /// If true, this inventory contains no items.
+        /// </summary>
+        public bool Empty { get; }
 
         /// <summary>
         /// Returns a clone of this inventory, but with the provided base resource Maximums

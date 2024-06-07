@@ -2,6 +2,7 @@
 using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
@@ -111,6 +112,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode Node { get; }
 
+        /// <summary>
+        /// Attempts to execute this CanLeaveCharged based on the provided in-game state (which will not be altered), 
+        /// by fulfilling its execution requirements. Be aware that this does not do any checks with remote initiation, 
+        /// as that part cannot be done while at the node of the CanLeaveCharged. Instead, this can be done retroactively. 
+        /// It's seen as the responsibility of <see cref="CanComeInCharged.ExecuteUseful(SuperMetroidModel, ReadOnlyInGameState, int, int)"/>
+        /// to combine the execution of a CanLeaveCharged with the retroactive validation of its remote initiation.
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
+        /// <param name="times">The number of consecutive times that this should be executed.
+        /// Only really impacts resource cost, since most items are non-consumable.</param>
+        /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
+        /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
+        /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.
+        /// The in-game state in that ExecutionResult will never be the same instance as the provided one.</returns>
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // There are many things to check...
@@ -153,6 +169,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Add a record of the canLeaveCharged being executed
             result.AddExecutedCanLeaveCharged(this, bestStrat);
+
+            // Add a record of SpeedBooster being used
+            result.AddItemInvolved(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME]);
 
             // Finally, spend the energy for executing a shinespark if needed (we already asked to check that the state has enough)
             result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, shinesparkEnergyToSpend);

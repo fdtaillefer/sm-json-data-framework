@@ -87,6 +87,8 @@ namespace sm_json_data_framework.Models.InGameStates
             return new ItemInventory(this, baseResourceMaximums);
         }
 
+        public override bool Empty => base.Empty && NonConsumableItems.Count == 0;
+
         /// <summary>
         /// Returns a read-only view of this ItemInventory. 
         /// The view will still be this instance and reflect any changes subsequently applied to it.

@@ -207,6 +207,16 @@ namespace sm_json_data_framework.Models.Requirements
         }
 
         /// <summary>
+        /// Adds to this ExecutionResult a record of getting execution some benefit out of having the provided item.
+        /// This should exclude damage reduction and the operation of weapons recorded in <see cref="KilledEnemies"/>.
+        /// </summary>
+        /// <param name="items">The items</param>
+        public void AddItemInvolved(Item item)
+        {
+            ItemsInvolved = ItemsInvolved.Values.Append(item).ToDictionary(item => item.Name);
+        }
+
+        /// <summary>
         /// Adds to this ExecutionResult a record of getting execution some benefit out of having the provided items.
         /// This should exclude damage reduction and the operation of weapons recorded in <see cref="KilledEnemies"/>.
         /// </summary>

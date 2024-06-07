@@ -620,6 +620,40 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
+        #region Tests for ApplyRefillResources()
+
+        [Fact]
+        public void ApplyRefillResources_RefillsAllResources()
+        {
+            // Given
+            int initialAmount = 5;
+            int maxAmount = 100;
+            ResourceCount startResources = new ResourceCount();
+            ResourceCount maxResources = startResources.Clone();
+            foreach(RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                startResources.ApplyAmount(resource, initialAmount);
+                maxResources.ApplyAmount(resource, maxAmount);
+            }
+
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .BaseResourceMaximums(maxResources)
+                .StartingResources(startResources)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyRefillResources();
+
+            // Expect
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            { 
+                Assert.Equal(maxAmount, inGameState.Resources.GetAmount(resource));
+            }
+        }
+
+        #endregion
+
         #region Tests for GetResourceVariationWith()
         [Fact]
         public void GetResourceVariationWith_ReturnsPositiveAndNegativeAnd0()

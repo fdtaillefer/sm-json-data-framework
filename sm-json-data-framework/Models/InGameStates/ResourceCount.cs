@@ -3,6 +3,7 @@ using sm_json_data_framework.Models.Requirements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace sm_json_data_framework.Models.InGameStates
@@ -203,6 +204,36 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 return actualAmount >= quantity;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if(obj is ReadOnlyResourceCount count)
+            {
+                foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                {
+                    if (GetAmount(resource) != count.GetAmount(resource))
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new();
+            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                hash.Add(Amounts[resource]);
+            }
+            return hash.ToHashCode();
         }
     }
 

@@ -176,6 +176,19 @@ namespace sm_json_data_framework.Models.InGameStates
             return this;
         }
 
+        /// <summary>
+        /// Sets current value for the all resources to their current maximum.
+        /// </summary>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyRefillResources()
+        {
+            foreach (RechargeableResourceEnum rechargeableResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                ApplyRefillResource(rechargeableResource);
+            }
+            return this;
+        }
+
         public ResourceCount GetResourceVariationWith(ReadOnlyInGameState other)
         {
             ResourceCount returnValue = new ResourceCount();
