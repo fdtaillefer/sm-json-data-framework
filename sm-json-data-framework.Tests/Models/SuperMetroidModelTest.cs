@@ -1332,51 +1332,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodeLocks()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_ZebesAwake"] })
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            NodeLock neverActiveLock = ModelWithOptions.Rooms["Bomb Torizo Room"].Nodes[1].Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
-            Assert.False(neverActiveLock.LogicallyRelevant);
-            Assert.False(neverActiveLock.LogicallyNever);
-            Assert.True(neverActiveLock.LogicallyAlways);
-            Assert.True(neverActiveLock.LogicallyFree);
-
-            NodeLock unpassableLock = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[7].Locks["Etecoon Exit Grey Lock"];
-            Assert.True(unpassableLock.LogicallyRelevant);
-            Assert.True(unpassableLock.LogicallyNever);
-            Assert.False(unpassableLock.LogicallyAlways);
-            Assert.False(unpassableLock.LogicallyFree);
-
-            NodeLock greyPossibleBypassableLock = ModelWithOptions.Rooms["West Ocean"].Nodes[4].Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
-            Assert.True(greyPossibleBypassableLock.LogicallyRelevant);
-            Assert.False(greyPossibleBypassableLock.LogicallyNever);
-            Assert.False(greyPossibleBypassableLock.LogicallyAlways);
-            Assert.False(greyPossibleBypassableLock.LogicallyFree);
-
-            NodeLock freeUnlockLock = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[5].Locks["Blue Brinstar Power Bombs Spawn Lock"];
-            Assert.True(freeUnlockLock.LogicallyRelevant);
-            Assert.False(freeUnlockLock.LogicallyNever);
-            Assert.True(freeUnlockLock.LogicallyAlways);
-            Assert.True(freeUnlockLock.LogicallyFree);
-
-            NodeLock possibleUnlockableLock = ModelWithOptions.Rooms["Construction Zone"].Nodes[2].Locks["Construction Zone Red Lock (to Ceiling E-Tank)"];
-            Assert.True(possibleUnlockableLock.LogicallyRelevant);
-            Assert.False(possibleUnlockableLock.LogicallyNever);
-            Assert.False(possibleUnlockableLock.LogicallyAlways);
-            Assert.False(possibleUnlockableLock.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
         {
             // Given

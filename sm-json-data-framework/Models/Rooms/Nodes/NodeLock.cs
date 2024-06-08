@@ -252,6 +252,12 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         public ExecutionResult Execute(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
+            // No point bypassing a lock that isn't active
+            if (!NodeLock.IsActive(model, inGameState))
+            {
+                return null;
+            }
+
             // If there are no bypass strats, bypassing fails
             if (!NodeLock.BypassStrats.Any())
             {

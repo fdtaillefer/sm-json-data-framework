@@ -44,10 +44,10 @@ namespace sm_json_data_framework.Models.Navigation
             ItemsEnabledNames = initialInGameState.Inventory.DisabledItemNames.Except(executionResult.ResultingState.Inventory.DisabledItemNames).ToHashSet();
 
             // Initialize flags gained
-            GameFlagsGained = GameFlagsGained.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptIn(initialInGameState).Values).ToList();
+            GameFlagsGained = GameFlagsGained.Values.Concat(executionResult.ResultingState.GetActiveGameFlagsExceptIn(initialInGameState).Values).ToDictionary(flag => flag.Name);
 
             // Initialize locks opened
-            LocksOpened = LocksOpened.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptIn(initialInGameState).Values).ToList();
+            LocksOpened = LocksOpened.Values.Concat(executionResult.ResultingState.GetOpenedNodeLocksExceptIn(initialInGameState).Values).ToDictionary(nodeLock => nodeLock.Name);
 
             // Initialize item locations taken
             ItemLocationsTaken = ItemLocationsTaken.Concat(executionResult.ResultingState.GetTakenItemLocationsExceptIn(initialInGameState).Values).ToList();
@@ -69,8 +69,8 @@ namespace sm_json_data_framework.Models.Navigation
             // Transfer information data from the ExecutionResult.
             RunwaysUsed = executionResult.RunwaysUsed.ToList();
             CanLeaveChargedExecuted = executionResult.CanLeaveChargedExecuted.ToList();
-            OpenedLocks = executionResult.OpenedLocks.ToList();
-            BypassedLocks = executionResult.BypassedLocks.ToList();
+            OpenedLocks = executionResult.OpenedLocks.Values.ToDictionary(pair => pair.openedLock.Name);
+            BypassedLocks = executionResult.BypassedLocks.Values.ToDictionary(pair => pair.bypassedLock.Name);
             KilledEnemies = executionResult.KilledEnemies.ToList();
 
             ItemsInvolved = new Dictionary<string, Item>(executionResult.ItemsInvolved);
@@ -120,25 +120,25 @@ namespace sm_json_data_framework.Models.Navigation
         public IReadOnlySet<string> ItemsEnabledNames { get; protected set; } = new HashSet<string>();
 
         /// <summary>
-        /// The enumeration of game flags that have been obtained by the player as a result of this action.
+        /// The game flags that have been obtained by the player as a result of this action, mapped by name.
         /// </summary>
-        public IReadOnlyCollection<GameFlag> GameFlagsGained { get; protected set; } = new List<GameFlag>();
+        public IReadOnlyDictionary<string, GameFlag> GameFlagsGained { get; protected set; } = new Dictionary<string, GameFlag>();
 
         /// <summary>
-        /// The enumeration of game flags that have been obtained by the player as a result of this action.
+        /// The game flags that have been obtained by the player as a result of this action, mapped by name.
         /// </summary>
-        public IReadOnlyCollection<GameFlag> GameFlagsLost { get; protected set; } = new List<GameFlag>();
+        public IReadOnlyDictionary<string, GameFlag> GameFlagsLost { get; protected set; } = new Dictionary<string, GameFlag>();
 
         /// <summary>
-        /// The enumeration of node locks that have been opened as a result of this action.
+        /// The node locks that have been opened as a result of this action, mapped by name.
         /// </summary>
-        public IReadOnlyCollection<NodeLock> LocksOpened { get; protected set; } = new List<NodeLock>();
+        public IReadOnlyDictionary<string, NodeLock> LocksOpened { get; protected set; } = new Dictionary<string, NodeLock>();
 
         /// <summary>
-        /// The enumeration of node  locks that have been closed as a result of this action.
+        /// The node locks that have been closed as a result of this action, mapped by name.
         /// This can only really happen by reversing an action.
         /// </summary>
-        public IReadOnlyCollection<NodeLock> LocksClosed { get; protected set; } = new List<NodeLock>();
+        public IReadOnlyDictionary<string, NodeLock> LocksClosed { get; protected set; } = new Dictionary<string, NodeLock>();
 
         /// <summary>
         /// The enumeration of item locations whose item has been taken by the player as a result of this action.
@@ -186,14 +186,14 @@ namespace sm_json_data_framework.Models.Navigation
         public IReadOnlyCollection<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; protected set; } = new List<(CanLeaveCharged, Strat)>();
 
         /// <summary>
-        /// A sequence of node locks that were opened along with the open strat used to opem them.
+        /// The node locks that were opened along with the open strat used to opem them, mapped by lock name.
         /// </summary>
-        public IReadOnlyCollection<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; protected set; } = new List<(NodeLock openedLock, Strat stratUsed)>();
+        public IReadOnlyDictionary<string, (NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; protected set; } = new Dictionary<string, (NodeLock openedLock, Strat stratUsed)>();
 
         /// <summary>
-        /// A sequence of node locks that were bypassed along with the bypass strat used to opem them.
+        /// The node locks that were bypassed along with the bypass strat used to opem them, mapped by lock name.
         /// </summary>
-        public IReadOnlyCollection<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; protected set; } = new List<(NodeLock bypassedLock, Strat stratUsed)>();
+        public IReadOnlyDictionary<string, (NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; protected set; } = new Dictionary<string, (NodeLock bypassedLock, Strat stratUsed)>();
 
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
@@ -321,12 +321,12 @@ namespace sm_json_data_framework.Models.Navigation
                     Console.WriteLine($"A canLeaveCharged on node '{canLeaveCharged.Node.Name}' was used, by executing strat '{strat.Name}'");
                 }
 
-                foreach(var (nodeLock, strat) in OpenedLocks)
+                foreach(var (nodeLock, strat) in OpenedLocks.Values)
                 {
                     Console.WriteLine($"Lock '{nodeLock.Name}' was opened, by executing strat '{strat.Name}'");
                 }
 
-                foreach(var (nodeLock, strat) in BypassedLocks)
+                foreach(var (nodeLock, strat) in BypassedLocks.Values)
                 {
                     Console.WriteLine($"Lock '{nodeLock.Name}' was bypassed, by executing strat '{strat.Name}'");
                 }
@@ -396,23 +396,23 @@ namespace sm_json_data_framework.Models.Navigation
                 }
 
                 // Game flags gained and lost
-                foreach (GameFlag flag in GameFlagsGained)
+                foreach (GameFlag flag in GameFlagsGained.Values)
                 {
                     Console.WriteLine($"Gained game flag '{flag.Name}'");
                 }
 
-                foreach (GameFlag flag in GameFlagsLost)
+                foreach (GameFlag flag in GameFlagsLost.Values)
                 {
                     Console.WriteLine($"Lost game flag '{flag.Name}'");
                 }
 
                 // Locks opened and closed
-                foreach (NodeLock nodeLock in LocksOpened)
+                foreach (NodeLock nodeLock in LocksOpened.Values)
                 {
                     Console.WriteLine($"Opened lock '{nodeLock.Name}'");
                 }
 
-                foreach (NodeLock nodeLock in LocksClosed)
+                foreach (NodeLock nodeLock in LocksClosed.Values)
                 {
                     Console.WriteLine($"Closed lock '{nodeLock.Name}'");
                 }

@@ -273,11 +273,11 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Applies the opening of the provided lock in this InGameState. Expects that samus is at the node that has that lock.
+        /// Applies the opening of the provided lock in this InGameState.
         /// </summary>
         /// <param name="nodeLock">Lock to open</param>
         /// <param name="applyToRoomState">If true, will also remember the lock as being opened in the current room visit.
-        /// This can only be done if Samus is at the node that has the lock. Se this to false to unlock a lock remotely.</param>
+        /// This can only be done if Samus is at the node that has the lock. Set this to false to unlock a lock remotely.</param>
         /// <returns>This, for chaining</returns>
         public InGameState ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
         {

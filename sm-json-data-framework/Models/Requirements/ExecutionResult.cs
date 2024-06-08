@@ -53,19 +53,19 @@ namespace sm_json_data_framework.Models.Requirements
         public ICollection<(CanLeaveCharged canLeaveChargedUsed, Strat stratUsed)> CanLeaveChargedExecuted { get; protected set; } = new List<(CanLeaveCharged, Strat)>();
 
         /// <summary>
-        /// A sequence of node locks that were opened along with the open strat used to opem them.
+        /// The node locks that were opened along with the open strat used to opem them, mapped by lock name.
         /// </summary>
-        public ICollection<(NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; protected set; } = new List<(NodeLock openedLock, Strat stratUsed)>();
+        public IDictionary<string, (NodeLock openedLock, Strat stratUsed)> OpenedLocks { get; protected set; } = new Dictionary<string, (NodeLock openedLock, Strat stratUsed)>();
 
         /// <summary>
-        /// A sequence of node locks that were bypassed along with the bypass strat used to opem them.
+        /// A sequence of node locks that were bypassed along with the bypass strat used to opem them, mapped by lock name.
         /// </summary>
-        public ICollection<(NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; protected set; } = new List<(NodeLock bypassedLock, Strat stratUsed)>();
+        public IDictionary<string, (NodeLock bypassedLock, Strat stratUsed)> BypassedLocks { get; protected set; } = new Dictionary<string, (NodeLock bypassedLock, Strat stratUsed)>();
 
         /// <summary>
-        /// A sequence of game flags that were activated.
+        /// A sequence of game flags that were activated, mapped by name.
         /// </summary>
-        public ICollection<GameFlag> ActivatedGameFlags { get; protected set; } = new List<GameFlag>();
+        public IDictionary<string, GameFlag> ActivatedGameFlags { get; protected set; } = new Dictionary<string, GameFlag>();
 
         /// <summary>
         /// A sequence of enemies that were killed, along with the weapon and number of shots used.
@@ -95,9 +95,13 @@ namespace sm_json_data_framework.Models.Requirements
             ResultingState = subsequentResult.ResultingState;
             RunwaysUsed = RunwaysUsed.Concat(subsequentResult.RunwaysUsed).ToList();
             CanLeaveChargedExecuted = CanLeaveChargedExecuted.Concat(subsequentResult.CanLeaveChargedExecuted).ToList();
-            OpenedLocks = OpenedLocks.Concat(subsequentResult.OpenedLocks).ToList();
-            BypassedLocks = BypassedLocks.Concat(subsequentResult.BypassedLocks).ToList();
-            ActivatedGameFlags = ActivatedGameFlags.Concat(subsequentResult.ActivatedGameFlags).ToList();
+            OpenedLocks = OpenedLocks.Values.Concat(subsequentResult.OpenedLocks.Values)
+                .ToDictionary(pair => pair.openedLock.Name);
+            BypassedLocks = BypassedLocks.Values.Concat(subsequentResult.BypassedLocks.Values)
+                .ToDictionary(pair => pair.bypassedLock.Name);
+            ActivatedGameFlags = ActivatedGameFlags.Values.Concat(subsequentResult.ActivatedGameFlags.Values)
+                .Distinct(ObjectReferenceEqualityComparer<GameFlag>.Default)
+                .ToDictionary(flag => flag.Name);
             KilledEnemies = KilledEnemies.Concat(subsequentResult.KilledEnemies).ToList();
             ItemsInvolved = ItemsInvolved.Values.Concat(subsequentResult.ItemsInvolved.Values)
                 .Distinct(ObjectReferenceEqualityComparer<Item>.Default)
@@ -135,7 +139,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to open the lock</param>
         public void ApplyOpenedLock(NodeLock nodeLock, Strat strat)
         {
-            OpenedLocks = OpenedLocks.Append((nodeLock, strat)).ToList();
+            OpenedLocks = OpenedLocks.Values.Append((openedLock: nodeLock, stratUsed: strat)).ToDictionary(pair => pair.openedLock.Name);
             ResultingState.ApplyOpenLock(nodeLock);
         }
 
@@ -146,7 +150,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to bypass the lock</param>
         public void ApplyBypassedLock(NodeLock nodeLock, Strat strat)
         {
-            BypassedLocks = BypassedLocks.Append((nodeLock, strat)).ToList();
+            BypassedLocks = BypassedLocks.Values.Append((bypassedLock: nodeLock, stratUsed: strat)).ToDictionary(pair => pair.bypassedLock.Name);
             ResultingState.ApplyBypassLock(nodeLock);
         }
 
@@ -158,7 +162,7 @@ namespace sm_json_data_framework.Models.Requirements
         {
             if (!ResultingState.ActiveGameFlags.ContainsFlag(gameFlag))
             {
-                ActivatedGameFlags = ActivatedGameFlags.Append(gameFlag).ToList();
+                ActivatedGameFlags = ActivatedGameFlags.Values.Append(gameFlag).ToDictionary(gameFlag => gameFlag.Name);
                 ResultingState.ApplyAddGameFlag(gameFlag);
             }
         }
