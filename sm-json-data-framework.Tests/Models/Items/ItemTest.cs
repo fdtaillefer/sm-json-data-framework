@@ -29,7 +29,6 @@ namespace sm_json_data_framework.Tests.Models.Items
             // Expect
             Item item = Model.Items[SuperMetroidModel.POWER_SUIT_NAME];
             Assert.Equal(SuperMetroidModel.POWER_SUIT_NAME, item.Name);
-
         }
 
         #endregion

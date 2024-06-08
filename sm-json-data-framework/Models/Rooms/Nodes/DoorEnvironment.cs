@@ -29,8 +29,6 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public PhysicsEnum Physics { get; }
 
-        public IReadOnlySet<int> EntranceNodeIds { get; }
-
         /// <summary>
         /// The nodes that enable this environment if Samus has entered the room from one of them, mapped by in-room ID. Or, if null, the environment is always applicable.
         /// </summary>
