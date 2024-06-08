@@ -43,9 +43,9 @@ namespace sm_json_data_framework.Models.Requirements
         public InGameState ResultingState { get; protected set; }
 
         /// <summary>
-        /// A sequence of runways that were used (possibly retroactively) along with the accompanying runway strat.
+        /// The runways that were used (possibly retroactively) along with the accompanying runway strat, mapped by name.
         /// </summary>
-        public ICollection<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; protected set; } = new List<(Runway, Strat)>();
+        public IDictionary<string, (Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; protected set; } = new Dictionary<string, (Runway, Strat)>();
 
         /// <summary>
         /// A sequence of canLeaveCharged that were executed (possibly retroactively) along with the accompanying canLeaveCharged strat.
@@ -93,7 +93,7 @@ namespace sm_json_data_framework.Models.Requirements
         public ExecutionResult ApplySubsequentResult(ExecutionResult subsequentResult)
         {
             ResultingState = subsequentResult.ResultingState;
-            RunwaysUsed = RunwaysUsed.Concat(subsequentResult.RunwaysUsed).ToList();
+            RunwaysUsed = RunwaysUsed.Values.Concat(subsequentResult.RunwaysUsed.Values).ToDictionary(pair => pair.runwayUsed.Name);
             CanLeaveChargedExecuted = CanLeaveChargedExecuted.Concat(subsequentResult.CanLeaveChargedExecuted).ToList();
             OpenedLocks = OpenedLocks.Values.Concat(subsequentResult.OpenedLocks.Values)
                 .ToDictionary(pair => pair.openedLock.Name);
@@ -174,7 +174,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used on that runway</param>
         public void AddUsedRunway(Runway runway, Strat strat)
         {
-            RunwaysUsed = RunwaysUsed.Append((runway, strat)).ToList();
+            RunwaysUsed = RunwaysUsed.Values.Append((runwayUsed: runway, stratUsed: strat)).ToDictionary(pair => pair.runwayUsed.Name);
         }
 
         /// <summary>

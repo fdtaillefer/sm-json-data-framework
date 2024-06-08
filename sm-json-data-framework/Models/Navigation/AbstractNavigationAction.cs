@@ -67,7 +67,7 @@ namespace sm_json_data_framework.Models.Navigation
             }
 
             // Transfer information data from the ExecutionResult.
-            RunwaysUsed = executionResult.RunwaysUsed.ToList();
+            RunwaysUsed = executionResult.RunwaysUsed.Values.ToDictionary(pair => pair.runwayUsed.Name);
             CanLeaveChargedExecuted = executionResult.CanLeaveChargedExecuted.ToList();
             OpenedLocks = executionResult.OpenedLocks.Values.ToDictionary(pair => pair.openedLock.Name);
             BypassedLocks = executionResult.BypassedLocks.Values.ToDictionary(pair => pair.bypassedLock.Name);
@@ -176,9 +176,9 @@ namespace sm_json_data_framework.Models.Navigation
 
         #region Information about how the action was performed
         /// <summary>
-        /// A sequence of runways that were used (possibly retroactively) along with the accompanying runway strat.
+        /// The runways that were used (possibly retroactively) along with the accompanying runway strat, mapped by name.
         /// </summary>
-        public IReadOnlyCollection<(Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; protected set; } = new List<(Runway, Strat)>();
+        public IReadOnlyDictionary<string, (Runway runwayUsed, Strat stratUsed)> RunwaysUsed { get; protected set; } = new Dictionary<string, (Runway, Strat)>();
 
         /// <summary>
         /// A sequence of canLeaveCharged that were executed (possibly retroactively) along with the accompanying canLeaveCharged strat.
@@ -311,7 +311,7 @@ namespace sm_json_data_framework.Models.Navigation
 
             if (outputDetails)
             {
-                foreach(var (runway, strat) in RunwaysUsed)
+                foreach(var (runway, strat) in RunwaysUsed.Values)
                 {
                     Console.WriteLine($"Runway '{runway.Name}' was used, by executing strat '{strat.Name}'");
                 }
