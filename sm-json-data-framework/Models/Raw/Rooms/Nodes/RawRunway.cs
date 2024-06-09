@@ -29,7 +29,7 @@ namespace sm_json_data_framework.Models.Raw.Rooms.Nodes
 
         public IList<RawStrat> Strats { get; set; } = new List<RawStrat>();
 
-        public bool UsableComingIn = true;
+        public bool UsableComingIn { get; set; } = true;
 
         public int OpenEnd { get; set; } = 0;
     }

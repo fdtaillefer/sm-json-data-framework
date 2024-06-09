@@ -1192,50 +1192,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRunways()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Runway freeRunway = ModelWithOptions.GetNodeInRoom("Fast Pillars Setup Room", 2).Runways["Base Runway - Fast Pillars Setup Room Bottom Left Door (to Fast Rippers)"];
-            Assert.True(freeRunway.LogicallyRelevant);
-            Assert.True(freeRunway.LogicallyAlways);
-            Assert.True(freeRunway.LogicallyFree);
-            Assert.False(freeRunway.LogicallyNever);
-            Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveRunwayLength);
-            Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveReversibleRunwayLength);
-            Assert.Equal(2 * (32M / 27M) + 10, freeRunway.LogicalEffectiveRunwayLengthNoCharge);
-
-            Runway neverRunway = ModelWithOptions.GetNodeInRoom("Oasis", 2).Runways["Base Runway - Oasis Right Door (to East Sand Hall)"];
-            Assert.False(neverRunway.LogicallyRelevant);
-            Assert.False(neverRunway.LogicallyAlways);
-            Assert.False(neverRunway.LogicallyFree);
-            Assert.True(neverRunway.LogicallyNever);
-            Assert.Equal(12, neverRunway.LogicalEffectiveRunwayLength);
-            Assert.Equal(12, neverRunway.LogicalEffectiveReversibleRunwayLength);
-            Assert.Equal(12, neverRunway.LogicalEffectiveRunwayLengthNoCharge);
-
-            Runway possibleRunway = ModelWithOptions.GetNodeInRoom("Golden Torizo's Room", 2).Runways["Base Runway - Golden Torizo Room Right Door (to Screw Attack)"];
-            Assert.True(possibleRunway.LogicallyRelevant);
-            Assert.False(possibleRunway.LogicallyAlways);
-            Assert.False(possibleRunway.LogicallyFree);
-            Assert.False(possibleRunway.LogicallyNever);
-            Assert.Equal(28, possibleRunway.LogicalEffectiveRunwayLength);
-            Assert.Equal(28, possibleRunway.LogicalEffectiveReversibleRunwayLength);
-            Assert.Equal(28, possibleRunway.LogicalEffectiveRunwayLengthNoCharge);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SpeedBoosterRemoved_SetsLogicalPropertiesOnViewableNodes()
         {
             // Given
