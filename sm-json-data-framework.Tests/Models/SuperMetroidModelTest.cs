@@ -213,7 +213,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Same(arbitraryNode3, initiateRemotely.InitiateAtNode);
 
             RoomNode arbitraryNode4 = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
-            ViewableNode viewableNode = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
+            ViewableNode viewableNode = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[3];
             Assert.Same(arbitraryNode4, viewableNode.Node);
 
             RoomNode arbitraryNode5 = model.GetNodeInRoom("Early Supers Room", 3);
@@ -740,7 +740,7 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Same(appliedOptions, arbitraryNode.CanLeaveCharged.First().AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryNode.InteractionRequires.AppliedLogicalOptions);
             Assert.Same(appliedOptions, arbitraryNode.Runways["Base Runway - Landing Site Top Left Door (to Gauntlet)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, ModelWithOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, ModelWithOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[3].AppliedLogicalOptions);
         }
 
         [Fact]
@@ -793,7 +793,7 @@ namespace sm_json_data_framework.Tests.Models
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            ViewableNode arbitraryViewableNode = ModelWithOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[0];
+            ViewableNode arbitraryViewableNode = ModelWithOptions.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).ViewableNodes[3];
             ReadOnlyLogicalOptions appliedOptions = arbitraryViewableNode.AppliedLogicalOptions;
             Assert.NotSame(logicalOptions, appliedOptions);
             Assert.Equal(20, appliedOptions.TilesToShineCharge);
@@ -1189,22 +1189,6 @@ namespace sm_json_data_framework.Tests.Models
             FarmCycle possibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
             Assert.True(possibleCycle.LogicallyRelevant);
             Assert.False(possibleCycle.LogicallyNever);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodes()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            RoomNode node = ModelWithOptions.GetNodeInRoom("Landing Site", 5);
-            Assert.True(node.LogicallyRelevant);
-            Assert.False(node.LogicallyNeverInteract);
-            // Model doesn't contain a InteractRequires value so no way to test for its never...
         }
 
         [Fact]

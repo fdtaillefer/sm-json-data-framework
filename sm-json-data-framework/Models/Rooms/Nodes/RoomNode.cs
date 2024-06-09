@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             SpawnAtNode = sourceElement.SpawnAtNode.Finalize(mappings);
             Locks = sourceElement.Locks.Values.Select(nodeLock => nodeLock.Finalize(mappings)).ToDictionary(nodeLock => nodeLock.Name).AsReadOnly();
             Utility = sourceElement.Utility.AsReadOnly();
-            ViewableNodes = sourceElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToList().AsReadOnly();
+            ViewableNodes = sourceElement.ViewableNodes.Select(viewableNode => viewableNode.Finalize(mappings)).ToDictionary(viewableNode => viewableNode.Node.Id).AsReadOnly();
             Yields = sourceElement.Yields.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
             Note = sourceElement.Note?.AsReadOnly();
             Room = sourceElement.Room.Finalize(mappings);
@@ -116,6 +116,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
         /// <summary>
         /// The node at which Samus actually spawns upon entering the room via this node. In most cases it will be this node, but not always.
+        /// This value is never null, and makes no reflection about whether it's actually possible to enter the room via this node.
         /// </summary>
         public RoomNode SpawnAtNode { get; }
 
@@ -135,9 +136,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IReadOnlySet<UtilityEnum> Utility { get; }
 
         /// <summary>
-        /// The list of ways Samus can view other nodes from this node.
+        /// The list of ways Samus can view other nodes from this node, mapped by the in-room ID of the node that can be viewed.
         /// </summary>
-        public IReadOnlyList<ViewableNode> ViewableNodes { get; }
+        public IReadOnlyDictionary<int, ViewableNode> ViewableNodes { get; }
 
         /// <summary>
         /// The game flags that are activated by interacting with this node, mapped by name.
@@ -175,15 +176,16 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         public IReadOnlyList<TwinDoorAddress> TwinDoorAddresses { get; }
 
         /// <summary>
-        /// Returns the enumeration of locks on this node that are active and locked, according to the provided inGameState.
+        /// Returns the locks on this node that are active and locked (mapped by name), according to the provided inGameState.
         /// </summary>
         /// <param name="inGameState">InGameState to evaluate for active locks</param>
         /// <returns></returns>
-        public IEnumerable<NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public IDictionary<string, NodeLock> GetActiveLocks(SuperMetroidModel model, ReadOnlyInGameState inGameState)
         {
             // Return locks whose locking conditions have been met, and that haven't been opened
             return Locks.Values.WhereLogicallyRelevant().Where(nodeLock => nodeLock.Lock.Execute(model, inGameState) != null)
-                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock));
+                .Where(nodeLock => !inGameState.OpenedLocks.ContainsLock(nodeLock))
+                .ToDictionary(nodeLock => nodeLock.Name);
         }
 
         IExecutable _interactExecution = null;
@@ -216,7 +218,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 doorEnvironment.ApplyLogicalOptions(logicalOptions, rules);
             }
 
-            foreach (ViewableNode viewableNode in ViewableNodes)
+            foreach (ViewableNode viewableNode in ViewableNodes.Values)
             {
                 viewableNode.ApplyLogicalOptions(logicalOptions, rules);
             }
@@ -291,7 +293,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // First thing is making sure no locks prevent interaction
             IEnumerable<NodeLock> bypassedLocks = inGameState.GetBypassedExitLocks(previousRoomCount);
-            IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState)
+            IEnumerable<NodeLock> unhandledLocks = Node.GetActiveLocks(model, inGameState).Values
                 .Where(activeLock => !bypassedLocks.Contains(activeLock, ReferenceEqualityComparer.Instance));
 
             // Can't interact with the node if there's active locks that haven't been opened or bypassed

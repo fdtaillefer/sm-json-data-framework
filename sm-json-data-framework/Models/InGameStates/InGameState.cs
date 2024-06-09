@@ -634,7 +634,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     $"because it does not have an out connection to another room.");
             }
 
-            IEnumerable<NodeLock> activeLocks = CurrentNode.GetActiveLocks(model, this)
+            IEnumerable<NodeLock> activeLocks = CurrentNode.GetActiveLocks(model, this).Values
                 .Except(GetBypassedExitLocks(), ObjectReferenceEqualityComparer<NodeLock>.Default);
             if (activeLocks.Any())
             {
