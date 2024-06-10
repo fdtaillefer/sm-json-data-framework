@@ -1,9 +1,6 @@
-﻿using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models.Requirements.StringRequirements;
-using sm_json_data_framework.Models.Techs;
+﻿using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
@@ -42,7 +39,7 @@ namespace sm_json_data_framework.Tests.Models.Techs
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTechs()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();

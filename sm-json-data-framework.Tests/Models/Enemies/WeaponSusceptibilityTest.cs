@@ -66,7 +66,7 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeaponMultipliers()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();

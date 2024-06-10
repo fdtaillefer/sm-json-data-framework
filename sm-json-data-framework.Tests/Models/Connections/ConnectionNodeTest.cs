@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Tests.Models.Connections
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnConnectionNodes()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();

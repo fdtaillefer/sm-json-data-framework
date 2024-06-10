@@ -1,7 +1,4 @@
-﻿using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models.Items;
-using sm_json_data_framework.Models;
+﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Tests.TestTools;
 using System;
@@ -37,7 +34,7 @@ namespace sm_json_data_framework.Tests.Models.GameFlags
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnGameFlags()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();

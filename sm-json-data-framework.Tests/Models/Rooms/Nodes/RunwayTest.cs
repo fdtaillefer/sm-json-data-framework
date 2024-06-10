@@ -1,7 +1,6 @@
 ﻿using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Rules.InitialState;
-using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Requirements;
 
 namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
@@ -136,7 +134,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRunways()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions()

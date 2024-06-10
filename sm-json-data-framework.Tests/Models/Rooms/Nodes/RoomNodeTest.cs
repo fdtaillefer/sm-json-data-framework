@@ -8,11 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.GameFlags;
-using sm_json_data_framework.Models.Items;
-using sm_json_data_framework.Models.Requirements;
-using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.InGameStates;
 
 namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
@@ -121,7 +116,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNodes()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();

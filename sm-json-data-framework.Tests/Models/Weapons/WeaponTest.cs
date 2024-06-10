@@ -1,6 +1,4 @@
-﻿using sm_json_data_framework.Models.Helpers;
-using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
+﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules.InitialState;
@@ -12,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Weapons;
-using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 
@@ -54,7 +51,7 @@ namespace sm_json_data_framework.Tests.Models.Weapons
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnWeapons()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();

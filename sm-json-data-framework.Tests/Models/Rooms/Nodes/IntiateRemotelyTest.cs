@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Models.Rooms;
 
 namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 {
@@ -39,7 +38,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnInitiateRemotelys()
+        public void ApplyLogicalOptions_SetsLogicalPropertiesOn()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions()

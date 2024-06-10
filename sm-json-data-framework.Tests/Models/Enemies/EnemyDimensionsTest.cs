@@ -1,5 +1,4 @@
 ﻿using sm_json_data_framework.Models.Enemies;
-using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Tests.TestTools;
@@ -34,7 +33,7 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyDimensions()
+        public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
             LogicalOptions logicalOptions = new LogicalOptions();
