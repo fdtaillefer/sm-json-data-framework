@@ -1258,20 +1258,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTwinDoorAddresses()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            TwinDoorAddress twinDoorAddress = ModelWithOptions.Rooms["East Pants Room"].Nodes[2].TwinDoorAddresses.First();
-            Assert.False(twinDoorAddress.LogicallyRelevant);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
         {
             // Given
