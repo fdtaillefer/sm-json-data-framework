@@ -142,7 +142,10 @@ namespace sm_json_data_framework.Models.Rooms
         /// <returns></returns>
         protected bool CalculateLogicallyNever(SuperMetroidRules rules)
         {
-            // A farm cycle is impossible if its requirements are impossible
+            // A farm cycle is impossible if its requirements are impossible.
+            // It's also impossible if the enemy can't spawn, but we can't get that property on the parent RoomEnemy because it's in the middle
+            // of updating its logical properties.
+            // Regardless, in that case our parent is not logically relevant so no one should access us by mistake so we don't need to take it into account.
             return Requires.LogicallyNever;
         }
     }
@@ -150,6 +153,7 @@ namespace sm_json_data_framework.Models.Rooms
 
     /// <summary>
     /// A class that encloses the execution of a farm cycle's requirements (for one cycle)  in an IExecutable interface.
+    /// It assumes the enemy to farm is spawning. It also doesn't add the resources from the kill.
     /// </summary>
     internal class RequirementExecution : IExecutable
     {
@@ -167,6 +171,7 @@ namespace sm_json_data_framework.Models.Rooms
 
     /// <summary>
     /// A class that encloses executing a refill of some resources using a FarmCycle in an IExecutable interface.
+    /// It assumes the enemy to farm is spawning.
     /// </summary>
     internal class FarmExecution : IExecutable
     {
@@ -183,7 +188,7 @@ namespace sm_json_data_framework.Models.Rooms
             {
                 return null;
             }
-            var requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            ExecutionResult requirementsResult = FarmCycle.RequirementExecution.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             // Can't even execute one cycle, so return a failure
             if (requirementsResult == null)
             {
@@ -415,7 +420,7 @@ namespace sm_json_data_framework.Models.Rooms
             }
 
             decimal netGainPerCycle = resource.GetRelatedDrops()
-                .Select(drop => dropRateMultiplier * model.Rules.ConvertDropRateToPercent(effectiveDropRates.GetDropRate(drop))
+                .Select(drop => dropRateMultiplier * model.Rules.ConvertDropRateToProportion(effectiveDropRates.GetDropRate(drop))
                     * FarmCycle.RoomEnemy.Quantity * model.Rules.GetDropResourceCount(drop))
                 .Sum() - costPerCycle;
             return netGainPerCycle;

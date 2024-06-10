@@ -26,6 +26,15 @@ namespace sm_json_data_framework.Rules
             powerBomb: 4
         );
 
+        private readonly EnemyDrops ZebboDrops = new EnemyDrops
+        (
+            noDrop: 0,
+            smallEnergy: 0,
+            bigEnergy: 56,
+            missile: 4,
+            super: 40,
+            powerBomb: 2
+        );
 
         public SuperMetroidRulesTest()
         {
@@ -178,6 +187,27 @@ namespace sm_json_data_framework.Rules
                 powerBomb: 0
             );
             Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void CalculateEffectiveDropRates_WithZeroNoDropAndNeedingNoTierOne_DoesntCrash()
+        {
+            // When
+            EnemyDrops result = Rules.CalculateEffectiveDropRates(ZebboDrops,
+                new EnemyDropEnum[] { EnemyDropEnum.SmallEnergy, EnemyDropEnum.BigEnergy, EnemyDropEnum.Missile, EnemyDropEnum.Super });
+
+            // Expect
+            EnemyDrops expected = new EnemyDrops
+            (
+                noDrop: 100,
+                smallEnergy: 0,
+                bigEnergy: 0,
+                missile: 0,
+                super: 0,
+                powerBomb: 2
+            );
+            Assert.Equal(expected, result);
+
         }
         #endregion
     }

@@ -172,7 +172,7 @@ namespace sm_json_data_framework.Models.Rooms
         /// <returns></returns>
         protected bool CalculateLogicallyNeverSpawns(SuperMetroidRules rules)
         {
-            // We never spawn if spawn conditions are never met OR if conditions to stop spwaning are always met
+            // We never spawn if spawn conditions are never met OR if conditions to stop spawning are always met
             return Spawn.LogicallyNever || StopSpawn?.LogicallyAlways is true;
         }
 

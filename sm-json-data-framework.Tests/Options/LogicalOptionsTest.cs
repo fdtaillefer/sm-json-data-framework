@@ -567,9 +567,9 @@ namespace sm_json_data_framework.Tests.Options
 
             // Expect
             // Untouched original (default) values in logicalOptions
-            Assert.Equal(1, logicalOptions.AcidLeniencyMultiplier);
-            Assert.Equal(1, logicalOptions.HeatLeniencyMultiplier);
-            Assert.Equal(1, logicalOptions.LavaLeniencyMultiplier);
+            Assert.Equal(LogicalOptions.DefaultFrameLeniencyMultiplier, logicalOptions.AcidLeniencyMultiplier);
+            Assert.Equal(LogicalOptions.DefaultFrameLeniencyMultiplier, logicalOptions.HeatLeniencyMultiplier);
+            Assert.Equal(LogicalOptions.DefaultFrameLeniencyMultiplier, logicalOptions.LavaLeniencyMultiplier);
 
             Assert.Empty(logicalOptions.DisabledStrats);
             Assert.Empty(logicalOptions.EnabledTechs);
@@ -586,8 +586,8 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Equal(LogicalOptions.DefaultTilesSavedWithStutter, logicalOptions.TilesSavedWithStutter);
             Assert.Equal(LogicalOptions.DefaultTilesToShineCharge, logicalOptions.TilesToShineCharge);
 
-            Assert.Equal(10, logicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[ConsumableResourceEnum.Energy]);
-            Assert.Equal(10, logicalOptions.SpawnerFarmingOptions.SafetyMarginPercent);
+            Assert.Equal(SpawnerFarmingOptions.DefaultEnergyMinimumRatePerSecond, logicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[ConsumableResourceEnum.Energy]);
+            Assert.Equal(SpawnerFarmingOptions.DefaultSafetyMarginPercent, logicalOptions.SpawnerFarmingOptions.SafetyMarginPercent);
         }
 
         #endregion

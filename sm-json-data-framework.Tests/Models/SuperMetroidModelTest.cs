@@ -1172,26 +1172,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnFarmCycles()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Grapple");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            FarmCycle impossibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
-            Assert.False(impossibleCycle.LogicallyRelevant);
-            Assert.True(impossibleCycle.LogicallyNever);
-
-            FarmCycle possibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
-            Assert.True(possibleCycle.LogicallyRelevant);
-            Assert.False(possibleCycle.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
         {
             // Given

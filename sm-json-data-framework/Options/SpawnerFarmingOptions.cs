@@ -16,8 +16,10 @@ namespace sm_json_data_framework.Options
         public static readonly decimal DefaultSafetyMarginPercent = 10;
         // The rate for energy off 5 Gamets, after heat loss, is roughly 13.7 assuming missiles and supers (but not PBs) are full.
         // With a 10% safety reduction in drops, that goes down to just about 10.8.
-        // We surely want a minimum rate that allows for energy refills at Gamet spawners in heated rooms, so we have a value of 10
-        public static readonly decimal DefaultEnergyMinimumRatePerSecond = 10;
+        // We surely want a minimum rate that allows that refill
+        // What's more: the rate for energy off a Zebbo (120-frame cycle) if non-farmable Missiles and PBs are not full (but supers are) is ~9.135.
+        // They drop big energy at a very high rate in that situation (96) so that seems a reasonable farm.
+        public static readonly decimal DefaultEnergyMinimumRatePerSecond = 9;
         public static readonly decimal DefaultMissileMinimumRatePerSecond = 0.175M;
         // The rate for supers off one Zebbo is roughly 0.196 (with a 2-second cycle)
         public static readonly decimal DefaultSuperMinimumRatePerSecond = 0.175M;

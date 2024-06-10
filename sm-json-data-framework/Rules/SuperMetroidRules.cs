@@ -93,6 +93,12 @@ namespace sm_json_data_framework.Rules
             // Formula for tier one drops is (255 - super - pb) / (small + big + missile + nothing) * (current item), truncated
             Func<EnemyDrops, decimal, decimal> calculateTierOneRate = (baseHexDropRates, individualHexDropRate) =>
             {
+                // A value of 0 stays at 0 regardless of any other drops.
+                // Returning immediately also makes it impossible to get a divide by 0 if all tier 1 drops are at 0.
+                if (individualHexDropRate == 0)
+                {
+                    return 0;
+                }
                 decimal tierTwoValue = 255 - baseHexDropRates.Super - baseHexDropRates.PowerBomb;
                 decimal tierOneValue = baseHexDropRates.SmallEnergy + baseHexDropRates.BigEnergy
                     + baseHexDropRates.Missile + baseHexDropRates.NoDrop;
@@ -126,11 +132,11 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
-        /// Converts the provided drop rate into a drop % chance.
+        /// Converts the provided drop rate into a drop chance (out of 1, rather than a percent).
         /// </summary>
         /// <param name="dropRate">The drop rate, out of DROP_RATE_DIVIDER</param>
         /// <returns></returns>
-        public virtual decimal ConvertDropRateToPercent(decimal dropRate)
+        public virtual decimal ConvertDropRateToProportion(decimal dropRate)
         {
             return dropRate / DROP_RATE_DIVIDER;
         }
