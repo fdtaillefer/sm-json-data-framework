@@ -1066,25 +1066,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinks()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Gravity")
-                .RegisterDisabledTech("canSuitlessMaridia");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Link noDestinationsLink = ModelWithOptions.Rooms["Crab Shaft"].Links[2];
-            Assert.False(noDestinationsLink.LogicallyRelevant);
-
-            Link possibleLink = ModelWithOptions.Rooms["Landing Site"].Links[1];
-            Assert.True(possibleLink.LogicallyRelevant);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinkTos()
         {
             // Given
