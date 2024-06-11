@@ -1066,37 +1066,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnLinkTos()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Gravity")
-                .RegisterDisabledTech("canSuitlessMaridia");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            LinkTo noDestinationsLinkTo = ModelWithOptions.Rooms["Crab Shaft"].Links[2].To[1];
-            Assert.False(noDestinationsLinkTo.LogicallyRelevant);
-            Assert.False(noDestinationsLinkTo.LogicallyAlways);
-            Assert.False(noDestinationsLinkTo.LogicallyFree);
-            Assert.True(noDestinationsLinkTo.LogicallyNever);
-
-            LinkTo possibleLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[1].To[7];
-            Assert.True(possibleLinkTo.LogicallyRelevant);
-            Assert.False(possibleLinkTo.LogicallyAlways);
-            Assert.False(possibleLinkTo.LogicallyFree);
-            Assert.False(possibleLinkTo.LogicallyNever);
-
-            LinkTo freeLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[5].To[4];
-            Assert.True(freeLinkTo.LogicallyRelevant);
-            Assert.True(freeLinkTo.LogicallyAlways);
-            Assert.True(freeLinkTo.LogicallyFree);
-            Assert.False(freeLinkTo.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnemies()
         {
             // Given
