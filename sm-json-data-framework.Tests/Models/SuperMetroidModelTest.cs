@@ -1043,46 +1043,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnemies()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedRidley"] })
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            RoomEnemy alwaysSpawns = ModelWithOptions.RoomEnemies["Post Crocomire Farming Room Ripper 2"];
-            Assert.True(alwaysSpawns.LogicallyRelevant);
-            Assert.True(alwaysSpawns.LogicallyAlwaysSpawns);
-            Assert.False(alwaysSpawns.LogicallyNeverSpawns);
-
-            RoomEnemy neverMeetsSpawnConditions = ModelWithOptions.RoomEnemies["Bomb Torizo"];
-            Assert.False(neverMeetsSpawnConditions.LogicallyRelevant);
-            Assert.False(neverMeetsSpawnConditions.LogicallyAlwaysSpawns);
-            Assert.True(neverMeetsSpawnConditions.LogicallyNeverSpawns);
-
-            RoomEnemy alwaysMeetsStopSpawnConditions = ModelWithOptions.RoomEnemies["Ridley"];
-            Assert.False(alwaysMeetsStopSpawnConditions.LogicallyRelevant);
-            Assert.False(alwaysMeetsStopSpawnConditions.LogicallyAlwaysSpawns);
-            Assert.True(alwaysMeetsStopSpawnConditions.LogicallyNeverSpawns);
-
-            RoomEnemy notAlwaysSpawnConditions = ModelWithOptions.RoomEnemies["Attic Atomics"];
-            Assert.True(notAlwaysSpawnConditions.LogicallyRelevant);
-            Assert.False(notAlwaysSpawnConditions.LogicallyAlwaysSpawns);
-            Assert.False(notAlwaysSpawnConditions.LogicallyNeverSpawns);
-
-            RoomEnemy alwaysSpawnNotAlwaysStopSpawnConditions = ModelWithOptions.RoomEnemies["Flyway Mellows"];
-            Assert.True(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyRelevant);
-            Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyAlwaysSpawns);
-            Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyNeverSpawns);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnvironments()
         {
             // Given

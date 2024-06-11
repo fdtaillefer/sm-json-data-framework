@@ -18,8 +18,9 @@ namespace sm_json_data_framework.Options
         // With a 10% safety reduction in drops, that goes down to just about 10.8.
         // We surely want a minimum rate that allows that refill
         // What's more: the rate for energy off a Zebbo (120-frame cycle) if non-farmable Missiles and PBs are not full (but supers are) is ~9.135.
-        // They drop big energy at a very high rate in that situation (96) so that seems a reasonable farm.
-        public static readonly decimal DefaultEnergyMinimumRatePerSecond = 9;
+        // For 130-sec cycle, it's ~8.43.
+        // They drop big energy at a very high rate in that situation (96) so those seem reasonable farms.
+        public static readonly decimal DefaultEnergyMinimumRatePerSecond = 8;
         public static readonly decimal DefaultMissileMinimumRatePerSecond = 0.175M;
         // The rate for supers off one Zebbo is roughly 0.196 (with a 2-second cycle)
         public static readonly decimal DefaultSuperMinimumRatePerSecond = 0.175M;

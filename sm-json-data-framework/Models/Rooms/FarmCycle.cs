@@ -100,6 +100,8 @@ namespace sm_json_data_framework.Models.Rooms
         /// This is repeated until all qualifying resources are filled.</para>
         /// <para>Qualifying resources are determined based on logical options.</para>
         /// <para>For simplicity, a farm execution will be considered a failure if it results in any kind of resource tradeoff.</para>
+        /// <para>Note that this execution doesn't check whether the enemies actually spawn. For a more complete executable, 
+        /// see <see cref="RoomEnemy.SpawnerFarmExecution"/>.</para>
         /// </summary>
         public IExecutable FarmExecution
         {
