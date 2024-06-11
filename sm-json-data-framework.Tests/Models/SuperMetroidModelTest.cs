@@ -890,54 +890,6 @@ namespace sm_json_data_framework.Tests.Models
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
 
         [Fact]
-        public void ApplyLogicalOptions_ImpossibleObstacleCommonRequirements_SetsLogicalPropertiesOnRoomObstacles()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
-                .RegisterRemovedItem("ScrewAttack")
-                .RegisterRemovedItem("Morph")
-                .RegisterDisabledGameFlag("f_ZebesSetAblaze");
-            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            RoomObstacle obstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
-            Assert.True(obstacle.LogicallyRelevant);
-            Assert.True(obstacle.LogicallyIndestructible);
-            Assert.False(obstacle.LogicallyAlwaysDestructible);
-            Assert.False(obstacle.LogicallyDestructibleForFree);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_FreeObstacleCommonRequirements_SetsLogicalPropertiesOnRoomObstacles()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["ScrewAttack"])
-            )
-            .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            RoomObstacle obstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
-            Assert.True(obstacle.LogicallyRelevant);
-            Assert.False(obstacle.LogicallyIndestructible);
-            Assert.True(obstacle.LogicallyAlwaysDestructible);
-            Assert.True(obstacle.LogicallyDestructibleForFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnStrats()
         {
             // Given
