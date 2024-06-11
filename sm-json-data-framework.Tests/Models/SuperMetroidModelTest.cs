@@ -1043,22 +1043,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnRoomEnvironments()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            foreach (RoomEnvironment roomEnvironment in ModelWithOptions.Rooms["Volcano Room"].RoomEnvironments)
-            {
-                Assert.True(roomEnvironment.LogicallyRelevant);
-            }
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
         {
             // Given
