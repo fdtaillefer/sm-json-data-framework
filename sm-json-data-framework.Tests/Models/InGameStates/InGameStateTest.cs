@@ -1966,7 +1966,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), expectedStrat);
 
             // Expect
-            Strat result = inGameState.GetLastStrat(0);
+            Strat result = inGameState.GetLastLinkStrat(0);
 
             // When
             Assert.Same(expectedStrat, result);
@@ -1983,7 +1983,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When
-            Strat result = inGameState.GetLastStrat(0);
+            Strat result = inGameState.GetLastLinkStrat(0);
 
             // Expect
             Assert.Null(result);
@@ -2002,7 +2002,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
 
             // When
-            Strat result = inGameState.GetLastStrat(1);
+            Strat result = inGameState.GetLastLinkStrat(1);
 
             // Expect
             Assert.Same(expectedStrat, result);
@@ -2022,7 +2022,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
 
             // When
-            Strat result = inGameState.GetLastStrat(1);
+            Strat result = inGameState.GetLastLinkStrat(1);
 
             // Expect
             Assert.Same(expectedStrat, result);
@@ -2039,7 +2039,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
 
             // When and expect
-            Assert.Throws<ArgumentException>(() => inGameState.GetLastStrat(-1));
+            Assert.Throws<ArgumentException>(() => inGameState.GetLastLinkStrat(-1));
         }
 
         [Fact]
@@ -2065,7 +2065,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             }
 
             // When
-            Strat result = inGameState.GetLastStrat(InGameState.MaxPreviousRooms + 1);
+            Strat result = inGameState.GetLastLinkStrat(InGameState.MaxPreviousRooms + 1);
 
             // Expect
             Assert.Null(result);

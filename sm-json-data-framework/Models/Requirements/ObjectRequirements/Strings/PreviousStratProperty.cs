@@ -28,7 +28,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <returns></returns>
         public bool IsFulfilled(ReadOnlyInGameState inGameState, int previousRoomCount = 0)
         {
-            return inGameState.GetLastStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
+            return inGameState.GetLastLinkStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
         }
 
         protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

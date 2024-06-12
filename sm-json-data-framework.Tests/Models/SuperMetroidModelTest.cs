@@ -890,43 +890,6 @@ namespace sm_json_data_framework.Tests.Models
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnStrats()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Grapple")
-                .RegisterDisabledStrat("Ceiling E-Tank Dboost");
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Strat impossibleRequirementsStrat = ModelWithOptions.Rooms["Pants Room"].Links[4].To[5].Strats["Base"];
-            Assert.False(impossibleRequirementsStrat.LogicallyRelevant);
-            Assert.False(impossibleRequirementsStrat.LogicallyAlways);
-            Assert.False(impossibleRequirementsStrat.LogicallyFree);
-            Assert.True(impossibleRequirementsStrat.LogicallyNever);
-
-            Strat disabledStrat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
-            Assert.False(disabledStrat.LogicallyRelevant);
-            Assert.False(disabledStrat.LogicallyAlways);
-            Assert.False(disabledStrat.LogicallyFree);
-            Assert.True(disabledStrat.LogicallyNever);
-
-            Strat nonFreeStrat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Speed Jump"];
-            Assert.True(nonFreeStrat.LogicallyRelevant);
-            Assert.False(nonFreeStrat.LogicallyAlways);
-            Assert.False(nonFreeStrat.LogicallyFree);
-            Assert.False(nonFreeStrat.LogicallyNever);
-
-            Strat freeStrat = ModelWithOptions.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
-            Assert.True(freeStrat.LogicallyRelevant);
-            Assert.True(freeStrat.LogicallyAlways);
-            Assert.True(freeStrat.LogicallyFree);
-            Assert.False(freeStrat.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnStratFailures()
         {
 

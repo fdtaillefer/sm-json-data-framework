@@ -573,10 +573,11 @@ namespace sm_json_data_framework.Models.InGameStates
             return environment?.Physics;
         }
 
-        public Strat GetLastStrat(int previousRoomCount = 0)
+        public Strat LastLinkStrat => GetLastLinkStrat();
+
+        public Strat GetLastLinkStrat(int previousRoomCount = 0)
         {
-            InRoomState roomState = GetInternalInRoomState(previousRoomCount);
-            return roomState?.LastStrat;
+            return GetInternalInRoomState(previousRoomCount)?.LastStrat;
         }
 
         public IReadOnlyList<int> GetVisitedNodeIds(int previousRoomCount = 0)
@@ -1068,12 +1069,17 @@ namespace sm_json_data_framework.Models.InGameStates
         public PhysicsEnum? GetCurrentDoorPhysics(int previousRoomCount = 0);
 
         /// <summary>
+        /// The strat that was used to reach the current node, if any. Otherwise, is null.
+        /// </summary>
+        public Strat LastLinkStrat { get; }
+
+        /// <summary>
         /// Returns the strat that was used to reach the current node, if any. Otherwise, returns null.
         /// </summary>
         /// <param name="previousRoomCount">The number of playable rooms to go back by (using the last known state in the resulting room if so).
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public Strat GetLastStrat(int previousRoomCount = 0);
+        public Strat GetLastLinkStrat(int previousRoomCount = 0);
 
         /// <summary>
         /// Returns a list of IDs of nodes that have been visited in the specified room since entering, in order, 
