@@ -103,30 +103,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ExecutionResult result = runway.Execute(Model, inGameState, comingIn: true);
 
             // Expect
-            Assert.NotNull(result);
-
-            Assert.Single(result.RunwaysUsed);
-            Assert.Same(runway, result.RunwaysUsed[runway.Name].runwayUsed);
-            Assert.Same(runway.Strats["Base"], result.RunwaysUsed[runway.Name].stratUsed);
-
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Single(result.ItemsInvolved);
-            Assert.Same(Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME], result.ItemsInvolved[SuperMetroidModel.GRAVITY_SUIT_NAME]);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(inGameState.Resources, result.ResultingState.Resources);
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectRunwayUsed(runway.Name, "Base")
+                .ExpectItemInvolved(SuperMetroidModel.GRAVITY_SUIT_NAME)
+                .AssertRespectedBy(result);
         }
 
         #endregion

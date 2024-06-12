@@ -111,28 +111,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = farmCycle.RequirementExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Equal(1, result.ItemsInvolved.Count);
-            Assert.Same(Model.Items["Grapple"], result.ItemsInvolved["Grapple"]);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            // Farming kills enemies, but it's not recorded as an enemy kill right now. Should it? The killing is quite implicit.
-            Assert.Empty(result.KilledEnemies);
-
-            // This execution only executes the requirements, it doesn't add any drops
-            Assert.Equal(inGameState.Resources, result.ResultingState.Resources);
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectItemInvolved("Grapple")
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -146,27 +127,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = farmCycle.RequirementExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Empty(result.ItemsInvolved);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            // Farming kills enemies, but it's not recorded as an enemy kill right now. Should it? The killing is quite implicit.
-            Assert.Empty(result.KilledEnemies);
-
-            // This execution only executes the requirements, it doesn't add any drops
-            Assert.Equal(69, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                // This execution only executes the requirements, it doesn't add any drops
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -30)
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -208,31 +172,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = farmCycle.FarmExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-            Assert.Equal(99, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(5, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Super));
-            // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
-            Assert.Equal(5, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Missile));
-            Assert.Equal(1, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.PowerBomb));
-
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Empty(result.ItemsInvolved);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            // Farming kills enemies, but it's not recorded as an enemy kill right now. Should it? The killing is quite implicit.
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, 80)
+                .ExpectResourceVariation(RechargeableResourceEnum.Super, 4)
+                // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
+                .ExpectResourceVariation(RechargeableResourceEnum.Missile, 4)
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -289,47 +234,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = farmCycle.FarmExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-            Assert.Equal(99, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(10, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Super));
-            Assert.Equal(15, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Missile));
-            Assert.Equal(1, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.PowerBomb));
-
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Empty(result.ItemsInvolved);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            // Farming kills enemies, but it's not recorded as an enemy kill right now. Should it? The killing is quite implicit.
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, 49)
+                .ExpectResourceVariation(RechargeableResourceEnum.Super, 9)
+                // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
+                .ExpectResourceVariation(RechargeableResourceEnum.Missile, 10)
+                .AssertRespectedBy(result);
         }
+        #endregion
 
-            // STITCHME So a farm cycle with a 10% margin expects to give from 26.47 to 53.82 energy per cycle
-            // The 120 heat frames are 30 energy.
-            // so you're losing 3.5 energy per cycle until you start filling up...
-            // Default minimum rate per second is 10 energy, so it needs to gain 20 energy per cycle to be considered farmable.
-            // It will stabilize once we fill missiles
-            // Gain about 2.12 missiles per farm.
-            // So if you're missing 10 missiles it will takes 5 cycles to stabilize. In 5 cycles you will lose about 18 energy. So I think at 17 energy you should die and and 20 you should live?
+        #region Tests for ApplyLogicalOptions() that check applied logical properties
 
-            // PB Threshold is 0.175 per second, so not enough for a Zebbo to be acceptable. Supers are ok though.
-
-            #endregion
-
-            #region Tests for ApplyLogicalOptions() that check applied logical properties
-
-            [Fact]
+        [Fact]
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given

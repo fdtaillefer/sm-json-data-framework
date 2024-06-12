@@ -164,32 +164,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-            Assert.Equal(99, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(100, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
-            Assert.Equal(5, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Super));
-            // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
-            Assert.Equal(5, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Missile));
-            Assert.Equal(1, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.PowerBomb));
-
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Empty(result.ItemsInvolved);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            // Farming kills enemies, but it's not recorded as an enemy kill right now. Should it? The killing is quite implicit.
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, 98)
+                .ExpectResourceVariation(RechargeableResourceEnum.ReserveEnergy, 52)
+                .ExpectResourceVariation(RechargeableResourceEnum.Super, 4)
+                // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
+                .ExpectResourceVariation(RechargeableResourceEnum.Missile, 4)
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -213,7 +194,6 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         // There's no spawners that have any spawn conditions so we can't test for that...
 
         #endregion
-
 
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 

@@ -112,34 +112,14 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = stratObstacle.DestroyExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-
-            // LastLinkStrat should be updated when moving between nodes, not when executing a strat
-            Assert.Null(result.ResultingState.LastLinkStrat);
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Equal(1, result.ItemsInvolved.Count);
-            Assert.Contains("ScrewAttack", result.ItemsInvolved.Keys);
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(inGameState.Resources, result.ResultingState.Resources);
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
-
-            Assert.Contains("A", result.ResultingState.InRoomState.DestroyedObstacleIds);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectItemInvolved("ScrewAttack")
+                .ExpectDestroyedObstacle("A")
+                .AssertRespectedBy(result);
         }
 
         [Fact]
-        public void DestroyExecutionExecute_DestroyingObstacleDestroysAdditionalObstacle_DestroysBoth()
+        public void DestroyExecutionExecute_DestroyingObstacleThatHasAdditionalObstacle_DestroysBoth()
         {
             // Given
             StratObstacle stratObstacle = Model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"].Obstacles["B"];
@@ -153,32 +133,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = stratObstacle.DestroyExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-
-            // LastLinkStrat should be updated when moving between nodes, not when executing a strat
-            Assert.Null(result.ResultingState.LastLinkStrat);
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Equal(2, result.ItemsInvolved.Count);
-            Assert.Contains("Morph", result.ItemsInvolved.Keys);
-            Assert.Contains(SuperMetroidModel.POWER_BOMB_NAME, result.ItemsInvolved.Keys);
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(4, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.PowerBomb));
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
-
-            Assert.Contains("A", result.ResultingState.InRoomState.DestroyedObstacleIds);
-            Assert.Contains("B", result.ResultingState.InRoomState.DestroyedObstacleIds);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectItemInvolved("Morph")
+                .ExpectItemInvolved(SuperMetroidModel.POWER_BOMB_NAME)
+                .ExpectDestroyedObstacle("A")
+                .ExpectDestroyedObstacle("B")
+                .ExpectResourceVariation(RechargeableResourceEnum.PowerBomb, -1)
+                .AssertRespectedBy(result);
         }
 
         #endregion
@@ -213,29 +174,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             ExecutionResult result = stratObstacle.BypassExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-
-            Assert.Null(result.ResultingState.LastLinkStrat);
-            Assert.Empty(result.RunwaysUsed);
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Equal(1, result.ItemsInvolved.Count);
-            Assert.Contains("Morph", result.ItemsInvolved.Keys);
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            Assert.Empty(result.KilledEnemies);
-
-            Assert.Equal(inGameState.Resources, result.ResultingState.Resources);
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
-
-            Assert.DoesNotContain("B", result.ResultingState.InRoomState.DestroyedObstacleIds);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectItemInvolved("Morph")
+                .AssertRespectedBy(result);
         }
 
         // Succeed

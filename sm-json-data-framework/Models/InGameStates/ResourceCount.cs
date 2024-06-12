@@ -59,6 +59,17 @@ namespace sm_json_data_framework.Models.InGameStates
             return new ResourceCount(this);
         }
 
+        public ResourceCount GetVariationWith(ReadOnlyResourceCount other)
+        {
+            ResourceCount returnValue = new ResourceCount();
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                returnValue.ApplyAmount(currentResource, GetAmount(currentResource) - other.GetAmount(currentResource));
+            }
+
+            return returnValue;
+        }
+
         private IDictionary<RechargeableResourceEnum, int> Amounts { get; } = new Dictionary<RechargeableResourceEnum, int>();
 
         public int GetAmount(RechargeableResourceEnum resource)
@@ -247,6 +258,14 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <returns>The new copy, as a full-fledged ResourceCount</returns>
         public ResourceCount Clone();
+
+        /// <summary>
+        /// Creates and returns a new Resource count that expresses how many resources this has compared to the provided other resource count.
+        /// Negative values means this has less.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public ResourceCount GetVariationWith(ReadOnlyResourceCount other);
 
         /// <summary>
         /// Returns the amount associated to this container for the provided rechargeable resource.

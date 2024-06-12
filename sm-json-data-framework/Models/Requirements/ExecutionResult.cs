@@ -281,5 +281,42 @@ namespace sm_json_data_framework.Models.Requirements
         public Enemy Enemy { get; private set; }
 
         public IEnumerable<(Weapon weapon, int shots)> KillMethod { get; private set; }
+
+        public override bool Equals(object obj)
+        {
+            if(obj is IndividualEnemyKillResult result)
+            {
+                if(Enemy != result.Enemy || KillMethod.Count() != result.KillMethod.Count())
+                {
+                    return false;
+                }
+
+                List<(Weapon weapon, int shots)> otherKillMethod = new List<(Weapon weapon, int shots)>(result.KillMethod);
+                foreach ((Weapon weapon, int shots) in KillMethod)
+                {
+                    int index = otherKillMethod.FindIndex(method => method.weapon == weapon && method.shots == shots);
+                    if (index == -1)
+                    {
+                        return false;
+                    }
+                    otherKillMethod.RemoveAt(index);
+                }
+
+                return true;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new();
+            hash.Add(Enemy);
+            foreach ((Weapon weapon, int shots) in KillMethod)
+            {
+                hash.Add(weapon);
+                hash.Add(shots);
+            }
+            return hash.ToHashCode();
+        }
     }
 }

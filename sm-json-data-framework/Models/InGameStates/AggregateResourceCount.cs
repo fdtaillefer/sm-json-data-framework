@@ -37,6 +37,17 @@ namespace sm_json_data_framework.Models.InGameStates
             return new ResourceCount(this);
         }
 
+        public ResourceCount GetVariationWith(ReadOnlyResourceCount other)
+        {
+            ResourceCount returnValue = new ResourceCount();
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            {
+                returnValue.ApplyAmount(currentResource, GetAmount(currentResource) - other.GetAmount(currentResource));
+            }
+
+            return returnValue;
+        }
+
         public int GetAmount(RechargeableResourceEnum resource)
         {
             return ResourceCounts.Sum(count => count.GetAmount(resource));

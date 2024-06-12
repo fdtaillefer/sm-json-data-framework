@@ -193,31 +193,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ExecutionResult result = nodeLock.OpenExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-
-            Assert.Empty(result.BypassedLocks);
-            Assert.Single(result.OpenedLocks);
-            Assert.Same(nodeLock, result.OpenedLocks[nodeLock.Name].openedLock);
-            Assert.Same(nodeLock.UnlockStrats["Base"], result.OpenedLocks[nodeLock.Name].stratUsed);
-
-            Assert.Empty(result.CanLeaveChargedExecuted);
-            Assert.Single(result.ItemsInvolved);
-            Assert.Same(Model.Items[SuperMetroidModel.SUPER_NAME], result.ItemsInvolved[SuperMetroidModel.SUPER_NAME]);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            Assert.Empty(result.KilledEnemies);
-            Assert.Empty(result.RunwaysUsed);
-
-            Assert.Equal(4, result.ResultingState.Resources.GetAmount(RechargeableResourceEnum.Super));
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count + 1, result.ResultingState.OpenedLocks.Count);
-            Assert.Same(nodeLock, result.ResultingState.OpenedLocks[nodeLock.Name]);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectLockOpened(nodeLock.Name, "Base")
+                .ExpectItemInvolved(SuperMetroidModel.SUPER_NAME)
+                .ExpectResourceVariation(RechargeableResourceEnum.Super, -1)
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -249,11 +229,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ExecutionResult result = nodeLock.OpenExecution.Execute(Model, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-            Assert.Single(result.ActivatedGameFlags);
-            Assert.Same(Model.GameFlags["f_ZebesAwake"], result.ActivatedGameFlags["f_ZebesAwake"]);
-            Assert.Equal(inGameState.ActiveGameFlags.Count + 1, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Same(Model.GameFlags["f_ZebesAwake"], result.ResultingState.ActiveGameFlags["f_ZebesAwake"]);
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectLockOpened(nodeLock.Name, "Base")
+                .ExpectItemInvolved(SuperMetroidModel.MISSILE_NAME)
+                .ExpectItemInvolved("Morph")
+                .ExpectGameFlagActivated("f_ZebesAwake")
+                .AssertRespectedBy(result);
         }
 
         #endregion

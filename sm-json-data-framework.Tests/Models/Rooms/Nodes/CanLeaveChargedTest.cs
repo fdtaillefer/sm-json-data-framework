@@ -117,30 +117,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ExecutionResult result = canLeaveCharged.Execute(ModelWithOptions, inGameState);
 
             // Expect
-            Assert.NotNull(result);
-
-            Assert.Single(result.CanLeaveChargedExecuted);
-            Assert.Same(canLeaveCharged, result.CanLeaveChargedExecuted.First().canLeaveChargedUsed);
-            Assert.Same(canLeaveCharged.Strats["Base"], result.CanLeaveChargedExecuted.First().stratUsed);
-
-            Assert.Single(result.ItemsInvolved);
-            Assert.Same(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME], result.ItemsInvolved[SuperMetroidModel.SPEED_BOOSTER_NAME]);
-
-            Assert.Empty(result.ActivatedGameFlags);
-            Assert.Empty(result.BypassedLocks);
-            Assert.Empty(result.DamageReducingItemsInvolved);
-            Assert.Empty(result.KilledEnemies);
-            Assert.Empty(result.OpenedLocks);
-            Assert.Empty(result.RunwaysUsed);
-
-            Assert.Equal(inGameState.Resources, result.ResultingState.Resources);
-            Assert.Equal(inGameState.ResourceMaximums, result.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, result.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, result.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, result.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
-            Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(ModelWithOptions, inGameState)
+                .ExpectCanLeaveChargedExecuted(canLeaveCharged, "Base")
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -185,30 +165,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Expect
             Assert.Null(oneEnergyNotEnoughResult);
 
-            Assert.NotNull(exactlyEnoughEnergyResult);
-
-            Assert.Single(exactlyEnoughEnergyResult.CanLeaveChargedExecuted);
-            Assert.Same(canLeaveCharged, exactlyEnoughEnergyResult.CanLeaveChargedExecuted.First().canLeaveChargedUsed);
-            Assert.Same(canLeaveCharged.Strats["Base"], exactlyEnoughEnergyResult.CanLeaveChargedExecuted.First().stratUsed);
-
-            Assert.Single(exactlyEnoughEnergyResult.ItemsInvolved);
-            Assert.Same(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME], exactlyEnoughEnergyResult.ItemsInvolved[SuperMetroidModel.SPEED_BOOSTER_NAME]);
-
-            Assert.Empty(exactlyEnoughEnergyResult.ActivatedGameFlags);
-            Assert.Empty(exactlyEnoughEnergyResult.BypassedLocks);
-            Assert.Empty(exactlyEnoughEnergyResult.DamageReducingItemsInvolved);
-            Assert.Empty(exactlyEnoughEnergyResult.KilledEnemies);
-            Assert.Empty(exactlyEnoughEnergyResult.OpenedLocks);
-            Assert.Empty(exactlyEnoughEnergyResult.RunwaysUsed);
-
-            Assert.Equal(29, exactlyEnoughEnergyResult.ResultingState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
-            Assert.Equal(inGameState.ResourceMaximums, exactlyEnoughEnergyResult.ResultingState.ResourceMaximums);
-            Assert.Equal(inGameState.OpenedLocks.Count, exactlyEnoughEnergyResult.ResultingState.OpenedLocks.Count);
-            Assert.Equal(inGameState.ActiveGameFlags.Count, exactlyEnoughEnergyResult.ResultingState.ActiveGameFlags.Count);
-            Assert.Equal(inGameState.TakenItemLocations.Count, exactlyEnoughEnergyResult.ResultingState.TakenItemLocations.Count);
-            Assert.Same(inGameState.CurrentRoom, exactlyEnoughEnergyResult.ResultingState.CurrentRoom);
-            Assert.Same(inGameState.CurrentNode, exactlyEnoughEnergyResult.ResultingState.CurrentNode);
-            Assert.True(exactlyEnoughEnergyResult.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+            new ExecutionResultValidator(ModelWithOptions, inGameState)
+                .ExpectCanLeaveChargedExecuted(canLeaveCharged, "Base")
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                // Starting point is 99-51+1 = 49, expected value 29
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -20)
+                .AssertRespectedBy(exactlyEnoughEnergyResult);
         }
 
         [Fact]

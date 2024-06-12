@@ -191,13 +191,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ResourceCount GetResourceVariationWith(ReadOnlyInGameState other)
         {
-            ResourceCount returnValue = new ResourceCount();
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
-            {
-                returnValue.ApplyAmount(currentResource, InternalResources.GetAmount(currentResource) - other.Resources.GetAmount(currentResource));
-            }
-
-            return returnValue;
+            return InternalResources.GetVariationWith(other.Resources);
         }
 
         public IEnumerable<RechargeableResourceEnum> GetFullRechargeableResources()
