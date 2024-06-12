@@ -52,7 +52,8 @@ namespace sm_json_data_framework.Models.Rooms
 
         IExecutable _destroyExecution = null;
         /// <summary>
-        /// An IExecutable that corresponds to destroying this obstacle.
+        /// An IExecutable that corresponds to destroying this obstacle. Any additional destroyed obstacles will be applied as well.
+        /// This doesn't actually care whether the obstacle is already destroyed, that's for the Strat's execution to worry about.
         /// </summary>
         public IExecutable DestroyExecution
         {
@@ -69,6 +70,7 @@ namespace sm_json_data_framework.Models.Rooms
         IExecutable _bypassExecution = null;
         /// <summary>
         /// An IExecutable that corresponds to bypassing this obstacle.
+        /// This doesn't actually care whether the obstacle is already destroyed, that's for the Strat's execution to worry about.
         /// </summary>
         public IExecutable BypassExecution
         {

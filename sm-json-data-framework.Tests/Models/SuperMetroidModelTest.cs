@@ -890,59 +890,6 @@ namespace sm_json_data_framework.Tests.Models
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnStratObstacles()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
-                .RegisterRemovedItem("ScrewAttack")
-                .RegisterRemovedItem("Bombs")
-                .RegisterDisabledGameFlag("f_ZebesSetAblaze");
-            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            StratObstacle fullyImpossibleStratObstacle = ModelWithOptions.Rooms["Climb"].Links[2].To[6].Strats["Base"].Obstacles["A"];
-            Assert.True(fullyImpossibleStratObstacle.LogicallyRelevant);
-            Assert.True(fullyImpossibleStratObstacle.LogicallyNever);
-            Assert.True(fullyImpossibleStratObstacle.LogicallyNeverFromHere);
-            Assert.False(fullyImpossibleStratObstacle.LogicallyAlways);
-            Assert.False(fullyImpossibleStratObstacle.LogicallyFree);
-
-            StratObstacle locallyIndestructibleFreeToBypassStratObstacle = ModelWithOptions.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"].Obstacles["B"];
-            Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyRelevant);
-            Assert.False(locallyIndestructibleFreeToBypassStratObstacle.LogicallyNever);
-            Assert.False(locallyIndestructibleFreeToBypassStratObstacle.LogicallyNeverFromHere);
-            Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyAlways);
-            Assert.True(locallyIndestructibleFreeToBypassStratObstacle.LogicallyFree);
-
-            StratObstacle locallyImpossibleStratObstacle = ModelWithOptions.Rooms["Post Crocomire Jump Room"].Nodes[2].CanLeaveCharged.First().Strats["Speed Blocks Broken"].Obstacles["B"];
-            Assert.True(locallyImpossibleStratObstacle.LogicallyRelevant);
-            Assert.False(locallyImpossibleStratObstacle.LogicallyNever);
-            Assert.True(locallyImpossibleStratObstacle.LogicallyNeverFromHere);
-            Assert.False(locallyImpossibleStratObstacle.LogicallyAlways);
-            Assert.False(locallyImpossibleStratObstacle.LogicallyFree);
-
-            StratObstacle freeToDestroyStratObstacle = ModelWithOptions.Rooms["Pink Brinstar Hopper Room"].Links[2].To[1].Strats["Base"].Obstacles["B"];
-            Assert.True(freeToDestroyStratObstacle.LogicallyRelevant);
-            Assert.False(freeToDestroyStratObstacle.LogicallyNever);
-            Assert.False(freeToDestroyStratObstacle.LogicallyNeverFromHere);
-            Assert.True(freeToDestroyStratObstacle.LogicallyAlways);
-            Assert.True(freeToDestroyStratObstacle.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnLogicalRequirements()
         {
             // Given

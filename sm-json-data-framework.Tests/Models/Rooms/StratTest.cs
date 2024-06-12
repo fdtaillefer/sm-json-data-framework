@@ -204,6 +204,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.Same(inGameState.CurrentRoom, result.ResultingState.CurrentRoom);
             Assert.Same(inGameState.CurrentNode, result.ResultingState.CurrentNode);
             Assert.True(result.ResultingState.Inventory.ExceptIn(inGameState.Inventory).Empty);
+
+            Assert.DoesNotContain("B", result.ResultingState.InRoomState.DestroyedObstacleIds);
         }
 
         [Fact]
