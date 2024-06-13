@@ -272,6 +272,26 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         }
 
         [Fact]
+        public void ExecuteOneOrAll_NoElementsFree_ExecutesCheapest()
+        {
+            // Given
+            InGameState inGameState = Model.CreateInitialGameState()
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
+                .ApplyRefillResources();
+            LogicalRequirements logicalRequirements = Model.Helpers["h_canBlueGateGlitch"].Requires.LogicalElement<Or>(0).LogicalRequirements;
+
+            // When
+            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(Model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(Model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.MISSILE_NAME)
+                .ExpectResourceVariation(RechargeableResourceEnum.Missile, -1)
+                .AssertRespectedBy(result);
+        }
+
+        [Fact]
         public void ExecuteOneOrAll_NoElementsPossible_Fails()
         {
             // Given
