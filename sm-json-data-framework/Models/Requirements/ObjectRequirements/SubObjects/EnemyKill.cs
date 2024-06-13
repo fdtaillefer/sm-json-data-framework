@@ -56,7 +56,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public IReadOnlySet<AmmoEnum> FarmableAmmo { get; }
 
-        protected override ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             // Create an ExecutionResult immediately so we can record free kills in it
             ExecutionResult result = new ExecutionResult(inGameState.Clone());

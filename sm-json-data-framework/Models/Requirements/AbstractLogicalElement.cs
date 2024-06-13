@@ -39,12 +39,12 @@ namespace sm_json_data_framework.Models.Requirements
             {
                 return null;
             }
-            return ExecuteUseful(model, inGameState, times, previousRoomCount);
+            return ExecutePossible(model, inGameState, times, previousRoomCount);
         }
 
         /// <summary>
         /// Has the same purpose as <see cref="Execute(SuperMetroidModel, ReadOnlyInGameState, int, int)"/>, but will only be called if this logical element
-        /// has not be rendered impossible by logical options, meaning implementations don't need to test for it.
+        /// has not been rendered impossible by logical options, meaning implementations don't need to test for it.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
@@ -53,7 +53,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
-        protected abstract ExecutionResult ExecuteUseful(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
+        protected abstract ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
         protected override void UpdateLogicalProperties(SuperMetroidRules rules)
         {

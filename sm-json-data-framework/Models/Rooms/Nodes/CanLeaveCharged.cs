@@ -116,7 +116,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// Attempts to execute this CanLeaveCharged based on the provided in-game state (which will not be altered), 
         /// by fulfilling its execution requirements. Be aware that this does not do any checks with remote initiation, 
         /// as that part cannot be done while at the node of the CanLeaveCharged. Instead, this can be done retroactively. 
-        /// It's seen as the responsibility of <see cref="CanComeInCharged.ExecuteUseful(SuperMetroidModel, ReadOnlyInGameState, int, int)"/>
+        /// It's seen as the responsibility of <see cref="CanComeInCharged.ExecutePossible(SuperMetroidModel, ReadOnlyInGameState, int, int)"/>
         /// to combine the execution of a CanLeaveCharged with the retroactive validation of its remote initiation.
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
