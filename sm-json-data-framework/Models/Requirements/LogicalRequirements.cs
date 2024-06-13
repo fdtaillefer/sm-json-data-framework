@@ -1,7 +1,4 @@
-﻿using sm_json_data_framework.Converters;
-using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
+﻿using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
@@ -55,6 +52,7 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Attempts to execute one logical element inside this LogicalRequirements (the cheapest one) 
         /// based on the provided in-game state (which will not be altered), by fulfilling its execution requirements.
+        /// However, this execution will also succeed if there are no logical elemnts (Hence the "OrAll" part).
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">The in-game state to use for execution. This will NOT be altered by this method.</param>
@@ -62,9 +60,15 @@ namespace sm_json_data_framework.Models.Requirements
         /// Only really impacts resource cost, since most items are non-consumable.</param>
         /// <param name="previousRoomCount">The number of playable rooms to go back by (whenever in-room state is relevant). 
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
-        /// <returns></returns>
-        public ExecutionResult ExecuteOne(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        /// <returns>An ExecutionResult with details about successful execution (and a resulting InGameState that will never be the provided inGameState instance),
+        /// or null if execution failed.</returns>
+        public ExecutionResult ExecuteOneOrAll(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
+            if(!LogicalElements.Any())
+            {
+                // Clone the InGameState to fulfill method contract
+                return new ExecutionResult(inGameState.Clone());
+            }
             (_, ExecutionResult result) = LogicalElements.ExecuteBest(model, inGameState, times: times, previousRoomCount: previousRoomCount);
             return result;
         }

@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
 
         protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return LogicalRequirements.ExecuteOne(model, inGameState, times: times, previousRoomCount: previousRoomCount);
+            return LogicalRequirements.ExecuteOneOrAll(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
