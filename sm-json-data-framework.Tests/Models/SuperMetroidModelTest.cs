@@ -1027,39 +1027,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnGameFlagLogicalElements()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterDisabledGameFlag("f_AnimalsSaved");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedCeresRidley"] })
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            GameFlagLogicalElement alwaysFlagElement = ModelWithOptions.Locks["Ceres Ridley Room Grey Lock (to 58 Escape)"].UnlockStrats["Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
-            Assert.True(alwaysFlagElement.LogicallyRelevant);
-            Assert.False(alwaysFlagElement.LogicallyNever);
-            Assert.True(alwaysFlagElement.LogicallyAlways);
-            Assert.True(alwaysFlagElement.LogicallyFree);
-
-            GameFlagLogicalElement removedFlagElement = ModelWithOptions.Locks["Animal Escape Grey Lock (to Flyway)"].UnlockStrats["Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
-            Assert.True(removedFlagElement.LogicallyRelevant);
-            Assert.True(removedFlagElement.LogicallyNever);
-            Assert.False(removedFlagElement.LogicallyAlways);
-            Assert.False(removedFlagElement.LogicallyFree);
-
-            GameFlagLogicalElement obtainableFlagElement = ModelWithOptions.Locks["Blue Brinstar Power Bombs Spawn Lock"].UnlockStrats["Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
-            Assert.True(obtainableFlagElement.LogicallyRelevant);
-            Assert.False(obtainableFlagElement.LogicallyNever);
-            Assert.False(obtainableFlagElement.LogicallyAlways);
-            Assert.False(obtainableFlagElement.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given

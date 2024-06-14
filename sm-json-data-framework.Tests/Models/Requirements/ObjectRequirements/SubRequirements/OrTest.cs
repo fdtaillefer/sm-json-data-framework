@@ -1,6 +1,5 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Items;
 
-namespace sm_json_data_framework.Tests.Models.Requirements.SubRequirements
+namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.SubRequirements
 {
     public class OrTest
     {
@@ -42,7 +41,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.SubRequirements
 
         #region Tests for Execute()
 
-        [Fact] public void Execute_NoElementMet_Fails()
+        [Fact]
+        public void Execute_NoElementMet_Fails()
         {
             // Given
             Or or = Model.Helpers["h_heatProof"].Requires.LogicalElement<Or>(0);

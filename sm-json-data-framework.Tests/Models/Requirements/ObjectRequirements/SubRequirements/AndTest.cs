@@ -1,6 +1,5 @@
 ﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Requirements;
 
-namespace sm_json_data_framework.Tests.Models.Requirements.SubRequirements
+namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.SubRequirements
 {
     public class AndTest
     {
