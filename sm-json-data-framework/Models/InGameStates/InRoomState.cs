@@ -165,6 +165,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         /// <exception cref="ArgumentException">Thrown if a strat is provided when the node visit is part of spawning in the room; If visit is not part of spawning, 
         /// thrown if there is no link from current node to target, or if no strat from that link is provided.</exception>
+        /// <exception cref="ModelElementMismatchException">Thrown if the strat instance found on the link from current node to target node
+        /// is different from the provided one</exception>
         public InRoomState ApplyVisitNode(RoomNode node, Strat strat)
         {
             // Spawning in the room is ongoing if no nodes have been visited, or only one node has been visited and that node spawns Samus elsewhere
@@ -197,8 +199,14 @@ namespace sm_json_data_framework.Models.InGameStates
                 }
                 else
                 {
-                    link.Strats.TryGetValue(strat.Name, out Strat existingStrat);
-                    if (existingStrat == null || existingStrat != strat)
+                    if (link.Strats.TryGetValue(strat.Name, out Strat existingStrat))
+                    {
+                        if (existingStrat != strat)
+                        {
+                            throw new ModelElementMismatchException(strat);
+                        }
+                    }
+                    else
                     {
                         throw new ArgumentException($"The specified strat must be in a link from current node {CurrentNode.Id} to target node {node.Id} in room '{CurrentRoom.Name}'");
                     }
@@ -252,6 +260,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="obstacle">The obstacle to destroy.</param>
         /// <returns>This, for chaining</returns>
         /// <exception cref="ArgumentException">Thrown if the obstacle is not in the current room</exception>
+        /// <exception cref="ModelElementMismatchException">Thrown if the obstacle instance found in the current room is different from the provided one</exception>
         /// <exception cref="InvalidOperationException">Thrown if this state is not at a node (and hence has no room)</exception>
         public InRoomState ApplyDestroyObstacle(RoomObstacle obstacle)
         {
@@ -259,8 +268,14 @@ namespace sm_json_data_framework.Models.InGameStates
             {
                 throw new InvalidOperationException("Cannot destroy an obstacle when not in a room");
             }
-            CurrentRoom.Obstacles.TryGetValue(obstacle.Id, out RoomObstacle foundObstacle);
-            if (foundObstacle != obstacle)
+            if (CurrentRoom.Obstacles.TryGetValue(obstacle.Id, out RoomObstacle foundObstacle))
+            {
+                if (foundObstacle != obstacle)
+                {
+                    throw new ModelElementMismatchException(obstacle);
+                }
+            }
+            else
             {
                 throw new ArgumentException("Provided obstacle must exist in current room");
             }

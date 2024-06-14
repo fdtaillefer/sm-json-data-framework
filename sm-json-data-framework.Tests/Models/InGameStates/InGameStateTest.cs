@@ -50,6 +50,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
         private static SuperMetroidModel Model { get; set; } = StaticTestObjects.UnmodifiableModel;
 
+        private static SuperMetroidModel OtherModel { get; set; } = StaticTestObjects.UnfinalizedModel.Finalize();
+
         #region Tests for ctor(StartConditions)
         [Fact]
         public void ConstructorWithStartConditions_InitializesProperly()
@@ -878,7 +880,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyAddGameFlag()
+        #region Tests for ApplyAddGameFlag(GameFlag)
         [Fact]
         public void ApplyAddGameFlag_AddsIt()
         {
@@ -891,6 +893,39 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState
                 .ApplyAddGameFlag(flag1)
                 .ApplyAddGameFlag(flag2);
+
+            // Expect
+            Assert.Equal(2, inGameState.ActiveGameFlags.Count);
+            Assert.Contains(flag1, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<GameFlag>.Default);
+            Assert.Contains(flag2, inGameState.ActiveGameFlags.Values, ObjectReferenceEqualityComparer<GameFlag>.Default);
+        }
+
+        [Fact]
+        public void ApplyAddGameFlag_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            GameFlag flag1 = OtherModel.GameFlags["f_ZebesAwake"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyAddGameFlag(flag1));
+        }
+
+        #endregion
+
+        #region Tests for ApplyAddGameFlag(string)
+        [Fact]
+        public void ApplyAddGameFlagByName_AddsIt()
+        {
+            // Given
+            GameFlag flag1 = Model.GameFlags["f_ZebesAwake"];
+            GameFlag flag2 = Model.GameFlags["f_DefeatedBombTorizo"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When
+            inGameState
+                .ApplyAddGameFlag("f_ZebesAwake")
+                .ApplyAddGameFlag("f_DefeatedBombTorizo");
 
             // Expect
             Assert.Equal(2, inGameState.ActiveGameFlags.Count);
@@ -923,7 +958,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyOpenLock()
+        #region Tests for ApplyOpenLock(NodeLock)
+
         [Fact]
         public void ApplyOpenLock_AddsIt()
         {
@@ -942,6 +978,17 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Contains(lock1, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
             Assert.Contains(lock2, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
             Assert.Empty(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLock_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            NodeLock lock1 = OtherModel.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyOpenLock(lock1, applyToRoomState: false));
         }
 
         [Fact]
@@ -974,6 +1021,62 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Single(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
             Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.OpenedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
         }
+
+        #endregion
+
+        #region Tests for ApplyOpenLock(string)
+
+        [Fact]
+        public void ApplyOpenLockByName_AddsIt()
+        {
+            // Given
+            NodeLock lock1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lock2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When
+            inGameState
+                .ApplyOpenLock(lock1.Name, applyToRoomState: false)
+                .ApplyOpenLock(lock2.Name, applyToRoomState: false);
+
+            // Expect
+            Assert.Equal(2, inGameState.OpenedLocks.Count);
+            Assert.Contains(lock1, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Contains(lock2, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Empty(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
+        }
+
+        [Fact]
+        public void ApplyOpenLockByName_ApplyingToRoomStateWhileNotOnNode_ThrowsArgumentException()
+        {
+            // Given
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When and expect
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyOpenLock(nodeLock.Name, applyToRoomState: true));
+        }
+
+        [Fact]
+        public void ApplyOpenLockByName_ApplyingToRoomStateWhileOnNode_SucceedsAndAltersNodeState()
+        {
+            // Given
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Landing Site", 3)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyOpenLock(nodeLock.Name, applyToRoomState: true);
+
+            // Expect
+            Assert.Single(inGameState.OpenedLocks);
+            Assert.Contains(nodeLock, inGameState.OpenedLocks.Values, ObjectReferenceEqualityComparer<NodeLock>.Default);
+            Assert.Single(inGameState.InRoomState.CurrentNodeState.OpenedLocks);
+            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.OpenedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+        }
+
         #endregion
 
         #region Tests for GetOpenedNodeLocksExceptIn()
@@ -1000,9 +1103,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyBypassLock()
+        #region Tests for ApplyBypassLock(NodeLock)
+
         [Fact]
-        public void ApplyBypassLock_NotOnNode_AltersInNodeState()
+        public void ApplyBypassLock_AltersInNodeState()
         {
             // Given
             NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
@@ -1020,6 +1124,20 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
 
         [Fact]
+        public void ApplyBypassLock_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            NodeLock nodeLock = OtherModel.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Landing Site", 3)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyBypassLock(nodeLock));
+        }
+
+        [Fact]
         public void ApplyBypassLock_NotOnNode_ThrowsArgumentException()
         {
             // Given
@@ -1029,6 +1147,40 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyBypassLock(nodeLock));
         }
+
+        #endregion
+
+        #region Tests for ApplyBypassLock(string)
+
+        [Fact]
+        public void ApplyBypassLockByName_AltersInNodeState()
+        {
+            // Given
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Landing Site", 3)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyBypassLock(nodeLock.Name);
+
+            // Expect
+            Assert.Single(inGameState.InRoomState.CurrentNodeState.BypassedLocks);
+            Assert.Contains(nodeLock, inGameState.InRoomState.CurrentNodeState.BypassedLocks, ObjectReferenceEqualityComparer<NodeLock>.Default);
+        }
+
+        [Fact]
+        public void ApplyBypassLockByName_NotOnNode_ThrowsArgumentException()
+        {
+            // Given
+            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When and expect
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyBypassLock(nodeLock.Name));
+        }
+
         #endregion
 
         #region Tests for GetBypassedExitLocks()
@@ -1075,7 +1227,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyTakeLocation()
+        #region Tests for ApplyTakeLocation(RoomNode)
+
         [Fact]
         public void ApplyTakeLocation_AddsIt()
         {
@@ -1094,6 +1247,41 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Contains(node1, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
             Assert.Contains(node2, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
         }
+
+        [Fact]
+        public void ApplyTakeLocation_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            RoomNode node1 = OtherModel.GetNodeInRoom("Varia Suit Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyTakeLocation(node1));
+        }
+
+        #endregion
+
+        #region Tests for ApplyTakeLocation(string, int)
+
+        [Fact]
+        public void ApplyTakeLocationByRoomNameAndNodeId_AddsIt()
+        {
+            // Given
+            RoomNode node1 = Model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode node2 = Model.GetNodeInRoom("Spazer Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+
+            // When
+            inGameState
+                .ApplyTakeLocation("Varia Suit Room", 2)
+                .ApplyTakeLocation("Spazer Room", 2);
+
+            // Expect
+            Assert.Equal(2, inGameState.TakenItemLocations.Count);
+            Assert.Contains(node1, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
+            Assert.Contains(node2, inGameState.TakenItemLocations.Values, ObjectReferenceEqualityComparer<RoomNode>.Default);
+        }
+
         #endregion
 
         #region Tests for GetTakenItemLocationsExceptIn()
@@ -1121,7 +1309,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyAddItem()
+        #region Tests for ApplyAddItem(Item)
+
         [Fact]
         public void ApplyAddItem_NonConsumableItem_AddsIt()
         {
@@ -1142,6 +1331,20 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Equal(2, inGameState.Inventory.NonConsumableItems.Count);
             Assert.Same(item1, inGameState.Inventory.NonConsumableItems[item1.Name]);
             Assert.Same(item2, inGameState.Inventory.NonConsumableItems[item2.Name]);
+        }
+
+        [Fact]
+        public void ApplyAddItem_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            Item item1 = OtherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyAddItem(item1));
         }
 
         [Fact]
@@ -1168,9 +1371,62 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Same(item2, inGameState.Inventory.ExpansionItems[item2.Name].item);
             Assert.Equal(1, inGameState.Inventory.ExpansionItems[item2.Name].count);
         }
+
         #endregion
 
-        #region Tests for ApplyDisableItem()
+        #region Tests for ApplyAddItem(string)
+
+        [Fact]
+        public void ApplyAddItemByName_NonConsumableItem_AddsIt()
+        {
+            // Given
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState
+                .ApplyAddItem(item1.Name)
+                .ApplyAddItem(item2.Name);
+
+            // Expect
+            Assert.Equal(2, inGameState.Inventory.NonConsumableItems.Count);
+            Assert.Same(item1, inGameState.Inventory.NonConsumableItems[item1.Name]);
+            Assert.Same(item2, inGameState.Inventory.NonConsumableItems[item2.Name]);
+        }
+
+        [Fact]
+        public void ApplyAddItemByName_ExpansionItem_AddsItAndIncreasesCount()
+        {
+            // Given
+            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState
+                .ApplyAddItem(item1.Name)
+                .ApplyAddItem(item1.Name)
+                .ApplyAddItem(item2.Name);
+
+            // Expect
+            Assert.Equal(2, inGameState.Inventory.ExpansionItems.Count);
+            Assert.Same(item1, inGameState.Inventory.ExpansionItems[item1.Name].item);
+            Assert.Equal(2, inGameState.Inventory.ExpansionItems[item1.Name].count);
+            Assert.Same(item2, inGameState.Inventory.ExpansionItems[item2.Name].item);
+            Assert.Equal(1, inGameState.Inventory.ExpansionItems[item2.Name].count);
+        }
+
+        #endregion
+
+        #region Tests for ApplyDisableItem(Item)
+
         [Fact]
         public void ApplyDisableItem_NonConsumableItem_DisablesIt()
         {
@@ -1200,6 +1456,24 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
 
         [Fact]
+        public void ApplyDisableItem_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item wrongItem1 = OtherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState
+                .ApplyAddItem(item1);
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyDisableItem(wrongItem1));
+        }
+
+        [Fact]
         public void ApplyDisableItem_ExpansionItem_DoesNothing()
         {
             // Given
@@ -1226,9 +1500,71 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.True(inGameState.Inventory.HasItem(item1));
             Assert.True(inGameState.Inventory.HasItem(item2));
         }
+
         #endregion
 
-        #region Tests for ApplyEnableItem
+        #region Tests for ApplyDisableItem(string)
+
+        [Fact]
+        public void ApplyDisableItemByName_NonConsumableItem_DisablesIt()
+        {
+            // Given
+            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState
+                .ApplyAddItem(item1)
+                .ApplyAddItem(item2);
+
+            // When
+            inGameState
+                .ApplyDisableItem(item1.Name)
+                .ApplyDisableItem(notPresentItem.Name);
+
+            // Expect
+            Assert.True(inGameState.Inventory.IsItemDisabled(item1));
+            Assert.False(inGameState.Inventory.IsItemDisabled(item2));
+            Assert.False(inGameState.Inventory.IsItemDisabled(notPresentItem));
+            Assert.False(inGameState.Inventory.HasItem(item1));
+            Assert.True(inGameState.Inventory.HasItem(item2));
+        }
+
+        [Fact]
+        public void ApplyDisableItemByName_ExpansionItem_DoesNothing()
+        {
+            // Given
+            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
+            Item notPresentItem = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState
+                .ApplyAddItem(item1.Name)
+                .ApplyAddItem(item2.Name);
+
+            // When
+            inGameState
+                .ApplyDisableItem(item1)
+                .ApplyDisableItem(notPresentItem);
+
+            // Expect
+            Assert.False(inGameState.Inventory.IsItemDisabled(item1));
+            Assert.False(inGameState.Inventory.IsItemDisabled(item2));
+            Assert.False(inGameState.Inventory.IsItemDisabled(notPresentItem));
+            Assert.True(inGameState.Inventory.HasItem(item1));
+            Assert.True(inGameState.Inventory.HasItem(item2));
+        }
+
+        #endregion
+
+        #region Tests for ApplyEnableItem(Item)
+
         [Fact]
         public void ApplyEnableItem_NonConsumableItem_EnablesIt()
         {
@@ -1248,6 +1584,48 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.False(inGameState.Inventory.IsItemDisabled(item));
             Assert.True(inGameState.Inventory.HasItem(item));
         }
+
+        [Fact]
+        public void ApplyEnableItem_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item wrongItem = OtherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyAddItem(item);
+            inGameState.ApplyDisableItem(item);
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyEnableItem(wrongItem));
+        }
+
+        #endregion
+
+        #region Tests for ApplyEnableItem(string)
+
+        [Fact]
+        public void ApplyEnableItemByName_NonConsumableItem_EnablesIt()
+        {
+            // Given
+            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyAddItem(item);
+            inGameState.ApplyDisableItem(item);
+
+            // When
+            inGameState.ApplyEnableItem(item.Name);
+
+            // Expect
+            Assert.False(inGameState.Inventory.IsItemDisabled(item));
+            Assert.True(inGameState.Inventory.HasItem(item));
+        }
+
         #endregion
 
         #region Tests for GetInventoryExceptIn()
@@ -1301,7 +1679,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyDestroyObstacle()
+        #region Tests for ApplyDestroyObstacle(RoomObstacle)
+
         [Fact]
         public void ApplyDestroyObstacle_AddsItToDestroyedObstacles()
         {
@@ -1320,6 +1699,19 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
 
         [Fact]
+        public void ApplyDestroyObstacle_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Landing Site", 5)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyDestroyObstacle(OtherModel.Rooms["Landing Site"].Obstacles["A"]));
+        }
+
+        [Fact]
         public void ApplyDestroyObstacle_ObstacleNotInRoom_ThrowsException()
         {
             // Given
@@ -1331,9 +1723,45 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
         }
+
         #endregion
 
-        #region Tests for ApplyEnterRoom()
+        #region Tests for ApplyDestroyObstacle(string)
+
+        [Fact]
+        public void ApplyDestroyObstacleById_AddsItToDestroyedObstacles()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Landing Site", 5)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyDestroyObstacle("A");
+
+            // Expect
+            Assert.Single(inGameState.InRoomState.DestroyedObstacleIds);
+            Assert.Contains("A", inGameState.InRoomState.DestroyedObstacleIds);
+        }
+
+        [Fact]
+        public void ApplyDestroyObstacleById_ObstacleNotInRoom_ThrowsException()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Parlor and Alcatraz", 4)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyDestroyObstacle("A"));
+        }
+
+        #endregion
+
+        #region Tests for ApplyEnterRoom(RoomNode)
+
         [Fact]
         public void ApplyEnterRoom_ChangesCurrentNode()
         {
@@ -1349,6 +1777,20 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyEnterRoom_FromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            RoomNode node = OtherModel.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Sloaters Refill", 1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyEnterRoom(node));
         }
 
         [Fact]
@@ -1430,6 +1872,108 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Expect
             Assert.NotEqual(initialRoomName, inGameState.PreviousRoomStates.Last().CurrentRoom.Name);
         }
+
+        #endregion
+
+        #region Tests for ApplyEnterRoom(string, int)
+
+        [Fact]
+        public void ApplyEnterRoomByRoomNameAndId_ChangesCurrentNode()
+        {
+            // Given
+            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Sloaters Refill", 1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyEnterRoom("Red Tower", 3);
+
+            // Expect
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyEnterRoomByRoomNameAndId_ClearsPreviousRoomState()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Landing Site", 5)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+
+            // When
+            inGameState.ApplyEnterRoom("Parlor and Alcatraz", 4);
+
+            // Expect
+            Assert.Empty(inGameState.InRoomState.DestroyedObstacleIds);
+            Assert.Single(inGameState.InRoomState.VisitedRoomPath);
+        }
+
+        [Fact]
+        public void ApplyEnterRoomByRoomNameAndId_AddsCurrentRoomStateCopyToRememberedRooms()
+        {
+            // Given
+            Room initialRoom = Model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(initialRoom.Name, 1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyEnterRoom("Red Tower", 3);
+
+            // Expect
+            Assert.Same(initialRoom, inGameState.PreviousRoomStates[0].CurrentRoom);
+            Assert.NotSame(inGameState.InRoomState, inGameState.PreviousRoomStates[0]);
+        }
+
+        [Fact]
+        public void ApplyEnterRoomByRoomNameAndId_SpawnsAtDifferentNode_GoesToCorrectNode()
+        {
+            // Given
+            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Ice Beam Tutorial Room", 2)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyEnterRoom("Ice Beam Gate Room", 1);
+
+            // Expect
+            Assert.Same(expectedNode, inGameState.CurrentNode);
+        }
+
+        [Fact]
+        public void ApplyEnterRoomByRoomNameAndId_GoingBeyondRememberedRooms_EliminatesOldestRoom()
+        {
+            // Given
+            string initialRoomName = "Sloaters Refill";
+            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode(initialRoomName, 1)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
+
+            // When
+            for (int i = 0; i < InGameState.MaxPreviousRooms; i++)
+            {
+                RoomNode node = i % 2 == 0 ? node2 : node1;
+                inGameState.ApplyEnterRoom(node.Room.Name, node.Id);
+            }
+
+            // Expect
+            Assert.NotEqual(initialRoomName, inGameState.PreviousRoomStates.Last().CurrentRoom.Name);
+        }
+
         #endregion
 
         #region Tests for ApplyExitRoom()
@@ -1603,7 +2147,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyVisitNode()
+        #region Tests for ApplyVisitNode(RoomNode, Strat)
+
         [Fact]
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
@@ -1634,6 +2179,34 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
 
         [Fact]
+        public void ApplyVisitNode_NodeFromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Parlor and Alcatraz", 4)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            RoomNode node = OtherModel.GetNodeInRoom("Parlor and Alcatraz", 8);
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(node, inGameState.CurrentNode.LinksTo[8].Strats["Base"]));
+        }
+
+        [Fact]
+        public void ApplyVisitNode_StratFromWrongModel_ThrowsModelElementMismatchException()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Parlor and Alcatraz", 4)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Strat strat = OtherModel.GetNodeInRoom("Parlor and Alcatraz", 4).LinksTo[8].Strats["Base"];
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), strat));
+        }
+
+        [Fact]
         public void ApplyVisitNode_LinkDoesntExist_ThrowsException()
         {
             // Given
@@ -1657,8 +2230,68 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Strat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).LinksTo[1].Strats["Base"];
 
             // When and expect
-            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
         }
+
+        #endregion
+
+        #region Tests for ApplyVisitNode(int, string)
+
+        [Fact]
+        public void ApplyVisitNodeByNodeIdAndStratName_AccumulatesVisitedNodesAndStrats()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Parlor and Alcatraz", 4)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When
+            inGameState.ApplyVisitNode(8, "Base")
+                .ApplyVisitNode(1, "Parlor Quick Charge");
+
+            // Expect
+            Assert.Equal("Parlor and Alcatraz", inGameState.CurrentRoom.Name);
+            Assert.Equal(1, inGameState.CurrentNode.Id);
+            Assert.Equal("Parlor Quick Charge", inGameState.InRoomState.LastStrat.Name);
+            Assert.Equal(3, inGameState.GetVisitedPath().Count);
+
+            Assert.Equal(4, inGameState.GetVisitedPath()[0].nodeState.Node.Id);
+            Assert.Null(inGameState.GetVisitedPath()[0].strat);
+
+            Assert.Equal(8, inGameState.GetVisitedPath()[1].nodeState.Node.Id);
+            Assert.Equal("Base", inGameState.GetVisitedPath()[1].strat.Name);
+
+            Assert.Equal(1, inGameState.GetVisitedPath()[2].nodeState.Node.Id);
+            Assert.Equal("Parlor Quick Charge", inGameState.GetVisitedPath()[2].strat.Name);
+        }
+
+        [Fact]
+        public void ApplyVisitNodeByNodeIdAndStratName_LinkDoesntExist_ThrowsException()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Parlor and Alcatraz", 4)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(1, "Base"));
+        }
+
+        [Fact]
+        public void ApplyVisitNodeByNodeIdAndStratName_StratNotOnOriginLink_ThrowsException()
+        {
+            // Given
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+                .StartingNode("Parlor and Alcatraz", 4)
+                .Build();
+            InGameState inGameState = new InGameState(startConditions);
+
+            // When and expect
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(8, "wrongStrat"));
+        }
+
         #endregion
 
         #region Tests for GetInRoomState()

@@ -243,6 +243,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="flag">Flag to add</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the game flag instance found in the model is different from the provided one</exception>
         public InGameState ApplyAddGameFlag(GameFlag flag)
         {
             if (flag != Model.GameFlags[flag.Name])
@@ -297,6 +298,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="applyToRoomState">If true, will also remember the lock as being opened in the current room visit.
         /// This can only be done if Samus is at the node that has the lock. Set this to false to unlock a lock remotely.</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the lock instance found in the model is different from the provided one</exception>
         public InGameState ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
         {
             if (nodeLock != Model.Locks[nodeLock.Name])
@@ -340,6 +342,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="nodeLock">Lock to bypass</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the lock instance found in the model is different from the provided one</exception>
         public InGameState ApplyBypassLock(NodeLock nodeLock)
         {
             if (nodeLock != Model.Locks[nodeLock.Name])
@@ -404,6 +407,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="location">Node of the location to add</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the node instance found in the model is different from the provided one</exception>
         public InGameState ApplyTakeLocation(RoomNode location)
         {
             if (Model.Nodes[location.Name] != location)
@@ -452,6 +456,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="item">Item to add</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the item instance found in the model is different from the provided one</exception>
         public InGameState ApplyAddItem(Item item)
         {
             if (Model.Items[item.Name] != item)
@@ -479,6 +484,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="itemName">Name of the item to disable</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the item instance found in the model is different from the provided one</exception>
         public InGameState ApplyDisableItem(Item item)
         {
             if (Model.Items[item.Name] != item)
@@ -507,6 +513,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="itemName">Name of the item to enable</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the item instance found in the model is different from the provided one</exception>
         public InGameState ApplyEnableItem(Item item)
         {
             if (Model.Items[item.Name] != item)
@@ -535,6 +542,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="obstacle">The obstacle to destroy.</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the obstacle instance found in the current room is different from the provided one</exception>
         public InGameState ApplyDestroyObstacle(RoomObstacle obstacle)
         {
             InternalInRoomState.ApplyDestroyObstacle(obstacle);
@@ -725,6 +733,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the node instance found in the model is different from the provided one</exception>
         public InGameState ApplyEnterRoom(RoomNode entryNode)
         {
             if (Model.Nodes[entryNode.Name] != entryNode)
@@ -796,6 +805,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="strat">The strat through which the node is being reached. Can be null. If not null, only makes sense if 
         /// it's on a link that connects previous node to new node.</param>
         /// <returns>This, for chaining</returns>
+        /// <exception cref="ModelElementMismatchException">Thrown if the node instance found in the model is different from the provided one,
+        /// or if the strat instance found on the link from current node to target node is different from the provided one.</exception>
         public InGameState ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
         {
             if (Model.Nodes[nodeToVisit.Name] != nodeToVisit)
