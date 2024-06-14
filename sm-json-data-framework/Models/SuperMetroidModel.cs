@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Models
 
         public SuperMetroidModel(UnfinalizedSuperMetroidModel sourceModel, LogicalOptions logicalOptions = null)
         {
-            ModelFinalizationMappings mappings = new ModelFinalizationMappings();
+            ModelFinalizationMappings mappings = new ModelFinalizationMappings(this);
             Items = sourceModel.Items.Values.Select(item => item.Finalize(mappings)).ToDictionary(item => item.Name).AsReadOnly();
             GameFlags = sourceModel.GameFlags.Values.Select(flag => flag.Finalize(mappings)).ToDictionary(flag => flag.Name).AsReadOnly();
             Weapons = sourceModel.Weapons.Values.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
@@ -205,7 +205,7 @@ namespace sm_json_data_framework.Models
         /// This is able to interpret <see cref="UnfinalizedStartConditions"/> in the logical options.
         /// </summary>
         /// <param name="logicalOptions">The LogicalOptions to apply.</param>
-        /// <param name="mappings">If model finalization is ongoing, these are the mappings used for it. Leave null otherwise.</param>
+        /// <param name="mappings">If model finalization is ongoing, these are the mappings used for it. Leave null otherwise.
         /// If null, this instead removes all alterations made by logical options, by applying default logical options.</param>
         private void ApplyLogicalOptions(LogicalOptions logicalOptions, ModelFinalizationMappings mappings)
         {

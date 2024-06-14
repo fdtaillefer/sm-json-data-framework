@@ -204,7 +204,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Bombs");
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedRidley"] })
+                .StartingGameFlags(new List<string> { "f_DefeatedRidley" })
                 .Build();
 
             // When

@@ -28,10 +28,10 @@ namespace sm_json_data_framework.Rules.InitialState
         {
             ItemInventory startingInventory = ItemInventory.CreateVanillaStartingInventory(model);
             // Start with no open locks, taken items, or active game flags, so we can leave those as their empty defaults
-            StartConditionsBuilder vanillaStartConditions = new StartConditionsBuilder()
+            StartConditionsBuilder vanillaStartConditions = new StartConditionsBuilder(model)
                 .StartingInventory(startingInventory)
                 .StartingResources(startingInventory.BaseResourceMaximums.Clone())
-                .StartingNode(model.GetNodeInRoom("Ceres Elevator Room", 1));
+                .StartingNode("Ceres Elevator Room", 1);
 
             return vanillaStartConditions;
         }
@@ -46,6 +46,7 @@ namespace sm_json_data_framework.Rules.InitialState
             ItemInventory startingInventory = ItemInventory.CreateVanillaStartingInventory(model);
             // Start with no open locks, taken items, or active game flags, so we can leave those as their empty defaults
             StartConditions vanillaStartConditions = new StartConditions(
+                model: model,
                 startingInventory: startingInventory,
                 startingResources: startingInventory.BaseResourceMaximums.Clone(),
                 startingNode: model.GetNodeInRoom("Ceres Elevator Room", 1)
@@ -53,6 +54,8 @@ namespace sm_json_data_framework.Rules.InitialState
 
             return vanillaStartConditions;
         }
+
+        public SuperMetroidModel Model { get; }
 
         public RoomNode StartingNode { get; }
 
@@ -77,7 +80,12 @@ namespace sm_json_data_framework.Rules.InitialState
         /// </summary>
         public IReadOnlyDictionary<string, RoomNode> StartingTakenItemLocations { get; }
 
-        public StartConditions(UnfinalizedStartConditions sourceElement, ModelFinalizationMappings mappings)
+        private StartConditions(SuperMetroidModel model)
+        {
+            Model = model;
+        }
+
+        public StartConditions(UnfinalizedStartConditions sourceElement, ModelFinalizationMappings mappings): this(mappings.Model)
         {
             StartingNode = sourceElement.StartingNode.Finalize(mappings);
             StartingInventory = new ItemInventory(sourceElement, mappings).AsReadOnly();
@@ -87,8 +95,9 @@ namespace sm_json_data_framework.Rules.InitialState
             StartingTakenItemLocations = sourceElement.StartingTakenItemLocations.Select(node => node.Finalize(mappings)).ToDictionary(node =>  node.Name).AsReadOnly();
         }
 
-        public StartConditions(RoomNode startingNode, ReadOnlyItemInventory startingInventory, ReadOnlyResourceCount startingResources,
+        public StartConditions(SuperMetroidModel model, RoomNode startingNode, ReadOnlyItemInventory startingInventory, ReadOnlyResourceCount startingResources,
             ICollection<GameFlag> startingGameFlags = null, ICollection<NodeLock> startingOpenLocks = null, ICollection<RoomNode> startingTakenItemLocations = null)
+            : this(model)
         {
             StartingNode = startingNode;
             StartingInventory = startingInventory;
@@ -96,9 +105,54 @@ namespace sm_json_data_framework.Rules.InitialState
             StartingGameFlags = startingGameFlags?.ToDictionary(flag => flag.Name).AsReadOnly() ?? new Dictionary<string, GameFlag>().AsReadOnly();
             StartingOpenLocks = startingOpenLocks?.ToDictionary(nodeLock => nodeLock.Name).AsReadOnly() ?? new Dictionary<string, NodeLock>().AsReadOnly();
             StartingTakenItemLocations = startingTakenItemLocations?.ToDictionary(node => node.Name).AsReadOnly() ?? new Dictionary<string, RoomNode>().AsReadOnly();
+
+            // Ensure that all instances in this StartConditions actually exist in the model.
+            if (Model.Nodes[StartingNode.Name] != StartingNode)
+            {
+                throw new ModelElementMismatchException(StartingNode);
+            }
+
+            foreach (Item item in StartingInventory.ExpansionItems.Values.Select(pair => pair.item))
+            {
+                if (Model.Items[item.Name] != item)
+                {
+                    throw new ModelElementMismatchException(item);
+                }
+            }
+            foreach (Item item in StartingInventory.NonConsumableItems.Values)
+            {
+                if (Model.Items[item.Name] != item)
+                {
+                    throw new ModelElementMismatchException(item);
+                }
+            }
+
+            foreach(GameFlag flag in StartingGameFlags.Values)
+            {
+                if (Model.GameFlags[flag.Name] != flag)
+                {
+                    throw new ModelElementMismatchException(flag);
+                }
+            }
+
+            foreach(NodeLock nodeLock in StartingOpenLocks.Values)
+            {
+                if (Model.Locks[nodeLock.Name] != nodeLock)
+                {
+                    throw new ModelElementMismatchException(nodeLock);
+                }
+            }
+
+            foreach (RoomNode node in StartingTakenItemLocations.Values)
+            {
+                if (Model.Nodes[node.Name] != node)
+                {
+                    throw new ModelElementMismatchException(node);
+                }
+            }
         }
 
-        public StartConditions(StartConditions other)
+        public StartConditions(StartConditions other): this(other.Model)
         {
             StartingNode = other.StartingNode;
             StartingInventory = other.StartingInventory.Clone().AsReadOnly();
@@ -116,6 +170,8 @@ namespace sm_json_data_framework.Rules.InitialState
 
     public class StartConditionsBuilder
     {
+        private SuperMetroidModel _model;
+
         private RoomNode _startingNode;
 
         private ItemInventory _startingInventory;
@@ -130,9 +186,20 @@ namespace sm_json_data_framework.Rules.InitialState
 
         private IList<RoomNode> _startingTakenItemLocations = new List<RoomNode>();
 
+        public StartConditionsBuilder(SuperMetroidModel model)
+        {
+            _model = model;
+        }
+
         public StartConditionsBuilder StartingNode(RoomNode startingNode)
         {
             _startingNode = startingNode;
+            return this;
+        }
+
+        public StartConditionsBuilder StartingNode(string roomName, int nodeId)
+        {
+            _startingNode = _model.Rooms[roomName].Nodes[nodeId];
             return this;
         }
 
@@ -160,15 +227,33 @@ namespace sm_json_data_framework.Rules.InitialState
             return this;
         }
 
+        public StartConditionsBuilder StartingGameFlags(ICollection<string> startingGameFlagNames)
+        {
+            _startingGameFlags = startingGameFlagNames.Select(flagName => _model.GameFlags[flagName]).ToList();
+            return this;
+        }
+
         public StartConditionsBuilder StartingOpenLocks(ICollection<NodeLock> startingOpenLocks)
         {
             _startingOpenLocks = new List<NodeLock>(startingOpenLocks);
             return this;
         }
 
+        public StartConditionsBuilder StartingOpenLocks(ICollection<string> startingOpenLockNames)
+        {
+            _startingOpenLocks = startingOpenLockNames.Select(lockName => _model.Locks[lockName]).ToList();
+            return this;
+        }
+
         public StartConditionsBuilder StartingTakenItemLocations(ICollection<RoomNode> startingTakenItemLocation)
         {
             _startingTakenItemLocations = new List<RoomNode>(startingTakenItemLocation);
+            return this;
+        }
+
+        public StartConditionsBuilder StartingTakenItemLocations(ICollection<(string roomName, int nodeId)> startingTakenItemLocation)
+        {
+            _startingTakenItemLocations = startingTakenItemLocation.Select(pair => _model.Rooms[pair.roomName].Nodes[pair.nodeId]).ToList();
             return this;
         }
 
@@ -188,6 +273,7 @@ namespace sm_json_data_framework.Rules.InitialState
             ItemInventory startingInventory = _baseResourceMaximums == null
                 ? _startingInventory : _startingInventory?.WithBaseResourceMaximums(_baseResourceMaximums);
             return new StartConditions(
+                model: _model,
                 startingNode: _startingNode,
                 startingInventory: startingInventory?.AsReadOnly(),
                 startingResources: _startingResources?.AsReadOnly(),

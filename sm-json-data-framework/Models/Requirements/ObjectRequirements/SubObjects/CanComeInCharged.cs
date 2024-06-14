@@ -159,7 +159,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
 
             // Next step: Find the best retroactive CanLeaveCharged that has enough frames
             // remaining and leaves Samus with enough energy for the shinespark
-            var usableCanLeaveChargeds = inGameState.GetRetroactiveCanLeaveChargeds(model, requiredInRoomPath, previousRoomCount: previousRoomCount)
+            var usableCanLeaveChargeds = inGameState.GetRetroactiveCanLeaveChargeds(requiredInRoomPath, previousRoomCount: previousRoomCount)
                 .Where(clc => clc.FramesRemaining >= FramesRemaining);
             (_, ExecutionResult bestLeaveChargedResult) = usableCanLeaveChargeds.ExecuteBest(model, inGameState, times: times,
                 previousRoomCount: previousRoomCount, hasEnergyForShinespark);

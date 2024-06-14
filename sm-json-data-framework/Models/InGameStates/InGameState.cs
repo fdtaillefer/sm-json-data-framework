@@ -26,6 +26,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         public const int MaxPreviousRooms = 2;
 
+        private SuperMetroidModel Model { get; }
+
         // STITCHME It might be valuable to eventually have InGameState be able to say which nodes are reachable?
 
         // STITCHME It could be nice to keep track of all canResets in the room and evaluate them as you move around?
@@ -41,6 +43,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="startConditions">StartConditions on which to base the new InGame State</param>
         public InGameState(StartConditions startConditions)
         {
+            Model = startConditions.Model;
+
             // Initialize starting inventory
             InternalInventory = startConditions.StartingInventory.Clone();
 
@@ -76,6 +80,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <param name="other">The InGameState to copy</param>
         public InGameState(InGameState other)
         {
+            Model = other.Model;
+
             InternalActiveGameFlags = new Dictionary<string, GameFlag>(other.InternalActiveGameFlags);
 
             InternalTakenItemLocations = new Dictionary<string, RoomNode>(other.InternalTakenItemLocations);
@@ -208,9 +214,9 @@ namespace sm_json_data_framework.Models.InGameStates
                 .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
-        public IEnumerable<EnemyDropEnum> GetUnneededDrops(SuperMetroidModel model)
+        public IEnumerable<EnemyDropEnum> GetUnneededDrops()
         {
-            return model.Rules.GetUnneededDrops(GetFullRechargeableResources());
+            return Model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
 
         protected Dictionary<string, GameFlag> InternalActiveGameFlags { get; set; } = new Dictionary<string, GameFlag>();
@@ -239,9 +245,27 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyAddGameFlag(GameFlag flag)
         {
+            if (flag != Model.GameFlags[flag.Name])
+            {
+                throw new ModelElementMismatchException(flag);
+            }
             if (!InternalActiveGameFlags.ContainsFlag(flag))
             {
                 InternalActiveGameFlags.Add(flag.Name, flag);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the game flag with the provided name to the activated game flags in this InGameState.
+        /// </summary>
+        /// <param name="flagName">Name of flag to add</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyAddGameFlag(string flagName)
+        {
+            if (!InternalActiveGameFlags.ContainsFlag(flagName))
+            {
+                InternalActiveGameFlags.Add(flagName, Model.GameFlags[flagName]);
             }
             return this;
         }
@@ -275,9 +299,34 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyOpenLock(NodeLock nodeLock, bool applyToRoomState = true)
         {
+            if (nodeLock != Model.Locks[nodeLock.Name])
+            {
+                throw new ModelElementMismatchException(nodeLock);
+            }
             if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
                 InternalOpenedLocks.Add(nodeLock.Name, nodeLock);
+                if (applyToRoomState)
+                {
+                    InternalInRoomState.ApplyOpenLock(nodeLock);
+                }
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Applies the opening of the lock with the provided name in this InGameState.
+        /// </summary>
+        /// <param name="nodeLockName">Name of lock to open</param>
+        /// <param name="applyToRoomState">If true, will also remember the lock as being opened in the current room visit.
+        /// This can only be done if Samus is at the node that has the lock. Set this to false to unlock a lock remotely.</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyOpenLock(string nodeLockName, bool applyToRoomState = true)
+        {
+            if (!InternalOpenedLocks.ContainsLock(nodeLockName))
+            {
+                NodeLock nodeLock = Model.Locks[nodeLockName];
+                InternalOpenedLocks.Add(nodeLockName, nodeLock);
                 if (applyToRoomState)
                 {
                     InternalInRoomState.ApplyOpenLock(nodeLock);
@@ -293,9 +342,27 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyBypassLock(NodeLock nodeLock)
         {
+            if (nodeLock != Model.Locks[nodeLock.Name])
+            {
+                throw new ModelElementMismatchException(nodeLock);
+            }
             if (!InternalOpenedLocks.ContainsLock(nodeLock))
             {
                 InternalInRoomState.ApplyBypassLock(nodeLock);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Applies the bypassing of the lock with the provded name in this InGameState. Expects that samus is at the node that has that lock.
+        /// </summary>
+        /// <param name="lockName">Name of the lock to bypass</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyBypassLock(string lockName)
+        {
+            if (!InternalOpenedLocks.ContainsLock(lockName))
+            {
+                InternalInRoomState.ApplyBypassLock(Model.Locks[lockName]);
             }
             return this;
         }
@@ -339,6 +406,27 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyTakeLocation(RoomNode location)
         {
+            if (Model.Nodes[location.Name] != location)
+            {
+                throw new ModelElementMismatchException(location);
+            }
+            if (!TakenItemLocations.ContainsNode(location))
+            {
+                InternalTakenItemLocations.Add(location.Name, location);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the location identified by the provided room name and in-room ID to the taken locations in this InGameState.
+        /// Does not modify the inventory.
+        /// </summary>
+        /// <param name="roomName">Name of the room the location is in</param>
+        /// <param name="nodeId">In-room ID of the location</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyTakeLocation(string roomName, int nodeId)
+        {
+            RoomNode location = Model.Rooms[roomName].Nodes[nodeId];
             if (!TakenItemLocations.ContainsNode(location))
             {
                 InternalTakenItemLocations.Add(location.Name, location);
@@ -362,11 +450,26 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Adds the provided item to the player's inventory for this InGameState.
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">Item to add</param>
         /// <returns>This, for chaining</returns>
         public InGameState ApplyAddItem(Item item)
         {
+            if (Model.Items[item.Name] != item)
+            {
+                throw new ModelElementMismatchException(item);
+            }
             InternalInventory.ApplyAddItem(item);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the item with the provided name to the player's inventory for this InGameState.
+        /// </summary>
+        /// <param name="item">Name of the item to add</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyAddItem(string itemName)
+        {
+            InternalInventory.ApplyAddItem(Model.Items[itemName]);
             return this;
         }
 
@@ -378,6 +481,10 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyDisableItem(Item item)
         {
+            if (Model.Items[item.Name] != item)
+            {
+                throw new ModelElementMismatchException(item);
+            }
             InternalInventory.ApplyDisableItem(item);
             return this;
         }
@@ -390,7 +497,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyDisableItem(string itemName)
         {
-            InternalInventory.ApplyDisableItem(itemName);
+            InternalInventory.ApplyDisableItem(Model.Items[itemName]);
             return this;
         }
 
@@ -402,6 +509,10 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyEnableItem(Item item)
         {
+            if (Model.Items[item.Name] != item)
+            {
+                throw new ModelElementMismatchException(item);
+            }
             InternalInventory.ApplyEnableItem(item);
             return this;
         }
@@ -427,6 +538,17 @@ namespace sm_json_data_framework.Models.InGameStates
         public InGameState ApplyDestroyObstacle(RoomObstacle obstacle)
         {
             InternalInRoomState.ApplyDestroyObstacle(obstacle);
+            return this;
+        }
+
+        /// <summary>
+        /// Updates the in-room state to contain a mention of the destruction of the obstacle with the provided in-room ID.
+        /// </summary>
+        /// <param name="obstacleId">The in-room ID of the obstacle to destroy.</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyDestroyObstacle(string obstacleId)
+        {
+            InternalInRoomState.ApplyDestroyObstacle(obstacleId);
             return this;
         }
 
@@ -598,13 +720,38 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// <para>Positions the in-game state as it would be after entering a room via the provided node. This may place the player at a different node immediately
         /// if the node calls for it.</para>
-        /// <para>This will be executed regardless of the current in-room state. To exit with more applied intelligence, see <see cref="ApplyExitRoom(UnfinalizedSuperMetroidModel)"/></para>
+        /// <para>This will be executed regardless of the current in-room state. To exit with more applied intelligence, see <see cref="ApplyExitRoom()"/></para>
         /// </para>
         /// </summary>
         /// <param name="entryNode">The node (in the next room) through which the next room will be entered.</param>
         /// <returns>This, for chaining</returns>
         public InGameState ApplyEnterRoom(RoomNode entryNode)
         {
+            if (Model.Nodes[entryNode.Name] != entryNode)
+            {
+                throw new ModelElementMismatchException(entryNode);
+            }
+            // Copy current room state and remember it as previous
+            RegisterPreviousRoom(InternalInRoomState.Clone());
+
+            // Enter next room
+            InternalInRoomState.ApplyEnterRoom(entryNode);
+
+            return this;
+        }
+
+        /// <summary>
+        /// <para>Positions the in-game state as it would be after entering a room via the node with the provided in-room ID within the room with the provided name.
+        /// This may place the player at a different node immediately if the node calls for it.</para>
+        /// <para>This will be executed regardless of the current in-room state. To exit with more applied intelligence, see <see cref="ApplyExitRoom()"/></para>
+        /// </para>
+        /// </summary>
+        /// <param name="roomName">Name of the room to enter</param>
+        /// <param name="entryNodeId">In-room ID of the node (in the next room) through which the next room will be entered.</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyEnterRoom(string roomName, int entryNodeId)
+        {
+            RoomNode entryNode = Model.Rooms[roomName].Nodes[entryNodeId];
             // Copy current room state and remember it as previous
             RegisterPreviousRoom(InternalInRoomState.Clone());
 
@@ -618,9 +765,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Attends to exit the current room at the current node, going to the adjacent room this node is connected to.
         /// This is only possible if the current node allows exiting the room, and if no locks are active on the node.
         /// </summary>
-        /// <param name="model">A SuperMetroidModel, which will be used to when determining whether current node has any active locks</param>
         /// <returns>This, for chaining</returns>
-        public InGameState ApplyExitRoom(SuperMetroidModel model)
+        public InGameState ApplyExitRoom()
         {
             RoomNode outNode = CurrentNode.OutNode;
             if (outNode == null)
@@ -629,7 +775,7 @@ namespace sm_json_data_framework.Models.InGameStates
                     $"because it does not have an out connection to another room.");
             }
 
-            IEnumerable<NodeLock> activeLocks = CurrentNode.GetActiveLocks(model, this).Values
+            IEnumerable<NodeLock> activeLocks = CurrentNode.GetActiveLocks(Model, this).Values
                 .Except(GetBypassedExitLocks(), ObjectReferenceEqualityComparer<NodeLock>.Default);
             if (activeLocks.Any())
             {
@@ -652,8 +798,25 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyVisitNode(RoomNode nodeToVisit, Strat strat)
         {
+            if (Model.Nodes[nodeToVisit.Name] != nodeToVisit)
+            {
+                throw new ModelElementMismatchException(nodeToVisit);
+            }
             InternalInRoomState.ApplyVisitNode(nodeToVisit, strat);
 
+            return this;
+        }
+
+        /// <summary>
+        /// Positions the in-game state at the node with the provided in-room ID.
+        /// </summary>
+        /// <param name="nodeToVisitId">In-room ID of the node to go to</param>
+        /// <param name="stratName">The name of the strat through which the node is being reached. Can be null. If not null, only makes sense if 
+        /// it's on a link that connects previous node to new node. The strat must be on a link from the current node to the ndoe to visit</param>
+        /// <returns>This, for chaining</returns>
+        public InGameState ApplyVisitNode(int nodeToVisitId, string stratName)
+        {
+            InternalInRoomState.ApplyVisitNode(nodeToVisitId, stratName);
             return this;
         }
 
@@ -719,7 +882,7 @@ namespace sm_json_data_framework.Models.InGameStates
             return previousRoomExitNode.Runways.Values.WhereLogicallyRelevant();
         }
 
-        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
+        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0)
         {
             // Since this is a retroactive check, we already have to look at the room prior to the "current" room for this check
             // If that "current" room is the last remembered one, we have no way to obtain the state of the room before that so just return
@@ -826,7 +989,7 @@ namespace sm_json_data_framework.Models.InGameStates
                         }
 
                         // If there's any active locks on the exit door, then the door can't possibly have been opened first.
-                        if (previousRoomExitNode.GetActiveLocks(model, this).Any())
+                        if (previousRoomExitNode.GetActiveLocks(Model, this).Any())
                         {
                             return false;
                         }
@@ -891,9 +1054,8 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <summary>
         /// Returns the enumeration of enemy drops that aren't needed by this in-game state because the associated resources are full.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <returns></returns>
-        public IEnumerable<EnemyDropEnum> GetUnneededDrops(SuperMetroidModel model);
+        public IEnumerable<EnemyDropEnum> GetUnneededDrops();
 
         /// <summary>
         /// The read-only dictionary of game flags that are active in this InGameState, mapped by their name.
@@ -1129,13 +1291,12 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <para>A canLeaveCharged would typically be used retroactively to satisfy a canComeInCharged
         /// that is being executed soon after entry of the new room.</para>
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="requiredInRoomPath">The path that must have been followed in the current room (as successive node IDs) in order to be able to use 
         /// retroactive canLeavechargeds in the current context. The first node in this path also dictates the node to which 
         /// the retroactive charged exit must lead.</param>
         /// <param name="previousRoomCount">The number of playable rooms to go back by, *before* looking for retroactive canLeaveChargeds in the room before that.
         /// 0 means current room, 3 means go back 3 rooms (using last known state), negative values are invalid. Non-playable rooms are skipped.</param>
         /// <returns></returns>
-        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(SuperMetroidModel model, IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0);
+        public IEnumerable<CanLeaveCharged> GetRetroactiveCanLeaveChargeds(IEnumerable<int> requiredInRoomPath, int previousRoomCount = 0);
     }
 }

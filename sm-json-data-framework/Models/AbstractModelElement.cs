@@ -136,7 +136,7 @@ namespace sm_json_data_framework.Models
         public virtual TargetType Finalize(ModelFinalizationMappings mappings)
         {
             var constructorDelegate = CreateFinalizedElement;
-            return mappings.GetFinalizedModel((ConcreteType)this, constructorDelegate);
+            return mappings.GetFinalizedElement((ConcreteType)this, constructorDelegate);
         }
 
         public IModelElement FinalizeUntyped(ModelFinalizationMappings mappings)

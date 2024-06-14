@@ -40,7 +40,7 @@ namespace sm_json_data_framework.Tests.Models.GameFlags
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledGameFlag("f_AnimalsSaved");
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_DefeatedCeresRidley"] })
+                .StartingGameFlags(new List<string> { "f_DefeatedCeresRidley" })
                 .Build();
 
             // When

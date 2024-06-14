@@ -342,7 +342,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Bombs");
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
-                .StartingGameFlags(new List<GameFlag> { ModelWithOptions.GameFlags["f_ZebesAwake"] })
+                .StartingGameFlags(new List<string> { "f_ZebesAwake" })
                 .Build();
 
             // When

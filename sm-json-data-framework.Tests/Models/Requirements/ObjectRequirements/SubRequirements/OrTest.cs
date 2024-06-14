@@ -77,9 +77,9 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             Or or = Model.Rooms["X-Ray Scope Room"].Links[3].To[1].Strats["Base"].Requires.LogicalElement<Or>(0);
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                .ApplyAddItem(ModelWithOptions.Items["SpringBall"])
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem(Model.Items["Morph"])
+                .ApplyAddItem(Model.Items["SpringBall"])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
                 .ApplyRefillResources()
                 .ApplyEnterRoom(Model.Rooms["X-Ray Scope Room"].Nodes[3]);
 
