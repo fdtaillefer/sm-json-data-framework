@@ -135,7 +135,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddGameFlag(Model.GameFlags["f_DefeatedPhantoon"]);
+                .ApplyAddGameFlag("f_DefeatedPhantoon");
             NodeLock nodeLock = Model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
 
             // When
@@ -151,7 +151,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             NodeLock nodeLock = Model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddGameFlag(Model.GameFlags["f_DefeatedPhantoon"])
+                .ApplyAddGameFlag("f_DefeatedPhantoon")
                 .ApplyOpenLock(nodeLock, applyToRoomState: false);
 
             // When
@@ -185,7 +185,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             NodeLock nodeLock = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources()
                 .ApplyEnterRoom(nodeLock.Node);
 
@@ -221,8 +221,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             NodeLock nodeLock = Model.Locks["Pit Room Left Grey Lock (to Climb)"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items["Morph"])
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem("Morph")
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
@@ -247,8 +247,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             NodeLock nodeLock = Model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Ice"])
-                .ApplyAddItem(Model.Items["Wave"])
+                .ApplyAddItem("Ice")
+                .ApplyAddItem("Wave")
                 .ApplyOpenLock(nodeLock, applyToRoomState: false)
                 .ApplyEnterRoom(nodeLock.Node);
 
@@ -295,8 +295,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             NodeLock nodeLock = Model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Ice"])
-                .ApplyAddItem(Model.Items["Wave"])
+                .ApplyAddItem("Ice")
+                .ApplyAddItem("Wave")
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When

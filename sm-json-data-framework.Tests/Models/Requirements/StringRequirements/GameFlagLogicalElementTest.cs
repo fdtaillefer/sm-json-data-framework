@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
             // Given
             GameFlagLogicalElement gameFlagLogicalElement = Model.Rooms["Glass Tunnel"].Links[5].To[6].Strats["Suitless Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddGameFlag(Model.GameFlags["f_MaridiaTubeBroken"]);
+                .ApplyAddGameFlag("f_MaridiaTubeBroken");
 
             // When
             ExecutionResult result = gameFlagLogicalElement.Execute(Model, inGameState);
@@ -76,7 +76,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             GameFlagLogicalElement gameFlagLogicalElement = ModelWithOptions.Rooms["Glass Tunnel"].Links[5].To[6].Strats["Suitless Base"].Requires.LogicalElement<GameFlagLogicalElement>(0);
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddGameFlag(ModelWithOptions.GameFlags["f_MaridiaTubeBroken"]); ;
+                .ApplyAddGameFlag("f_MaridiaTubeBroken"); ;
 
             // When
             ExecutionResult result = gameFlagLogicalElement.Execute(ModelWithOptions, inGameState);

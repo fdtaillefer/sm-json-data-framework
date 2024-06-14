@@ -57,7 +57,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Morph Ball Room"].Nodes[6]);
+                .ApplyEnterRoom("Morph Ball Room", 6);
             StratObstacle stratObstacle = Model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"].Obstacles["C"];
 
             // When
@@ -72,8 +72,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Morph Ball Room"].Nodes[6])
-                .ApplyDestroyObstacle(Model.Rooms["Morph Ball Room"].Obstacles["C"]);
+                .ApplyEnterRoom("Morph Ball Room", 6)
+                .ApplyDestroyObstacle("C");
             StratObstacle stratObstacle = Model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"].Obstacles["C"];
 
             // When
@@ -89,7 +89,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Climb"].Nodes[2]);
+                .ApplyEnterRoom("Climb", 2);
             StratObstacle stratObstacle = Model.Rooms["Climb"].Links[2].To[6].Strats["Base"].Obstacles["A"];
 
             // When
@@ -104,8 +104,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["ScrewAttack"])
-                .ApplyEnterRoom(Model.Rooms["Climb"].Nodes[2]);
+                .ApplyAddItem("ScrewAttack")
+                .ApplyEnterRoom("Climb", 2);
             StratObstacle stratObstacle = Model.Rooms["Climb"].Links[2].To[6].Strats["Base"].Obstacles["A"];
 
             // When
@@ -124,10 +124,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             StratObstacle stratObstacle = Model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"].Obstacles["B"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem("Morph")
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
-                .ApplyEnterRoom(Model.Rooms["Wrecked Ship Main Shaft"].Nodes[7]);
+                .ApplyEnterRoom("Wrecked Ship Main Shaft", 7);
 
             // When
             ExecutionResult result = stratObstacle.DestroyExecution.Execute(Model, inGameState);
@@ -151,7 +151,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Post Crocomire Jump Room"].Nodes[5]);
+                .ApplyEnterRoom("Post Crocomire Jump Room", 5);
             StratObstacle stratObstacle = Model.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"].Obstacles["B"];
 
             // When
@@ -166,8 +166,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyEnterRoom(Model.Rooms["Post Crocomire Jump Room"].Nodes[5]);
+                .ApplyAddItem("Morph")
+                .ApplyEnterRoom("Post Crocomire Jump Room", 5);
             StratObstacle stratObstacle = Model.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"].Obstacles["B"];
 
             // When

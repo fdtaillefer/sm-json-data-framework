@@ -44,7 +44,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Big Pink"].Nodes[13]);
+                .ApplyEnterRoom("Big Pink", 13);
             And and = Model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0).LogicalRequirements.LogicalElement<And>(0);
 
             //  When
@@ -59,7 +59,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Green Hill Zone"].Nodes[1]);
+                .ApplyEnterRoom("Green Hill Zone", 1);
             And and = Model.Rooms["Green Hill Zone"].Links[1].To[2].Strats["Base"].Requires.LogicalElement<Or>(0).LogicalRequirements.LogicalElement<And>(0);
 
             //  When
@@ -74,9 +74,9 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                .ApplyAddItem(Model.Items["HiJump"])
-                .ApplyEnterRoom(Model.Rooms["Big Pink"].Nodes[13]);
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyAddItem("HiJump")
+                .ApplyEnterRoom("Big Pink", 13);
             And and = Model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0).LogicalRequirements.LogicalElement<And>(0);
 
             //  When

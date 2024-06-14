@@ -68,9 +68,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             Strat strat = Model.Rooms["Morph Ball Room"].Links[6].To[5].Strats["Bomb the Blocks"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items["Bombs"])
-                .ApplyEnterRoom(Model.Rooms["Morph Ball Room"].Nodes[6]);
+                .ApplyAddItem("Morph")
+                .ApplyAddItem("Bombs")
+                .ApplyEnterRoom("Morph Ball Room", 6);
 
             // When
             ExecutionResult result = strat.Execute(Model, inGameState);
@@ -89,7 +89,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             Strat strat = Model.Rooms["Construction Zone"].Links[3].To[4].Strats["Base"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Construction Zone"].Nodes[3]);
+                .ApplyEnterRoom("Construction Zone",3);
 
             // When
             ExecutionResult result = strat.Execute(Model, inGameState);
@@ -103,7 +103,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Morph Ball Room"].Nodes[6]);
+                .ApplyEnterRoom("Morph Ball Room", 6);
             Strat strat = Model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"];
 
             // When
@@ -118,8 +118,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Morph Ball Room"].Nodes[6])
-                .ApplyDestroyObstacle(Model.Rooms["Morph Ball Room"].Obstacles["C"]);
+                .ApplyEnterRoom("Morph Ball Room", 6)
+                .ApplyDestroyObstacle("C");
             Strat strat = Model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"];
 
             // When
@@ -135,9 +135,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items["Ice"])
-                .ApplyEnterRoom(Model.Rooms["Post Crocomire Jump Room"].Nodes[5]);
+                .ApplyAddItem("Morph")
+                .ApplyAddItem("Ice")
+                .ApplyEnterRoom("Post Crocomire Jump Room", 5);
             Strat strat = Model.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"];
 
             // When
@@ -155,7 +155,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Climb"].Nodes[2]);
+                .ApplyEnterRoom("Climb", 2);
             Strat strat = Model.Rooms["Climb"].Links[2].To[6].Strats["Base"];
 
             // When
@@ -170,8 +170,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["ScrewAttack"])
-                .ApplyEnterRoom(Model.Rooms["Climb"].Nodes[2]);
+                .ApplyAddItem("ScrewAttack")
+                .ApplyEnterRoom("Climb", 2);
             Strat strat = Model.Rooms["Climb"].Links[2].To[6].Strats["Base"];
 
             // When
@@ -190,10 +190,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             Strat strat = Model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem("Morph")
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
-                .ApplyEnterRoom(Model.Rooms["Wrecked Ship Main Shaft"].Nodes[7]);
+                .ApplyEnterRoom("Wrecked Ship Main Shaft", 7);
 
             // When
             ExecutionResult result = strat.Execute(Model, inGameState);
@@ -214,11 +214,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             Strat strat = Model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem("Morph")
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
-                .ApplyEnterRoom(Model.Rooms["Wrecked Ship Main Shaft"].Nodes[7])
-                .ApplyDestroyObstacle(Model.Rooms["Wrecked Ship Main Shaft"].Obstacles["B"]);
+                .ApplyEnterRoom("Wrecked Ship Main Shaft", 7)
+                .ApplyDestroyObstacle("B");
 
             // When
             ExecutionResult result = strat.Execute(Model, inGameState);
@@ -237,8 +237,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .RegisterStratTries("Ceiling E-Tank Dboost", 3);
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddGameFlag(ModelWithOptions.GameFlags["f_ZebesAwake"])
-                .ApplyEnterRoom(ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Nodes[2]);
+                .ApplyAddGameFlag("f_ZebesAwake")
+                .ApplyEnterRoom("Blue Brinstar Energy Tank Room", 2);
             Strat strat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
 
             // When
@@ -259,8 +259,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .RegisterDisabledStrat("Ceiling E-Tank Dboost");
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddGameFlag(ModelWithOptions.GameFlags["f_ZebesAwake"])
-                .ApplyEnterRoom(ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Nodes[2]);
+                .ApplyAddGameFlag("f_ZebesAwake")
+                .ApplyEnterRoom("Blue Brinstar Energy Tank Room", 2);
             Strat strat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
 
             // When

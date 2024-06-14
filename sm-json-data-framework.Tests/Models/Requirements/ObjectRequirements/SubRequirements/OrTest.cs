@@ -61,7 +61,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             Or or = Model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0);
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Big Pink"].Nodes[13]);
+                .ApplyEnterRoom("Big Pink", 13);
 
             // When
             ExecutionResult result = or.Execute(Model, inGameState);
@@ -77,11 +77,11 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             Or or = Model.Rooms["X-Ray Scope Room"].Links[3].To[1].Strats["Base"].Requires.LogicalElement<Or>(0);
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items["SpringBall"])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem("Morph")
+                .ApplyAddItem("SpringBall")
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
-                .ApplyEnterRoom(Model.Rooms["X-Ray Scope Room"].Nodes[3]);
+                .ApplyEnterRoom("X-Ray Scope Room", 3);
 
             // When
             ExecutionResult result = or.Execute(Model, inGameState);
@@ -99,7 +99,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             Or or = Model.Rooms["Pink Brinstar Power Bomb Room"].Links[1].To[4].Strats["Tank the Damage"].Requires.LogicalElement<Or>(0);
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyEnterRoom(Model.Rooms["Pink Brinstar Power Bomb Room"].Nodes[1]);
+                .ApplyEnterRoom("Pink Brinstar Power Bomb Room", 1);
 
             // When
             ExecutionResult result = or.Execute(Model, inGameState);

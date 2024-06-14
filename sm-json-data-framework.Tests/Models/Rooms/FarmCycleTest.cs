@@ -58,7 +58,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             FarmCycle farmCycle = Model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
+                .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
             bool result = farmCycle.IsFree(Model, inGameState);
@@ -105,7 +105,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             FarmCycle farmCycle = Model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Grapple"]);
+                .ApplyAddItem("Grapple");
 
             // When
             ExecutionResult result = farmCycle.RequirementExecution.Execute(Model, inGameState);
@@ -158,9 +158,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Test with a 2-second Zebbo cycle. Drop rates for missile and PowerBomb are too low to logically expect by default.
             FarmCycle farmCycle = Model.RoomEnemies["Etecoon E-Tank Middle Zebbo"].FarmCycles["Crouch over spawn point"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
                 .ApplyConsumeResource(ConsumableResourceEnum.Missile, 4)
                 .ApplyConsumeResource(ConsumableResourceEnum.Super, 4)
@@ -188,13 +188,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // But, that takes 5 cycles. We will not have the 30 energy needed to execute the last cycle before stabilizing.
             FarmCycle farmCycle = Model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
                 .ApplyConsumeResource(ConsumableResourceEnum.Missile, 10)
                 .ApplyConsumeResource(ConsumableResourceEnum.Super, 9)
@@ -216,13 +216,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Test with a 2-second 5-Gamet heated cycle. Energy will be unstable until missiles are filled.
             FarmCycle farmCycle = Model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
                 .ApplyConsumeResource(ConsumableResourceEnum.Missile, 10)
                 .ApplyConsumeResource(ConsumableResourceEnum.Super, 9)

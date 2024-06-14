@@ -89,7 +89,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
@@ -108,9 +108,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME)
+                .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
@@ -133,7 +133,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
@@ -151,9 +151,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME)
+                .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
@@ -181,7 +181,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Blue Brinstar Boulder Room"].Nodes[2].CanLeaveCharged.First();
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
-                .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When

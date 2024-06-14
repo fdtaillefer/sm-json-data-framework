@@ -149,10 +149,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             RoomEnemy roomEnemy = Model.RoomEnemies["Etecoon E-Tank Left Zebbo"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BOMB_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.RESERVE_TANK_NAME])
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
+                .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
+                .ApplyAddItem(SuperMetroidModel.RESERVE_TANK_NAME)
                 .ApplyRefillResources()
                 .ApplyConsumeResource(ConsumableResourceEnum.Missile, 4)
                 .ApplyConsumeResource(ConsumableResourceEnum.Super, 4)

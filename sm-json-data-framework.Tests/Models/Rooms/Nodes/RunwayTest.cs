@@ -97,7 +97,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             Runway runway = Model.Runways["Base Runway - Oasis Left Door (to West Sand Hall)"];
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME]);
+                .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
             ExecutionResult result = runway.Execute(Model, inGameState, comingIn: true);

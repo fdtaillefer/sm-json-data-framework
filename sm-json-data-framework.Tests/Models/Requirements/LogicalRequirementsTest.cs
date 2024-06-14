@@ -200,7 +200,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
             LogicalRequirements logicalRequirements = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires;
 
@@ -239,7 +239,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Charge"]);
+                .ApplyAddItem("Charge");
             LogicalRequirements logicalRequirements = Model.Techs["canWrapAroundShot"].Requires;
 
             // When
@@ -256,9 +256,9 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items["Morph"])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem("Morph")
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyRefillResources();
             LogicalRequirements logicalRequirements = Model.Techs["canCrystalFlash"].Requires;
 
@@ -276,8 +276,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         {
             // Given
             InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
-                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
+                .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
+                .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
             LogicalRequirements logicalRequirements = Model.Helpers["h_canBlueGateGlitch"].Requires.LogicalElement<Or>(0).LogicalRequirements;
 

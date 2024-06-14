@@ -1215,7 +1215,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyBypassLock(previousRoomLock);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crateria Kihunter Room", 3));
+            inGameState.ApplyEnterRoom("Crateria Kihunter Room", 3);
             inGameState.ApplyBypassLock(currentRoomLock);
 
             // When
@@ -1802,7 +1802,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Parlor and Alcatraz", 4));
@@ -1859,7 +1859,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(8, "Base");
             inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
 
             // When
@@ -1903,7 +1903,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             inGameState.ApplyEnterRoom("Parlor and Alcatraz", 4);
@@ -1960,7 +1960,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
+            inGameState.ApplyVisitNode(8, "Base");
             inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
 
             // When
@@ -2003,7 +2003,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             inGameState.ApplyExitRoom();
@@ -2057,9 +2057,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(initialRoomName, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Red Tower", 3);
+            inGameState.ApplyVisitNode(8, "Base");
+            inGameState.ApplyVisitNode(4, "Base");
 
             // When
             for (int i = 0; i < InGameState.MaxPreviousRooms; i++)
@@ -2119,7 +2119,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
+            inGameState.ApplyOpenLock("Landing Site Bottom Right Green Lock (to Crateria Tube)");
 
             // When
             inGameState.ApplyExitRoom();
@@ -2137,7 +2137,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
+            inGameState.ApplyBypassLock("Landing Site Bottom Right Green Lock (to Crateria Tube)");
 
             // When
             inGameState.ApplyExitRoom();
@@ -2322,7 +2322,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When
             ReadOnlyInRoomState result = inGameState.GetInRoomState(1);
@@ -2342,8 +2342,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             ReadOnlyInRoomState result = inGameState.GetInRoomState(1);
@@ -2360,7 +2360,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetInRoomState(-1));
@@ -2418,7 +2418,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When
             Room result = inGameState.GetCurrentOrPreviousRoom(1);
@@ -2438,8 +2438,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             Room result = inGameState.GetCurrentOrPreviousRoom(1);
@@ -2456,7 +2456,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetCurrentOrPreviousRoom(-1));
@@ -2515,7 +2515,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+            inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
             RoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(1);
@@ -2536,8 +2536,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             RoomEnvironment result = inGameState.GetCurrentOrPreviousRoomEnvironment(1);
@@ -2554,7 +2554,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetCurrentOrPreviousRoomEnvironment(-1));
@@ -2593,8 +2593,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Red Tower", 3);
+            inGameState.ApplyVisitNode(8, "Base");
             Strat expectedStrat = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), expectedStrat);
 
@@ -2613,7 +2613,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When
             Strat result = inGameState.GetLastLinkStrat(0);
@@ -2632,7 +2632,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             InGameState inGameState = new InGameState(startConditions);
             Strat expectedStrat = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), expectedStrat);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+            inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
             Strat result = inGameState.GetLastLinkStrat(1);
@@ -2651,8 +2651,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             InGameState inGameState = new InGameState(startConditions);
             Strat expectedStrat = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
             inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), expectedStrat);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             Strat result = inGameState.GetLastLinkStrat(1);
@@ -2669,7 +2669,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetLastLinkStrat(-1));
@@ -2714,9 +2714,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Red Tower", 3);
+            inGameState.ApplyVisitNode(8, "Base");
+            inGameState.ApplyVisitNode(4, "Base");
 
             // When
             IReadOnlyList<int> result = inGameState.GetVisitedNodeIds(0);
@@ -2736,8 +2736,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Business Center", 8)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), inGameState.CurrentNode.LinksTo[6].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+            inGameState.ApplyVisitNode(6, "Base");
+            inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
             IReadOnlyList<int> result = inGameState.GetVisitedNodeIds(1);
@@ -2756,9 +2756,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Oasis", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), inGameState.CurrentNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyVisitNode(3, "Base");
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             IReadOnlyList<int> result = inGameState.GetVisitedNodeIds(1);
@@ -2777,7 +2777,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetVisitedNodeIds(-1));
@@ -2856,7 +2856,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             RoomNode expectedNode2 = Model.GetNodeInRoom("Business Center", 6);
             Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+            inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
             var result = inGameState.GetVisitedPath(1);
@@ -2881,8 +2881,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             RoomNode expectedNode2 = Model.GetNodeInRoom("Oasis", 3);
             Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             var result = inGameState.GetVisitedPath(1);
@@ -2903,7 +2903,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetVisitedPath(-1));
@@ -2948,8 +2948,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Hellway", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Caterpillar Room", 2));
-            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
+            inGameState.ApplyEnterRoom("Caterpillar Room", 2);
+            inGameState.ApplyDestroyObstacle("A");
 
             // When
             IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(0);
@@ -2967,8 +2967,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Caterpillar Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Hellway", 2));
+            inGameState.ApplyDestroyObstacle("A");
+            inGameState.ApplyEnterRoom("Hellway", 2);
 
             // When
             IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(1);
@@ -2988,8 +2988,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyDestroyObstacle(inGameState.CurrentRoom.Obstacles["A"]);
             //Note: This is an invalid connection, but it's not ApplyEnterRoom()'s job to validate that
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             IEnumerable<string> result = inGameState.GetDestroyedObstacleIds(1);
@@ -3007,7 +3007,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetDestroyedObstacleIds(-1));
@@ -3051,7 +3051,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Business Center", 6)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+            inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
             bool result = inGameState.IsHeatedRoom(0);
@@ -3100,7 +3100,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Business Center", 6)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Cathedral Entrance", 1));
+            inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
             bool result = inGameState.IsHeatedRoom(1);
@@ -3118,8 +3118,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             // Not a valid connection but it's not ApplyEnterRoom()'s job to know that
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             bool result = inGameState.IsHeatedRoom(1);
@@ -3136,7 +3136,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.IsHeatedRoom(-1));
@@ -3210,7 +3210,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Volcano Room", 2), startNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(0);
@@ -3228,7 +3228,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Boyon Gate Hall", 3));
+            inGameState.ApplyEnterRoom("Boyon Gate Hall", 3);
 
             // When
             DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
@@ -3249,8 +3249,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             DoorEnvironment result = inGameState.GetCurrentDoorEnvironment(1);
@@ -3268,7 +3268,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetCurrentDoorEnvironment(-1));
@@ -3307,7 +3307,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Boyon Gate Hall", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crab Hole", 2));
+            inGameState.ApplyEnterRoom("Crab Hole", 2);
 
             // When
             PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(0);
@@ -3341,7 +3341,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Volcano Room", 2), startNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(0);
@@ -3358,7 +3358,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Crab Hole", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Boyon Gate Hall", 3));
+            inGameState.ApplyEnterRoom("Boyon Gate Hall", 3);
 
             // When
             PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(1);
@@ -3376,9 +3376,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyVisitNode(3, "Base");
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             PhysicsEnum? result = inGameState.GetCurrentDoorPhysics(1);
@@ -3395,7 +3395,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetCurrentDoorPhysics(-1));
@@ -3453,7 +3453,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When
             RoomNode result = inGameState.GetCurrentNode(1);
@@ -3473,8 +3473,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(expectedNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             RoomNode result = inGameState.GetCurrentNode(1);
@@ -3491,7 +3491,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.GetCurrentNode(-1));
@@ -3547,7 +3547,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyBypassLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
+            inGameState.ApplyBypassLock("Business Center Top Left Green Lock (to Ice Beam Gate)");
 
             // When
             bool result = inGameState.BypassingExitLock(0);
@@ -3565,8 +3565,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyBypassLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 4));
+            inGameState.ApplyBypassLock("Business Center Top Left Green Lock (to Ice Beam Gate)");
+            inGameState.ApplyEnterRoom("Ice Beam Gate Room", 4);
 
             // When
             bool result = inGameState.BypassingExitLock(1);
@@ -3586,9 +3586,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(exitNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyBypassLock(exitNode.Locks["Oasis Green Lock (to Toilet)"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyBypassLock("Oasis Green Lock (to Toilet)");
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             bool result = inGameState.BypassingExitLock(1);
@@ -3605,7 +3605,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.BypassingExitLock(-1));
@@ -3666,7 +3666,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyOpenLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
+            inGameState.ApplyOpenLock("Business Center Top Left Green Lock (to Ice Beam Gate)");
 
             // When
             bool result = inGameState.OpeningExitLock(0);
@@ -3684,8 +3684,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyOpenLock(startNode.Locks["Business Center Top Left Green Lock (to Ice Beam Gate)"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 4));
+            inGameState.ApplyOpenLock("Business Center Top Left Green Lock (to Ice Beam Gate)");
+            inGameState.ApplyEnterRoom("Ice Beam Gate Room", 4);
 
             // When
             bool result = inGameState.OpeningExitLock(1);
@@ -3705,9 +3705,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyVisitNode(exitNode, startNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyOpenLock(exitNode.Locks["Oasis Green Lock (to Toilet)"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Toilet Bowl", 2)); // Toilet Bowl is non-playable
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Plasma Spark Room", 1));
+            inGameState.ApplyOpenLock("Oasis Green Lock (to Toilet)");
+            inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
+            inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
             // When
             bool result = inGameState.OpeningExitLock(1);
@@ -3724,7 +3724,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom("Red Tower", 3);
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.OpeningExitLock(-1));
@@ -3785,7 +3785,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+            inGameState.ApplyEnterRoom("Big Boy Room", 1);
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
@@ -3803,7 +3803,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 2));
+            inGameState.ApplyEnterRoom("Big Boy Room", 2);
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
@@ -3820,8 +3820,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Big Boy Room", 1);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.GetVisitedNodeIds()[0] }, acceptablePhysics: null);
@@ -3839,8 +3839,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Big Boy Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Big Boy Room", 1);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(inGameState.GetVisitedNodeIds(), acceptablePhysics: null);
@@ -3859,7 +3859,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             IEnumerable<Runway> expected = inGameState.CurrentNode.Runways.Values;
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+            inGameState.ApplyEnterRoom("Big Boy Room", 1);
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Normal });
@@ -3877,7 +3877,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Big Boy Room", 1));
+            inGameState.ApplyEnterRoom("Big Boy Room", 1);
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: new HashSet<PhysicsEnum> { PhysicsEnum.Water });
@@ -3894,8 +3894,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Crateria Tube", 1));
+            inGameState.ApplyBypassLock("Landing Site Bottom Right Green Lock (to Crateria Tube)");
+            inGameState.ApplyEnterRoom("Crateria Tube", 1);
 
             // When
             IEnumerable<Runway> result = inGameState.GetRetroactiveRunways(new int[] { inGameState.CurrentNode.Id }, acceptablePhysics: null);
@@ -3931,7 +3931,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
+            inGameState.ApplyEnterRoom("Noob Bridge aka A Bridge Too Far", 1);
 
             // When
             IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(new int[] { inGameState.CurrentNode.Id });
@@ -3949,7 +3949,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Green Hill Zone", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2));
+            inGameState.ApplyEnterRoom("Noob Bridge aka A Bridge Too Far", 2);
 
             // When
             IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(new int[] { inGameState.CurrentNode.Id });
@@ -3966,8 +3966,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Green Hill Zone", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Noob Bridge aka A Bridge Too Far", 1);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(new int[] { inGameState.GetVisitedNodeIds()[0] });
@@ -3985,8 +3985,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 1));
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Noob Bridge aka A Bridge Too Far", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyEnterRoom("Noob Bridge aka A Bridge Too Far", 1);
+            inGameState.ApplyVisitNode(2, "Base");
 
             // When
             IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(inGameState.GetVisitedNodeIds());
@@ -4004,8 +4004,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Crab Shaft", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Crab Shaft Green Lock (to Aqueduct)"]);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Aqueduct", 1));
+            inGameState.ApplyBypassLock("Crab Shaft Green Lock (to Aqueduct)");
+            inGameState.ApplyEnterRoom("Aqueduct", 1);
 
             // When
             IEnumerable<CanLeaveCharged> result = inGameState.GetRetroactiveCanLeaveChargeds(new int[] { inGameState.CurrentNode.Id });
@@ -4022,7 +4022,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Speed Through"]);
+            inGameState.ApplyVisitNode(2, "Speed Through");
             IEnumerable<CanLeaveCharged> expected = inGameState.CurrentNode.CanLeaveCharged;
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
@@ -4042,8 +4042,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Speed Through"]);
-            inGameState.ApplyBypassLock(inGameState.CurrentNode.Locks["Early Supers Red Lock (to Brinstar Reserve)"]);
+            inGameState.ApplyVisitNode(2, "Speed Through");
+            inGameState.ApplyBypassLock("Early Supers Red Lock (to Brinstar Reserve)");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4061,9 +4061,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Speed Through"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 4), inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
+            inGameState.ApplyVisitNode(2, "Speed Through");
+            inGameState.ApplyVisitNode(4, "Base");
+            inGameState.ApplyVisitNode(2, "Base");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4081,7 +4081,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Early Supers Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Early Supers Mockball"]);
+            inGameState.ApplyVisitNode(2, "Early Supers Mockball");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4099,7 +4099,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 1), inGameState.CurrentNode.LinksTo[1].Strats["Shinespark"]);
+            inGameState.ApplyVisitNode(1, "Shinespark");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4117,9 +4117,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Landing Site", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 4), inGameState.CurrentNode.LinksTo[4].Strats["Shinespark"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 3), inGameState.CurrentNode.LinksTo[3].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Landing Site", 1), inGameState.CurrentNode.LinksTo[1].Strats["Shinespark"]);
+            inGameState.ApplyVisitNode(4, "Shinespark");
+            inGameState.ApplyVisitNode(3, "Base");
+            inGameState.ApplyVisitNode(1, "Shinespark");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4137,8 +4137,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Red Brinstar Fireflea Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.LinksTo[1].Strats["In-Room Shinespark"]);
+            inGameState.ApplyVisitNode(2, "Base");
+            inGameState.ApplyVisitNode(1, "In-Room Shinespark");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4156,9 +4156,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Red Brinstar Fireflea Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.LinksTo[1].Strats["In-Room Shinespark"]);
-            inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Red Firefleas Red Lock (to X-Ray)"]);
+            inGameState.ApplyVisitNode(2, "Base");
+            inGameState.ApplyVisitNode(1, "In-Room Shinespark");
+            inGameState.ApplyOpenLock("Red Firefleas Red Lock (to X-Ray)");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4176,9 +4176,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .StartingNode("Red Brinstar Fireflea Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyOpenLock(inGameState.CurrentNode.Locks["Red Firefleas Red Lock (to X-Ray)"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 2), inGameState.CurrentNode.LinksTo[2].Strats["Base"]);
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Brinstar Fireflea Room", 1), inGameState.CurrentNode.LinksTo[1].Strats["In-Room Shinespark"]);
+            inGameState.ApplyOpenLock("Red Firefleas Red Lock (to X-Ray)");
+            inGameState.ApplyVisitNode(2, "Base");
+            inGameState.ApplyVisitNode(1, "In-Room Shinespark");
             inGameState.ApplyEnterRoom(inGameState.CurrentNode.OutNode);
 
             // When
@@ -4250,14 +4250,14 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Subsequently given
             // Modify the clone
-            clone.ApplyVisitNode(Model.GetNodeInRoom(startingRoomName, 8), clone.GetCurrentNode().LinksTo[8].Strats["Base"]);
-            clone.ApplyVisitNode(Model.GetNodeInRoom(startingRoomName, 3), clone.GetCurrentNode().LinksTo[3].Strats["Base"]);
+            clone.ApplyVisitNode(8, "Base");
+            clone.ApplyVisitNode(3, "Base");
             clone.ApplyOpenLock(Model.Locks[secondLockName]);
             clone.ApplyTakeLocation(variaNode);
-            clone.ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
-            clone.ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME]);
+            clone.ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
+            clone.ApplyAddItem(SuperMetroidModel.MISSILE_NAME);
             clone.ApplyAddResource(RechargeableResourceEnum.Missile, 2);
-            clone.ApplyAddGameFlag(Model.GameFlags[maridiaTubeFlag]);
+            clone.ApplyAddGameFlag(maridiaTubeFlag);
 
             // Expect
             // Make sure the original is unchanged
