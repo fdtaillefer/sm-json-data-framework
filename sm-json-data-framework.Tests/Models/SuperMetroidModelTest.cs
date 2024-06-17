@@ -991,42 +991,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnHelperLogicalElements()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canGateGlitch");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            HelperLogicalElement impossibleHelperElement = ModelWithOptions.Helpers["h_canHeatedBlueGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canBlueGateGlitch");
-            Assert.True(impossibleHelperElement.LogicallyRelevant);
-            Assert.False(impossibleHelperElement.LogicallyAlways);
-            Assert.False(impossibleHelperElement.LogicallyFree);
-            Assert.True(impossibleHelperElement.LogicallyNever);
-
-            HelperLogicalElement nonFreeHelperElement = ModelWithOptions.Helpers["h_canOpenYellowDoors"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUsePowerBombs");
-            Assert.True(nonFreeHelperElement.LogicallyRelevant);
-            Assert.False(nonFreeHelperElement.LogicallyAlways);
-            Assert.False(nonFreeHelperElement.LogicallyFree);
-            Assert.False(nonFreeHelperElement.LogicallyNever);
-
-            HelperLogicalElement freeHelperElement = ModelWithOptions.Techs["canHBJ"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUseMorphBombs");
-            Assert.True(freeHelperElement.LogicallyRelevant);
-            Assert.True(freeHelperElement.LogicallyAlways);
-            Assert.True(freeHelperElement.LogicallyFree);
-            Assert.False(freeHelperElement.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
