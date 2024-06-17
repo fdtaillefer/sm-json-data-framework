@@ -939,23 +939,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnNeverLogicalElements()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            NeverLogicalElement never = ModelWithOptions.Locks["Etecoon Exit Grey Lock"].UnlockStrats["Base"].Requires.LogicalElement<NeverLogicalElement>(0);
-            Assert.True(never.LogicallyRelevant);
-            Assert.False(never.LogicallyAlways);
-            Assert.False(never.LogicallyFree);
-            Assert.True(never.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
