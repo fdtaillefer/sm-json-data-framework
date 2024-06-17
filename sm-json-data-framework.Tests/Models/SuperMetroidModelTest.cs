@@ -890,55 +890,6 @@ namespace sm_json_data_framework.Tests.Models
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnTechLogicalElements()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterDisabledTech("canPreciseWalljump");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            TechLogicalElement disabledTechElement = ModelWithOptions.Techs["canDelayedWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canPreciseWalljump");
-            Assert.True(disabledTechElement.LogicallyRelevant);
-            Assert.False(disabledTechElement.LogicallyAlways);
-            Assert.False(disabledTechElement.LogicallyFree);
-            Assert.True(disabledTechElement.LogicallyNever);
-
-            TechLogicalElement impossibleSubTechElement = ModelWithOptions.Techs["canInsaneWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canDelayedWalljump");
-            Assert.True(impossibleSubTechElement.LogicallyRelevant);
-            Assert.False(impossibleSubTechElement.LogicallyAlways);
-            Assert.False(impossibleSubTechElement.LogicallyFree);
-            Assert.True(impossibleSubTechElement.LogicallyNever);
-
-            TechLogicalElement nonFreeTechElement = ModelWithOptions.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"].BypassStrats["Bowling Skip"]
-                .Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canGrappleClip");
-            Assert.True(nonFreeTechElement.LogicallyRelevant);
-            Assert.False(nonFreeTechElement.LogicallyAlways);
-            Assert.False(nonFreeTechElement.LogicallyFree);
-            Assert.False(nonFreeTechElement.LogicallyNever);
-
-            TechLogicalElement freeTechElement = ModelWithOptions.Techs["canPreciseWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canWalljump");
-            Assert.True(freeTechElement.LogicallyRelevant);
-            Assert.True(freeTechElement.LogicallyAlways);
-            Assert.True(freeTechElement.LogicallyFree);
-            Assert.False(freeTechElement.LogicallyNever);
-
-            TechLogicalElement freeByStartItemTechElement = ModelWithOptions.Techs["canJumpIntoIBJ"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canIBJ");
-            Assert.True(freeByStartItemTechElement.LogicallyRelevant);
-            Assert.True(freeByStartItemTechElement.LogicallyAlways);
-            Assert.True(freeByStartItemTechElement.LogicallyFree);
-            Assert.False(freeByStartItemTechElement.LogicallyNever);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
