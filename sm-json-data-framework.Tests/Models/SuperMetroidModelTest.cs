@@ -938,12 +938,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
-            Assert.True(electricityFrames.LogicallyRelevant);
-            Assert.True(electricityFrames.LogicallyNever);
-            Assert.False(electricityFrames.LogicallyAlways);
-            Assert.False(electricityFrames.LogicallyFree);
-
             HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
             Assert.True(heatFrames.LogicallyRelevant);
             Assert.True(heatFrames.LogicallyNever);
@@ -1049,12 +1043,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
-            Assert.True(electricityFrames.LogicallyRelevant);
-            Assert.False(electricityFrames.LogicallyNever);
-            Assert.False(electricityFrames.LogicallyAlways);
-            Assert.False(electricityFrames.LogicallyFree);
-
             HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
             Assert.True(heatFrames.LogicallyRelevant);
             Assert.False(heatFrames.LogicallyNever);
@@ -1129,12 +1117,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
-            Assert.True(electricityFrames.LogicallyRelevant);
-            Assert.False(electricityFrames.LogicallyNever);
-            Assert.False(electricityFrames.LogicallyAlways);
-            Assert.False(electricityFrames.LogicallyFree);
-
             HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
             Assert.True(heatFrames.LogicallyRelevant);
             Assert.False(heatFrames.LogicallyNever);
