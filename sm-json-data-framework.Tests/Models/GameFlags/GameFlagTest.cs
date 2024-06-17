@@ -13,8 +13,8 @@ namespace sm_json_data_framework.Tests.Models.GameFlags
 {
     public class GameFlagTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -22,9 +22,10 @@ namespace sm_json_data_framework.Tests.Models.GameFlags
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            GameFlag gameFlag = Model.GameFlags["f_ZebesAwake"];
+            GameFlag gameFlag = model.GameFlags["f_ZebesAwake"];
 
             Assert.Equal("f_ZebesAwake", gameFlag.Name);
         }
@@ -37,29 +38,30 @@ namespace sm_json_data_framework.Tests.Models.GameFlags
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledGameFlag("f_AnimalsSaved");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingGameFlags(new List<string> { "f_DefeatedCeresRidley" })
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            GameFlag alwaysFlag = ModelWithOptions.GameFlags["f_DefeatedCeresRidley"];
+            GameFlag alwaysFlag = model.GameFlags["f_DefeatedCeresRidley"];
             Assert.True(alwaysFlag.LogicallyRelevant);
             Assert.False(alwaysFlag.LogicallyNever);
             Assert.True(alwaysFlag.LogicallyAlways);
             Assert.True(alwaysFlag.LogicallyFree);
 
-            GameFlag removedFlag = ModelWithOptions.GameFlags["f_AnimalsSaved"];
+            GameFlag removedFlag = model.GameFlags["f_AnimalsSaved"];
             Assert.False(removedFlag.LogicallyRelevant);
             Assert.True(removedFlag.LogicallyNever);
             Assert.False(removedFlag.LogicallyAlways);
             Assert.False(removedFlag.LogicallyFree);
 
-            GameFlag obtainableFlag = ModelWithOptions.GameFlags["f_ZebesAwake"];
+            GameFlag obtainableFlag = model.GameFlags["f_ZebesAwake"];
             Assert.True(obtainableFlag.LogicallyRelevant);
             Assert.False(obtainableFlag.LogicallyNever);
             Assert.False(obtainableFlag.LogicallyAlways);

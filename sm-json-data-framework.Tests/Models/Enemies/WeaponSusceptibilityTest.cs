@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Enemies
 {
     public class WeaponSusceptibilityTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,28 +21,29 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            WeaponSusceptibility halfSusceptibility = Model.Enemies["Kihunter (red)"].WeaponSusceptibilities["Spazer"];
-            Assert.Same(Model.Weapons["Spazer"], halfSusceptibility.Weapon);
+            WeaponSusceptibility halfSusceptibility = model.Enemies["Kihunter (red)"].WeaponSusceptibilities["Spazer"];
+            Assert.Same(model.Weapons["Spazer"], halfSusceptibility.Weapon);
             Assert.Equal(0.5M, halfSusceptibility.WeaponMultiplier.Multiplier);
             Assert.Equal(20, halfSusceptibility.DamagePerShot);
             Assert.Equal(90, halfSusceptibility.Shots);
 
-            WeaponSusceptibility doubleSusceptibility = Model.Enemies["Kihunter (red)"].WeaponSusceptibilities["ScrewAttack"];
-            Assert.Same(Model.Weapons["ScrewAttack"], doubleSusceptibility.Weapon);
+            WeaponSusceptibility doubleSusceptibility = model.Enemies["Kihunter (red)"].WeaponSusceptibilities["ScrewAttack"];
+            Assert.Same(model.Weapons["ScrewAttack"], doubleSusceptibility.Weapon);
             Assert.Equal(2, doubleSusceptibility.WeaponMultiplier.Multiplier);
             Assert.Equal(4000, doubleSusceptibility.DamagePerShot);
             Assert.Equal(1, doubleSusceptibility.Shots);
 
-            WeaponSusceptibility baseSusceptibility = Model.Enemies["Kihunter (red)"].WeaponSusceptibilities["Plasma"];
-            Assert.Same(Model.Weapons["Plasma"], baseSusceptibility.Weapon);
+            WeaponSusceptibility baseSusceptibility = model.Enemies["Kihunter (red)"].WeaponSusceptibilities["Plasma"];
+            Assert.Same(model.Weapons["Plasma"], baseSusceptibility.Weapon);
             Assert.Equal(1, baseSusceptibility.WeaponMultiplier.Multiplier);
             Assert.Equal(150, baseSusceptibility.DamagePerShot);
             Assert.Equal(12, baseSusceptibility.Shots);
 
-            WeaponSusceptibility susceptibilityFromCategory = Model.Enemies["Mella"].WeaponSusceptibilities["Ice"];
-            Assert.Same(Model.Weapons["Ice"], susceptibilityFromCategory.Weapon);
+            WeaponSusceptibility susceptibilityFromCategory = model.Enemies["Mella"].WeaponSusceptibilities["Ice"];
+            Assert.Same(model.Weapons["Ice"], susceptibilityFromCategory.Weapon);
             Assert.Equal(2, susceptibilityFromCategory.WeaponMultiplier.Multiplier);
             Assert.Equal(60, susceptibilityFromCategory.DamagePerShot);
             Assert.Equal(1, susceptibilityFromCategory.Shots);
@@ -55,7 +56,8 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         [Fact]
         public void NumberOfHits_ReturnsCorrectValue()
         {
-            WeaponSusceptibility susceptibility = Model.Enemies["Multiviola"].WeaponSusceptibilities["Ice"];
+            SuperMetroidModel model = ReusableModel();
+            WeaponSusceptibility susceptibility = model.Enemies["Multiviola"].WeaponSusceptibilities["Ice"];
             Assert.Equal(1, susceptibility.NumberOfHits(60));
             Assert.Equal(2, susceptibility.NumberOfHits(61));
             Assert.Equal(2, susceptibility.NumberOfHits(120));
@@ -69,14 +71,15 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterRemovedItem("Ice");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Enemy susceptibilityEnemy = ModelWithOptions.Enemies["Kihunter (red)"];
+            Enemy susceptibilityEnemy = model.Enemies["Kihunter (red)"];
             Assert.False(susceptibilityEnemy.WeaponSusceptibilities["Ice"].LogicallyRelevant);
             Assert.True(susceptibilityEnemy.WeaponSusceptibilities["Spazer"].LogicallyRelevant);
         }

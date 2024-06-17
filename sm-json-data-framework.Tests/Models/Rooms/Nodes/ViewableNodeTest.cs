@@ -14,8 +14,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 {
     public class ViewableNodeTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -23,10 +23,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            ViewableNode viewableNode = Model.Rooms["Blue Brinstar Energy Tank Room"].Nodes[1].ViewableNodes[3];
-            Assert.Same(Model.Rooms["Blue Brinstar Energy Tank Room"].Nodes[3], viewableNode.Node);
+            ViewableNode viewableNode = model.Rooms["Blue Brinstar Energy Tank Room"].Nodes[1].ViewableNodes[3];
+            Assert.Same(model.Rooms["Blue Brinstar Energy Tank Room"].Nodes[3], viewableNode.Node);
             Assert.Equal(1, viewableNode.Strats.Count);
             Assert.Contains("Base", viewableNode.Strats.Keys);
     }
@@ -39,14 +40,15 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
             // There's only one ViewableNode in the model right now, and it's always free, so we can only test that
-            ViewableNode viewableNode = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Nodes[1].ViewableNodes[3];
+            ViewableNode viewableNode = model.Rooms["Blue Brinstar Energy Tank Room"].Nodes[1].ViewableNodes[3];
             Assert.True(viewableNode.LogicallyRelevant);
             Assert.False(viewableNode.LogicallyNever);
             Assert.True(viewableNode.LogicallyAlways);

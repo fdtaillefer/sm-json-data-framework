@@ -12,13 +12,14 @@ using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
+using System.Reflection;
 
 namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class StratTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -26,9 +27,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Strat strat = Model.Rooms["Early Supers Room"].Links[1].To[2].Strats["Early Supers Mockball"];
+            Strat strat = model.Rooms["Early Supers Room"].Links[1].To[2].Strats["Early Supers Mockball"];
             Assert.Equal("Early Supers Mockball", strat.Name);
             Assert.True(strat.Notable);
             Assert.NotNull(strat.Requires);
@@ -45,7 +47,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.Empty(strat.StratProperties);
 
 
-            Strat stratWithObstacles = Model.Rooms["Morph Ball Room"].Links[4].To[5].Strats["Base"];
+            Strat stratWithObstacles = model.Rooms["Morph Ball Room"].Links[4].To[5].Strats["Base"];
             Assert.False(stratWithObstacles.Notable);
             Assert.Equal(1, stratWithObstacles.Obstacles.Count);
             Assert.Contains("B", stratWithObstacles.Obstacles.Keys);
@@ -53,7 +55,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.Empty(stratWithObstacles.Requires.LogicalElements);
             Assert.Empty(stratWithObstacles.Failures);
 
-            Strat stratWithProperties = Model.Rooms["Crumble Shaft"].Links[1].To[3].Strats["Space Jump"];
+            Strat stratWithProperties = model.Rooms["Crumble Shaft"].Links[1].To[3].Strats["Space Jump"];
             Assert.Equal(1, stratWithProperties.StratProperties.Count);
             Assert.Contains("spinjump", stratWithProperties.StratProperties);
         }
@@ -66,17 +68,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_PossibleStrat_Succeeds()
         {
             // Given
-            Strat strat = Model.Rooms["Morph Ball Room"].Links[6].To[5].Strats["Bomb the Blocks"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Strat strat = model.Rooms["Morph Ball Room"].Links[6].To[5].Strats["Bomb the Blocks"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph")
                 .ApplyAddItem("Bombs")
                 .ApplyEnterRoom("Morph Ball Room", 6);
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .ExpectItemInvolved("Bombs")
                 .ExpectDestroyedObstacle("A")
@@ -87,12 +90,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_StratRequirementsNotMet_Fails()
         {
             // Given
-            Strat strat = Model.Rooms["Construction Zone"].Links[3].To[4].Strats["Base"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Strat strat = model.Rooms["Construction Zone"].Links[3].To[4].Strats["Base"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Construction Zone",3);
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -102,12 +106,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_RequirementsMetButObstacleLocalRequirementsNotMet_Fails()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Morph Ball Room", 6);
-            Strat strat = Model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"];
+            Strat strat = model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"];
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -117,16 +122,17 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_LocallyIndestructibleObstacleButAlreadyDestroyed_Succeeds()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Morph Ball Room", 6)
                 .ApplyDestroyObstacle("C");
-            Strat strat = Model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"];
+            Strat strat = model.Rooms["Morph Ball Room"].Links[6].To[1].Strats["Laugh at Dead Sidehoppers"];
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .AssertRespectedBy(result);
         }
 
@@ -134,17 +140,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_ObstacleCanBeBypassedButNotDestroyed_Succeeds()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph")
                 .ApplyAddItem("Ice")
                 .ApplyEnterRoom("Post Crocomire Jump Room", 5);
-            Strat strat = Model.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"];
+            Strat strat = model.Rooms["Post Crocomire Jump Room"].Links[5].To[1].Strats["PCJR Frozen Mella Door"];
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .ExpectItemInvolved("Ice")
                 .AssertRespectedBy(result);
@@ -154,12 +161,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_ObstacleHasUnmetCommonRequirements_Fails()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Climb", 2);
-            Strat strat = Model.Rooms["Climb"].Links[2].To[6].Strats["Base"];
+            Strat strat = model.Rooms["Climb"].Links[2].To[6].Strats["Base"];
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -169,16 +177,17 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_ObstacleHasMetCommonRequirements_Succeeds()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("ScrewAttack")
                 .ApplyEnterRoom("Climb", 2);
-            Strat strat = Model.Rooms["Climb"].Links[2].To[6].Strats["Base"];
+            Strat strat = model.Rooms["Climb"].Links[2].To[6].Strats["Base"];
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("ScrewAttack")
                 .ExpectDestroyedObstacle("A")
                 .AssertRespectedBy(result);
@@ -188,18 +197,19 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_DestroyingObstacleDestroysAdditionalObstacle_DestroysBoth()
         {
             // Given
-            Strat strat = Model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Strat strat = model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph")
                 .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
                 .ApplyEnterRoom("Wrecked Ship Main Shaft", 7);
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .ExpectItemInvolved(SuperMetroidModel.POWER_BOMB_NAME)
                 .ExpectDestroyedObstacle("A")
@@ -212,8 +222,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_ObstacleDestroysAdditionalObstacleButIsAlreadyDestroyed_DoesNotDestroyAdditional()
         {
             // Given
-            Strat strat = Model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Strat strat = model.Rooms["Wrecked Ship Main Shaft"].Links[7].To[9].Strats["Power Bombs"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph")
                 .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
                 .ApplyRefillResources()
@@ -221,10 +232,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .ApplyDestroyObstacle("B");
 
             // When
-            ExecutionResult result = strat.Execute(Model, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .AssertRespectedBy(result);
         }
@@ -233,19 +244,20 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_ConfiguredToTakeMultipleTries_UsesMoreResources()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterStratTries("Ceiling E-Tank Dboost", 3);
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddGameFlag("f_ZebesAwake")
                 .ApplyEnterRoom("Blue Brinstar Energy Tank Room", 2);
-            Strat strat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = model.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
 
             // When
-            ExecutionResult result = strat.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(ModelWithOptions, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 // Should have taken 3 Reo hits of damage rather than 1
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -45)
                 .AssertRespectedBy(result);
@@ -255,16 +267,17 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Execute_DisabledByConfiguration_Fails()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledStrat("Ceiling E-Tank Dboost");
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddGameFlag("f_ZebesAwake")
                 .ApplyEnterRoom("Blue Brinstar Energy Tank Room", 2);
-            Strat strat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
+            Strat strat = model.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
 
             // When
-            ExecutionResult result = strat.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = strat.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -278,33 +291,34 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Grapple")
                 .RegisterDisabledStrat("Ceiling E-Tank Dboost");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Strat impossibleRequirementsStrat = ModelWithOptions.Rooms["Pants Room"].Links[4].To[5].Strats["Base"];
+            Strat impossibleRequirementsStrat = model.Rooms["Pants Room"].Links[4].To[5].Strats["Base"];
             Assert.False(impossibleRequirementsStrat.LogicallyRelevant);
             Assert.False(impossibleRequirementsStrat.LogicallyAlways);
             Assert.False(impossibleRequirementsStrat.LogicallyFree);
             Assert.True(impossibleRequirementsStrat.LogicallyNever);
 
-            Strat disabledStrat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
+            Strat disabledStrat = model.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"];
             Assert.False(disabledStrat.LogicallyRelevant);
             Assert.False(disabledStrat.LogicallyAlways);
             Assert.False(disabledStrat.LogicallyFree);
             Assert.True(disabledStrat.LogicallyNever);
 
-            Strat nonFreeStrat = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Speed Jump"];
+            Strat nonFreeStrat = model.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Speed Jump"];
             Assert.True(nonFreeStrat.LogicallyRelevant);
             Assert.False(nonFreeStrat.LogicallyAlways);
             Assert.False(nonFreeStrat.LogicallyFree);
             Assert.False(nonFreeStrat.LogicallyNever);
 
-            Strat freeStrat = ModelWithOptions.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
+            Strat freeStrat = model.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
             Assert.True(freeStrat.LogicallyRelevant);
             Assert.True(freeStrat.LogicallyAlways);
             Assert.True(freeStrat.LogicallyFree);

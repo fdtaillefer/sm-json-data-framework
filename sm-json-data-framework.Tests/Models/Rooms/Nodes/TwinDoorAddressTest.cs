@@ -13,8 +13,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 {
     public class TwinDoorAddressTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -22,9 +22,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            TwinDoorAddress twinDoorAddress = Model.Rooms["East Pants Room"].Nodes[2].TwinDoorAddresses.First();
+            TwinDoorAddress twinDoorAddress = model.Rooms["East Pants Room"].Nodes[2].TwinDoorAddresses.First();
             Assert.Equal("0x7D646", twinDoorAddress.RoomAddress);
             Assert.Equal("0x001a798", twinDoorAddress.DoorAddress);
         }
@@ -37,13 +38,14 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            TwinDoorAddress twinDoorAddress = ModelWithOptions.Rooms["East Pants Room"].Nodes[2].TwinDoorAddresses.First();
+            TwinDoorAddress twinDoorAddress = model.Rooms["East Pants Room"].Nodes[2].TwinDoorAddresses.First();
             Assert.False(twinDoorAddress.LogicallyRelevant);
         }
 

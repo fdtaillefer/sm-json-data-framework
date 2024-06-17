@@ -15,8 +15,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class FarmCycleTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -24,14 +24,15 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            FarmCycle farmCycle = Model.RoomEnemies["Early Supers Zeb"].FarmCycles["Crouch over spawn point"];
+            FarmCycle farmCycle = model.RoomEnemies["Early Supers Zeb"].FarmCycles["Crouch over spawn point"];
             Assert.Equal("Crouch over spawn point", farmCycle.Name);
             Assert.Equal(120, farmCycle.CycleFrames);
             Assert.NotNull(farmCycle.Requires);
             Assert.Empty(farmCycle.Requires.LogicalElements);
-            Assert.Same(Model.RoomEnemies["Early Supers Zeb"], farmCycle.RoomEnemy);
+            Assert.Same(model.RoomEnemies["Early Supers Zeb"], farmCycle.RoomEnemy);
         }
 
         #endregion
@@ -42,11 +43,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void IsFree_AlwaysFree_ReturnsTrue()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Early Supers Zeb"].FarmCycles["Crouch over spawn point"];
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Early Supers Zeb"].FarmCycles["Crouch over spawn point"];
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            bool result = farmCycle.IsFree(Model, inGameState);
+            bool result = farmCycle.IsFree(model, inGameState);
 
             // Expect
             Assert.True(result);
@@ -56,12 +58,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void IsFree_FreeThanksToVaria_ReturnsTrue()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            bool result = farmCycle.IsFree(Model, inGameState);
+            bool result = farmCycle.IsFree(model, inGameState);
 
             // Expect
             Assert.True(result);
@@ -71,11 +74,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void IsFree_DoableButCostsResources_ReturnsFalse()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            bool result = farmCycle.IsFree(Model, inGameState);
+            bool result = farmCycle.IsFree(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -85,11 +89,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void IsFree_NotDoable_ReturnsFalse()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            bool result = farmCycle.IsFree(Model, inGameState);
+            bool result = farmCycle.IsFree(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -103,15 +108,16 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void RequirementsExecutionExecute_Possible_Succeeds()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Grapple");
 
             // When
-            ExecutionResult result = farmCycle.RequirementExecution.Execute(Model, inGameState);
+            ExecutionResult result = farmCycle.RequirementExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Grapple")
                 .AssertRespectedBy(result);
         }
@@ -120,14 +126,15 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void RequirementsExecutionExecute_PossibleButNotFree_Succeeds()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = farmCycle.RequirementExecution.Execute(Model, inGameState);
+            ExecutionResult result = farmCycle.RequirementExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 // This execution only executes the requirements, it doesn't add any drops
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -30)
                 .AssertRespectedBy(result);
@@ -137,11 +144,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void RequirementsExecutionExecute_NotPossible_Fails()
         {
             // Given
-            FarmCycle farmCycle = Model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            FarmCycle farmCycle = model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = farmCycle.RequirementExecution.Execute(Model, inGameState);
+            ExecutionResult result = farmCycle.RequirementExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -155,9 +163,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void FarmExecutionExecute_Free_RefillsLogicallyFarmableResources()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             // Test with a 2-second Zebbo cycle. Drop rates for missile and PowerBomb are too low to logically expect by default.
-            FarmCycle farmCycle = Model.RoomEnemies["Etecoon E-Tank Middle Zebbo"].FarmCycles["Crouch over spawn point"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            FarmCycle farmCycle = model.RoomEnemies["Etecoon E-Tank Middle Zebbo"].FarmCycles["Crouch over spawn point"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
@@ -169,10 +178,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .ApplyEnterRoom(farmCycle.RoomEnemy.HomeNodes[4]);
 
             // When
-            ExecutionResult result = farmCycle.FarmExecution.Execute(Model, inGameState);
+            ExecutionResult result = farmCycle.FarmExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, 80)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, 4)
                 // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
@@ -184,10 +193,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void FarmExecutionExecute_UnstableResource_WouldStabilizeInTimeButUpFrontCostTooHigh_Fails()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             // Test with a 2-second 5-Gamet heated cycle. Energy will be unstable until missiles are filled.
             // But, that takes 5 cycles. We will not have the 30 energy needed to execute the last cycle before stabilizing.
-            FarmCycle farmCycle = Model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            FarmCycle farmCycle = model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
@@ -203,7 +213,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .ApplyEnterRoom(farmCycle.RoomEnemy.HomeNodes[5]);
 
             // When
-            ExecutionResult result = farmCycle.FarmExecution.Execute(Model, inGameState);
+            ExecutionResult result = farmCycle.FarmExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -213,9 +223,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void FarmExecutionExecute_UnstableResourceStabilizesInTime_RefillsLogicallyFarmableResources()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             // Test with a 2-second 5-Gamet heated cycle. Energy will be unstable until missiles are filled.
-            FarmCycle farmCycle = Model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            FarmCycle farmCycle = model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
@@ -231,10 +242,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .ApplyEnterRoom(farmCycle.RoomEnemy.HomeNodes[5]);
 
             // When
-            ExecutionResult result = farmCycle.FarmExecution.Execute(Model, inGameState);
+            ExecutionResult result = farmCycle.FarmExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, 49)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, 9)
                 // Missile drop rate is horrendous, but it becomes super high once energy is filled so it becomes farmable
@@ -249,18 +260,19 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Grapple");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            FarmCycle impossibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
+            FarmCycle impossibleCycle = model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Grapple three tiles away"];
             Assert.False(impossibleCycle.LogicallyRelevant);
             Assert.True(impossibleCycle.LogicallyNever);
 
-            FarmCycle possibleCycle = ModelWithOptions.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
+            FarmCycle possibleCycle = model.RoomEnemies["Gauntlet E-Tank Zebbo"].FarmCycles["Shoot and jump three tiles away"];
             Assert.True(possibleCycle.LogicallyRelevant);
             Assert.False(possibleCycle.LogicallyNever);
         }

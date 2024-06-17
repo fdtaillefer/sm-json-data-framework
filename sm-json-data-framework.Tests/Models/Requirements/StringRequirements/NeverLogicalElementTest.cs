@@ -14,8 +14,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
 {
     public class NeverLogicalElementTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for Execute()
 
@@ -23,11 +23,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_Fails()
         {
             // Given
-            NeverLogicalElement neverLogicalElement = Model.Locks["Etecoon Exit Grey Lock"].UnlockStrats["Base"].Requires.LogicalElement<NeverLogicalElement>(0);
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            NeverLogicalElement neverLogicalElement = model.Locks["Etecoon Exit Grey Lock"].UnlockStrats["Base"].Requires.LogicalElement<NeverLogicalElement>(0);
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = neverLogicalElement.Execute(Model, inGameState);
+            ExecutionResult result = neverLogicalElement.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -41,13 +42,14 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            NeverLogicalElement never = ModelWithOptions.Locks["Etecoon Exit Grey Lock"].UnlockStrats["Base"].Requires.LogicalElement<NeverLogicalElement>(0);
+            NeverLogicalElement never = model.Locks["Etecoon Exit Grey Lock"].UnlockStrats["Base"].Requires.LogicalElement<NeverLogicalElement>(0);
             Assert.True(never.LogicallyRelevant);
             Assert.False(never.LogicallyAlways);
             Assert.False(never.LogicallyFree);

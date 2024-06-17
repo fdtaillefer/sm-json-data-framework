@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class LinkToTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,10 +21,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            LinkTo linkTo = Model.Rooms["Landing Site"].Links[5].To[7];
-            Assert.Same(Model.Rooms["Landing Site"].Nodes[7], linkTo.TargetNode);
+            LinkTo linkTo = model.Rooms["Landing Site"].Links[5].To[7];
+            Assert.Same(model.Rooms["Landing Site"].Nodes[7], linkTo.TargetNode);
             Assert.Equal(2, linkTo.Strats.Count);
             Assert.Contains("Base", linkTo.Strats.Keys);
             Assert.Contains("Gauntlet Walljumps", linkTo.Strats.Keys);
@@ -38,27 +39,28 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Gravity")
                 .RegisterDisabledTech("canSuitlessMaridia");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LinkTo noDestinationsLinkTo = ModelWithOptions.Rooms["Crab Shaft"].Links[2].To[1];
+            LinkTo noDestinationsLinkTo = model.Rooms["Crab Shaft"].Links[2].To[1];
             Assert.False(noDestinationsLinkTo.LogicallyRelevant);
             Assert.False(noDestinationsLinkTo.LogicallyAlways);
             Assert.False(noDestinationsLinkTo.LogicallyFree);
             Assert.True(noDestinationsLinkTo.LogicallyNever);
 
-            LinkTo possibleLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[1].To[7];
+            LinkTo possibleLinkTo = model.Rooms["Landing Site"].Links[1].To[7];
             Assert.True(possibleLinkTo.LogicallyRelevant);
             Assert.False(possibleLinkTo.LogicallyAlways);
             Assert.False(possibleLinkTo.LogicallyFree);
             Assert.False(possibleLinkTo.LogicallyNever);
 
-            LinkTo freeLinkTo = ModelWithOptions.Rooms["Landing Site"].Links[5].To[4];
+            LinkTo freeLinkTo = model.Rooms["Landing Site"].Links[5].To[4];
             Assert.True(freeLinkTo.LogicallyRelevant);
             Assert.True(freeLinkTo.LogicallyAlways);
             Assert.True(freeLinkTo.LogicallyFree);

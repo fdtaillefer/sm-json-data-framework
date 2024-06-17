@@ -15,8 +15,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
 {
     public class ItemLogicalElementTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -24,10 +24,11 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            ItemLogicalElement itemLogicalElement = Model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
-            Assert.Same(Model.Items["Morph"], itemLogicalElement.Item);
+            ItemLogicalElement itemLogicalElement = model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
+            Assert.Same(model.Items["Morph"], itemLogicalElement.Item);
         }
 
         #endregion
@@ -38,11 +39,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_ItemNotPresent_Fails()
         {
             // Given
-            ItemLogicalElement itemLogicalElement = Model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            ItemLogicalElement itemLogicalElement = model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = itemLogicalElement.Execute(Model, inGameState);
+            ExecutionResult result = itemLogicalElement.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -52,15 +54,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_ItemPresent_Succeeds()
         {
             // Given
-            ItemLogicalElement itemLogicalElement = Model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            ItemLogicalElement itemLogicalElement = model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph");
 
             // When
-            ExecutionResult result = itemLogicalElement.Execute(Model, inGameState);
+            ExecutionResult result = itemLogicalElement.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .AssertRespectedBy(result);
         }
@@ -69,15 +72,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_ItemPresentButLogicallyDisabled_Fails()
         {
             // Given
-            ItemLogicalElement itemLogicalElement = ModelWithOptions.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
+            SuperMetroidModel model = NewModelForOptions();
+            ItemLogicalElement itemLogicalElement = model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Morph");
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph");
 
             // When
-            ExecutionResult result = itemLogicalElement.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = itemLogicalElement.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -91,31 +95,32 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Morph"])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            ItemLogicalElement freeItemElement = ModelWithOptions.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
+            ItemLogicalElement freeItemElement = model.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
             Assert.True(freeItemElement.LogicallyRelevant);
             Assert.False(freeItemElement.LogicallyNever);
             Assert.True(freeItemElement.LogicallyAlways);
             Assert.True(freeItemElement.LogicallyFree);
 
-            ItemLogicalElement removedItemElement = ModelWithOptions.Helpers["h_canUseMorphBombs"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Bombs");
+            ItemLogicalElement removedItemElement = model.Helpers["h_canUseMorphBombs"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Bombs");
             Assert.True(removedItemElement.LogicallyRelevant);
             Assert.True(removedItemElement.LogicallyNever);
             Assert.False(removedItemElement.LogicallyAlways);
             Assert.False(removedItemElement.LogicallyFree);
 
-            ItemLogicalElement obtainableItemElement = ModelWithOptions.Helpers["h_canUseSpringBall"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "SpringBall");
+            ItemLogicalElement obtainableItemElement = model.Helpers["h_canUseSpringBall"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "SpringBall");
             Assert.True(obtainableItemElement.LogicallyRelevant);
             Assert.False(obtainableItemElement.LogicallyNever);
             Assert.False(obtainableItemElement.LogicallyAlways);

@@ -15,8 +15,8 @@ namespace sm_json_data_framework.Tests.Models.Connections
 {
     public class ConnectionNodeTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -24,9 +24,10 @@ namespace sm_json_data_framework.Tests.Models.Connections
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            ConnectionNode connectionNode = Model.Connections[Model.Rooms["Parlor and Alcatraz"].Nodes[7].IdentifyingString].FromNode;
+            ConnectionNode connectionNode = model.Connections[model.Rooms["Parlor and Alcatraz"].Nodes[7].IdentifyingString].FromNode;
 
             Assert.Equal("Crateria", connectionNode.Area);
             Assert.Equal("Central", connectionNode.Subarea);
@@ -45,23 +46,24 @@ namespace sm_json_data_framework.Tests.Models.Connections
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Connection unfollowableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Big Pink", 8).IdentifyingString];
+            Connection unfollowableconnection = model.Connections[model.GetNodeInRoom("Big Pink", 8).IdentifyingString];
             // Followability is not considered in-scope for logical relevance
             Assert.True(unfollowableconnection.FromNode.LogicallyRelevant);
             Assert.True(unfollowableconnection.ToNode.LogicallyRelevant);
 
-            Connection followableconnection = ModelWithOptions.Connections[ModelWithOptions.GetNodeInRoom("Landing Site", 1).IdentifyingString];
+            Connection followableconnection = model.Connections[model.GetNodeInRoom("Landing Site", 1).IdentifyingString];
             Assert.True(followableconnection.FromNode.LogicallyRelevant);
             Assert.True(followableconnection.ToNode.LogicallyRelevant);
         }

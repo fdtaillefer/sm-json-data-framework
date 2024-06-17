@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Items
 {
     public class ItemTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,9 +21,10 @@ namespace sm_json_data_framework.Tests.Models.Items
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Item item = Model.Items[SuperMetroidModel.POWER_SUIT_NAME];
+            Item item = model.Items[SuperMetroidModel.POWER_SUIT_NAME];
             Assert.Equal(SuperMetroidModel.POWER_SUIT_NAME, item.Name);
         }
 
@@ -35,26 +36,27 @@ namespace sm_json_data_framework.Tests.Models.Items
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterRemovedItem("Bombs");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
             
             // Expect
-            Item freeItem = ModelWithOptions.Items[SuperMetroidModel.POWER_SUIT_NAME];
+            Item freeItem = model.Items[SuperMetroidModel.POWER_SUIT_NAME];
             Assert.True(freeItem.LogicallyRelevant);
             Assert.False(freeItem.LogicallyNever);
             Assert.True(freeItem.LogicallyAlways);
             Assert.True(freeItem.LogicallyFree);
 
-            Item removedItem = ModelWithOptions.Items["Bombs"];
+            Item removedItem = model.Items["Bombs"];
             Assert.False(removedItem.LogicallyRelevant);
             Assert.True(removedItem.LogicallyNever);
             Assert.False(removedItem.LogicallyAlways);
             Assert.False(removedItem.LogicallyFree);
 
-            Item obtainableItem = ModelWithOptions.Items["Charge"];
+            Item obtainableItem = model.Items["Charge"];
             Assert.True(obtainableItem.LogicallyRelevant);
             Assert.False(obtainableItem.LogicallyNever);
             Assert.False(obtainableItem.LogicallyAlways);

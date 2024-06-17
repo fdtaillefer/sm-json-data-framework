@@ -18,8 +18,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 {
     public class NodeLockTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -27,9 +27,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            NodeLock nodeLock = Model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            NodeLock nodeLock = model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
             Assert.Equal(LockTypeEnum.Permanent, nodeLock.LockType);
             Assert.Empty(nodeLock.Lock.LogicalElements);
             Assert.Equal("West Ocean Ship Exit Grey Lock (to Gravity Suit Room)", nodeLock.Name);
@@ -38,13 +39,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(1, nodeLock.BypassStrats.Count);
             Assert.Contains("Bowling Skip", nodeLock.BypassStrats.Keys);
             Assert.Empty(nodeLock.Yields);
-            Assert.Same(Model.Rooms["West Ocean"].Nodes[4], nodeLock.Node);
+            Assert.Same(model.Rooms["West Ocean"].Nodes[4], nodeLock.Node);
 
-            NodeLock nodeLockWithYields = Model.Locks["Pit Room Left Grey Lock (to Climb)"];
+            NodeLock nodeLockWithYields = model.Locks["Pit Room Left Grey Lock (to Climb)"];
             Assert.Equal(1, nodeLockWithYields.Yields.Count);
-            Assert.Same(Model.GameFlags["f_ZebesAwake"], nodeLockWithYields.Yields["f_ZebesAwake"]);
+            Assert.Same(model.GameFlags["f_ZebesAwake"], nodeLockWithYields.Yields["f_ZebesAwake"]);
 
-            NodeLock nonSystematicLock = Model.Locks["Morph Ball Room Grey Lock (to Green Hill Zone)"];
+            NodeLock nonSystematicLock = model.Locks["Morph Ball Room Grey Lock (to Green Hill Zone)"];
             Assert.NotNull(nonSystematicLock.Lock);
             Assert.Equal(1, nonSystematicLock.Lock.LogicalElements.Count);
             Assert.NotNull(nonSystematicLock.Lock.LogicalElement<GameFlagLogicalElement>(0));
@@ -58,11 +59,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsOpen_NotOpen_ReturnsFalse()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            NodeLock nodeLock = Model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            NodeLock nodeLock = model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
 
             // When
-            bool result = nodeLock.IsOpen(Model, inGameState);
+            bool result = nodeLock.IsOpen(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -72,12 +74,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsOpen_Open_ReturnsTrue()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyOpenLock(nodeLock, applyToRoomState: false);
 
             // When
-            bool result = nodeLock.IsOpen(Model, inGameState);
+            bool result = nodeLock.IsOpen(model, inGameState);
 
             // Expect
             Assert.True(result);
@@ -91,11 +94,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsActive_InitiallyActiveNotOpen_ReturnsTrue()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            NodeLock nodeLock = Model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            NodeLock nodeLock = model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
 
             // When
-            bool result = nodeLock.IsActive(Model, inGameState);
+            bool result = nodeLock.IsActive(model, inGameState);
 
             // Expect
             Assert.True(result);
@@ -105,12 +109,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsActive_InitiallyActiveButOpen_ReturnsFalse()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyOpenLock(nodeLock, applyToRoomState: false);
 
             // When
-            bool result = nodeLock.IsActive(Model, inGameState);
+            bool result = nodeLock.IsActive(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -120,11 +125,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsActive_LockConditionsNotMet_ReturnsFalse()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            NodeLock nodeLock = Model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            NodeLock nodeLock = model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
 
             // When
-            bool result = nodeLock.IsActive(Model, inGameState);
+            bool result = nodeLock.IsActive(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -134,12 +140,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsActive_LockConditionsMetNotOpen_ReturnsTrue()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddGameFlag("f_DefeatedPhantoon");
-            NodeLock nodeLock = Model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
+            NodeLock nodeLock = model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
 
             // When
-            bool result = nodeLock.IsActive(Model, inGameState);
+            bool result = nodeLock.IsActive(model, inGameState);
 
             // Expect
             Assert.True(result);
@@ -149,13 +156,14 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void IsActive_LockConditionsMetAndLockOpen_ReturnsFalse()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddGameFlag("f_DefeatedPhantoon")
                 .ApplyOpenLock(nodeLock, applyToRoomState: false);
 
             // When
-            bool result = nodeLock.IsActive(Model, inGameState);
+            bool result = nodeLock.IsActive(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -169,11 +177,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void OpenExecutionExecute_InactiveLock_Fails()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            NodeLock nodeLock = Model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            NodeLock nodeLock = model.Locks["Attic Bottom Grey Lock (to Main Shaft)"];
 
             // When
-            ExecutionResult result = nodeLock.OpenExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.OpenExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -183,17 +192,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void OpenExecutionExecute_ActiveAndOpenable_Succeeds()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources()
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.OpenExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.OpenExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectLockOpened(nodeLock.Name, "Base")
                 .ExpectItemInvolved(SuperMetroidModel.SUPER_NAME)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, -1)
@@ -204,12 +214,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void OpenExecutionExecute_ActiveAndNotFulfillable_Fails()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.OpenExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.OpenExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -219,17 +230,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void OpenExecutionExecute_OpenableWithYields_ActivatesFlag()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Pit Room Left Grey Lock (to Climb)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Pit Room Left Grey Lock (to Climb)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem("Morph")
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.OpenExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.OpenExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectLockOpened(nodeLock.Name, "Base")
                 .ExpectItemInvolved(SuperMetroidModel.MISSILE_NAME)
                 .ExpectItemInvolved("Morph")
@@ -245,15 +257,16 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void BypassExecutionExecute_InactiveLock_Fails()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Ice")
                 .ApplyAddItem("Wave")
                 .ApplyOpenLock(nodeLock, applyToRoomState: false)
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.BypassExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.BypassExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -263,12 +276,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void BypassExecutionExecute_NoBypassStrats_Fails()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.BypassExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.BypassExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -278,12 +292,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void BypassExecutionExecute_NotFulfillable_Fails()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.BypassExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.BypassExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -293,14 +308,15 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void BypassExecutionExecute_Fulfillable_Succeeds()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Butterfly Room Grey Lock (to West Cactus Alley)"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Ice")
                 .ApplyAddItem("Wave")
                 .ApplyEnterRoom(nodeLock.Node);
 
             // When
-            ExecutionResult result = nodeLock.BypassExecution.Execute(Model, inGameState);
+            ExecutionResult result = nodeLock.BypassExecution.Execute(model, inGameState);
 
             // Expect
             Assert.NotNull(result);
@@ -312,8 +328,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 
             Assert.Empty(result.CanLeaveChargedExecuted);
             Assert.Equal(2, result.ItemsInvolved.Count);
-            Assert.Same(Model.Items["Ice"], result.ItemsInvolved["Ice"]);
-            Assert.Same(Model.Items["Wave"], result.ItemsInvolved["Wave"]);
+            Assert.Same(model.Items["Ice"], result.ItemsInvolved["Ice"]);
+            Assert.Same(model.Items["Wave"], result.ItemsInvolved["Wave"]);
 
             Assert.Empty(result.ActivatedGameFlags);
             Assert.Empty(result.DamageReducingItemsInvolved);
@@ -339,41 +355,42 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingGameFlags(new List<string> { "f_ZebesAwake" })
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            NodeLock neverActiveLock = ModelWithOptions.Rooms["Bomb Torizo Room"].Nodes[1].Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
+            NodeLock neverActiveLock = model.Rooms["Bomb Torizo Room"].Nodes[1].Locks["Bomb Torizo Room Grey Lock (to Flyway)"];
             Assert.False(neverActiveLock.LogicallyRelevant);
             Assert.False(neverActiveLock.LogicallyNever);
             Assert.True(neverActiveLock.LogicallyAlways);
             Assert.True(neverActiveLock.LogicallyFree);
 
-            NodeLock unpassableLock = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[7].Locks["Etecoon Exit Grey Lock"];
+            NodeLock unpassableLock = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[7].Locks["Etecoon Exit Grey Lock"];
             Assert.True(unpassableLock.LogicallyRelevant);
             Assert.True(unpassableLock.LogicallyNever);
             Assert.False(unpassableLock.LogicallyAlways);
             Assert.False(unpassableLock.LogicallyFree);
 
-            NodeLock greyPossibleBypassableLock = ModelWithOptions.Rooms["West Ocean"].Nodes[4].Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
+            NodeLock greyPossibleBypassableLock = model.Rooms["West Ocean"].Nodes[4].Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"];
             Assert.True(greyPossibleBypassableLock.LogicallyRelevant);
             Assert.False(greyPossibleBypassableLock.LogicallyNever);
             Assert.False(greyPossibleBypassableLock.LogicallyAlways);
             Assert.False(greyPossibleBypassableLock.LogicallyFree);
 
-            NodeLock freeUnlockLock = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[5].Locks["Blue Brinstar Power Bombs Spawn Lock"];
+            NodeLock freeUnlockLock = model.Rooms["Morph Ball Room"].Nodes[5].Locks["Blue Brinstar Power Bombs Spawn Lock"];
             Assert.True(freeUnlockLock.LogicallyRelevant);
             Assert.False(freeUnlockLock.LogicallyNever);
             Assert.True(freeUnlockLock.LogicallyAlways);
             Assert.True(freeUnlockLock.LogicallyFree);
 
-            NodeLock possibleUnlockableLock = ModelWithOptions.Rooms["Construction Zone"].Nodes[2].Locks["Construction Zone Red Lock (to Ceiling E-Tank)"];
+            NodeLock possibleUnlockableLock = model.Rooms["Construction Zone"].Nodes[2].Locks["Construction Zone Red Lock (to Ceiling E-Tank)"];
             Assert.True(possibleUnlockableLock.LogicallyRelevant);
             Assert.False(possibleUnlockableLock.LogicallyNever);
             Assert.False(possibleUnlockableLock.LogicallyAlways);

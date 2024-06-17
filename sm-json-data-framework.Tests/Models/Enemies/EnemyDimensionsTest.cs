@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Enemies
 {
     public class EnemyDimensionsTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,9 +21,10 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            EnemyDimensions enemyDimensions = Model.Enemies["Evir"].Dimensions;
+            EnemyDimensions enemyDimensions = model.Enemies["Evir"].Dimensions;
             Assert.Equal(16, enemyDimensions.Width);
             Assert.Equal(20, enemyDimensions.Height);
         }
@@ -36,13 +37,14 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            EnemyDimensions enemyDimensions = ModelWithOptions.Enemies["Evir"].Dimensions;
+            EnemyDimensions enemyDimensions = model.Enemies["Evir"].Dimensions;
             Assert.False(enemyDimensions.LogicallyRelevant);
         }
 

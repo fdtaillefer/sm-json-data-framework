@@ -15,8 +15,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class RoomTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -24,9 +24,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Room room = Model.Rooms["Climb"];
+            Room room = model.Rooms["Climb"];
             Assert.Equal(11, room.Id);
             Assert.Equal("Climb", room.Name);
             Assert.Equal("Crateria", room.Area);
@@ -59,7 +60,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.Contains("e1", room.Enemies.Keys);
             Assert.Contains("e2", room.Enemies.Keys);
 
-            Room nonPlayableRoom = Model.Rooms["Toilet Bowl"];
+            Room nonPlayableRoom = model.Rooms["Toilet Bowl"];
             Assert.False(nonPlayableRoom.Playable);
         }
 
@@ -71,7 +72,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void GetLinkBetween_LinkExists_ReturnsLink()
         {
             // Given
-            Room room = Model.Rooms["Climb"];
+            SuperMetroidModel model = ReusableModel();
+            Room room = model.Rooms["Climb"];
 
             // When
             LinkTo result = room.GetLinkBetween(2, 6);
@@ -84,7 +86,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void GetLinkBetween_LinkDoesntExist_ReturnsNull()
         {
             // Given
-            Room room = Model.Rooms["Climb"];
+            SuperMetroidModel model = ReusableModel();
+            Room room = model.Rooms["Climb"];
 
             // When
             LinkTo result = room.GetLinkBetween(2, 5);
@@ -102,22 +105,23 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Room unreachableRoom = ModelWithOptions.Rooms["Norfair Map Room"];
+            Room unreachableRoom = model.Rooms["Norfair Map Room"];
             // Room accessibility is not considered in-scope for logical relevance
             Assert.True(unreachableRoom.LogicallyRelevant);
 
-            Room reachableRoom = ModelWithOptions.Rooms["Landing Site"];
+            Room reachableRoom = model.Rooms["Landing Site"];
             Assert.True(reachableRoom.LogicallyRelevant);
         }
 

@@ -14,8 +14,8 @@ namespace sm_json_data_framework.Tests.Models.Enemies
 {
     public class EnemyTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -23,9 +23,10 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Enemy enemy = Model.Enemies["Pink Space Pirate (standing)"];
+            Enemy enemy = model.Enemies["Pink Space Pirate (standing)"];
 
             Assert.Equal(71, enemy.Id);
             Assert.Equal("Pink Space Pirate (standing)", enemy.Name);
@@ -42,15 +43,15 @@ namespace sm_json_data_framework.Tests.Models.Enemies
             Assert.NotNull(enemy.Dimensions);
             Assert.True(enemy.Freezable);
             Assert.False(enemy.Grapplable);
-            int expectedInvulnerableCount = 4 + Model.WeaponsByCategory[WeaponCategoryEnum.BeamNoPlasma].Count + Model.WeaponsByCategory[WeaponCategoryEnum.PowerBombBlast].Count;
-            int expectedSusceptibilityCount = Model.Weapons.Count - expectedInvulnerableCount;
+            int expectedInvulnerableCount = 4 + model.WeaponsByCategory[WeaponCategoryEnum.BeamNoPlasma].Count + model.WeaponsByCategory[WeaponCategoryEnum.PowerBombBlast].Count;
+            int expectedSusceptibilityCount = model.Weapons.Count - expectedInvulnerableCount;
             Assert.Equal(expectedInvulnerableCount, enemy.InvulnerableWeapons.Count);
             Assert.Empty(enemy.WeaponMultipliers.Where(multiplier => multiplier.Value.Multiplier != 1));
             Assert.Equal(expectedSusceptibilityCount, enemy.WeaponMultipliers.Where(multiplier => multiplier.Value.Multiplier == 1).Count());
             Assert.Equal(1, enemy.Areas.Count);
             Assert.Equal(expectedSusceptibilityCount, enemy.WeaponSusceptibilities.Count);
 
-            Enemy otherEnemy = Model.Enemies["Bomb Torizo"];
+            Enemy otherEnemy = model.Enemies["Bomb Torizo"];
             Assert.Equal(22, otherEnemy.FarmableDrops.NoDrop);
             Assert.Equal(46, otherEnemy.FarmableDrops.SmallEnergy);
             Assert.Equal(8, otherEnemy.FarmableDrops.BigEnergy);
@@ -68,13 +69,14 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Enemy enemy = ModelWithOptions.Enemies["Evir"];
+            Enemy enemy = model.Enemies["Evir"];
             Assert.True(enemy.LogicallyRelevant);
         }
 

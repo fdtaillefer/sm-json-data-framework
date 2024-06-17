@@ -16,8 +16,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class RoomObstacleTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -25,18 +25,19 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            RoomObstacle roomObstacle = Model.Rooms["Climb"].Obstacles["A"];
+            RoomObstacle roomObstacle = model.Rooms["Climb"].Obstacles["A"];
             Assert.Equal("A", roomObstacle.Id);
             Assert.Equal("Bottom Bomb Blocks", roomObstacle.Name);
             Assert.Equal(ObstacleTypeEnum.Inanimate, roomObstacle.ObstacleType);
             Assert.NotNull(roomObstacle.Requires);
             Assert.Equal(1, roomObstacle.Requires.LogicalElements.Count);
             Assert.NotNull(roomObstacle.Requires.LogicalElement<Or>(0));
-            Assert.Same(Model.Rooms["Climb"], roomObstacle.Room);
+            Assert.Same(model.Rooms["Climb"], roomObstacle.Room);
 
-            RoomObstacle noRequirementsRoomObstacle = Model.Rooms["Morph Ball Room"].Obstacles["A"];
+            RoomObstacle noRequirementsRoomObstacle = model.Rooms["Morph Ball Room"].Obstacles["A"];
             Assert.NotNull(noRequirementsRoomObstacle.Requires);
             Assert.Empty(noRequirementsRoomObstacle.Requires.LogicalElements);
         }
@@ -49,22 +50,23 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_ImpossibleObstacleCommonRequirements_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .RegisterRemovedItem("ScrewAttack")
                 .RegisterRemovedItem("Morph")
                 .RegisterDisabledGameFlag("f_ZebesSetAblaze");
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomObstacle obstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
+            RoomObstacle obstacle = model.Rooms["Climb"].Obstacles["A"];
             Assert.True(obstacle.LogicallyRelevant);
             Assert.True(obstacle.LogicallyIndestructible);
             Assert.False(obstacle.LogicallyAlwaysDestructible);
@@ -75,18 +77,19 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_FreeObstacleCommonRequirements_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["ScrewAttack"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["ScrewAttack"])
             )
             .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomObstacle obstacle = ModelWithOptions.Rooms["Climb"].Obstacles["A"];
+            RoomObstacle obstacle = model.Rooms["Climb"].Obstacles["A"];
             Assert.True(obstacle.LogicallyRelevant);
             Assert.False(obstacle.LogicallyIndestructible);
             Assert.True(obstacle.LogicallyAlwaysDestructible);

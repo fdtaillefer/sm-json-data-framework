@@ -17,8 +17,8 @@ namespace sm_json_data_framework.Tests.Models.Weapons
 {
     public class WeaponTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -26,9 +26,10 @@ namespace sm_json_data_framework.Tests.Models.Weapons
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Weapon weapon = Model.Weapons["Plasma Shield"];
+            Weapon weapon = model.Weapons["Plasma Shield"];
             Assert.Equal("Plasma Shield", weapon.Name);
             Assert.Equal(39, weapon.Id);
             Assert.Equal(1200, weapon.Damage);
@@ -54,44 +55,45 @@ namespace sm_json_data_framework.Tests.Models.Weapons
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
 
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Wave"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Wave"])
                 )
                 .Build();
 
             logicalOptions.RegisterRemovedItem("Ice");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Weapon impossibleUseWeapon = ModelWithOptions.Weapons["Ice"];
+            Weapon impossibleUseWeapon = model.Weapons["Ice"];
             Assert.False(impossibleUseWeapon.LogicallyRelevant);
             Assert.False(impossibleUseWeapon.LogicallyAlways);
             Assert.False(impossibleUseWeapon.LogicallyFree);
             Assert.True(impossibleUseWeapon.LogicallyNever);
 
-            Weapon impossibleShootWeapon = ModelWithOptions.Weapons["Missile"];
+            Weapon impossibleShootWeapon = model.Weapons["Missile"];
             Assert.False(impossibleShootWeapon.LogicallyRelevant);
             Assert.False(impossibleShootWeapon.LogicallyAlways);
             Assert.False(impossibleShootWeapon.LogicallyFree);
             Assert.True(impossibleShootWeapon.LogicallyNever);
 
-            Weapon nonFreeWeapon = ModelWithOptions.Weapons["Charge+Wave"];
+            Weapon nonFreeWeapon = model.Weapons["Charge+Wave"];
             Assert.True(nonFreeWeapon.LogicallyRelevant);
             Assert.False(nonFreeWeapon.LogicallyAlways);
             Assert.False(nonFreeWeapon.LogicallyFree);
             Assert.False(nonFreeWeapon.LogicallyNever);
 
-            Weapon freeWeapon = ModelWithOptions.Weapons["Wave"];
+            Weapon freeWeapon = model.Weapons["Wave"];
             Assert.True(freeWeapon.LogicallyRelevant);
             Assert.True(freeWeapon.LogicallyAlways);
             Assert.True(freeWeapon.LogicallyFree);

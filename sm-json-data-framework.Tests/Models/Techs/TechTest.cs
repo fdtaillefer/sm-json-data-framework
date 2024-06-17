@@ -15,8 +15,8 @@ namespace sm_json_data_framework.Tests.Models.Techs
 {
     public class TechTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -24,9 +24,10 @@ namespace sm_json_data_framework.Tests.Models.Techs
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Tech tech = Model.Techs["canXRayClimb"];
+            Tech tech = model.Techs["canXRayClimb"];
             Assert.Equal("canXRayClimb", tech.Name);
             Assert.NotNull(tech.Requires);
             Assert.Equal(1, tech.Requires.LogicalElements.Count());
@@ -44,12 +45,18 @@ namespace sm_json_data_framework.Tests.Models.Techs
         [Fact]
         public void SelectWithExtensions_ReturnsSelfAndAllDescendants()
         {
-            Tech tech = Model.Techs["canTrickyUseFrozenEnemies"];
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            Tech tech = model.Techs["canTrickyUseFrozenEnemies"];
+
+            // When
             IEnumerable<Tech> techs = tech.SelectWithExtensions();
+
+            // Expect
             Assert.True(techs.Contains(tech, ReferenceEqualityComparer.Instance)); // Self
-            Assert.True(techs.Contains(Model.Techs["canNonTrivialIceClip"], ReferenceEqualityComparer.Instance)); // Child
-            Assert.True(techs.Contains(Model.Techs["canWallCrawlerIceClip"], ReferenceEqualityComparer.Instance)); // Grandchild
-            Assert.False(techs.Contains(Model.Techs["canUseFrozenEnemies"], ReferenceEqualityComparer.Instance)); // Parent
+            Assert.True(techs.Contains(model.Techs["canNonTrivialIceClip"], ReferenceEqualityComparer.Instance)); // Child
+            Assert.True(techs.Contains(model.Techs["canWallCrawlerIceClip"], ReferenceEqualityComparer.Instance)); // Grandchild
+            Assert.False(techs.Contains(model.Techs["canUseFrozenEnemies"], ReferenceEqualityComparer.Instance)); // Parent
         }
 
         #endregion
@@ -60,44 +67,45 @@ namespace sm_json_data_framework.Tests.Models.Techs
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledTech("canPreciseWalljump");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Morph"])
+                    .ApplyAddItem(model.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Tech disabledTech = ModelWithOptions.Techs["canPreciseWalljump"];
+            Tech disabledTech = model.Techs["canPreciseWalljump"];
             Assert.False(disabledTech.LogicallyRelevant);
             Assert.False(disabledTech.LogicallyAlways);
             Assert.False(disabledTech.LogicallyFree);
             Assert.True(disabledTech.LogicallyNever);
 
-            Tech impossibleSubTech = ModelWithOptions.Techs["canDelayedWalljump"];
+            Tech impossibleSubTech = model.Techs["canDelayedWalljump"];
             Assert.False(impossibleSubTech.LogicallyRelevant);
             Assert.False(impossibleSubTech.LogicallyAlways);
             Assert.False(impossibleSubTech.LogicallyFree);
             Assert.True(impossibleSubTech.LogicallyNever);
 
-            Tech nonFreeTech = ModelWithOptions.Techs["canGrappleClip"];
+            Tech nonFreeTech = model.Techs["canGrappleClip"];
             Assert.True(nonFreeTech.LogicallyRelevant);
             Assert.False(nonFreeTech.LogicallyAlways);
             Assert.False(nonFreeTech.LogicallyFree);
             Assert.False(nonFreeTech.LogicallyNever);
 
-            Tech freeTech = ModelWithOptions.Techs["canWalljump"];
+            Tech freeTech = model.Techs["canWalljump"];
             Assert.True(freeTech.LogicallyRelevant);
             Assert.True(freeTech.LogicallyAlways);
             Assert.True(freeTech.LogicallyFree);
             Assert.False(freeTech.LogicallyNever);
 
-            Tech freeByStartItemTech = ModelWithOptions.Techs["canIBJ"];
+            Tech freeByStartItemTech = model.Techs["canIBJ"];
             Assert.True(freeByStartItemTech.LogicallyRelevant);
             Assert.True(freeByStartItemTech.LogicallyAlways);
             Assert.True(freeByStartItemTech.LogicallyFree);

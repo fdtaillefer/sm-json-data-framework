@@ -16,8 +16,8 @@ namespace sm_json_data_framework.Tests.Models.Helpers
 {
     public class HelperTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -25,9 +25,10 @@ namespace sm_json_data_framework.Tests.Models.Helpers
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Helper helper = Model.Helpers["h_heatProof"];
+            Helper helper = model.Helpers["h_heatProof"];
             Assert.Equal("h_heatProof", helper.Name);
             Assert.NotNull(helper.Requires);
             Assert.Equal(1, helper.Requires.LogicalElements.Count());
@@ -42,32 +43,33 @@ namespace sm_json_data_framework.Tests.Models.Helpers
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canGateGlitch");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Morph"])
+                    .ApplyAddItem(model.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Helper impossibleHelper = ModelWithOptions.Helpers["h_canBlueGateGlitch"];
+            Helper impossibleHelper = model.Helpers["h_canBlueGateGlitch"];
             Assert.False(impossibleHelper.LogicallyRelevant);
             Assert.False(impossibleHelper.LogicallyAlways);
             Assert.False(impossibleHelper.LogicallyFree);
             Assert.True(impossibleHelper.LogicallyNever);
 
-            Helper nonFreeHelper = ModelWithOptions.Helpers["h_hasBeamUpgrade"];
+            Helper nonFreeHelper = model.Helpers["h_hasBeamUpgrade"];
             Assert.True(nonFreeHelper.LogicallyRelevant);
             Assert.False(nonFreeHelper.LogicallyAlways);
             Assert.False(nonFreeHelper.LogicallyFree);
             Assert.False(nonFreeHelper.LogicallyNever);
 
-            Helper freeHelper = ModelWithOptions.Helpers["h_canUseMorphBombs"];
+            Helper freeHelper = model.Helpers["h_canUseMorphBombs"];
             Assert.True(freeHelper.LogicallyRelevant);
             Assert.True(freeHelper.LogicallyAlways);
             Assert.True(freeHelper.LogicallyFree);

@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class RoomEnvironmentTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,16 +21,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
-            RoomEnvironment roomEnvironment = Model.Rooms["Spiky Platforms Tunnel"].RoomEnvironments.First();
-            Assert.True(roomEnvironment.Heated);
-            Assert.Null(roomEnvironment.EntranceNodes);
-            Assert.Same(Model.Rooms["Spiky Platforms Tunnel"], roomEnvironment.Room);
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            RoomEnvironment roomEnvironmentWithEntranceNode = Model.Rooms["Volcano Room"].RoomEnvironments.First();
+            RoomEnvironment roomEnvironment = model.Rooms["Spiky Platforms Tunnel"].RoomEnvironments.First();
+            Assert.True(roomEnvironment.Heated);
+            Assert.Null(roomEnvironment.EntranceNodes);
+            Assert.Same(model.Rooms["Spiky Platforms Tunnel"], roomEnvironment.Room);
+
+            RoomEnvironment roomEnvironmentWithEntranceNode = model.Rooms["Volcano Room"].RoomEnvironments.First();
             Assert.False(roomEnvironmentWithEntranceNode.Heated);
             Assert.Equal(1, roomEnvironmentWithEntranceNode.EntranceNodes.Count);
-            Assert.Same(Model.Rooms["Volcano Room"].Nodes[1], roomEnvironmentWithEntranceNode.EntranceNodes[1]);
+            Assert.Same(model.Rooms["Volcano Room"].Nodes[1], roomEnvironmentWithEntranceNode.EntranceNodes[1]);
         }
 
         #endregion
@@ -41,13 +43,14 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            foreach (RoomEnvironment roomEnvironment in ModelWithOptions.Rooms["Volcano Room"].RoomEnvironments)
+            foreach (RoomEnvironment roomEnvironment in model.Rooms["Volcano Room"].RoomEnvironments)
             {
                 Assert.True(roomEnvironment.LogicallyRelevant);
             }

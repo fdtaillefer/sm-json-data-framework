@@ -14,8 +14,8 @@ namespace sm_json_data_framework.Tests.Models.Items
 {
     public class ExpansionItemTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -23,9 +23,10 @@ namespace sm_json_data_framework.Tests.Models.Items
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            ExpansionItem item = (ExpansionItem)Model.Items[SuperMetroidModel.MISSILE_NAME];
+            ExpansionItem item = (ExpansionItem)model.Items[SuperMetroidModel.MISSILE_NAME];
             Assert.Equal(SuperMetroidModel.MISSILE_NAME, item.Name);
             Assert.Equal("0xC2", item.Data);
             Assert.Equal(RechargeableResourceEnum.Missile, item.Resource);
@@ -40,31 +41,32 @@ namespace sm_json_data_framework.Tests.Models.Items
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterRemovedItem(SuperMetroidModel.SUPER_NAME);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.MISSILE_NAME])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items[SuperMetroidModel.MISSILE_NAME])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            ExpansionItem freeItem = (ExpansionItem)ModelWithOptions.Items[SuperMetroidModel.MISSILE_NAME];
+            ExpansionItem freeItem = (ExpansionItem)model.Items[SuperMetroidModel.MISSILE_NAME];
             Assert.True(freeItem.LogicallyRelevant);
             Assert.False(freeItem.LogicallyNever);
             Assert.True(freeItem.LogicallyAlways);
             Assert.True(freeItem.LogicallyFree);
 
-            ExpansionItem removedItem = (ExpansionItem)ModelWithOptions.Items[SuperMetroidModel.SUPER_NAME];
+            ExpansionItem removedItem = (ExpansionItem)model.Items[SuperMetroidModel.SUPER_NAME];
             Assert.False(removedItem.LogicallyRelevant);
             Assert.True(removedItem.LogicallyNever);
             Assert.False(removedItem.LogicallyAlways);
             Assert.False(removedItem.LogicallyFree);
 
-            ExpansionItem obtainableItem = (ExpansionItem)ModelWithOptions.Items[SuperMetroidModel.ENERGY_TANK_NAME];
+            ExpansionItem obtainableItem = (ExpansionItem)model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
             Assert.True(obtainableItem.LogicallyRelevant);
             Assert.False(obtainableItem.LogicallyNever);
             Assert.False(obtainableItem.LogicallyAlways);

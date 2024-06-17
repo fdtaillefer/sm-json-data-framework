@@ -11,13 +11,14 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Models.Requirements;
+using System.Reflection;
 
 namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Integers
 {
     public class AcidFramesTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -25,9 +26,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
             Assert.Equal(30, acidFrames.Value);
         }
 
@@ -39,12 +41,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void CalculateDamage_Suitless_ReturnsCorrectValue()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState();
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            int result = acidFrames.CalculateDamage(Model, inGameState);
+            int result = acidFrames.CalculateDamage(model, inGameState);
 
             // Expect
             Assert.Equal(45, result);
@@ -54,13 +57,14 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void CalculateDamage_WithVaria_ReturnsCorrectValue()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            int result = acidFrames.CalculateDamage(Model, inGameState);
+            int result = acidFrames.CalculateDamage(model, inGameState);
 
             // Expect
             Assert.Equal(22, result);
@@ -70,13 +74,14 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void CalculateDamage_WithGravity_ReturnsCorrectValue()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
-            int result = acidFrames.CalculateDamage(Model, inGameState);
+            int result = acidFrames.CalculateDamage(model, inGameState);
 
             // Expect
             Assert.Equal(11, result);
@@ -86,16 +91,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void CalculateDamage_WithLeniency_ReturnsCorrectValue()
         {
             // Given
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = NewModelForOptions();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.AcidLeniencyMultiplier = 1.5M;
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            int result = acidFrames.CalculateDamage(ModelWithOptions, inGameState);
+            int result = acidFrames.CalculateDamage(model, inGameState);
 
             // Expect
             Assert.Equal(33, result);
@@ -109,13 +115,14 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void Execute_NotEnoughEnergy_Fails()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 54);
 
             // When
-            ExecutionResult result = acidFrames.Execute(Model, inGameState);
+            ExecutionResult result = acidFrames.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -125,16 +132,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void Execute_EnoughEnergy_Succeeds()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 53);
 
             // When
-            ExecutionResult result = acidFrames.Execute(Model, inGameState);
+            ExecutionResult result = acidFrames.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -45)
                 .AssertRespectedBy(result);
         }
@@ -143,17 +151,18 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void Execute_EnoughEnergyWithVaria_Succeeds()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 76)
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            ExecutionResult result = acidFrames.Execute(Model, inGameState);
+            ExecutionResult result = acidFrames.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -22)
                 .ExpectDamageReducingItemInvolved(SuperMetroidModel.VARIA_SUIT_NAME)
                 .AssertRespectedBy(result);
@@ -163,16 +172,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void Execute_EnoughEnergyWithGravity_Succeeds()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
-            ExecutionResult result = acidFrames.Execute(Model, inGameState);
+            ExecutionResult result = acidFrames.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -11)
                 .ExpectDamageReducingItemInvolved(SuperMetroidModel.GRAVITY_SUIT_NAME)
                 .AssertRespectedBy(result);
@@ -182,18 +192,19 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void Execute_WithLeniencyMultiplier_ConsumesCorrectAmount()
         {
             // Given
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = NewModelForOptions();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.AcidLeniencyMultiplier = 1.5M;
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState();
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = acidFrames.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = acidFrames.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(ModelWithOptions, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -67)
                 .AssertRespectedBy(result);
         }
@@ -202,15 +213,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void Execute_MultipleTimes_ConsumesCorrectAmount()
         {
             // Given
-            AcidFrames acidFrames = Model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            SuperMetroidModel model = ReusableModel();
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
-            InGameState inGameState = Model.CreateInitialGameState();
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = acidFrames.Execute(Model, inGameState, times:2);
+            ExecutionResult result = acidFrames.Execute(model, inGameState, times:2);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -90)
                 .AssertRespectedBy(result);
         }
@@ -225,29 +237,30 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    ItemInventory.CreateVanillaStartingInventory(model)
+                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
                 )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
             Assert.True(acidFrames.LogicallyRelevant);
             Assert.True(acidFrames.LogicallyNever);
@@ -260,32 +273,33 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void ApplyLogicalOptions_NormalPossibleEnergy_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    ItemInventory.CreateVanillaStartingInventory(model)
+                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
                 )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
             Assert.True(acidFrames.LogicallyRelevant);
             Assert.False(acidFrames.LogicallyNever);
@@ -298,25 +312,26 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void ApplyLogicalOptions_BothSuitsFree_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+                    ItemInventory.CreateVanillaStartingInventory(model)
+                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                        .ApplyAddItem(model.Items[SuperMetroidModel.VARIA_SUIT_NAME])
+                        .ApplyAddItem(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
                 )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
             Assert.True(acidFrames.LogicallyRelevant);
             Assert.False(acidFrames.LogicallyNever);
@@ -329,14 +344,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         public void ApplyLogicalOptions_DifferentAcidLeniency_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.AcidLeniencyMultiplier = 2;
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
+            AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
                 .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
             Assert.Equal(2, acidFrames.AcidLeniencyMultiplier);
         }

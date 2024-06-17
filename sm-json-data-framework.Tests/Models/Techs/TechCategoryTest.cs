@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Techs
 {
     public class TechCategoryTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,9 +21,10 @@ namespace sm_json_data_framework.Tests.Models.Techs
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            TechCategory techCategory = Model.TechCategories["General"];
+            TechCategory techCategory = model.TechCategories["General"];
             Assert.Equal("General", techCategory.Name);
             Assert.Equal("General configuration techs", techCategory.Description);
             Assert.Equal(4, techCategory.FirstLevelTechs.Count);
@@ -42,16 +43,17 @@ namespace sm_json_data_framework.Tests.Models.Techs
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            TechCategory disabledTechsCategory = ModelWithOptions.TechCategories["Speed Booster"];
+            TechCategory disabledTechsCategory = model.TechCategories["Speed Booster"];
             Assert.False(disabledTechsCategory.LogicallyRelevant);
-            TechCategory normalTechsCategory = ModelWithOptions.TechCategories["General"];
+            TechCategory normalTechsCategory = model.TechCategories["General"];
             Assert.True(normalTechsCategory.LogicallyRelevant);
         }
 

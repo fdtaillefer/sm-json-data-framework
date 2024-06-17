@@ -15,6 +15,7 @@ using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,28 +49,29 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             }
         }
 
-        private static SuperMetroidModel Model { get; set; } = StaticTestObjects.UnmodifiableModel;
-
-        private static SuperMetroidModel OtherModel { get; set; } = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel _otherReusableModel = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel OtherReusableModel() => _otherReusableModel;
 
         #region Tests for ctor(StartConditions)
         [Fact]
         public void ConstructorWithStartConditions_InitializesProperly()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             string startingRoomName = "Business Center";
             int startingNodeId = 7;
             string startingLockName = "Business Center Top Left Green Lock (to Ice Beam Gate)";
             int startingEnergy = 50;
             string maridiaTubeFlag = "f_MaridiaTubeBroken";
-            RoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode variaNode = model.GetNodeInRoom("Varia Suit Room", 2);
             StartConditions startConditions = new StartConditions
             (
-                model: Model,
-                startingGameFlags: new GameFlag[] { Model.GameFlags[maridiaTubeFlag] },
-                startingInventory: ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]),
-                startingNode: Model.GetNodeInRoom(startingRoomName, startingNodeId),
-                startingOpenLocks: new NodeLock[] { Model.Locks[startingLockName] },
+                model: model,
+                startingGameFlags: new GameFlag[] { model.GameFlags[maridiaTubeFlag] },
+                startingInventory: ItemInventory.CreateVanillaStartingInventory(model).ApplyAddItem(model.Items[SuperMetroidModel.VARIA_SUIT_NAME]),
+                startingNode: model.GetNodeInRoom(startingRoomName, startingNodeId),
+                startingOpenLocks: new NodeLock[] { model.Locks[startingLockName] },
                 startingTakenItemLocations: new RoomNode[] { variaNode },
                 startingResources: new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
             );
@@ -96,8 +98,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_Requesting0_ReturnsTrue(ConsumableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             ResourceCount resourceCount = new ResourceCount();
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -117,10 +120,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingExactPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -137,10 +141,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingExactPresentAmount_Energy_ReturnsFalse()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int amount = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -161,10 +166,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingLessThanPresentAmount_Ammo_ReturnsTrue(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest + 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -181,10 +187,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingLessThanPresentAmount_Energy_ReturnsTrue()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest + 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -201,10 +208,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingLessThanPresentAmount_EnergyMixOfReserveAndNormal_ReturnsTrue()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 3);
             resourceCount.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -224,10 +232,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingMoreThanPresentAmount_Ammo_ReturnsFalse(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(resource, amountToRequest - 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -244,10 +253,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsResourceAvailable_RequestingMoreThanPresentAmount_Energy_ReturnsFalse()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int amountToRequest = 5;
             ResourceCount resourceCount = new ResourceCount();
             resourceCount.ApplyAmount(RechargeableResourceEnum.RegularEnergy, amountToRequest - 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceCount)
                 .StartingResources(resourceCount)
                 .Build();
@@ -266,6 +276,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddResource_AddsAmount(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 2;
             int addedAmount = 5;
             int expectedamount = 7;
@@ -277,7 +288,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -302,6 +313,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddResource_DoesNotExceedMax(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 2;
             int addedAmount = 150;
             int expectedamount = 100;
@@ -313,7 +325,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -342,6 +354,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyConsumeResource_Ammo_SetsAmount(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int removedAmount = 2;
             int expectedAmount = 3;
@@ -353,7 +366,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -377,6 +390,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyConsumeResource_RegularEnergy_SetsAmount()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int removedAmount = 2;
             int expectedAmount = 3;
@@ -392,7 +406,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 }
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -416,6 +430,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyConsumeResource_ReserveEnergy_SetsAmount()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int removedAmount = 2;
             int expectedAmount = 3;
@@ -431,7 +446,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 }
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -455,6 +470,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyConsumeResource_MixedEnergy_ConsumesRegularEnergyFirst()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialRegularAmount = 10;
             int initialReserveAmount = 10;
             int reductionAmount = 12;
@@ -467,7 +483,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -485,6 +501,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyConsumeResource_MixedEnergy_ConsumesReservesBeforeGoingTo0Regular()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialRegularAmount = 10;
             int initialReserveAmount = 10;
             int reductionAmount = 19;
@@ -497,7 +514,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -515,6 +532,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyConsumeResource_MixedEnergy_ConsumesReservesBeforeGoingToNegativeRegular()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialRegularAmount = 10;
             int initialReserveAmount = 10;
             int reductionAmount = 22;
@@ -527,7 +545,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -548,13 +566,14 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyRefillResource_RechargeableResource_SetsToMax(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount()
                 .ApplyAmount(resource, initialAmount);
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(resource, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -576,13 +595,14 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyRefillResource_ConsumableAmmo_SetsToMax(RechargeableResourceEnum resource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount()
                 .ApplyAmount(resource, initialAmount);
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(resource, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -599,6 +619,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyRefillResource_ConsumableEnergy_SetsBothTypesToMax()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount()
@@ -607,7 +628,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             ResourceCount maxResources = startResources.Clone()
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, maxAmount)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, maxAmount);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -628,6 +649,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyRefillResources_RefillsAllResources()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
@@ -638,7 +660,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 maxResources.ApplyAmount(resource, maxAmount);
             }
 
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -661,6 +683,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetResourceVariationWith_ReturnsPositiveAndNegativeAnd0()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -685,14 +708,14 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             resources1.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
             resources2.ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 40);
 
-            StartConditions startConditions1 = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions1 = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceMaximums)
                 .StartingResources(resources1)
                 .Build();
 
             InGameState inGameState1 = new InGameState(startConditions1);
 
-            StartConditions startConditions2 = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions2 = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceMaximums)
                 .StartingResources(resources2)
                 .Build();
@@ -716,6 +739,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetFullRechargeableResources_ReturnsFullResources()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -724,7 +748,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             ResourceCount resources = new ResourceCount()
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceMaximums)
                 .StartingResources(resources)
                 .Build();
@@ -746,6 +770,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetFullConsumableResources_ReturnsFullResources()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -755,7 +780,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100)
                 .ApplyAmount(RechargeableResourceEnum.ReserveEnergy, 100);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceMaximums)
                 .StartingResources(resources)
                 .Build();
@@ -774,6 +799,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetFullConsumableResources_OneEnergyTypeFull_DoesNotReturnEnergy()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
             foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
             {
@@ -782,7 +808,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             ResourceCount resources = new ResourceCount()
                 .ApplyAmount(RechargeableResourceEnum.Super, 100)
                 .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 100);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(resourceMaximums)
                 .StartingResources(resources)
                 .Build();
@@ -802,7 +828,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetUnneededDrops_SamusIsFull_ReturnsAllButNoDrops()
         {
             // Given
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops();
@@ -820,6 +847,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetUnneededDrops_SamusNeedsEverything_ReturnsEmpty()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
@@ -829,7 +857,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -848,6 +876,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetUnneededDrops_OnlyOneTypeOfEnergyNotFull_DoesNotReturnEnergyDrops(RechargeableResourceEnum energyResource)
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             int initialAmount = 5;
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
@@ -864,7 +893,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 }
                 maxResources.ApplyAmount(loopResource, maxAmount);
             }
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(maxResources)
                 .StartingResources(startResources)
                 .Build();
@@ -885,9 +914,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddGameFlag_AddsIt()
         {
             // Given
-            GameFlag flag1 = Model.GameFlags["f_ZebesAwake"];
-            GameFlag flag2 = Model.GameFlags["f_DefeatedBombTorizo"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            GameFlag flag1 = model.GameFlags["f_ZebesAwake"];
+            GameFlag flag2 = model.GameFlags["f_DefeatedBombTorizo"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             inGameState
@@ -904,8 +934,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddGameFlag_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            GameFlag flag1 = OtherModel.GameFlags["f_ZebesAwake"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            GameFlag flag1 = otherModel.GameFlags["f_ZebesAwake"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyAddGameFlag(flag1));
@@ -918,9 +950,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddGameFlagByName_AddsIt()
         {
             // Given
-            GameFlag flag1 = Model.GameFlags["f_ZebesAwake"];
-            GameFlag flag2 = Model.GameFlags["f_DefeatedBombTorizo"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            GameFlag flag1 = model.GameFlags["f_ZebesAwake"];
+            GameFlag flag2 = model.GameFlags["f_DefeatedBombTorizo"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             inGameState
@@ -939,13 +972,14 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetActiveGameFlagsExceptIn_ReturnsDifference()
         {
             // Given
-            GameFlag flagIn1 = Model.GameFlags["f_ZebesAwake"];
-            GameFlag flagIn2 = Model.GameFlags["f_DefeatedBombTorizo"];
-            GameFlag flagInBoth = Model.GameFlags["f_DefeatedCeresRidley"];
-            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            SuperMetroidModel model = ReusableModel();
+            GameFlag flagIn1 = model.GameFlags["f_ZebesAwake"];
+            GameFlag flagIn2 = model.GameFlags["f_DefeatedBombTorizo"];
+            GameFlag flagInBoth = model.GameFlags["f_DefeatedCeresRidley"];
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyAddGameFlag(flagIn1)
                 .ApplyAddGameFlag(flagInBoth);
-            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyAddGameFlag(flagIn2)
                 .ApplyAddGameFlag(flagInBoth);
 
@@ -964,9 +998,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLock_AddsIt()
         {
             // Given
-            NodeLock lock1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            NodeLock lock2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            NodeLock lock1 = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lock2 = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             inGameState
@@ -984,8 +1019,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLock_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            NodeLock lock1 = OtherModel.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            NodeLock lock1 = otherModel.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyOpenLock(lock1, applyToRoomState: false));
@@ -995,8 +1032,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLock_ApplyingToRoomStateWhileNotOnNode_ThrowsArgumentException()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyOpenLock(nodeLock, applyToRoomState: true));
@@ -1006,8 +1044,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLock_ApplyingToRoomStateWhileOnNode_SucceedsAndAltersNodeState()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1030,9 +1069,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLockByName_AddsIt()
         {
             // Given
-            NodeLock lock1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            NodeLock lock2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            NodeLock lock1 = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lock2 = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             inGameState
@@ -1050,8 +1090,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLockByName_ApplyingToRoomStateWhileNotOnNode_ThrowsArgumentException()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyOpenLock(nodeLock.Name, applyToRoomState: true));
@@ -1061,8 +1102,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyOpenLockByName_ApplyingToRoomStateWhileOnNode_SucceedsAndAltersNodeState()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1084,13 +1126,14 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetOpenedNodeLocksExceptIn_ReturnsDifference()
         {
             // Given
-            NodeLock lockIn1 = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            NodeLock lockIn2 = Model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
-            NodeLock lockInBoth = Model.Locks["Parlor Bottom Right Red Lock (to Pre-Map)"];
-            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            SuperMetroidModel model = ReusableModel();
+            NodeLock lockIn1 = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            NodeLock lockIn2 = model.Locks["Landing Site Bottom Right Green Lock (to Crateria Tube)"];
+            NodeLock lockInBoth = model.Locks["Parlor Bottom Right Red Lock (to Pre-Map)"];
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyOpenLock(lockIn1, applyToRoomState: false)
                 .ApplyOpenLock(lockInBoth, applyToRoomState: false);
-            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyOpenLock(lockIn2, applyToRoomState: false)
                 .ApplyOpenLock(lockInBoth, applyToRoomState: false);
 
@@ -1109,8 +1152,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyBypassLock_AltersInNodeState()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1127,8 +1171,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyBypassLock_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            NodeLock nodeLock = OtherModel.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            NodeLock nodeLock = otherModel.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1141,8 +1187,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyBypassLock_NotOnNode_ThrowsArgumentException()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyBypassLock(nodeLock));
@@ -1156,8 +1203,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyBypassLockByName_AltersInNodeState()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1174,8 +1222,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyBypassLockByName_NotOnNode_ThrowsArgumentException()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ArgumentException>(() => inGameState.ApplyBypassLock(nodeLock.Name));
@@ -1188,8 +1237,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetBypassedExitLocks_CurrentRoom_ReturnsBypassedLocks()
         {
             // Given
-            NodeLock nodeLock = Model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            NodeLock nodeLock = model.Locks["Landing Site Top Right Yellow Lock (to Power Bombs)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1207,9 +1257,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetBypassedExitLocks_PreviousRoom_ReturnsBypassedLocksOnlyFromCorrectRoom()
         {
             // Given
-            NodeLock previousRoomLock = Model.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
-            NodeLock currentRoomLock = Model.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            NodeLock previousRoomLock = model.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
+            NodeLock currentRoomLock = model.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Red Brinstar Elevator Room", 1)
                 .Build();
 
@@ -1233,9 +1284,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyTakeLocation_AddsIt()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Varia Suit Room", 2);
-            RoomNode node2 = Model.GetNodeInRoom("Spazer Room", 2);
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode node2 = model.GetNodeInRoom("Spazer Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             inGameState
@@ -1252,8 +1304,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyTakeLocation_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            RoomNode node1 = OtherModel.GetNodeInRoom("Varia Suit Room", 2);
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            RoomNode node1 = otherModel.GetNodeInRoom("Varia Suit Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When and expect
             Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyTakeLocation(node1));
@@ -1267,9 +1321,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyTakeLocationByRoomNameAndNodeId_AddsIt()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Varia Suit Room", 2);
-            RoomNode node2 = Model.GetNodeInRoom("Spazer Room", 2);
-            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(Model));
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode node2 = model.GetNodeInRoom("Spazer Room", 2);
+            InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
             inGameState
@@ -1289,14 +1344,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetTakenItemLocationsExceptIn_ReturnsDifference()
         {
             // Given
-            RoomNode nodeIn1 = Model.GetNodeInRoom("Varia Suit Room", 2);
-            RoomNode nodeIn2 = Model.GetNodeInRoom("Spazer Room", 2);
-            RoomNode nodeInBoth = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
+            SuperMetroidModel model = ReusableModel();
+            RoomNode nodeIn1 = model.GetNodeInRoom("Varia Suit Room", 2);
+            RoomNode nodeIn2 = model.GetNodeInRoom("Spazer Room", 2);
+            RoomNode nodeInBoth = model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 3);
 
-            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyTakeLocation(nodeIn1)
                 .ApplyTakeLocation(nodeInBoth);
-            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyTakeLocation(nodeIn2)
                 .ApplyTakeLocation(nodeInBoth);
 
@@ -1315,9 +1371,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddItem_NonConsumableItem_AddsIt()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1337,8 +1394,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddItem_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            Item item1 = OtherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            Item item1 = otherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1351,9 +1410,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddItem_ExpansionItem_AddsItAndIncreasesCount()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = model.Items[SuperMetroidModel.SUPER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1380,9 +1440,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddItemByName_NonConsumableItem_AddsIt()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1402,9 +1463,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyAddItemByName_ExpansionItem_AddsItAndIncreasesCount()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = model.Items[SuperMetroidModel.SUPER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1431,10 +1493,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDisableItem_NonConsumableItem_DisablesIt()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item notPresentItem = model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1459,10 +1522,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDisableItem_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item wrongItem1 = OtherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item wrongItem1 = otherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item notPresentItem = model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1477,10 +1542,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDisableItem_ExpansionItem_DoesNothing()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            Item notPresentItem = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = model.Items[SuperMetroidModel.SUPER_NAME];
+            Item notPresentItem = model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1509,10 +1575,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDisableItemByName_NonConsumableItem_DisablesIt()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            Item notPresentItem = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item item2 = model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item notPresentItem = model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1537,10 +1604,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDisableItemByName_ExpansionItem_DoesNothing()
         {
             // Given
-            Item item1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            Item item2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            Item notPresentItem = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item1 = model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item item2 = model.Items[SuperMetroidModel.SUPER_NAME];
+            Item notPresentItem = model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1569,8 +1637,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnableItem_NonConsumableItem_EnablesIt()
         {
             // Given
-            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1589,9 +1658,11 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnableItem_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item wrongItem = OtherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            Item item = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item wrongItem = otherModel.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1610,8 +1681,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnableItemByName_NonConsumableItem_EnablesIt()
         {
             // Given
-            Item item = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Item item = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums()))
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1633,17 +1705,18 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetInventoryExceptIn_ReturnsDifference()
         {
             // Given
-            Item nonConsumableItemIn1 = Model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
-            Item nonConsumableItemIn2 = Model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
-            Item nonConsumableItemInBoth = Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
+            SuperMetroidModel model = ReusableModel();
+            Item nonConsumableItemIn1 = model.Items[SuperMetroidModel.VARIA_SUIT_NAME];
+            Item nonConsumableItemIn2 = model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME];
+            Item nonConsumableItemInBoth = model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME];
 
-            Item expansionItemIn1 = Model.Items[SuperMetroidModel.MISSILE_NAME];
-            Item expansionItemIn2 = Model.Items[SuperMetroidModel.SUPER_NAME];
-            Item expansionItemInBoth = Model.Items[SuperMetroidModel.POWER_BOMB_NAME];
-            Item expansionItemMoreIn1 = Model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
-            Item expansionItemMoreIn2 = Model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
+            Item expansionItemIn1 = model.Items[SuperMetroidModel.MISSILE_NAME];
+            Item expansionItemIn2 = model.Items[SuperMetroidModel.SUPER_NAME];
+            Item expansionItemInBoth = model.Items[SuperMetroidModel.POWER_BOMB_NAME];
+            Item expansionItemMoreIn1 = model.Items[SuperMetroidModel.ENERGY_TANK_NAME];
+            Item expansionItemMoreIn2 = model.Items[SuperMetroidModel.RESERVE_TANK_NAME];
 
-            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState1 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyAddItem(nonConsumableItemIn1)
                 .ApplyAddItem(nonConsumableItemInBoth)
                 .ApplyAddItem(expansionItemIn1)
@@ -1652,7 +1725,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .ApplyAddItem(expansionItemMoreIn1)
                 .ApplyAddItem(expansionItemMoreIn1)
                 .ApplyAddItem(expansionItemMoreIn2);
-            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(Model))
+            InGameState inGameState2 = new InGameState(StartConditions.CreateVanillaStartConditions(model))
                 .ApplyAddItem(nonConsumableItemIn2)
                 .ApplyAddItem(nonConsumableItemInBoth)
                 .ApplyAddItem(expansionItemIn2)
@@ -1685,7 +1758,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDestroyObstacle_AddsItToDestroyedObstacles()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1702,26 +1776,29 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDestroyObstacle_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
-            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyDestroyObstacle(OtherModel.Rooms["Landing Site"].Obstacles["A"]));
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyDestroyObstacle(otherModel.Rooms["Landing Site"].Obstacles["A"]));
         }
 
         [Fact]
         public void ApplyDestroyObstacle_ObstacleNotInRoom_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
-            Assert.Throws<ArgumentException>(() => inGameState.ApplyDestroyObstacle(Model.Rooms["Landing Site"].Obstacles["A"]));
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyDestroyObstacle(model.Rooms["Landing Site"].Obstacles["A"]));
         }
 
         #endregion
@@ -1732,7 +1809,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDestroyObstacleById_AddsItToDestroyedObstacles()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1749,7 +1827,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyDestroyObstacleById_ObstacleNotInRoom_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1766,8 +1845,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoom_ChangesCurrentNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1783,8 +1863,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoom_FromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            RoomNode node = OtherModel.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            RoomNode node = otherModel.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1797,7 +1879,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoom_ClearsPreviousRoomState()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1805,7 +1888,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyVisitNode(2, "Base");
 
             // When
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Parlor and Alcatraz", 4));
+            inGameState.ApplyEnterRoom(model.GetNodeInRoom("Parlor and Alcatraz", 4));
 
             // Expect
             Assert.Empty(inGameState.InRoomState.DestroyedObstacleIds);
@@ -1816,14 +1899,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoom_AddsCurrentRoomStateCopyToRememberedRooms()
         {
             // Given
-            Room initialRoom = Model.Rooms["Sloaters Refill"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Room initialRoom = model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(initialRoom.Name, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom(model.GetNodeInRoom("Red Tower", 3));
 
             // Expect
             Assert.Same(initialRoom, inGameState.PreviousRoomStates[0].CurrentRoom);
@@ -1834,14 +1918,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoom_SpawnsAtDifferentNode_GoesToCorrectNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Ice Beam Tutorial Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Ice Beam Gate Room", 1));
+            inGameState.ApplyEnterRoom(model.GetNodeInRoom("Ice Beam Gate Room", 1));
 
             // Expect
             Assert.Same(expectedNode, inGameState.CurrentNode);
@@ -1851,14 +1936,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoom_GoingBeyondRememberedRooms_EliminatesOldestRoom()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             string initialRoomName = "Sloaters Refill";
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            RoomNode node1 = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(initialRoomName, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom(model.GetNodeInRoom("Red Tower", 3));
             inGameState.ApplyVisitNode(8, "Base");
             inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
 
@@ -1881,8 +1967,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoomByRoomNameAndId_ChangesCurrentNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1898,7 +1985,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoomByRoomNameAndId_ClearsPreviousRoomState()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1917,8 +2005,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoomByRoomNameAndId_AddsCurrentRoomStateCopyToRememberedRooms()
         {
             // Given
-            Room initialRoom = Model.Rooms["Sloaters Refill"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Room initialRoom = model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(initialRoom.Name, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1935,8 +2024,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoomByRoomNameAndId_SpawnsAtDifferentNode_GoesToCorrectNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Ice Beam Tutorial Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1952,14 +2042,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyEnterRoomByRoomNameAndId_GoingBeyondRememberedRooms_EliminatesOldestRoom()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             string initialRoomName = "Sloaters Refill";
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            RoomNode node1 = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(initialRoomName, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            inGameState.ApplyEnterRoom(Model.GetNodeInRoom("Red Tower", 3));
+            inGameState.ApplyEnterRoom(model.GetNodeInRoom("Red Tower", 3));
             inGameState.ApplyVisitNode(8, "Base");
             inGameState.ApplyVisitNode(node1, inGameState.CurrentNode.LinksTo[4].Strats["Base"]);
 
@@ -1981,8 +2072,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_ChangesCurrentNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -1998,7 +2090,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_ClearsPreviousRoomState()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2017,8 +2110,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_AddsCurrentRoomStateCopyToRememberedRooms()
         {
             // Given
-            Room initialRoom = Model.Rooms["Sloaters Refill"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            Room initialRoom = model.Rooms["Sloaters Refill"];
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(initialRoom.Name, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2035,8 +2129,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_SpawnsAtDifferentNode_GoesToCorrectNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Ice Beam Gate Room", 6);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Ice Beam Gate Room", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Ice Beam Tutorial Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2052,8 +2147,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_GoingBeyondRememberedRooms_EliminatesOldestRoom()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             string initialRoomName = "Sloaters Refill";
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(initialRoomName, 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2075,7 +2171,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_NonDoorNode_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 7)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2088,7 +2185,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_OneWayEntranceDoorNode_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("West Sand Hall", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2101,7 +2199,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_LockedDoorNode_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2114,8 +2213,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_UnlockedDoorNode_Succeeds()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Crateria Tube", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2132,8 +2232,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyExitRoom_BypassedLock_Succeeds()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Crateria Tube", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Crateria Tube", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2153,14 +2254,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyVisitNode_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"])
-                .ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.LinksTo[1].Strats["Parlor Quick Charge"]);
+            inGameState.ApplyVisitNode(model.GetNodeInRoom("Parlor and Alcatraz", 8), inGameState.CurrentNode.LinksTo[8].Strats["Base"])
+                .ApplyVisitNode(model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.LinksTo[1].Strats["Parlor Quick Charge"]);
 
             // Expect
             Assert.Equal("Parlor and Alcatraz", inGameState.CurrentRoom.Name);
@@ -2182,13 +2284,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyVisitNode_NodeFromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
-            RoomNode node = OtherModel.GetNodeInRoom("Parlor and Alcatraz", 8);
+            RoomNode node = otherModel.GetNodeInRoom("Parlor and Alcatraz", 8);
             Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(node, inGameState.CurrentNode.LinksTo[8].Strats["Base"]));
         }
 
@@ -2196,41 +2300,45 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyVisitNode_StratFromWrongModel_ThrowsModelElementMismatchException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            SuperMetroidModel otherModel = OtherReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
-            Strat strat = OtherModel.GetNodeInRoom("Parlor and Alcatraz", 4).LinksTo[8].Strats["Base"];
-            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), strat));
+            Strat strat = otherModel.GetNodeInRoom("Parlor and Alcatraz", 4).LinksTo[8].Strats["Base"];
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(model.GetNodeInRoom("Parlor and Alcatraz", 8), strat));
         }
 
         [Fact]
         public void ApplyVisitNode_LinkDoesntExist_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
 
             // When and expect
-            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.LinksTo[8].Strats["Base"]));
+            Assert.Throws<ArgumentException>(() => inGameState.ApplyVisitNode(model.GetNodeInRoom("Parlor and Alcatraz", 1), inGameState.CurrentNode.LinksTo[8].Strats["Base"]));
         }
 
         [Fact]
         public void ApplyVisitNode_StratNotOnOriginLink_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            Strat wrongStrat = Model.GetNodeInRoom("Parlor and Alcatraz", 8).LinksTo[1].Strats["Base"];
+            Strat wrongStrat = model.GetNodeInRoom("Parlor and Alcatraz", 8).LinksTo[1].Strats["Base"];
 
             // When and expect
-            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(Model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
+            Assert.Throws<ModelElementMismatchException>(() => inGameState.ApplyVisitNode(model.GetNodeInRoom("Parlor and Alcatraz", 8), wrongStrat));
         }
 
         #endregion
@@ -2241,7 +2349,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyVisitNodeByNodeIdAndStratName_AccumulatesVisitedNodesAndStrats()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2270,7 +2379,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyVisitNodeByNodeIdAndStratName_LinkDoesntExist_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2283,7 +2393,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void ApplyVisitNodeByNodeIdAndStratName_StratNotOnOriginLink_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Parlor and Alcatraz", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2299,8 +2410,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetInRoomState_CurrentRoom_ReturnsCurrentRoomState()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2317,8 +2429,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetInRoomState_PreviousRoom_ReturnsPreviousRoomState()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2335,9 +2448,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetInRoomState_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2356,7 +2470,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetInRoomState_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2370,9 +2485,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetInRoomState_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2395,8 +2511,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoom_CurrentRoom_ReturnsCurrentRoom()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2413,8 +2530,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoom_PreviousRoom_ReturnsPreviousRoom()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2431,9 +2549,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoom_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2452,7 +2571,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoom_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2466,9 +2586,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoom_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2491,8 +2612,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_CurrentRoom_ReturnsCurrentRoomEnvironment()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Cathedral Entrance", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 6)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2510,8 +2632,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_PreviousRoom_ReturnsPreviousRoomEnvironment()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Business Center", 6);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Business Center", 6);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2529,9 +2652,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2550,7 +2674,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2564,9 +2689,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentOrPreviousRoomEnvironment_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2589,14 +2715,15 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetLastStrat_CurrentRoom_ReturnsCurrentRoomLastStrat()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             inGameState.ApplyEnterRoom("Red Tower", 3);
             inGameState.ApplyVisitNode(8, "Base");
             Strat expectedStrat = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Red Tower", 4), expectedStrat);
+            inGameState.ApplyVisitNode(model.GetNodeInRoom("Red Tower", 4), expectedStrat);
 
             // Expect
             Strat result = inGameState.GetLastLinkStrat(0);
@@ -2609,7 +2736,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetLastStrat_NoLastStrat_ReturnsNull()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2626,12 +2754,13 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetLastStrat_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 8)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             Strat expectedStrat = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Business Center", 6), expectedStrat);
+            inGameState.ApplyVisitNode(model.GetNodeInRoom("Business Center", 6), expectedStrat);
             inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
 
             // When
@@ -2645,12 +2774,13 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetLastStrat_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Oasis", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
             Strat expectedStrat = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
-            inGameState.ApplyVisitNode(Model.GetNodeInRoom("Oasis", 3), expectedStrat);
+            inGameState.ApplyVisitNode(model.GetNodeInRoom("Oasis", 3), expectedStrat);
             inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
             inGameState.ApplyEnterRoom("Plasma Spark Room", 1);
 
@@ -2665,7 +2795,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetLastStrat_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2679,11 +2810,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetLastStrat_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
-            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
-            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode room1DoorNode = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(room1OtherNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2710,7 +2842,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedNodeIds_CurrentRoom_ReturnsCurrentRoomVisitedNodeIds()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2732,7 +2865,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedNodeIds_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 8)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2752,7 +2886,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedNodeIds_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Oasis", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2773,7 +2908,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedNodeIds_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2787,11 +2923,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedNodeIds_GoingBeyondRememberedRooms_ReturnsEmpty()
         {
             // Given
-            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
-            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
-            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode room1DoorNode = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(room1OtherNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2818,16 +2955,17 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedPath_CurrentRoom_ReturnsCurrentRoomVisitedPath()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            RoomNode expectedNode1 = Model.GetNodeInRoom("Red Tower", 3);
+            RoomNode expectedNode1 = model.GetNodeInRoom("Red Tower", 3);
             inGameState.ApplyEnterRoom(expectedNode1);
-            RoomNode expectedNode2 = Model.GetNodeInRoom("Red Tower", 8);
+            RoomNode expectedNode2 = model.GetNodeInRoom("Red Tower", 8);
             Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[8].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
-            RoomNode expectedNode3 = Model.GetNodeInRoom("Red Tower", 4);
+            RoomNode expectedNode3 = model.GetNodeInRoom("Red Tower", 4);
             Strat expectedStrat3 = inGameState.CurrentNode.LinksTo[4].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode3, expectedStrat3);
 
@@ -2848,12 +2986,13 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedPath_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            RoomNode expectedNode1 = Model.GetNodeInRoom("Business Center", 8);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode1 = model.GetNodeInRoom("Business Center", 8);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            RoomNode expectedNode2 = Model.GetNodeInRoom("Business Center", 6);
+            RoomNode expectedNode2 = model.GetNodeInRoom("Business Center", 6);
             Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[6].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
             inGameState.ApplyEnterRoom("Cathedral Entrance", 1);
@@ -2873,12 +3012,13 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedPath_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode expectedNode1 = Model.GetNodeInRoom("Oasis", 4);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode1 = model.GetNodeInRoom("Oasis", 4);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
-            RoomNode expectedNode2 = Model.GetNodeInRoom("Oasis", 3);
+            RoomNode expectedNode2 = model.GetNodeInRoom("Oasis", 3);
             Strat expectedStrat2 = inGameState.CurrentNode.LinksTo[3].Strats["Base"];
             inGameState.ApplyVisitNode(expectedNode2, expectedStrat2);
             inGameState.ApplyEnterRoom("Toilet Bowl", 2); // Toilet Bowl is non-playable
@@ -2899,7 +3039,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedPath_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2913,11 +3054,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetVisitedPath_GoingBeyondRememberedRooms_ReturnsEmpty()
         {
             // Given
-            RoomNode room1DoorNode = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode room1OtherNode = Model.GetNodeInRoom("Red Tower", 8);
-            RoomNode room2DoorNode = Model.GetNodeInRoom("Bat Room", 1);
-            RoomNode room2OtherNode = Model.GetNodeInRoom("Bat Room", 2);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode room1DoorNode = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode room1OtherNode = model.GetNodeInRoom("Red Tower", 8);
+            RoomNode room2DoorNode = model.GetNodeInRoom("Bat Room", 1);
+            RoomNode room2OtherNode = model.GetNodeInRoom("Bat Room", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(room1OtherNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2944,7 +3086,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetDestroyedObstacleIds_CurrentRoom_ReturnsCurrentRoomData()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Hellway", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2963,7 +3106,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetDestroyedObstacleIds_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Caterpillar Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -2982,7 +3126,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetDestroyedObstacleIds_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Caterpillar Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3003,7 +3148,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetDestroyedObstacleIds_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3017,11 +3163,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetDestroyedObstacleIds_GoingBeyondRememberedRooms_ReturnsEmpty()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Caterpillar Room", 2);
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Caterpillar Room", 2);
             RoomObstacle obstacle1 = node1.Room.Obstacles["A"];
-            RoomNode node2 = Model.GetNodeInRoom("Beta Power Bomb Room", 1);
+            RoomNode node2 = model.GetNodeInRoom("Beta Power Bomb Room", 1);
             RoomObstacle obstacle2 = node2.Room.Obstacles["B"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3047,7 +3194,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_CurrentRoom_ReturnsCurrentRoom()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 6)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3064,7 +3212,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_ConditionalEnteringFromHeatedNode_ReturnsTrue()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Volcano Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3080,7 +3229,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_ConditionalEnteringFromNonHeatedNode_ReturnsTrue()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Volcano Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3096,7 +3246,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_PreviousRoom_ReturnsPreviousRoom()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 6)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3113,7 +3264,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Cathedral Entrance", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3132,7 +3284,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3146,9 +3299,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void IsHeatedRoom_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Bat Cave", 2);
-            RoomNode node2 = Model.GetNodeInRoom("Speed Booster Hall", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Bat Cave", 2);
+            RoomNode node2 = model.GetNodeInRoom("Speed Booster Hall", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3171,8 +3325,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_CurrentRoom_ReturnsCurrentRoomData()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Cathedral Entrance", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Cathedral Entrance", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 6)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3189,7 +3344,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_ConditionalFromSameEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Volcano Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3205,8 +3361,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_ConditionalFromDifferentEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Volcano Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3223,8 +3380,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Crab Hole", 2);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Crab Hole", 2);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3242,9 +3400,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3264,7 +3423,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3278,9 +3438,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorEnvironment_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
-            RoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Crab Hole", 2);
+            RoomNode node2 = model.GetNodeInRoom("Boyon Gate Hall", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3303,7 +3464,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_CurrentRoom_ReturnsCurrentRoomData()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Boyon Gate Hall", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3320,7 +3482,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_ConditionalFromSameEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Volcano Room", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3336,8 +3499,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_ConditionalFromDifferentEntranceNode_ReturnsCorrectEnvironment()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Volcano Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Volcano Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3354,7 +3518,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_PreviousRoom_ReturnsPreviousRoomData()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Crab Hole", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3371,8 +3536,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3391,7 +3557,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3405,9 +3572,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentDoorPhysics_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Crab Hole", 2);
-            RoomNode node2 = Model.GetNodeInRoom("Boyon Gate Hall", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Crab Hole", 2);
+            RoomNode node2 = model.GetNodeInRoom("Boyon Gate Hall", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3430,8 +3598,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentNode_CurrentRoom_ReturnsCurrentNode()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Red Tower", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Red Tower", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3448,8 +3617,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentNode_PreviousRoom_ReturnsLastNodeOfPreviousRoom()
         {
             // Given
-            RoomNode expectedNode = Model.GetNodeInRoom("Sloaters Refill", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode expectedNode = model.GetNodeInRoom("Sloaters Refill", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(expectedNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3466,9 +3636,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentNode_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode expectedNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode expectedNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3487,7 +3658,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentNode_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3501,9 +3673,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetCurrentNode_GoingBeyondRememberedRooms_ReturnsNull()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Red Tower", 4);
-            RoomNode node2 = Model.GetNodeInRoom("Bat Room", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Red Tower", 4);
+            RoomNode node2 = model.GetNodeInRoom("Bat Room", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3526,7 +3699,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void BypassingExitLock_CurrentRoomNotBypassing_ReturnsFalse()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3542,8 +3716,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void BypassingExitLock_CurrentRoomBypassing_ReturnsTrue()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3560,8 +3735,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void BypassingExitLock_PreviousRoom_ReturnsLastRoomData()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3579,9 +3755,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void BypassingExitLock_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode exitNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3601,7 +3778,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void BypassingExitLock_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3615,11 +3793,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void BypassingExitLock_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
             NodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
-            RoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
+            RoomNode node2 = model.GetNodeInRoom("Crateria Kihunter Room", 3);
             NodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3645,7 +3824,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void OpeningExitLock_CurrentRoomNotOpening_ReturnsFalse()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Business Center", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3661,8 +3841,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void OpeningExitLock_CurrentRoomOpening_ReturnsTrue()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3679,8 +3860,9 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void OpeningExitLock_PreviousRoom_ReturnsLastRoomData()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Business Center", 1);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Business Center", 1);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3698,9 +3880,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void OpeningExitLock_PreviousRoom_SkipsNonPlayableRooms()
         {
             // Given
-            RoomNode startNode = Model.GetNodeInRoom("Oasis", 4);
-            RoomNode exitNode = Model.GetNodeInRoom("Oasis", 3);
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            RoomNode startNode = model.GetNodeInRoom("Oasis", 4);
+            RoomNode exitNode = model.GetNodeInRoom("Oasis", 3);
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(startNode)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3720,7 +3903,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void OpeningExitLock_NegativePreviousRoomCount_ThrowsException()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Sloaters Refill", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3734,11 +3918,12 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void OpeningExitLock_GoingBeyondRememberedRooms_ReturnsFalse()
         {
             // Given
-            RoomNode node1 = Model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
+            SuperMetroidModel model = ReusableModel();
+            RoomNode node1 = model.GetNodeInRoom("Red Brinstar Elevator Room", 1);
             NodeLock lock1 = node1.Locks["Red Brinstar Elevator Yellow Lock (to Kihunters)"];
-            RoomNode node2 = Model.GetNodeInRoom("Crateria Kihunter Room", 3);
+            RoomNode node2 = model.GetNodeInRoom("Crateria Kihunter Room", 3);
             NodeLock lock2 = node2.Locks["Crateria Kihunter Room Bottom Yellow Lock (to Elevator)"];
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode(node1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3764,7 +3949,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_NoPreviousRoom_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3780,7 +3966,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_ReturnsRunways()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3799,7 +3986,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_PreviousRoomNodeUnconnected_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3816,7 +4004,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_VisitedPathMismatch_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3834,7 +4023,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_MultiNodePathMatch_ReturnsRunways()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3854,7 +4044,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_PhysicsMatch_ReturnsRunways()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3873,7 +4064,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_PhysicsMismatch_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Seaweed Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3890,7 +4082,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveRunways_BypassingLock_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 4)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3910,7 +4103,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_NoPreviousRoom_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 5)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3926,7 +4120,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_ReturnsCanLeaveChargeds()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Green Hill Zone", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3945,7 +4140,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_PreviousRoomNodeUnconnected_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Green Hill Zone", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3962,7 +4158,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_VisitedPathMismatch_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Green Hill Zone", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -3980,7 +4177,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_MultiNodePathMatch_ReturnsCanLeaveChargeds()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Green Hill Zone", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4000,7 +4198,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_BypassingLock_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Crab Shaft", 2)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4018,7 +4217,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoor_ReturnsCanLeaveCharged()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4038,7 +4238,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoor_BypassingLock_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4057,7 +4258,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_NotFollowingPathToDoor_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4077,7 +4279,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_FollowingPathToDoorWithWrongStrat_ReturnsEmpty()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Early Supers Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4095,7 +4298,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorButNotVisited_ExcludesCanLeaveCharged()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 3)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4113,7 +4317,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorAndWasVisited_IncludesCanLeaveCharged()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Landing Site", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4133,7 +4338,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenLockedDoorAndWasVisitedButNotUnlocked_ExcludesCanLeaveCharged()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Red Brinstar Fireflea Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4152,7 +4358,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenLockedDoorAndWasVisitedButNotUnlockedUntilLeaving_ExcludesCanLeaveCharged()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Red Brinstar Fireflea Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4172,7 +4379,8 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void GetRetroactiveCanLeaveChargeds_RemoteCanLeaveCharged_RequiringOpenDoorLockedAndWasUnlocked_IncludesCanLeaveCharged()
         {
             // Given
-            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(Model)
+            SuperMetroidModel model = ReusableModel();
+            StartConditions startConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingNode("Red Brinstar Fireflea Room", 1)
                 .Build();
             InGameState inGameState = new InGameState(startConditions);
@@ -4194,15 +4402,16 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void Clone_CopiesCorrectly()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             string startingRoomName = "Business Center";
             int startingNodeId = 7;
             string startingLockName = "Business Center Top Left Green Lock (to Ice Beam Gate)";
             int startingEnergy = 50;
             string maridiaTubeFlag = "f_MaridiaTubeBroken";
-            RoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
-            StartConditions startConditions = new StartConditionsBuilder(Model)
+            RoomNode variaNode = model.GetNodeInRoom("Varia Suit Room", 2);
+            StartConditions startConditions = new StartConditionsBuilder(model)
                 .StartingGameFlags(new string[] { maridiaTubeFlag })
-                .StartingInventory(ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items[SuperMetroidModel.VARIA_SUIT_NAME]))
+                .StartingInventory(ItemInventory.CreateVanillaStartingInventory(model).ApplyAddItem(model.Items[SuperMetroidModel.VARIA_SUIT_NAME]))
                 .StartingNode(startingRoomName, startingNodeId)
                 .StartingOpenLocks(new string[] { startingLockName })
                 .StartingTakenItemLocations(new RoomNode[] { variaNode })
@@ -4228,15 +4437,16 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public void Clone_SeparatesState()
         {
             // Given
+            SuperMetroidModel model = ReusableModel();
             string startingRoomName = "Business Center";
             int startingNodeId = 7;
             string startingLockName = "Business Center Top Left Green Lock (to Ice Beam Gate)";
             string secondLockName = "Business Center Bottom Left Red Lock (to HiJump E-Tank)";
             int startingEnergy = 50;
             string maridiaTubeFlag = "f_MaridiaTubeBroken";
-            RoomNode variaNode = Model.GetNodeInRoom("Varia Suit Room", 2);
-            StartConditions startConditions = new StartConditionsBuilder(Model)
-                .StartingInventory(ItemInventory.CreateVanillaStartingInventory(Model).ApplyAddItem(Model.Items["Missile"]))
+            RoomNode variaNode = model.GetNodeInRoom("Varia Suit Room", 2);
+            StartConditions startConditions = new StartConditionsBuilder(model)
+                .StartingInventory(ItemInventory.CreateVanillaStartingInventory(model).ApplyAddItem(model.Items["Missile"]))
                 .StartingNode(startingRoomName, startingNodeId)
                 .StartingOpenLocks(new string[] { startingLockName })
                 .StartingResources(new ResourceCount().ApplyAmount(RechargeableResourceEnum.RegularEnergy, startingEnergy)
@@ -4252,7 +4462,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Modify the clone
             clone.ApplyVisitNode(8, "Base");
             clone.ApplyVisitNode(3, "Base");
-            clone.ApplyOpenLock(Model.Locks[secondLockName]);
+            clone.ApplyOpenLock(model.Locks[secondLockName]);
             clone.ApplyTakeLocation(variaNode);
             clone.ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
             clone.ApplyAddItem(SuperMetroidModel.MISSILE_NAME);

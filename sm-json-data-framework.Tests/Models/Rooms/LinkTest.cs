@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class LinkTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,10 +21,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Link link = Model.Rooms["Landing Site"].Links[5];
-            Assert.Same(Model.Rooms["Landing Site"].Nodes[5], link.FromNode);
+            Link link = model.Rooms["Landing Site"].Links[5];
+            Assert.Same(model.Rooms["Landing Site"].Nodes[5], link.FromNode);
             Assert.Equal(5, link.To.Count);
             Assert.Contains(2, link.To.Keys);
             Assert.Contains(3, link.To.Keys);
@@ -41,18 +42,19 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Gravity")
                 .RegisterDisabledTech("canSuitlessMaridia");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Link noDestinationsLink = ModelWithOptions.Rooms["Crab Shaft"].Links[2];
+            Link noDestinationsLink = model.Rooms["Crab Shaft"].Links[2];
             Assert.False(noDestinationsLink.LogicallyRelevant);
 
-            Link possibleLink = ModelWithOptions.Rooms["Landing Site"].Links[1];
+            Link possibleLink = model.Rooms["Landing Site"].Links[1];
             Assert.True(possibleLink.LogicallyRelevant);
         }
 

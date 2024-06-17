@@ -12,8 +12,8 @@ namespace sm_json_data_framework.Tests.Models.Enemies
 {
     public class EnemyAttackTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -21,9 +21,10 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            EnemyAttack enemyAttack = Model.Enemies["Mother Brain 2"].Attacks["rainbow"];
+            EnemyAttack enemyAttack = model.Enemies["Mother Brain 2"].Attacks["rainbow"];
             Assert.Equal("rainbow", enemyAttack.Name);
             Assert.Equal(600, enemyAttack.BaseDamage);
             Assert.True(enemyAttack.AffectedByVaria);
@@ -38,14 +39,15 @@ namespace sm_json_data_framework.Tests.Models.Enemies
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterRemovedItem("Ice");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            EnemyAttack enemyAttack = ModelWithOptions.Enemies["Evir"].Attacks["contact"];
+            EnemyAttack enemyAttack = model.Enemies["Evir"].Attacks["contact"];
             Assert.True(enemyAttack.LogicallyRelevant);
         }
 

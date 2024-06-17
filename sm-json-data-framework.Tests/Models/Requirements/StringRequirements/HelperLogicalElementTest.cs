@@ -16,8 +16,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
 {
     public class HelperLogicalElementTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -27,9 +27,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
             // Given/when standard model creation
 
             // Expect
-            HelperLogicalElement helperLogicalElement = Model.Techs["canHBJ"].Requires
+            SuperMetroidModel model = ReusableModel();
+            HelperLogicalElement helperLogicalElement = model.Techs["canHBJ"].Requires
                 .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUseMorphBombs");
-            Assert.Same(Model.Helpers["h_canUseMorphBombs"], helperLogicalElement.Helper);
+            Assert.Same(model.Helpers["h_canUseMorphBombs"], helperLogicalElement.Helper);
         }
 
         #endregion
@@ -40,12 +41,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_HelperRequirementsNotMet_Fails()
         {
             // Given
-            HelperLogicalElement manyTriesHelperElement = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires
+            SuperMetroidModel model = ReusableModel();
+            HelperLogicalElement manyTriesHelperElement = model.Helpers["h_canHeatedGreenGateGlitch"].Requires
                 .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
-            InGameState inGameState = Model.CreateInitialGameState();
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = manyTriesHelperElement.Execute(Model, inGameState);
+            ExecutionResult result = manyTriesHelperElement.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -55,17 +57,18 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_HelperRequirementsMet_Succeeds()
         {
             // Given
-            HelperLogicalElement manyTriesHelperElement = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires
+            SuperMetroidModel model = ReusableModel();
+            HelperLogicalElement manyTriesHelperElement = model.Helpers["h_canHeatedGreenGateGlitch"].Requires
                 .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
 
             // When
-            ExecutionResult result = manyTriesHelperElement.Execute(Model, inGameState);
+            ExecutionResult result = manyTriesHelperElement.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, -1)
                 .ExpectItemInvolved(SuperMetroidModel.SUPER_NAME)
                 .AssertRespectedBy(result);
@@ -76,20 +79,21 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         {
 
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterHelperTries("h_canGreenGateGlitch", 3);
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            HelperLogicalElement manyTriesHelperElement = ModelWithOptions.Helpers["h_canHeatedGreenGateGlitch"].Requires
+            model.ApplyLogicalOptions(logicalOptions);
+            HelperLogicalElement manyTriesHelperElement = model.Helpers["h_canHeatedGreenGateGlitch"].Requires
                 .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
 
             // When
-            ExecutionResult result = manyTriesHelperElement.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = manyTriesHelperElement.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(ModelWithOptions, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, -3)
                 .ExpectItemInvolved(SuperMetroidModel.SUPER_NAME)
                 .AssertRespectedBy(result);
@@ -103,42 +107,43 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canGateGlitch")
                 .RegisterHelperTries("h_canGreenGateGlitch", 2);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Morph"])
+                    .ApplyAddItem(model.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HelperLogicalElement impossibleHelperElement = ModelWithOptions.Helpers["h_canHeatedBlueGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canBlueGateGlitch");
+            HelperLogicalElement impossibleHelperElement = model.Helpers["h_canHeatedBlueGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canBlueGateGlitch");
             Assert.True(impossibleHelperElement.LogicallyRelevant);
             Assert.False(impossibleHelperElement.LogicallyAlways);
             Assert.False(impossibleHelperElement.LogicallyFree);
             Assert.True(impossibleHelperElement.LogicallyNever);
             Assert.Equal(1, impossibleHelperElement.Tries);
 
-            HelperLogicalElement nonFreeHelperElement = ModelWithOptions.Helpers["h_canOpenYellowDoors"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUsePowerBombs");
+            HelperLogicalElement nonFreeHelperElement = model.Helpers["h_canOpenYellowDoors"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUsePowerBombs");
             Assert.True(nonFreeHelperElement.LogicallyRelevant);
             Assert.False(nonFreeHelperElement.LogicallyAlways);
             Assert.False(nonFreeHelperElement.LogicallyFree);
             Assert.False(nonFreeHelperElement.LogicallyNever);
             Assert.Equal(1, nonFreeHelperElement.Tries);
 
-            HelperLogicalElement freeHelperElement = ModelWithOptions.Techs["canHBJ"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUseMorphBombs");
+            HelperLogicalElement freeHelperElement = model.Techs["canHBJ"].Requires.LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUseMorphBombs");
             Assert.True(freeHelperElement.LogicallyRelevant);
             Assert.True(freeHelperElement.LogicallyAlways);
             Assert.True(freeHelperElement.LogicallyFree);
             Assert.False(freeHelperElement.LogicallyNever);
             Assert.Equal(1, freeHelperElement.Tries);
 
-            HelperLogicalElement manyTriesHelperElement = ModelWithOptions.Helpers["h_canHeatedGreenGateGlitch"].Requires
+            HelperLogicalElement manyTriesHelperElement = model.Helpers["h_canHeatedGreenGateGlitch"].Requires
                 .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
             Assert.Equal(2, manyTriesHelperElement.Tries);
         }

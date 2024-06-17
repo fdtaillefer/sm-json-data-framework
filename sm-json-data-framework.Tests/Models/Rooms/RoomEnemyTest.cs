@@ -19,8 +19,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
 {
     public class RoomEnemyTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -28,14 +28,15 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            RoomEnemy roomEnemy = Model.RoomEnemies["Early Supers Zeb"];
+            RoomEnemy roomEnemy = model.RoomEnemies["Early Supers Zeb"];
             Assert.Equal("e1", roomEnemy.Id);
             Assert.Equal("Early Supers Zeb", roomEnemy.GroupName);
-            Assert.Same(Model.Enemies["Zeb"], roomEnemy.Enemy);
+            Assert.Same(model.Enemies["Zeb"], roomEnemy.Enemy);
             Assert.Equal(1, roomEnemy.Quantity);
-            Assert.Same(Model.Rooms["Early Supers Room"], roomEnemy.Room);
+            Assert.Same(model.Rooms["Early Supers Room"], roomEnemy.Room);
 
             Assert.Equal(1, roomEnemy.HomeNodes.Count);
             Assert.Contains(1, roomEnemy.HomeNodes.Keys);
@@ -56,7 +57,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.True(roomEnemy.IsSpawner);
 
 
-            RoomEnemy betweenNodesRoomEnemy = Model.RoomEnemies["Waterway Puyos"];
+            RoomEnemy betweenNodesRoomEnemy = model.RoomEnemies["Waterway Puyos"];
             Assert.Empty(betweenNodesRoomEnemy.HomeNodes);
             Assert.Equal(2, betweenNodesRoomEnemy.BetweenNodes.Count);
             Assert.Contains(1, betweenNodesRoomEnemy.BetweenNodes.Keys);
@@ -64,13 +65,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.Empty(betweenNodesRoomEnemy.FarmCycles);
             Assert.False(betweenNodesRoomEnemy.IsSpawner);
 
-            RoomEnemy roomEnemyWithSpawnConditions = Model.RoomEnemies["Alcatraz Ripper"];
+            RoomEnemy roomEnemyWithSpawnConditions = model.RoomEnemies["Alcatraz Ripper"];
             Assert.Equal(1, roomEnemyWithSpawnConditions.Spawn.LogicalElements.Count);
             Assert.NotNull(roomEnemyWithSpawnConditions.Spawn.LogicalElement<GameFlagLogicalElement>(0));
             Assert.Equal(1, roomEnemyWithSpawnConditions.StopSpawn.LogicalElements.Count);
             Assert.NotNull(roomEnemyWithSpawnConditions.StopSpawn.LogicalElement<GameFlagLogicalElement>(0));
 
-            RoomEnemy roomEnemyWithDropRequirements= Model.RoomEnemies["Fast Pillars Standing Pirates"];
+            RoomEnemy roomEnemyWithDropRequirements= model.RoomEnemies["Fast Pillars Standing Pirates"];
             Assert.Equal(1, roomEnemyWithDropRequirements.DropRequires.LogicalElements.Count);
             Assert.NotNull(roomEnemyWithDropRequirements.DropRequires.LogicalElement<HelperLogicalElement>(0));
         }
@@ -83,11 +84,12 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Spawns_SpawnConditionNotMet_ReturnsFalse()
         {
             // Given
-            RoomEnemy roomEnemy = Model.RoomEnemies["Alcatraz Ripper"];
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            RoomEnemy roomEnemy = model.RoomEnemies["Alcatraz Ripper"];
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            bool result = roomEnemy.Spawns(Model, inGameState);
+            bool result = roomEnemy.Spawns(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -97,12 +99,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Spawns_SpawnConditionMetAndStopSpawnNotMet_ReturnsTrue()
         {
             // Given
-            RoomEnemy roomEnemy = Model.RoomEnemies["Alcatraz Ripper"];
-            InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddGameFlag(Model.GameFlags["f_ZebesAwake"]);
+            SuperMetroidModel model = ReusableModel();
+            RoomEnemy roomEnemy = model.RoomEnemies["Alcatraz Ripper"];
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddGameFlag(model.GameFlags["f_ZebesAwake"]);
 
             // When
-            bool result = roomEnemy.Spawns(Model, inGameState);
+            bool result = roomEnemy.Spawns(model, inGameState);
 
             // Expect
             Assert.True(result);
@@ -112,13 +115,14 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void Spawns_SpawnAndStopSpawnConditionMet_ReturnsFalse()
         {
             // Given
-            RoomEnemy roomEnemy = Model.RoomEnemies["Alcatraz Ripper"];
-            InGameState inGameState = Model.CreateInitialGameState()
-                .ApplyAddGameFlag(Model.GameFlags["f_ZebesAwake"])
-                .ApplyAddGameFlag(Model.GameFlags["f_ZebesSetAblaze"]);
+            SuperMetroidModel model = ReusableModel();
+            RoomEnemy roomEnemy = model.RoomEnemies["Alcatraz Ripper"];
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddGameFlag(model.GameFlags["f_ZebesAwake"])
+                .ApplyAddGameFlag(model.GameFlags["f_ZebesSetAblaze"]);
 
             // When
-            bool result = roomEnemy.Spawns(Model, inGameState);
+            bool result = roomEnemy.Spawns(model, inGameState);
 
             // Expect
             Assert.False(result);
@@ -132,12 +136,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void SpawnFarmExecutionExecute_NotSpawner_Fails()
         {
             // Given
-            RoomEnemy roomEnemy = Model.RoomEnemies["Green Shaft Top Zeelas"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            RoomEnemy roomEnemy = model.RoomEnemies["Green Shaft Top Zeelas"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(roomEnemy.HomeNodes[12]);
 
             // When
-            ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(Model, inGameState);
+            ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -147,8 +152,9 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void SpawnFarmExecutionExecute_FarmPossible_RefillsFarmableResources()
         {
             // Given
-            RoomEnemy roomEnemy = Model.RoomEnemies["Etecoon E-Tank Left Zebbo"];
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            RoomEnemy roomEnemy = model.RoomEnemies["Etecoon E-Tank Left Zebbo"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
@@ -161,10 +167,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .ApplyEnterRoom(roomEnemy.HomeNodes[4]);
 
             // When
-            ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(Model, inGameState);
+            ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, 98)
                 .ExpectResourceVariation(RechargeableResourceEnum.ReserveEnergy, 52)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, 4)
@@ -177,15 +183,16 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void SpawnFarmExecutionExecute_FarmNotPossible_Fails()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canSuitlessMaridia");
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            RoomEnemy roomEnemy = ModelWithOptions.RoomEnemies["Botwoon E-Tank Zoas"];
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            RoomEnemy roomEnemy = model.RoomEnemies["Botwoon E-Tank Zoas"];
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(roomEnemy.HomeNodes[4]);
 
             // When
-            ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = roomEnemy.SpawnerFarmExecution.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -201,37 +208,38 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingGameFlags(new List<string> { "f_DefeatedRidley" })
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            RoomEnemy alwaysSpawns = ModelWithOptions.RoomEnemies["Post Crocomire Farming Room Ripper 2"];
+            RoomEnemy alwaysSpawns = model.RoomEnemies["Post Crocomire Farming Room Ripper 2"];
             Assert.True(alwaysSpawns.LogicallyRelevant);
             Assert.True(alwaysSpawns.LogicallyAlwaysSpawns);
             Assert.False(alwaysSpawns.LogicallyNeverSpawns);
 
-            RoomEnemy neverMeetsSpawnConditions = ModelWithOptions.RoomEnemies["Bomb Torizo"];
+            RoomEnemy neverMeetsSpawnConditions = model.RoomEnemies["Bomb Torizo"];
             Assert.False(neverMeetsSpawnConditions.LogicallyRelevant);
             Assert.False(neverMeetsSpawnConditions.LogicallyAlwaysSpawns);
             Assert.True(neverMeetsSpawnConditions.LogicallyNeverSpawns);
 
-            RoomEnemy alwaysMeetsStopSpawnConditions = ModelWithOptions.RoomEnemies["Ridley"];
+            RoomEnemy alwaysMeetsStopSpawnConditions = model.RoomEnemies["Ridley"];
             Assert.False(alwaysMeetsStopSpawnConditions.LogicallyRelevant);
             Assert.False(alwaysMeetsStopSpawnConditions.LogicallyAlwaysSpawns);
             Assert.True(alwaysMeetsStopSpawnConditions.LogicallyNeverSpawns);
 
-            RoomEnemy notAlwaysSpawnConditions = ModelWithOptions.RoomEnemies["Attic Atomics"];
+            RoomEnemy notAlwaysSpawnConditions = model.RoomEnemies["Attic Atomics"];
             Assert.True(notAlwaysSpawnConditions.LogicallyRelevant);
             Assert.False(notAlwaysSpawnConditions.LogicallyAlwaysSpawns);
             Assert.False(notAlwaysSpawnConditions.LogicallyNeverSpawns);
 
-            RoomEnemy alwaysSpawnNotAlwaysStopSpawnConditions = ModelWithOptions.RoomEnemies["Flyway Mellows"];
+            RoomEnemy alwaysSpawnNotAlwaysStopSpawnConditions = model.RoomEnemies["Flyway Mellows"];
             Assert.True(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyRelevant);
             Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyAlwaysSpawns);
             Assert.False(alwaysSpawnNotAlwaysStopSpawnConditions.LogicallyNeverSpawns);

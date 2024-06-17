@@ -16,8 +16,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 {
     public class CanLeaveChargedTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -25,9 +25,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            CanLeaveCharged canLeaveCharged = Model.Rooms["Parlor and Alcatraz"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged canLeaveCharged = model.Rooms["Parlor and Alcatraz"].Nodes[1].CanLeaveCharged.First();
             Assert.Equal(0, canLeaveCharged.EndingUpTiles);
             Assert.Equal(0, canLeaveCharged.StartingDownTiles);
             Assert.Equal(25, canLeaveCharged.UsedTiles);
@@ -45,10 +46,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 
             Assert.Equal(1, canLeaveCharged.Strats.Count);
             Assert.Contains("Base", canLeaveCharged.Strats.Keys);
-            Assert.Same(Model.Rooms["Parlor and Alcatraz"].Nodes[1], canLeaveCharged.Node);
+            Assert.Same(model.Rooms["Parlor and Alcatraz"].Nodes[1], canLeaveCharged.Node);
 
 
-            CanLeaveCharged noSparkCanLeaveCharged = Model.Rooms["Blue Brinstar Boulder Room"].Nodes[2].CanLeaveCharged.First();
+            CanLeaveCharged noSparkCanLeaveCharged = model.Rooms["Blue Brinstar Boulder Room"].Nodes[2].CanLeaveCharged.First();
             Assert.Equal(50, noSparkCanLeaveCharged.FramesRemaining);
             Assert.Equal(0, noSparkCanLeaveCharged.ShinesparkFrames);
             Assert.False(noSparkCanLeaveCharged.MustShinespark);
@@ -56,7 +57,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(0, noSparkCanLeaveCharged.SteepDownTiles);
 
 
-            CanLeaveCharged remoteCanLeaveCharged = Model.Rooms["Early Supers Room"].Nodes[2].CanLeaveCharged.First();
+            CanLeaveCharged remoteCanLeaveCharged = model.Rooms["Early Supers Room"].Nodes[2].CanLeaveCharged.First();
             Assert.NotNull(remoteCanLeaveCharged.InitiateRemotely);
             Assert.True(remoteCanLeaveCharged.IsInitiatedRemotely);
         }
@@ -69,12 +70,13 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void Execute_NoSpeedBooster_Fails()
         {
             // Given
-            CanLeaveCharged canLeaveCharged = Model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            CanLeaveCharged canLeaveCharged = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
-            ExecutionResult result = canLeaveCharged.Execute(Model, inGameState);
+            ExecutionResult result = canLeaveCharged.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -84,16 +86,17 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void Execute_ShinesparkTechDisabled_RequiresShinespark_Fails()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canShinespark");
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            CanLeaveCharged canLeaveCharged = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
-            ExecutionResult result = canLeaveCharged.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = canLeaveCharged.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -103,21 +106,22 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void Execute_ShinesparkTechDisabled_DoesntNeedShineSpark_Succeeds()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canShinespark");
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            CanLeaveCharged canLeaveCharged = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
-            ExecutionResult result = canLeaveCharged.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = canLeaveCharged.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(ModelWithOptions, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectCanLeaveChargedExecuted(canLeaveCharged, "Base")
                 .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .AssertRespectedBy(result);
@@ -127,17 +131,18 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void Execute_TooShortToShineCharge_Fails()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.TilesSavedWithStutter = 0;
             logicalOptions.TilesToShineCharge = 19;
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            CanLeaveCharged canLeaveCharged = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
-            ExecutionResult result = canLeaveCharged.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = canLeaveCharged.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -147,10 +152,11 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void Execute_RequiresShinespark_RequiresAndSpendsCorrectEnergy()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            CanLeaveCharged canLeaveCharged = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME)
@@ -158,14 +164,14 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 
             // When
             inGameState.ApplyConsumeResource(ConsumableResourceEnum.Energy, 51);
-            ExecutionResult oneEnergyNotEnoughResult = canLeaveCharged.Execute(ModelWithOptions, inGameState);
+            ExecutionResult oneEnergyNotEnoughResult = canLeaveCharged.Execute(model, inGameState);
             inGameState.ApplyAddResource(RechargeableResourceEnum.RegularEnergy, 1);
-            ExecutionResult exactlyEnoughEnergyResult = canLeaveCharged.Execute(ModelWithOptions, inGameState);
+            ExecutionResult exactlyEnoughEnergyResult = canLeaveCharged.Execute(model, inGameState);
 
             // Expect
             Assert.Null(oneEnergyNotEnoughResult);
 
-            new ExecutionResultValidator(ModelWithOptions, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectCanLeaveChargedExecuted(canLeaveCharged, "Base")
                 .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 // Starting point is 99-51+1 = 49, expected value 29
@@ -177,15 +183,16 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void Execute_UnableToExecuteStrat_Fails()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Blue Brinstar Boulder Room"].Nodes[2].CanLeaveCharged.First();
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            CanLeaveCharged canLeaveCharged = model.Rooms["Blue Brinstar Boulder Room"].Nodes[2].CanLeaveCharged.First();
+            InGameState inGameState = model .CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
                 .ApplyEnterRoom(canLeaveCharged.Node);
 
             // When
-            ExecutionResult result = canLeaveCharged.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = canLeaveCharged.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -199,6 +206,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SpeedBoosterPossible_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Morph")
                 .RegisterRemovedItem("Gravity")
@@ -207,10 +215,10 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             logicalOptions.TilesToShineCharge = 19;
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged neverByImpossibleRemote = ModelWithOptions.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged neverByImpossibleRemote = model.Rooms["Warehouse Kihunter Room"].Nodes[3].CanLeaveCharged.First();
             Assert.False(neverByImpossibleRemote.LogicallyRelevant);
             Assert.False(neverByImpossibleRemote.LogicallyAlways);
             Assert.False(neverByImpossibleRemote.LogicallyFree);
@@ -220,7 +228,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(19, neverByImpossibleRemote.TilesToShineCharge);
             Assert.False(neverByImpossibleRemote.CanShinespark);
 
-            CanLeaveCharged neverByImpossibleStrat = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged neverByImpossibleStrat = model.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
             Assert.False(neverByImpossibleStrat.LogicallyRelevant);
             Assert.False(neverByImpossibleStrat.LogicallyAlways);
             Assert.False(neverByImpossibleStrat.LogicallyFree);
@@ -230,7 +238,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(19, neverByImpossibleStrat.TilesToShineCharge);
             Assert.False(neverByImpossibleStrat.CanShinespark);
 
-            CanLeaveCharged neverByImpossibleShinespark = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged neverByImpossibleShinespark = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             Assert.False(neverByImpossibleShinespark.LogicallyRelevant);
             Assert.False(neverByImpossibleShinespark.LogicallyAlways);
             Assert.False(neverByImpossibleShinespark.LogicallyFree);
@@ -240,7 +248,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(19, neverByImpossibleShinespark.TilesToShineCharge);
             Assert.False(neverByImpossibleShinespark.CanShinespark);
 
-            CanLeaveCharged neverByShortRunway = ModelWithOptions.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
+            CanLeaveCharged neverByShortRunway = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
             Assert.False(neverByShortRunway.LogicallyRelevant);
             Assert.False(neverByShortRunway.LogicallyAlways);
             Assert.False(neverByShortRunway.LogicallyFree);
@@ -250,7 +258,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(19, neverByShortRunway.TilesToShineCharge);
             Assert.False(neverByShortRunway.CanShinespark);
 
-            CanLeaveCharged notFreeBecauseSpeedNotFree = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseSpeedNotFree = model.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
             Assert.True(notFreeBecauseSpeedNotFree.LogicallyRelevant);
             Assert.False(notFreeBecauseSpeedNotFree.LogicallyAlways);
             Assert.False(notFreeBecauseSpeedNotFree.LogicallyFree);
@@ -265,14 +273,15 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SpeedBoosterRemoved_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("SpeedBooster");
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged neverByNoSpeedBooster = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged neverByNoSpeedBooster = model.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
             Assert.False(neverByNoSpeedBooster.LogicallyRelevant);
             Assert.False(neverByNoSpeedBooster.LogicallyAlways);
             Assert.False(neverByNoSpeedBooster.LogicallyFree);
@@ -283,19 +292,20 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SpeedBoosterFree_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    .ApplyAddItem(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged free = ModelWithOptions.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged free = model.Rooms["Mt. Everest"].Nodes[3].CanLeaveCharged.First();
             Assert.True(free.LogicallyRelevant);
             Assert.True(free.LogicallyAlways);
             Assert.True(free.LogicallyFree);
@@ -303,7 +313,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(20.5M, free.LogicalEffectiveRunwayLength);
 
             // Expect
-            CanLeaveCharged notFreeBecauseShinespark = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseShinespark = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(notFreeBecauseShinespark.LogicallyRelevant);
             Assert.False(notFreeBecauseShinespark.LogicallyAlways);
             Assert.False(notFreeBecauseShinespark.LogicallyFree);
@@ -311,7 +321,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(19M + 2 * 4M / 3M, notFreeBecauseShinespark.LogicalEffectiveRunwayLength);
 
             // Expect
-            CanLeaveCharged notFreeBecauseStratNotFree = ModelWithOptions.Rooms["Botwoon's Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseStratNotFree = model.Rooms["Botwoon's Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(notFreeBecauseStratNotFree.LogicallyRelevant);
             Assert.False(notFreeBecauseStratNotFree.LogicallyAlways);
             Assert.False(notFreeBecauseStratNotFree.LogicallyFree);
@@ -319,7 +329,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(16, notFreeBecauseStratNotFree.LogicalEffectiveRunwayLength);
 
             // Expect
-            CanLeaveCharged notFreeBecauseRemoteNotFree = ModelWithOptions.Rooms["Red Brinstar Fireflea Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged notFreeBecauseRemoteNotFree = model.Rooms["Red Brinstar Fireflea Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(notFreeBecauseRemoteNotFree.LogicallyRelevant);
             Assert.False(notFreeBecauseRemoteNotFree.LogicallyAlways);
             Assert.False(notFreeBecauseRemoteNotFree.LogicallyFree);
@@ -331,27 +341,28 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SpeedFree_LessPossibleEnergyThanSparkRequires_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
             baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    ItemInventory.CreateVanillaStartingInventory(model)
+                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
                 )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged canLeaveCharged = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             Assert.False(canLeaveCharged.LogicallyRelevant);
             Assert.True(canLeaveCharged.LogicallyNever);
             Assert.False(canLeaveCharged.LogicallyAlways);
@@ -360,7 +371,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.Equal(LogicalOptions.DefaultTilesToShineCharge, canLeaveCharged.TilesToShineCharge);
             Assert.True(canLeaveCharged.CanShinespark);
 
-            CanLeaveCharged freeCanLeaveCharged = ModelWithOptions.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
+            CanLeaveCharged freeCanLeaveCharged = model.Rooms["Morph Ball Room"].Nodes[3].CanLeaveCharged.First();
             Assert.True(freeCanLeaveCharged.LogicallyRelevant);
             Assert.False(freeCanLeaveCharged.LogicallyNever);
             Assert.True(freeCanLeaveCharged.LogicallyAlways);
@@ -374,30 +385,31 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
         public void ApplyLogicalOptions_SpeedFree_NormalPossibleEnergy_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
             baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions)
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                        .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                    ItemInventory.CreateVanillaStartingInventory(model)
+                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
                 )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
             logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)ModelWithOptions.Items["ReserveTank"], 4);
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            CanLeaveCharged canLeaveCharged = ModelWithOptions.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
+            CanLeaveCharged canLeaveCharged = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             Assert.True(canLeaveCharged.LogicallyRelevant);
             Assert.False(canLeaveCharged.LogicallyNever);
             Assert.False(canLeaveCharged.LogicallyAlways);

@@ -11,13 +11,14 @@ using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Items;
+using System.Reflection;
 
 namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
 {
     public class TechLogicalElementTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -25,10 +26,11 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            TechLogicalElement techElement = Model.Techs["canDelayedWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canPreciseWalljump");
-            Assert.Same(Model.Techs["canPreciseWalljump"], techElement.Tech);
+            TechLogicalElement techElement = model.Techs["canDelayedWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canPreciseWalljump");
+            Assert.Same(model.Techs["canPreciseWalljump"], techElement.Tech);
         }
 
         #endregion
@@ -39,12 +41,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_RequirementsNotMet_Fails()
         {
             // Given
-            TechLogicalElement techLogicalElement = Model.Techs["canWaterBreakFree"].Requires
+            SuperMetroidModel model = ReusableModel();
+            TechLogicalElement techLogicalElement = model.Techs["canWaterBreakFree"].Requires
                 .LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canSunkenDualWallClimb");
-            InGameState inGameState = Model.CreateInitialGameState();
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = techLogicalElement.Execute(Model, inGameState);
+            ExecutionResult result = techLogicalElement.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -54,16 +57,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_RequirementsMet_Succeeds()
         {
             // Given
-            TechLogicalElement techLogicalElement = Model.Techs["canWaterBreakFree"].Requires
+            SuperMetroidModel model = ReusableModel();
+            TechLogicalElement techLogicalElement = model.Techs["canWaterBreakFree"].Requires
                 .LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canSunkenDualWallClimb");
-            InGameState inGameState = Model.CreateInitialGameState()
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("HiJump");
 
             // When
-            ExecutionResult result = techLogicalElement.Execute(Model, inGameState);
+            ExecutionResult result = techLogicalElement.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("HiJump")
                 .AssertRespectedBy(result);
         }
@@ -72,16 +76,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_RequirementsMetButTechDisabled_Fails()
         {
             // Given
-            TechLogicalElement techLogicalElement = ModelWithOptions.Techs["canWaterBreakFree"].Requires
+            SuperMetroidModel model = NewModelForOptions();
+            TechLogicalElement techLogicalElement = model.Techs["canWaterBreakFree"].Requires
                 .LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canSunkenDualWallClimb");
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledTech("canSunkenDualWallClimb");
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("HiJump");
 
             // When
-            ExecutionResult result = techLogicalElement.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = techLogicalElement.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -91,12 +96,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_ConfiguredWithMultipleTries_ConsumesMoreResources()
         {
             // Given
-            TechLogicalElement techLogicalElement = ModelWithOptions.Rooms["Draygon's Room"].Links[3].To[2].Strats["Draygon Grapple Jump"].Requires
+            SuperMetroidModel model = NewModelForOptions();
+            TechLogicalElement techLogicalElement = model.Rooms["Draygon's Room"].Links[3].To[2].Strats["Draygon Grapple Jump"].Requires
                 .LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canDraygonTurretGrappleJump");
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterTechTries("canDraygonTurretGrappleJump", 3);
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = ModelWithOptions.CreateInitialGameState()
+            model.ApplyLogicalOptions(logicalOptions);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Grapple")
                 .ApplyAddItem("HiJump")
                 .ApplyAddItem("Morph")
@@ -104,10 +110,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
                 .ApplyRefillResources();
 
             // When
-            ExecutionResult result = techLogicalElement.Execute(ModelWithOptions, inGameState);
+            ExecutionResult result = techLogicalElement.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(ModelWithOptions, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Grapple")
                 .ExpectItemInvolved("HiJump")
                 .ExpectItemInvolved("Morph")
@@ -123,45 +129,46 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.RegisterDisabledTech("canPreciseWalljump");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Morph"])
+                    .ApplyAddItem(model.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            TechLogicalElement disabledTechElement = ModelWithOptions.Techs["canDelayedWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canPreciseWalljump");
+            TechLogicalElement disabledTechElement = model.Techs["canDelayedWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canPreciseWalljump");
             Assert.True(disabledTechElement.LogicallyRelevant);
             Assert.False(disabledTechElement.LogicallyAlways);
             Assert.False(disabledTechElement.LogicallyFree);
             Assert.True(disabledTechElement.LogicallyNever);
 
-            TechLogicalElement impossibleSubTechElement = ModelWithOptions.Techs["canInsaneWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canDelayedWalljump");
+            TechLogicalElement impossibleSubTechElement = model.Techs["canInsaneWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canDelayedWalljump");
             Assert.True(impossibleSubTechElement.LogicallyRelevant);
             Assert.False(impossibleSubTechElement.LogicallyAlways);
             Assert.False(impossibleSubTechElement.LogicallyFree);
             Assert.True(impossibleSubTechElement.LogicallyNever);
 
-            TechLogicalElement nonFreeTechElement = ModelWithOptions.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"].BypassStrats["Bowling Skip"]
+            TechLogicalElement nonFreeTechElement = model.Locks["West Ocean Ship Exit Grey Lock (to Gravity Suit Room)"].BypassStrats["Bowling Skip"]
                 .Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canGrappleClip");
             Assert.True(nonFreeTechElement.LogicallyRelevant);
             Assert.False(nonFreeTechElement.LogicallyAlways);
             Assert.False(nonFreeTechElement.LogicallyFree);
             Assert.False(nonFreeTechElement.LogicallyNever);
 
-            TechLogicalElement freeTechElement = ModelWithOptions.Techs["canPreciseWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canWalljump");
+            TechLogicalElement freeTechElement = model.Techs["canPreciseWalljump"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canWalljump");
             Assert.True(freeTechElement.LogicallyRelevant);
             Assert.True(freeTechElement.LogicallyAlways);
             Assert.True(freeTechElement.LogicallyFree);
             Assert.False(freeTechElement.LogicallyNever);
 
-            TechLogicalElement freeByStartItemTechElement = ModelWithOptions.Techs["canJumpIntoIBJ"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canIBJ");
+            TechLogicalElement freeByStartItemTechElement = model.Techs["canJumpIntoIBJ"].Requires.LogicalElement<TechLogicalElement>(0, element => element.Tech.Name == "canIBJ");
             Assert.True(freeByStartItemTechElement.LogicallyRelevant);
             Assert.True(freeByStartItemTechElement.LogicallyAlways);
             Assert.True(freeByStartItemTechElement.LogicallyFree);

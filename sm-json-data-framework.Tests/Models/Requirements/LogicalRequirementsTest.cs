@@ -20,8 +20,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
 {
     public class LogicalRequirementsTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -29,9 +29,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            LogicalRequirements logicalRequirements = Model.Techs["canNonTrivialIceClip"].Requires;
+            LogicalRequirements logicalRequirements = model.Techs["canNonTrivialIceClip"].Requires;
             Assert.Equal(3, logicalRequirements.LogicalElements.Count);
             Assert.True(logicalRequirements.LogicalElements.First() is TechLogicalElement);
             Assert.Equal("canCeilingClip", ((TechLogicalElement)logicalRequirements.LogicalElements.First()).Tech.Name);
@@ -48,7 +49,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementTyped_NoElementsAtAll_ReturnsNull()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Techs["canBePatient"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Techs["canBePatient"].Requires;
 
             // When
             Or result0 = logicalRequirements.LogicalElement<Or>(0);
@@ -63,7 +65,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementTyped_NoElementsOfType_ReturnsNull()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Techs["canSunkenDualWallClimb"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Techs["canSunkenDualWallClimb"].Requires;
 
             // When
             Or result0 = logicalRequirements.LogicalElement<Or>(0);
@@ -78,7 +81,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementTyped_NoElementsOfType_ReturnsNthElement()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Helpers["h_hasBeamUpgrade"].Requires.LogicalElement<Or>(0).LogicalRequirements;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Helpers["h_hasBeamUpgrade"].Requires.LogicalElement<Or>(0).LogicalRequirements;
 
             // When
             ItemLogicalElement result3 = logicalRequirements.LogicalElement<ItemLogicalElement>(3);
@@ -98,7 +102,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementsTyped_NoElementsAtAll_ReturnsNull()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Techs["canBePatient"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Techs["canBePatient"].Requires;
 
             // When
             IEnumerable<Or> result = logicalRequirements.LogicalElementsTyped<Or>();
@@ -111,7 +116,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementsTyped_NoElementsOfType_ReturnsNull()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Techs["canSunkenDualWallClimb"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Techs["canSunkenDualWallClimb"].Requires;
 
             // When
             IEnumerable<Or> result = logicalRequirements.LogicalElementsTyped<Or>();
@@ -124,7 +130,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElemensTyped_ReturnsSubset()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Helpers["h_canHeatedBlueGateGlitch"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Helpers["h_canHeatedBlueGateGlitch"].Requires;
 
             // When
             IEnumerable<HelperLogicalElement> result = logicalRequirements.LogicalElementsTyped<HelperLogicalElement>();
@@ -141,7 +148,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementsWhere_NoElementsAtAll_ReturnsNull()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Techs["canBePatient"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Techs["canBePatient"].Requires;
 
             // When
             IEnumerable<GameFlagLogicalElement> result = logicalRequirements.LogicalElementsWhere<GameFlagLogicalElement>(flagElement => flagElement.GameFlag.Name == "f_ZebesAwake");
@@ -154,7 +162,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void LogicalElementsWhere_NoElementsOfType_ReturnsNull()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Techs["canSunkenDualWallClimb"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Techs["canSunkenDualWallClimb"].Requires;
 
             // When
             IEnumerable<GameFlagLogicalElement> result = logicalRequirements.LogicalElementsWhere<GameFlagLogicalElement>(flagElement => flagElement.GameFlag.Name == "f_ZebesAwake");
@@ -164,17 +173,18 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         }
 
         [Fact]
-        public void LogicalElemensWhere_ReturnsSubset()
+        public void LogicalElementsWhere_ReturnsSubset()
         {
             // Given
-            LogicalRequirements logicalRequirements = Model.Helpers["h_canHeatedBlueGateGlitch"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            LogicalRequirements logicalRequirements = model.Helpers["h_canHeatedBlueGateGlitch"].Requires;
 
             // When
             IEnumerable<HelperLogicalElement> result = logicalRequirements.LogicalElementsWhere<HelperLogicalElement>(helper => helper.Helper.Name == "h_canBlueGateGlitch");
 
             // Expect
             Assert.Equal(1, result.Count());
-            Assert.Same(Model.Helpers["h_canBlueGateGlitch"], result.First().Helper);
+            Assert.Same(model.Helpers["h_canBlueGateGlitch"], result.First().Helper);
         }
 
         #endregion
@@ -185,11 +195,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void Execute_SomeElementsPossibleSomeNot_Fails()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            LogicalRequirements logicalRequirements = Model.Helpers["h_canPlasmaHitbox"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            LogicalRequirements logicalRequirements = model.Helpers["h_canPlasmaHitbox"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.Execute(Model, inGameState);
+            ExecutionResult result = logicalRequirements.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -199,16 +210,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void Execute_AllElementsPossible_SucceedsAndCombinesAllCosts()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
-            LogicalRequirements logicalRequirements = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires;
+            LogicalRequirements logicalRequirements = model.Helpers["h_canHeatedGreenGateGlitch"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.Execute(Model, inGameState);
+            ExecutionResult result = logicalRequirements.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved(SuperMetroidModel.SUPER_NAME)
                 .ExpectResourceVariation(RechargeableResourceEnum.Super, -1)
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -15)
@@ -219,14 +231,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void Execute_NoElements_SucceedsWithNoChanges()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            LogicalRequirements logicalRequirements = Model.Techs["canBePatient"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            LogicalRequirements logicalRequirements = model.Techs["canBePatient"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.Execute(Model, inGameState);
+            ExecutionResult result = logicalRequirements.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .AssertRespectedBy(result);
         }
 
@@ -238,15 +251,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void ExecuteOneOrAll_SomeElementsPossibleSomeNot_Succeeds()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Charge");
-            LogicalRequirements logicalRequirements = Model.Techs["canWrapAroundShot"].Requires;
+            LogicalRequirements logicalRequirements = model.Techs["canWrapAroundShot"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(Model, inGameState);
+            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Charge")
                 .AssertRespectedBy(result);
         }
@@ -255,18 +269,19 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void ExecuteOneOrAll_SomeElementsFreeSomeNot_ExecutesFree()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph")
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyRefillResources();
-            LogicalRequirements logicalRequirements = Model.Techs["canCrystalFlash"].Requires;
+            LogicalRequirements logicalRequirements = model.Techs["canCrystalFlash"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(Model, inGameState);
+            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .AssertRespectedBy(result);
         }
@@ -275,17 +290,18 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void ExecuteOneOrAll_NoElementsFree_ExecutesCheapest()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.MISSILE_NAME)
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
-            LogicalRequirements logicalRequirements = Model.Helpers["h_canBlueGateGlitch"].Requires.LogicalElement<Or>(0).LogicalRequirements;
+            LogicalRequirements logicalRequirements = model.Helpers["h_canBlueGateGlitch"].Requires.LogicalElement<Or>(0).LogicalRequirements;
 
             // When
-            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(Model, inGameState);
+            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved(SuperMetroidModel.MISSILE_NAME)
                 .ExpectResourceVariation(RechargeableResourceEnum.Missile, -1)
                 .AssertRespectedBy(result);
@@ -295,11 +311,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void ExecuteOneOrAll_NoElementsPossible_Fails()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            LogicalRequirements logicalRequirements = Model.Techs["canBlueSpaceJump"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            LogicalRequirements logicalRequirements = model.Techs["canBlueSpaceJump"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(Model, inGameState);
+            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -309,14 +326,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void ExecuteOneOrAll_NoElements_SucceedsWithNoChanges()
         {
             // Given
-            InGameState inGameState = Model.CreateInitialGameState();
-            LogicalRequirements logicalRequirements = Model.Techs["canBePatient"].Requires;
+            SuperMetroidModel model = ReusableModel();
+            InGameState inGameState = model.CreateInitialGameState();
+            LogicalRequirements logicalRequirements = model.Techs["canBePatient"].Requires;
 
             // When
-            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(Model, inGameState);
+            ExecutionResult result = logicalRequirements.ExecuteOneOrAll(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .AssertRespectedBy(result);
         }
 
@@ -328,22 +346,23 @@ namespace sm_json_data_framework.Tests.Models.Requirements
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterDisabledGameFlag("f_ZebesAwake")
                 .RegisterDisabledTech("canCrouchJump")
                 .RegisterDisabledTech("canDownGrab");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                    .ApplyAddItem(ModelWithOptions.Items["Bombs"])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Morph"])
+                    .ApplyAddItem(model.Items["Bombs"])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LogicalRequirements oneFreeOneNeverOnePossible = ModelWithOptions.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"].Requires;
+            LogicalRequirements oneFreeOneNeverOnePossible = model.Rooms["Blue Brinstar Energy Tank Room"].Links[1].To[3].Strats["Ceiling E-Tank Dboost"].Requires;
             Assert.True(oneFreeOneNeverOnePossible.LogicallyRelevant);
             Assert.True(oneFreeOneNeverOnePossible.LogicallyNever);
             Assert.False(oneFreeOneNeverOnePossible.LogicallyAlways);
@@ -352,7 +371,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements
             Assert.True(oneFreeOneNeverOnePossible.LogicallyOrAlways);
             Assert.True(oneFreeOneNeverOnePossible.LogicallyOrFree);
 
-            LogicalRequirements allFree = ModelWithOptions.Helpers["h_canUseMorphBombs"].Requires;
+            LogicalRequirements allFree = model.Helpers["h_canUseMorphBombs"].Requires;
             Assert.True(allFree.LogicallyRelevant);
             Assert.False(allFree.LogicallyNever);
             Assert.True(allFree.LogicallyAlways);
@@ -361,7 +380,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements
             Assert.True(allFree.LogicallyOrAlways);
             Assert.True(allFree.LogicallyOrFree);
 
-            LogicalRequirements allNever = ModelWithOptions.Helpers["h_canCrouchJumpDownGrab"].Requires;
+            LogicalRequirements allNever = model.Helpers["h_canCrouchJumpDownGrab"].Requires;
             Assert.True(allNever.LogicallyRelevant);
             Assert.True(allNever.LogicallyNever);
             Assert.False(allNever.LogicallyAlways);
@@ -370,7 +389,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements
             Assert.False(allNever.LogicallyOrAlways);
             Assert.False(allNever.LogicallyOrFree);
 
-            LogicalRequirements allPossible = ModelWithOptions.Helpers["h_canOpenGreenDoors"].Requires;
+            LogicalRequirements allPossible = model.Helpers["h_canOpenGreenDoors"].Requires;
             Assert.True(allPossible.LogicallyRelevant);
             Assert.False(allPossible.LogicallyNever);
             Assert.False(allPossible.LogicallyAlways);
@@ -379,7 +398,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements
             Assert.False(allPossible.LogicallyOrAlways);
             Assert.False(allPossible.LogicallyOrFree);
 
-            LogicalRequirements empty = ModelWithOptions.Techs["canSuitlessMaridia"].Requires;
+            LogicalRequirements empty = model.Techs["canSuitlessMaridia"].Requires;
             Assert.True(empty.LogicallyRelevant);
             Assert.False(empty.LogicallyNever);
             Assert.True(empty.LogicallyAlways);

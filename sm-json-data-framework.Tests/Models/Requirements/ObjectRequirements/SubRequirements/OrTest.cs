@@ -17,8 +17,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
 {
     public class OrTest
     {
-        private static SuperMetroidModel Model = StaticTestObjects.UnmodifiableModel;
-        private static SuperMetroidModel ModelWithOptions = StaticTestObjects.UnfinalizedModel.Finalize();
+        private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
+        private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
 
         #region Tests for construction from unfinalized model
 
@@ -26,9 +26,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         public void CtorFromUnfinalized_SetsPropertiesCorrectly()
         {
             // Given/when standard model creation
+            SuperMetroidModel model = ReusableModel();
 
             // Expect
-            Or or = Model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0);
+            Or or = model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0);
             Assert.NotNull(or.LogicalRequirements);
             Assert.Equal(4, or.LogicalRequirements.LogicalElements.Count);
             Assert.NotNull(or.LogicalRequirements.LogicalElement<ItemLogicalElement>(0));
@@ -45,11 +46,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         public void Execute_NoElementMet_Fails()
         {
             // Given
-            Or or = Model.Helpers["h_heatProof"].Requires.LogicalElement<Or>(0);
-            InGameState inGameState = Model.CreateInitialGameState();
+            SuperMetroidModel model = ReusableModel();
+            Or or = model.Helpers["h_heatProof"].Requires.LogicalElement<Or>(0);
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = or.Execute(Model, inGameState);
+            ExecutionResult result = or.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -59,15 +61,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         public void Execute_SomeElementsMetButNotAll_Succeeds()
         {
             // Given
-            Or or = Model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0);
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Or or = model.Rooms["Big Pink"].Links[13].To[10].Strats["Base"].Requires.LogicalElement<Or>(0);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Big Pink", 13);
 
             // When
-            ExecutionResult result = or.Execute(Model, inGameState);
+            ExecutionResult result = or.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .AssertRespectedBy(result);
         }
 
@@ -75,8 +78,9 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         public void Execute_OneElementFreeButNotAll_SucceedsForFree()
         {
             // Given
-            Or or = Model.Rooms["X-Ray Scope Room"].Links[3].To[1].Strats["Base"].Requires.LogicalElement<Or>(0);
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Or or = model.Rooms["X-Ray Scope Room"].Links[3].To[1].Strats["Base"].Requires.LogicalElement<Or>(0);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Morph")
                 .ApplyAddItem("SpringBall")
                 .ApplyAddItem(SuperMetroidModel.POWER_BOMB_NAME)
@@ -84,10 +88,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .ApplyEnterRoom("X-Ray Scope Room", 3);
 
             // When
-            ExecutionResult result = or.Execute(Model, inGameState);
+            ExecutionResult result = or.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 .ExpectItemInvolved("Morph")
                 .ExpectItemInvolved("SpringBall")
                 .AssertRespectedBy(result);
@@ -97,15 +101,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         public void Execute_NoElementsFree_ExecutesCheapest()
         {
             // Given
-            Or or = Model.Rooms["Pink Brinstar Power Bomb Room"].Links[1].To[4].Strats["Tank the Damage"].Requires.LogicalElement<Or>(0);
-            InGameState inGameState = Model.CreateInitialGameState()
+            SuperMetroidModel model = ReusableModel();
+            Or or = model.Rooms["Pink Brinstar Power Bomb Room"].Links[1].To[4].Strats["Tank the Damage"].Requires.LogicalElement<Or>(0);
+            InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Pink Brinstar Power Bomb Room", 1);
 
             // When
-            ExecutionResult result = or.Execute(Model, inGameState);
+            ExecutionResult result = or.Execute(model, inGameState);
 
             // Expect
-            new ExecutionResultValidator(Model, inGameState)
+            new ExecutionResultValidator(model, inGameState)
                 // 60 from a spike hit is less than 80 from a Sidehopper hit
                 .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -60)
                 .AssertRespectedBy(result);
@@ -119,40 +124,41 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         public void ApplyLogicalOptions_SetsLogicalProperties()
         {
             // Given
+            SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Spazer")
                 .RegisterRemovedItem("Wave");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Plasma"])
-                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.VARIA_SUIT_NAME])
-                    .ApplyAddItem(ModelWithOptions.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
+                ItemInventory.CreateVanillaStartingInventory(model)
+                    .ApplyAddItem(model.Items["Plasma"])
+                    .ApplyAddItem(model.Items[SuperMetroidModel.VARIA_SUIT_NAME])
+                    .ApplyAddItem(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
                 )
                 .Build();
 
             // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
+            model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            Or oneFreeOneNeverOnePossible = ModelWithOptions.Helpers["h_hasBeamUpgrade"].Requires.LogicalElement<Or>(0);
+            Or oneFreeOneNeverOnePossible = model.Helpers["h_hasBeamUpgrade"].Requires.LogicalElement<Or>(0);
             Assert.True(oneFreeOneNeverOnePossible.LogicallyRelevant);
             Assert.False(oneFreeOneNeverOnePossible.LogicallyNever);
             Assert.True(oneFreeOneNeverOnePossible.LogicallyAlways);
             Assert.True(oneFreeOneNeverOnePossible.LogicallyFree);
 
-            Or allFree = ModelWithOptions.Helpers["h_heatProof"].Requires.LogicalElement<Or>(0);
+            Or allFree = model.Helpers["h_heatProof"].Requires.LogicalElement<Or>(0);
             Assert.True(allFree.LogicallyRelevant);
             Assert.False(allFree.LogicallyNever);
             Assert.True(allFree.LogicallyAlways);
             Assert.True(allFree.LogicallyFree);
 
-            Or allNever = ModelWithOptions.Rooms["Morph Ball Room"].Links[1].To[6].Strats["Medium Sidehopper Kill"].Obstacles["C"].Requires.LogicalElement<Or>(0);
+            Or allNever = model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["Medium Sidehopper Kill"].Obstacles["C"].Requires.LogicalElement<Or>(0);
             Assert.True(allNever.LogicallyRelevant);
             Assert.True(allNever.LogicallyNever);
             Assert.False(allNever.LogicallyAlways);
             Assert.False(allNever.LogicallyFree);
 
-            Or allPossible = ModelWithOptions.Rooms["Morph Ball Room"].Links[5].To[6].Strats["Bomb the Blocks"].Obstacles["A"].Requires.LogicalElement<Or>(0);
+            Or allPossible = model.Rooms["Morph Ball Room"].Links[5].To[6].Strats["Bomb the Blocks"].Obstacles["A"].Requires.LogicalElement<Or>(0);
             Assert.True(allPossible.LogicallyRelevant);
             Assert.False(allPossible.LogicallyNever);
             Assert.False(allPossible.LogicallyAlways);
