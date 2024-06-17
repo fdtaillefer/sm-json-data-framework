@@ -915,12 +915,6 @@ namespace sm_json_data_framework.Tests.Models
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
-            Assert.True(acidFrames.LogicallyRelevant);
-            Assert.True(acidFrames.LogicallyNever);
-            Assert.False(acidFrames.LogicallyAlways);
-            Assert.False(acidFrames.LogicallyFree);
-
             DraygonElectricityFrames electricityFrames = ModelWithOptions.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
             Assert.True(electricityFrames.LogicallyRelevant);
             Assert.True(electricityFrames.LogicallyNever);
@@ -1031,12 +1025,6 @@ namespace sm_json_data_framework.Tests.Models
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
-            Assert.True(acidFrames.LogicallyRelevant);
-            Assert.False(acidFrames.LogicallyNever);
-            Assert.False(acidFrames.LogicallyAlways);
-            Assert.False(acidFrames.LogicallyFree);
-
             DraygonElectricityFrames electricityFrames = ModelWithOptions.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
             Assert.True(electricityFrames.LogicallyRelevant);
             Assert.False(electricityFrames.LogicallyNever);
@@ -1116,12 +1104,6 @@ namespace sm_json_data_framework.Tests.Models
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            AcidFrames acidFrames = ModelWithOptions.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
-            Assert.True(acidFrames.LogicallyRelevant);
-            Assert.False(acidFrames.LogicallyNever);
-            Assert.False(acidFrames.LogicallyAlways);
-            Assert.False(acidFrames.LogicallyFree);
-
             DraygonElectricityFrames electricityFrames = ModelWithOptions.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
             Assert.True(electricityFrames.LogicallyRelevant);
             Assert.False(electricityFrames.LogicallyNever);

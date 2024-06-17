@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// A multiplier to apply to acid frame requirements as a leniency, as per applied logical options.
         /// </summary>
-        private decimal AcidLeniencyMultiplier => AppliedLogicalOptions.AcidLeniencyMultiplier;
+        public decimal AcidLeniencyMultiplier => AppliedLogicalOptions.AcidLeniencyMultiplier;
 
         public AcidFrames(int numberOfFrames): base(numberOfFrames)
         {
