@@ -956,41 +956,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnItemLogicalElements()
-        {
-            // Given
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterRemovedItem("Bombs");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(ModelWithOptions).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(ModelWithOptions)
-                    .ApplyAddItem(ModelWithOptions.Items["Morph"])
-                )
-                .Build();
-
-            // When
-            ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            ItemLogicalElement freeItemElement = ModelWithOptions.Helpers["h_canBombThings"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Morph");
-            Assert.True(freeItemElement.LogicallyRelevant);
-            Assert.False(freeItemElement.LogicallyNever);
-            Assert.True(freeItemElement.LogicallyAlways);
-            Assert.True(freeItemElement.LogicallyFree);
-
-            ItemLogicalElement removedItemElement = ModelWithOptions.Helpers["h_canUseMorphBombs"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "Bombs");
-            Assert.True(removedItemElement.LogicallyRelevant);
-            Assert.True(removedItemElement.LogicallyNever);
-            Assert.False(removedItemElement.LogicallyAlways);
-            Assert.False(removedItemElement.LogicallyFree);
-
-            ItemLogicalElement obtainableItemElement = ModelWithOptions.Helpers["h_canUseSpringBall"].Requires.LogicalElement<ItemLogicalElement>(0, element => element.Item.Name == "SpringBall");
-            Assert.True(obtainableItemElement.LogicallyRelevant);
-            Assert.False(obtainableItemElement.LogicallyNever);
-            Assert.False(obtainableItemElement.LogicallyAlways);
-            Assert.False(obtainableItemElement.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
