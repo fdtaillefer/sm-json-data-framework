@@ -27,7 +27,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
             // Given/when standard model creation
 
             // Expect
-            HelperLogicalElement helperLogicalElement = Model.Techs["canHBJ"].Requires.LogicalElement<HelperLogicalElement>(0);
+            HelperLogicalElement helperLogicalElement = Model.Techs["canHBJ"].Requires
+                .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canUseMorphBombs");
             Assert.Same(Model.Helpers["h_canUseMorphBombs"], helperLogicalElement.Helper);
         }
 
@@ -39,7 +40,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_HelperRequirementsNotMet_Fails()
         {
             // Given
-            HelperLogicalElement manyTriesHelperElement = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(1);
+            HelperLogicalElement manyTriesHelperElement = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires
+                .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
             InGameState inGameState = Model.CreateInitialGameState();
 
             // When
@@ -53,7 +55,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
         public void Execute_HelperRequirementsMet_Succeeds()
         {
             // Given
-            HelperLogicalElement manyTriesHelperElement = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(1);
+            HelperLogicalElement manyTriesHelperElement = Model.Helpers["h_canHeatedGreenGateGlitch"].Requires
+                .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
             InGameState inGameState = Model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
@@ -76,7 +79,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterHelperTries("h_canGreenGateGlitch", 3);
             ModelWithOptions.ApplyLogicalOptions(logicalOptions);
-            HelperLogicalElement manyTriesHelperElement = ModelWithOptions.Helpers["h_canHeatedGreenGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(1);
+            HelperLogicalElement manyTriesHelperElement = ModelWithOptions.Helpers["h_canHeatedGreenGateGlitch"].Requires
+                .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
             InGameState inGameState = ModelWithOptions.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.SUPER_NAME)
                 .ApplyRefillResources();
@@ -134,7 +138,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.StringRequirements
             Assert.False(freeHelperElement.LogicallyNever);
             Assert.Equal(1, freeHelperElement.Tries);
 
-            HelperLogicalElement manyTriesHelperElement = ModelWithOptions.Helpers["h_canHeatedGreenGateGlitch"].Requires.LogicalElement<HelperLogicalElement>(1);
+            HelperLogicalElement manyTriesHelperElement = ModelWithOptions.Helpers["h_canHeatedGreenGateGlitch"].Requires
+                .LogicalElement<HelperLogicalElement>(0, element => element.Helper.Name == "h_canGreenGateGlitch");
             Assert.Equal(2, manyTriesHelperElement.Tries);
         }
 
