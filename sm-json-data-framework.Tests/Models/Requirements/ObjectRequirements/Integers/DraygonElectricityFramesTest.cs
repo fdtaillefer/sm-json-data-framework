@@ -188,8 +188,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
         #endregion
 
-        // Execute
-
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
@@ -203,10 +201,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
             baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 60);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
-                .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(model)
-                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
@@ -237,10 +231,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
-                .StartingInventory(
-                    ItemInventory.CreateVanillaStartingInventory(model)
-                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                )
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
@@ -275,7 +265,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
                     ItemInventory.CreateVanillaStartingInventory(model)
-                        .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
                         .ApplyAddItem(model.Items[SuperMetroidModel.VARIA_SUIT_NAME])
                         .ApplyAddItem(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME])
                 )
