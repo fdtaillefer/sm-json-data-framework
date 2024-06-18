@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Integers
 {
-    public class HeatFramesTest
+    public class LavaFramesTest
     {
         private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
         private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
@@ -28,8 +28,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             SuperMetroidModel model = ReusableModel();
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.Equal(100, heatFrames.Frames);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.Equal(150, lavaFrames.Frames);
         }
 
         #endregion
@@ -41,15 +41,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            int result = heatFrames.CalculateDamage(model, inGameState);
+            int result = lavaFrames.CalculateDamage(model, inGameState);
 
             // Expect
-            Assert.Equal(25, result);
+            Assert.Equal(75, result);
         }
 
         [Fact]
@@ -57,16 +57,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            int result = heatFrames.CalculateDamage(model, inGameState);
+            int result = lavaFrames.CalculateDamage(model, inGameState);
 
             // Expect
-            Assert.Equal(0, result);
+            Assert.Equal(37, result);
         }
 
         [Fact]
@@ -74,13 +74,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
-            int result = heatFrames.CalculateDamage(model, inGameState);
+            int result = lavaFrames.CalculateDamage(model, inGameState);
 
             // Expect
             Assert.Equal(0, result);
@@ -91,18 +91,19 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.HeatLeniencyMultiplier = 1.5M;
+            logicalOptions.LavaLeniencyMultiplier = 1.5M;
             model.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = model.CreateInitialGameState();
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            int result = heatFrames.CalculateDamage(model, inGameState);
+            int result = lavaFrames.CalculateDamage(model, inGameState);
 
             // Expect
-            Assert.Equal(37, result);
+            Assert.Equal(56, result);
         }
 
         #endregion
@@ -114,13 +115,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 74);
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 24);
 
             // When
-            ExecutionResult result = heatFrames.Execute(model, inGameState);
+            ExecutionResult result = lavaFrames.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -131,17 +132,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 24);
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 23);
 
             // When
-            ExecutionResult result = heatFrames.Execute(model, inGameState);
+            ExecutionResult result = lavaFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -25)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -75)
                 .AssertRespectedBy(result);
         }
 
@@ -150,16 +151,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            ExecutionResult result = heatFrames.Execute(model, inGameState);
+            ExecutionResult result = lavaFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -37)
                 .ExpectDamageReducingItemInvolved(SuperMetroidModel.VARIA_SUIT_NAME)
                 .AssertRespectedBy(result);
         }
@@ -169,13 +171,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
-            ExecutionResult result = heatFrames.Execute(model, inGameState);
+            ExecutionResult result = lavaFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
@@ -188,19 +190,21 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.HeatLeniencyMultiplier = 1.5M;
+            logicalOptions.LavaLeniencyMultiplier = 1.5M;
             model.ApplyLogicalOptions(logicalOptions);
-            InGameState inGameState = model.CreateInitialGameState();
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources();
 
             // When
-            ExecutionResult result = heatFrames.Execute(model, inGameState);
+            ExecutionResult result = lavaFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -37)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -112)
                 .AssertRespectedBy(result);
         }
 
@@ -209,16 +213,18 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            HeatFrames heatFrames = model.Rooms["Post Crocomire Power Bomb Room"].Links[1].To[2].Strats["Base"].Requires
-                .LogicalElement<HeatFrames>(0, heatFrames => heatFrames.Frames == 100);
-            InGameState inGameState = model.CreateInitialGameState();
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources();
 
             // When
-            ExecutionResult result = heatFrames.Execute(model, inGameState, times: 2);
+            ExecutionResult result = lavaFrames.Execute(model, inGameState, times: 2);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -50)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -150)
                 .AssertRespectedBy(result);
         }
 
@@ -227,15 +233,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalProperties()
+        public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
-            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums()
-                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
@@ -249,16 +255,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.True(heatFrames.LogicallyRelevant);
-            Assert.True(heatFrames.LogicallyNever);
-            Assert.False(heatFrames.LogicallyAlways);
-            Assert.False(heatFrames.LogicallyFree);
-            Assert.Equal(LogicalOptions.DefaultFrameLeniencyMultiplier, heatFrames.HeatLeniencyMultiplier);
+            LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.True(lavaFrames.LogicallyRelevant);
+            Assert.True(lavaFrames.LogicallyNever);
+            Assert.False(lavaFrames.LogicallyAlways);
+            Assert.False(lavaFrames.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_NormalPossibleEnergy_SetsLogicalProperties()
+        public void ApplyLogicalOptions_NormalPossibleEnergy_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
@@ -283,16 +288,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.True(heatFrames.LogicallyRelevant);
-            Assert.False(heatFrames.LogicallyNever);
-            Assert.False(heatFrames.LogicallyAlways);
-            Assert.False(heatFrames.LogicallyFree);
-            Assert.Equal(LogicalOptions.DefaultFrameLeniencyMultiplier, heatFrames.HeatLeniencyMultiplier);
+            LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.True(lavaFrames.LogicallyRelevant);
+            Assert.False(lavaFrames.LogicallyNever);
+            Assert.False(lavaFrames.LogicallyAlways);
+            Assert.False(lavaFrames.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_BothSuitsFree_SetsLogicalProperties()
+        public void ApplyLogicalOptions_BothSuitsFree_SetsLogicalPropertiesOnDamageLogicalElements()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
@@ -313,28 +317,28 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.True(heatFrames.LogicallyRelevant);
-            Assert.False(heatFrames.LogicallyNever);
-            Assert.True(heatFrames.LogicallyAlways);
-            Assert.True(heatFrames.LogicallyFree);
-            Assert.Equal(LogicalOptions.DefaultFrameLeniencyMultiplier, heatFrames.HeatLeniencyMultiplier);
+            LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
+            Assert.True(lavaFrames.LogicallyRelevant);
+            Assert.False(lavaFrames.LogicallyNever);
+            Assert.True(lavaFrames.LogicallyAlways);
+            Assert.True(lavaFrames.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_DifferentHeatLeniency_SetsLogicalProperties()
+        public void ApplyLogicalOptions_DifferentLavaLeniency_SetsLogicalProperties()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.HeatLeniencyMultiplier = 2;
+            logicalOptions.LavaLeniencyMultiplier = 2;
 
             // When
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.Equal(2, heatFrames.HeatLeniencyMultiplier);
+            LavaFrames lavaFrames = model.Rooms["Spiky Acid Snakes Tunnel"].Links[2].To[1].Strats["Tank the Damage"].Requires
+                .LogicalElement<LavaFrames>(0, lavaFrames => lavaFrames.Frames == 150);
+            Assert.Equal(2, lavaFrames.LavaLeniencyMultiplier);
         }
 
         #endregion

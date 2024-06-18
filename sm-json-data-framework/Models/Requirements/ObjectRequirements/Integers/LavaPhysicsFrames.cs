@@ -31,8 +31,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Frames) * times;
-            return (int)(baseDamage * LavaLeniencyMultiplier);
+            return model.Rules.CalculateLavaPhysicsDamage(inGameState, (int)(Frames * LavaLeniencyMultiplier)) * times;
         }
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)

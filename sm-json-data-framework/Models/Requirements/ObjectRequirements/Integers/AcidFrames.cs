@@ -35,8 +35,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int baseDamage = model.Rules.CalculateAcidDamage(inGameState, Frames) * times;
-            return (int)(baseDamage * AcidLeniencyMultiplier);
+            return model.Rules.CalculateAcidDamage(inGameState, (int)(Frames * AcidLeniencyMultiplier)) * times;
         }
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
