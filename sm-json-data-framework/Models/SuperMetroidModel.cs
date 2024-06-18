@@ -85,7 +85,7 @@ namespace sm_json_data_framework.Models
         /// The logical options currently applied to this model.
         /// Note that the <see cref="StartConditions"/> within this instance is never null.
         /// </summary>
-        private ReadOnlyLogicalOptions AppliedLogicalOptions { get; set; }
+        public ReadOnlyLogicalOptions AppliedLogicalOptions { get; private set; }
 
         /// <summary>
         /// The items in this model, mapped by name.

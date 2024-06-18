@@ -1,5 +1,6 @@
 ﻿using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
+using sm_json_data_framework.Options;
 
 namespace sm_json_data_framework.Rules
 {
@@ -17,17 +18,31 @@ namespace sm_json_data_framework.Rules
         /// </summary>
         /// <param name="physics">This physics</param>
         /// <param name="frames">The number of frames to spend in this physics</param>
+        /// <param name="logicalOptions">The logical options that are in effect, and may need to be applied to a created executable</param>
+        /// <param name="rules">The rules that are in effect, and may be needed to apply logical options</param>
         /// <returns></returns>
-        public static IExecutable FramesExecutable(this PhysicsEnum physics, int frames)
+        public static IExecutable FramesExecutable(this PhysicsEnum physics, int frames, ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
-            return physics switch
+            switch (physics)
             {
-                PhysicsEnum.Normal => LogicalRequirements.AlwaysRequirements.Instance,
-                PhysicsEnum.Water => LogicalRequirements.AlwaysRequirements.Instance,
-                PhysicsEnum.Lava => new LavaFrames(frames),
-                PhysicsEnum.Acid => new AcidFrames(frames),
-                _ => throw new System.NotImplementedException()
-            };
+                case PhysicsEnum.Normal:
+                case PhysicsEnum.Water:
+                    return LogicalRequirements.AlwaysRequirements.Instance;
+                case PhysicsEnum.Lava:
+                    LavaFrames lavaFrames = new LavaFrames(frames);
+                    // You normally shouldn't apply logical options out of the blue, but this is a temporary element with no ties to any elements in the model,
+                    // and it needs the logical options to have access to leniency
+                    lavaFrames.ApplyLogicalOptions(logicalOptions, rules);
+                    return lavaFrames;
+                case PhysicsEnum.Acid:
+                    AcidFrames acidFrames = new AcidFrames(frames);
+                    // You normally shouldn't apply logical options out of the blue, but this is a temporary element with no ties to any elements in the model,
+                    // and it needs the logical options to have access to leniency
+                    acidFrames.ApplyLogicalOptions(logicalOptions, rules);
+                    return acidFrames;
+                default:
+                    throw new System.NotImplementedException();
+            }
         }
     }
 }

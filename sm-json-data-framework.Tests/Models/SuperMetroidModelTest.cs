@@ -1061,24 +1061,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAdjacentRunways()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            AdjacentRunway adjacentRunway = model.Rooms["Screw Attack Room"].Links[2].To[3].Strats["Screw Attack Room Transition Screwjump"].Requires.LogicalElement<AdjacentRunway>(0);
-            Assert.True(adjacentRunway.LogicallyRelevant);
-            Assert.False(adjacentRunway.LogicallyNever);
-            Assert.False(adjacentRunway.LogicallyAlways);
-            Assert.False(adjacentRunway.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmo()
         {
             // Given

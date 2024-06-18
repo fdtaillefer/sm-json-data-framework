@@ -165,12 +165,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             PhysicsEnum? physics = inGameState.GetCurrentDoorPhysics(previousRoomCount);
             if (physics != null)
             {
-                frameExecutables.Add(physics.Value.FramesExecutable(Frames));
+                frameExecutables.Add(physics.Value.FramesExecutable(Frames, model.AppliedLogicalOptions, model.Rules));
             }
 
             if (inGameState.IsHeatedRoom(previousRoomCount))
             {
-                frameExecutables.Add(new HeatFrames(Frames));
+                HeatFrames heatFrames = new HeatFrames(Frames);
+                // You normally shouldn't apply logical options out of the blue, but this is a temporary element with no ties to any elements in the model,
+                // and it needs the logical options to have access to leniency
+                heatFrames.ApplyLogicalOptions(model.AppliedLogicalOptions, model.Rules);
+                frameExecutables.Add(heatFrames);
             }
 
             return frameExecutables.ExecuteAll(model, inGameState, previousRoomCount: previousRoomCount);
