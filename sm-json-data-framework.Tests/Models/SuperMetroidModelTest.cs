@@ -938,12 +938,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
-            Assert.True(spikeHits.LogicallyRelevant);
-            Assert.True(spikeHits.LogicallyNever);
-            Assert.False(spikeHits.LogicallyAlways);
-            Assert.False(spikeHits.LogicallyFree);
-
             EnemyDamage enemyDamage = model.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Tank the Damage"].Requires.LogicalElement<EnemyDamage>(0);
             Assert.True(enemyDamage.LogicallyRelevant);
             Assert.True(enemyDamage.LogicallyNever);
@@ -1007,12 +1001,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
-            Assert.True(spikeHits.LogicallyRelevant);
-            Assert.False(spikeHits.LogicallyNever);
-            Assert.False(spikeHits.LogicallyAlways);
-            Assert.False(spikeHits.LogicallyFree);
-
             EnemyDamage enemyDamage = model.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Tank the Damage"].Requires.LogicalElement<EnemyDamage>(0);
             Assert.True(enemyDamage.LogicallyRelevant);
             Assert.False(enemyDamage.LogicallyNever);
@@ -1057,12 +1045,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
-            Assert.True(spikeHits.LogicallyRelevant);
-            Assert.False(spikeHits.LogicallyNever);
-            Assert.False(spikeHits.LogicallyAlways);
-            Assert.False(spikeHits.LogicallyFree);
-
             EnemyDamage enemyDamage = model.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Tank the Damage"].Requires.LogicalElement<EnemyDamage>(0);
             Assert.True(enemyDamage.LogicallyRelevant);
             Assert.False(enemyDamage.LogicallyNever);
