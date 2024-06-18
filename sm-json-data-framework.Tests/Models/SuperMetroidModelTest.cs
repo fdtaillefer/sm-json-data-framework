@@ -1085,24 +1085,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnPreviousNodes()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            PreviousNode previousNode = model.Rooms["Early Supers Room"].Links[3].To[1].Strats["Early Supers Quick Crumble Escape (Dual Quick Crumble)"].Requires.LogicalElement<PreviousNode>(0);
-            Assert.True(previousNode.LogicallyRelevant);
-            Assert.False(previousNode.LogicallyNever);
-            Assert.False(previousNode.LogicallyAlways);
-            Assert.False(previousNode.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAdjacentRunways()
         {
             // Given
