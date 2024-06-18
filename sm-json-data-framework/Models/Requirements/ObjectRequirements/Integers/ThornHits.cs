@@ -19,19 +19,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
+        /// <summary>
+        /// The number of thorn hits that Samus must take.
+        /// </summary>
+        public int Hits => Value;
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.ThornDamage) * Value * times;
+            return model.Rules.CalculateEnvironmentalDamage(inGameState, model.Rules.ThornDamage) * Hits * times;
         }
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateBestCaseEnvironmentalDamage(rules.ThornDamage * Value, AppliedLogicalOptions.RemovedItems);
+            return rules.CalculateBestCaseEnvironmentalDamage(rules.ThornDamage * Hits, AppliedLogicalOptions.RemovedItems);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateWorstCaseEnvironmentalDamage(rules.ThornDamage * Value, AppliedLogicalOptions.StartConditions.StartingInventory);
+            return rules.CalculateWorstCaseEnvironmentalDamage(rules.ThornDamage * Hits, AppliedLogicalOptions.StartConditions.StartingInventory);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

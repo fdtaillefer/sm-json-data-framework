@@ -28,20 +28,25 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
+        /// <summary>
+        /// The number of frames that Samus must spend in acid.
+        /// </summary>
+        public int Frames => Value;
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int baseDamage = model.Rules.CalculateAcidDamage(inGameState, Value) * times;
+            int baseDamage = model.Rules.CalculateAcidDamage(inGameState, Frames) * times;
             return (int)(baseDamage * AcidLeniencyMultiplier);
         }
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateBestCaseAcidDamage(Value, AppliedLogicalOptions.RemovedItems) * AcidLeniencyMultiplier);
+            return (int)(rules.CalculateBestCaseAcidDamage(Frames, AppliedLogicalOptions.RemovedItems) * AcidLeniencyMultiplier);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateWorstCaseAcidDamage(Value, AppliedLogicalOptions.StartConditions.StartingInventory) * AcidLeniencyMultiplier);
+            return (int)(rules.CalculateWorstCaseAcidDamage(Frames, AppliedLogicalOptions.StartConditions.StartingInventory) * AcidLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

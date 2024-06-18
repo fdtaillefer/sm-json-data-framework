@@ -23,7 +23,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <summary>
         /// The string value of this logical element.
         /// </summary>
-        public string Value { get; }
+        protected string Value { get; }
     }
 
     public abstract class AbstractUnfinalizedObjectLogicalElementWithString<ConcreteType, TargetType> : AbstractUnfinalizedObjectLogicalElement<ConcreteType, TargetType>

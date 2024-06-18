@@ -28,8 +28,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             SuperMetroidModel model = ReusableModel();
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
+            Assert.Equal(60, electricityFrames.Frames);
         }
 
         #endregion
@@ -42,7 +42,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState();
 
             // When
@@ -58,7 +58,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
@@ -75,7 +75,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
@@ -96,7 +96,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 39);
 
@@ -113,7 +113,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 38);
 
@@ -132,7 +132,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
@@ -152,7 +152,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
@@ -172,7 +172,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
                 .ApplyRefillResources();
@@ -220,7 +220,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             Assert.True(electricityFrames.LogicallyRelevant);
             Assert.True(electricityFrames.LogicallyNever);
             Assert.False(electricityFrames.LogicallyAlways);
@@ -257,7 +257,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             Assert.True(electricityFrames.LogicallyRelevant);
             Assert.False(electricityFrames.LogicallyNever);
             Assert.False(electricityFrames.LogicallyAlways);
@@ -288,7 +288,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Value == 60);
+                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
             Assert.True(electricityFrames.LogicallyRelevant);
             Assert.False(electricityFrames.LogicallyNever);
             Assert.False(electricityFrames.LogicallyAlways);

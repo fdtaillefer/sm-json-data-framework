@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// The int value of this logical element.
         /// </summary>
-        public int Value { get; }
+        protected int Value { get; }
     }
 
     public abstract class AbstractUnfinalizedObjectLogicalElementWithInteger<ConcreteType, TargetType> 

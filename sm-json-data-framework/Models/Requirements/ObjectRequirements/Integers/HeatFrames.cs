@@ -29,20 +29,25 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
+        /// <summary>
+        /// The number of frames that Samus must spend in a heated room.
+        /// </summary>
+        public int Frames => Value;
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Value) * times;
+            int baseDamage = model.Rules.CalculateHeatDamage(inGameState, Frames) * times;
             return (int)(baseDamage * HeatLeniencyMultiplier);
         }
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateBestCaseHeatDamage(Value, AppliedLogicalOptions.RemovedItems) * HeatLeniencyMultiplier);
+            return (int)(rules.CalculateBestCaseHeatDamage(Frames, AppliedLogicalOptions.RemovedItems) * HeatLeniencyMultiplier);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateWorstCaseHeatDamage(Value, AppliedLogicalOptions.StartConditions.StartingInventory) * HeatLeniencyMultiplier);
+            return (int)(rules.CalculateWorstCaseHeatDamage(Frames, AppliedLogicalOptions.StartConditions.StartingInventory) * HeatLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

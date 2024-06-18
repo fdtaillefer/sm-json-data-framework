@@ -20,6 +20,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         }
 
         /// <summary>
+        /// The property that the strrat used to reach the current node must have.
+        /// </summary>
+        public string StratProperty => Value;
+
+        /// <summary>
         /// Returns whether the provided InGameState fulfills this PreviousStratProperty element.
         /// </summary>
         /// <param name="inGameState">The in-game state to evaluate</param>
@@ -28,7 +33,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings
         /// <returns></returns>
         public bool IsFulfilled(ReadOnlyInGameState inGameState, int previousRoomCount = 0)
         {
-            return inGameState.GetLastLinkStrat(previousRoomCount)?.StratProperties?.Contains(Value) == true;
+            return inGameState.GetLastLinkStrat(previousRoomCount)?.StratProperties?.Contains(StratProperty) == true;
         }
 
         protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

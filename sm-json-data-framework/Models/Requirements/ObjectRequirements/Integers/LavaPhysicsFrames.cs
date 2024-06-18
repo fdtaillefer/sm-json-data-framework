@@ -24,20 +24,25 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
+        /// <summary>
+        /// The number of frames that Samus must spend while under lava physics.
+        /// </summary>
+        public int Frames => Value;
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Value) * times;
+            int baseDamage = model.Rules.CalculateLavaPhysicsDamage(inGameState, Frames) * times;
             return (int)(baseDamage * LavaLeniencyMultiplier);
         }
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateBestCaseLavaPhysicsDamage(Value, AppliedLogicalOptions.RemovedItems) * LavaLeniencyMultiplier);
+            return (int)(rules.CalculateBestCaseLavaPhysicsDamage(Frames, AppliedLogicalOptions.RemovedItems) * LavaLeniencyMultiplier);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return (int)(rules.CalculateWorstCaseLavaPhysicsDamage(Value, AppliedLogicalOptions.StartConditions.StartingInventory) * LavaLeniencyMultiplier);
+            return (int)(rules.CalculateWorstCaseLavaPhysicsDamage(Frames, AppliedLogicalOptions.StartConditions.StartingInventory) * LavaLeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

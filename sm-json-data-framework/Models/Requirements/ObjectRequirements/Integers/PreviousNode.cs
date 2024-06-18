@@ -9,7 +9,7 @@ using System.Text;
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 {
     /// <summary>
-    /// A logical element which Requires Samus to have arrived at the current node strictly from a subset of acceptable nodes.
+    /// A logical element which Requires Samus to have arrived at the current node strictly from a specific node.
     /// </summary>
     public class PreviousNode : AbstractObjectLogicalElementWithNodeId<UnfinalizedPreviousNode, PreviousNode>
     {
@@ -18,6 +18,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
 
         }
+
+        /// <summary>
+        /// The in-room ID of the node from which Samus must have arrived.
+        /// </summary>
+        public int NodeId => Value;
 
         /// <summary>
         /// Returns whether the provided InGameState fulfills this PreviousNode element.
@@ -30,7 +35,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         {
             // Look at second-to-last visited node (last node is the current node)
             IReadOnlyList<int> visitedNodeIds = inGameState.GetVisitedNodeIds(previousRoomCount);
-            return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count - 2) == Value;
+            return visitedNodeIds.ElementAtOrDefault(visitedNodeIds.Count - 2) == NodeId;
         }
 
         protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)

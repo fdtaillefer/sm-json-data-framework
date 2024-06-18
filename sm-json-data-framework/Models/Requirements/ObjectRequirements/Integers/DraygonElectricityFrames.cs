@@ -19,9 +19,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
+        /// <summary>
+        /// The number of frames that Samus must spend grappled to a Draygon turret.
+        /// </summary>
+        public int Frames => Value;
+
         public override int CalculateDamage(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
-            return model.Rules.CalculateElectricityGrappleDamage(inGameState, Value) * times;
+            return model.Rules.CalculateElectricityGrappleDamage(inGameState, Frames) * times;
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
@@ -31,12 +36,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         public override int CalculateBestCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateBestCaseElectricityGrappleDamage(Value, AppliedLogicalOptions.RemovedItems);
+            return rules.CalculateBestCaseElectricityGrappleDamage(Frames, AppliedLogicalOptions.RemovedItems);
         }
 
         public override int CalculateWorstCastDamage(SuperMetroidRules rules)
         {
-            return rules.CalculateWorstCaseElectricityGrappleDamage(Value, AppliedLogicalOptions.StartConditions.StartingInventory);
+            return rules.CalculateWorstCaseElectricityGrappleDamage(Frames, AppliedLogicalOptions.StartConditions.StartingInventory);
         }
 
         protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)

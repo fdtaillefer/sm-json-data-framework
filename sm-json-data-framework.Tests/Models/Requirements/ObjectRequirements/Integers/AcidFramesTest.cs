@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires.LogicalElement<AcidFrames>(0);
-            Assert.Equal(30, acidFrames.Value);
+            Assert.Equal(30, acidFrames.Frames);
         }
 
         #endregion
@@ -43,7 +43,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState();
 
             // When
@@ -59,7 +59,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
@@ -76,7 +76,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
@@ -93,7 +93,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = NewModelForOptions();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.AcidLeniencyMultiplier = 1.5M;
             model.ApplyLogicalOptions(logicalOptions);
@@ -117,7 +117,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 54);
 
@@ -134,7 +134,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 53);
 
@@ -153,7 +153,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 76)
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
@@ -174,7 +174,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
@@ -194,7 +194,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = NewModelForOptions();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             LogicalOptions logicalOptions = new LogicalOptions();
             logicalOptions.AcidLeniencyMultiplier = 1.5M;
             model.ApplyLogicalOptions(logicalOptions);
@@ -215,7 +215,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             // Given
             SuperMetroidModel model = ReusableModel();
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             InGameState inGameState = model.CreateInitialGameState();
 
             // When
@@ -259,7 +259,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             Assert.True(acidFrames.LogicallyRelevant);
             Assert.True(acidFrames.LogicallyNever);
             Assert.False(acidFrames.LogicallyAlways);
@@ -297,7 +297,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             Assert.True(acidFrames.LogicallyRelevant);
             Assert.False(acidFrames.LogicallyNever);
             Assert.False(acidFrames.LogicallyAlways);
@@ -329,7 +329,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             Assert.True(acidFrames.LogicallyRelevant);
             Assert.False(acidFrames.LogicallyNever);
             Assert.False(acidFrames.LogicallyAlways);
@@ -350,7 +350,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
 
             // Expect
             AcidFrames acidFrames = model.Rooms["Metroid Room 1"].Links[3].To[2].Strats["Fearless Dive"].Requires
-                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Value == 30);
+                .LogicalElement<AcidFrames>(0, acidFrames => acidFrames.Frames == 30);
             Assert.Equal(2, acidFrames.AcidLeniencyMultiplier);
         }
 

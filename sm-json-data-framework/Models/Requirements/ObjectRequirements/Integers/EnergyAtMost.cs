@@ -20,11 +20,16 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
 
         }
 
+        /// <summary>
+        /// The fixed amount down to which this logical element will take Samus' energy (if it's higher).
+        /// </summary>
+        public int FixedAmount => Value;
+
         protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int currentRegularEnergy = inGameState.Resources.GetAmount(Items.RechargeableResourceEnum.RegularEnergy);
             // Don't take damage if we've already reached the threshold
-            int damage = Math.Max(0, currentRegularEnergy - Value);
+            int damage = Math.Max(0, currentRegularEnergy - FixedAmount);
 
 
             var resultingState = inGameState.Clone();
@@ -59,7 +64,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             {
                 return false;
             }
-            return maxEnergy <= Value;
+            return maxEnergy <= FixedAmount;
         }
     }
 
