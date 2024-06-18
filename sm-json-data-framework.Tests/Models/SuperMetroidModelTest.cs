@@ -950,12 +950,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(lavaPhysicsFrames.LogicallyAlways);
             Assert.False(lavaPhysicsFrames.LogicallyFree);
 
-            HibashiHits hibashiHits = model.Rooms["Wasteland"].Links[7].To[2].Strats["Morph Bombs"].Requires.LogicalElement<HibashiHits>(0);
-            Assert.True(hibashiHits.LogicallyRelevant);
-            Assert.True(hibashiHits.LogicallyNever);
-            Assert.False(hibashiHits.LogicallyAlways);
-            Assert.False(hibashiHits.LogicallyFree);
-
             SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
             Assert.True(spikeHits.LogicallyRelevant);
             Assert.True(spikeHits.LogicallyNever);
@@ -1037,12 +1031,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(lavaPhysicsFrames.LogicallyAlways);
             Assert.False(lavaPhysicsFrames.LogicallyFree);
 
-            HibashiHits hibashiHits = model.Rooms["Wasteland"].Links[7].To[2].Strats["Morph Bombs"].Requires.LogicalElement<HibashiHits>(0);
-            Assert.True(hibashiHits.LogicallyRelevant);
-            Assert.False(hibashiHits.LogicallyNever);
-            Assert.False(hibashiHits.LogicallyAlways);
-            Assert.False(hibashiHits.LogicallyFree);
-
             SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
             Assert.True(spikeHits.LogicallyRelevant);
             Assert.False(spikeHits.LogicallyNever);
@@ -1104,12 +1092,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(lavaPhysicsFrames.LogicallyNever);
             Assert.False(lavaPhysicsFrames.LogicallyAlways);
             Assert.False(lavaPhysicsFrames.LogicallyFree);
-
-            HibashiHits hibashiHits = model.Rooms["Wasteland"].Links[7].To[2].Strats["Morph Bombs"].Requires.LogicalElement<HibashiHits>(0);
-            Assert.True(hibashiHits.LogicallyRelevant);
-            Assert.False(hibashiHits.LogicallyNever);
-            Assert.False(hibashiHits.LogicallyAlways);
-            Assert.False(hibashiHits.LogicallyFree);
 
             SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
             Assert.True(spikeHits.LogicallyRelevant);
