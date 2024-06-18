@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// A multiplier to apply to heat frame requirements as a leniency, as per applied logical options.
         /// </summary>
-        private decimal HeatLeniencyMultiplier => AppliedLogicalOptions.HeatLeniencyMultiplier;
+        public decimal HeatLeniencyMultiplier => AppliedLogicalOptions.HeatLeniencyMultiplier;
 
         public HeatFrames(int numberOfFrames) : base(numberOfFrames)
         {

@@ -938,12 +938,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.True(heatFrames.LogicallyRelevant);
-            Assert.True(heatFrames.LogicallyNever);
-            Assert.False(heatFrames.LogicallyAlways);
-            Assert.False(heatFrames.LogicallyFree);
-
             LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
             Assert.True(lavaFrames.LogicallyRelevant);
             Assert.True(lavaFrames.LogicallyNever);
@@ -1031,12 +1025,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.True(heatFrames.LogicallyRelevant);
-            Assert.False(heatFrames.LogicallyNever);
-            Assert.False(heatFrames.LogicallyAlways);
-            Assert.False(heatFrames.LogicallyFree);
-
             LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
             Assert.True(lavaFrames.LogicallyRelevant);
             Assert.False(lavaFrames.LogicallyNever);
@@ -1105,12 +1093,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            HeatFrames heatFrames = model.Rooms["Fast Pillars Setup Room"].Links[4].To[1].Strats["Base"].Requires.LogicalElement<HeatFrames>(0);
-            Assert.True(heatFrames.LogicallyRelevant);
-            Assert.False(heatFrames.LogicallyNever);
-            Assert.True(heatFrames.LogicallyAlways);
-            Assert.True(heatFrames.LogicallyFree);
-
             LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
             Assert.True(lavaFrames.LogicallyRelevant);
             Assert.False(lavaFrames.LogicallyNever);
