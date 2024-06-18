@@ -16,7 +16,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// A multiplier to apply to lava frame requirements as a leniency, as per applied logical options.
         /// </summary>
-        private decimal LavaLeniencyMultiplier => AppliedLogicalOptions.LavaLeniencyMultiplier;
+        public decimal LavaLeniencyMultiplier => AppliedLogicalOptions.LavaLeniencyMultiplier;
 
         public LavaPhysicsFrames(UnfinalizedLavaPhysicsFrames sourceElement, Action<LavaPhysicsFrames> mappingsInsertionCallback)
             : base(sourceElement, mappingsInsertionCallback)

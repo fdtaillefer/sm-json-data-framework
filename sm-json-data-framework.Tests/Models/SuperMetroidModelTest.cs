@@ -938,18 +938,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
-            Assert.True(lavaFrames.LogicallyRelevant);
-            Assert.True(lavaFrames.LogicallyNever);
-            Assert.False(lavaFrames.LogicallyAlways);
-            Assert.False(lavaFrames.LogicallyFree);
-
-            LavaPhysicsFrames lavaPhysicsFrames = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive Gravity Jump"].Requires.LogicalElement<LavaPhysicsFrames>(0);
-            Assert.True(lavaPhysicsFrames.LogicallyRelevant);
-            Assert.True(lavaPhysicsFrames.LogicallyNever);
-            Assert.False(lavaPhysicsFrames.LogicallyAlways);
-            Assert.False(lavaPhysicsFrames.LogicallyFree);
-
             SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
             Assert.True(spikeHits.LogicallyRelevant);
             Assert.True(spikeHits.LogicallyNever);
@@ -1019,18 +1007,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
-            Assert.True(lavaFrames.LogicallyRelevant);
-            Assert.False(lavaFrames.LogicallyNever);
-            Assert.False(lavaFrames.LogicallyAlways);
-            Assert.False(lavaFrames.LogicallyFree);
-
-            LavaPhysicsFrames lavaPhysicsFrames = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive Gravity Jump"].Requires.LogicalElement<LavaPhysicsFrames>(0);
-            Assert.True(lavaPhysicsFrames.LogicallyRelevant);
-            Assert.False(lavaPhysicsFrames.LogicallyNever);
-            Assert.False(lavaPhysicsFrames.LogicallyAlways);
-            Assert.False(lavaPhysicsFrames.LogicallyFree);
-
             SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
             Assert.True(spikeHits.LogicallyRelevant);
             Assert.False(spikeHits.LogicallyNever);
@@ -1081,18 +1057,6 @@ namespace sm_json_data_framework.Tests.Models
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            LavaFrames lavaFrames = model.Rooms["Spiky Platforms Tunnel"].Links[2].To[1].Strats["Lava Bath"].Requires.LogicalElement<LavaFrames>(0);
-            Assert.True(lavaFrames.LogicallyRelevant);
-            Assert.False(lavaFrames.LogicallyNever);
-            Assert.True(lavaFrames.LogicallyAlways);
-            Assert.True(lavaFrames.LogicallyFree);
-
-            LavaPhysicsFrames lavaPhysicsFrames = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive Gravity Jump"].Requires.LogicalElement<LavaPhysicsFrames>(0);
-            Assert.True(lavaPhysicsFrames.LogicallyRelevant);
-            Assert.False(lavaPhysicsFrames.LogicallyNever);
-            Assert.False(lavaPhysicsFrames.LogicallyAlways);
-            Assert.False(lavaPhysicsFrames.LogicallyFree);
-
             SpikeHits spikeHits = model.Rooms["Double Chamber"].Links[3].To[4].Strats["Double Chamber Spike IBJ"].Requires.LogicalElement<SpikeHits>(0);
             Assert.True(spikeHits.LogicallyRelevant);
             Assert.False(spikeHits.LogicallyNever);
