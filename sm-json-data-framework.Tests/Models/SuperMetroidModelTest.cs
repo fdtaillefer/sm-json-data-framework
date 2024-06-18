@@ -944,8 +944,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(enemyDamage.LogicallyAlways);
             Assert.False(enemyDamage.LogicallyFree);
 
-            // Can't test for ThornHits, there's none of them in the model
-
             CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
             Assert.True(canShineCharge.LogicallyRelevant);
             Assert.True(canShineCharge.LogicallyNever);
@@ -1007,8 +1005,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(enemyDamage.LogicallyAlways);
             Assert.False(enemyDamage.LogicallyFree);
 
-            // Can't test for ThornHits, there's none of them in the model
-
             CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
             Assert.True(canShineCharge.LogicallyRelevant);
             Assert.False(canShineCharge.LogicallyNever);
@@ -1050,8 +1046,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(enemyDamage.LogicallyNever);
             Assert.False(enemyDamage.LogicallyAlways);
             Assert.False(enemyDamage.LogicallyFree);
-
-            // Can't test for ThornHits, there's none of them in the model
 
             CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
             Assert.True(canShineCharge.LogicallyRelevant);
