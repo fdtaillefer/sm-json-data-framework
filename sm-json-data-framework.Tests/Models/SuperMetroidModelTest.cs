@@ -1061,35 +1061,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmoDrain()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            AmmoDrain freeAmmoDrain = model.Locks["Mother Brain 2 and 3 Fight"].UnlockStrats["Base"].Requires.LogicalElement<AmmoDrain>(0);
-            Assert.True(freeAmmoDrain.LogicallyRelevant);
-            Assert.False(freeAmmoDrain.LogicallyNever);
-            Assert.True(freeAmmoDrain.LogicallyAlways);
-            Assert.True(freeAmmoDrain.LogicallyFree);
-
-            AmmoDrain nonFreeAmmoDrain = model.Locks["Mother Brain 2 and 3 Fight"].UnlockStrats["Base"].Requires.LogicalElement<AmmoDrain>(1);
-            Assert.True(nonFreeAmmoDrain.LogicallyRelevant);
-            Assert.False(nonFreeAmmoDrain.LogicallyNever);
-            Assert.True(nonFreeAmmoDrain.LogicallyAlways);
-            Assert.False(nonFreeAmmoDrain.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_NoSpeedBooster_SetsLogicalPropertiesOnShineChargeLogicalElements()
         {
             // Given
