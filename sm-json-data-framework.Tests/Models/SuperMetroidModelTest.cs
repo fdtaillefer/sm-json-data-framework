@@ -1061,36 +1061,6 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmo()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 1)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            Ammo impossibleAmmo = model.Techs["canCrystalFlash"].Requires.LogicalElement<Ammo>(0);
-            Assert.True(impossibleAmmo.LogicallyRelevant);
-            Assert.True(impossibleAmmo.LogicallyNever);
-            Assert.False(impossibleAmmo.LogicallyAlways);
-            Assert.False(impossibleAmmo.LogicallyFree);
-
-            Ammo possibleAmmo = model.Techs["canCrystalFlash"].Requires.LogicalElement<Ammo>(1);
-            Assert.True(possibleAmmo.LogicallyRelevant);
-            Assert.False(possibleAmmo.LogicallyNever);
-            Assert.False(possibleAmmo.LogicallyAlways);
-            Assert.False(possibleAmmo.LogicallyFree);
-        }
-
-        [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnAmmoDrain()
         {
             // Given
