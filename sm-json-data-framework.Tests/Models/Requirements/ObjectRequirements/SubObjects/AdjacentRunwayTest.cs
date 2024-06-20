@@ -68,8 +68,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             AdjacentRunway adjacentRunway = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Links[7].To[12]
                 .Strats["Green Brinstar Main Shaft Right-Side X-Ray Climb"].Requires.LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9])
-                .ApplyEnterRoom(model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[7]);
+                .ApplyEnterRoom("Green Brinstar Main Shaft / Etecoon Room", 9)
+                .ApplyEnterRoom("Green Brinstar Main Shaft / Etecoon Room", 7);
 
             // When
             ExecutionResult result = adjacentRunway.UseFramesExecution.Execute(model, inGameState, previousRoomCount: 1);
@@ -87,8 +87,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             AdjacentRunway adjacentRunway = model.Rooms["Wasteland"].Links[1].To[6].Strats["Wasteland X-Ray Climb"].Requires
                 .LogicalElement<AdjacentRunway>(0, adjacentRunway => adjacentRunway.UseFrames == 200);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Metal Pirates Room"].Nodes[2])
-                .ApplyEnterRoom(model.Rooms["Wasteland"].Nodes[1]);
+                .ApplyEnterRoom("Metal Pirates Room", 2)
+                .ApplyEnterRoom("Wasteland", 1);
 
             // When
             ExecutionResult result = adjacentRunway.UseFramesExecution.Execute(model, inGameState, previousRoomCount: 1);
@@ -113,9 +113,9 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
                 .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
                 .ApplyRefillResources()
-                .ApplyEnterRoom(model.Rooms["Volcano Room"].Nodes[1])
+                .ApplyEnterRoom("Volcano Room", 1)
                 .ApplyVisitNode(2, "Suitless Volcano Dive")
-                .ApplyEnterRoom(model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[7])
+                .ApplyEnterRoom("Green Brinstar Main Shaft / Etecoon Room", 7)
                 .ApplyRefillResources();
 
             // When
@@ -136,11 +136,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive (Morph)"].Requires.LogicalElement<AdjacentRunway>(0);
-            // We're going to make an impossible sequence of events to test that we fail if the adjacent runway is too short
+            AdjacentRunway adjacentRunway = model.Rooms["Ice Beam Gate Room"].Links[2].To[4].Strats["Mockball"].Requires.LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Morph Ball Room"].Nodes[1])
-                .ApplyEnterRoom(model.Rooms["Lava Dive Room"].Nodes[2]);
+                .ApplyEnterRoom("Ice Beam Acid Room", 2)
+                .ApplyEnterRoom("Ice Beam Gate Room", 2);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -155,10 +154,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = ReusableModel();
             AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive (Morph)"].Requires.LogicalElement<AdjacentRunway>(0);
-            // We're going to make an impossible sequence of events to test that we fail if no adjacent runway's requirements are met
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Oasis"].Nodes[1])
-                .ApplyEnterRoom(model.Rooms["Lava Dive Room"].Nodes[2]);
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 80)
+                .ApplyEnterRoom("Kronic Boost Room", 3)
+                .ApplyEnterRoom("Lava Dive Room", 2);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -174,8 +173,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             SuperMetroidModel model = ReusableModel();
             AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive (Morph)"].Requires.LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Kronic Boost Room"].Nodes[3])
-                .ApplyEnterRoom(model.Rooms["Lava Dive Room"].Nodes[2]);
+                .ApplyEnterRoom("Kronic Boost Room", 3)
+                .ApplyEnterRoom("Lava Dive Room", 2);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -196,8 +195,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .LogicalElement<AdjacentRunway>(0, adjacentRunway => adjacentRunway.UseFrames == 200);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 50)
-                .ApplyEnterRoom(model.Rooms["Metal Pirates Room"].Nodes[2])
-                .ApplyEnterRoom(model.Rooms["Wasteland"].Nodes[1]);
+                .ApplyEnterRoom("Metal Pirates Room", 2)
+                .ApplyEnterRoom("Wasteland", 1);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -214,8 +213,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             AdjacentRunway adjacentRunway = model.Rooms["Wasteland"].Links[1].To[6].Strats["Wasteland X-Ray Climb"].Requires
                 .LogicalElement<AdjacentRunway>(0, adjacentRunway => adjacentRunway.UseFrames == 200);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Metal Pirates Room"].Nodes[2])
-                .ApplyEnterRoom(model.Rooms["Wasteland"].Nodes[1]);
+                .ApplyEnterRoom("Metal Pirates Room", 2)
+                .ApplyEnterRoom("Wasteland", 1);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -236,8 +235,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 50)
                 // This runway requires Gravity so it will fail if requirements not ignored
-                .ApplyEnterRoom(model.Rooms["Crab Shaft"].Nodes[2])
-                .ApplyEnterRoom(model.Rooms["Aqueduct"].Nodes[1]);
+                .ApplyEnterRoom("Crab Shaft", 2)
+                .ApplyEnterRoom("Aqueduct", 1);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -256,8 +255,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
                 // Door physics are water but normal physics are required
-                .ApplyEnterRoom(model.Rooms["Below Botwoon Energy Tank"].Nodes[1])
-                .ApplyEnterRoom(model.Rooms["Aqueduct"].Nodes[5]);
+                .ApplyEnterRoom("Below Botwoon Energy Tank", 1)
+                .ApplyEnterRoom("Aqueduct", 5);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -274,8 +273,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             AdjacentRunway adjacentRunway = model.Rooms["Warehouse Kihunter Room"].Links[2].To[1].Strats["Warehouse Kihunter Room X-Ray Climb"].Requires
                 .LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Baby Kraid Room"].Nodes[1])
-                .ApplyEnterRoom(model.Rooms["Warehouse Kihunter Room"].Nodes[2]);
+                .ApplyEnterRoom("Baby Kraid Room", 1)
+                .ApplyEnterRoom("Warehouse Kihunter Room", 2);
 
             // When
             ExecutionResult result = adjacentRunway.Execute(model, inGameState);
@@ -293,8 +292,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             AdjacentRunway adjacentRunway = model.Rooms["Glass Tunnel"].Links[5].To[4].Strats["Maridia Tube Transition Gravity Jump"].Requires
                 .LogicalElement<Or>(0).LogicalRequirements.LogicalElement<AdjacentRunway>(0, adjacentRunway => adjacentRunway.FromNode.Id == 3);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Boyon Gate Hall"].Nodes[1])
-                .ApplyEnterRoom(model.Rooms["Glass Tunnel"].Nodes[3])
+                .ApplyEnterRoom("Boyon Gate Hall", 1)
+                .ApplyEnterRoom("Glass Tunnel", 3)
                 .ApplyVisitNode(5, "Base")
                 .ApplyVisitNode(1, "Base")
                 .ApplyVisitNode(5, "Base");
@@ -314,8 +313,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             AdjacentRunway adjacentRunway = model.Rooms["Glass Tunnel"].Links[5].To[4].Strats["Maridia Tube Transition Gravity Jump"].Requires
                 .LogicalElement<Or>(0).LogicalRequirements.LogicalElement<AdjacentRunway>(0, adjacentRunway => adjacentRunway.FromNode.Id == 3);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyEnterRoom(model.Rooms["Boyon Gate Hall"].Nodes[1])
-                .ApplyEnterRoom(model.Rooms["Glass Tunnel"].Nodes[3])
+                .ApplyEnterRoom("Boyon Gate Hall", 1)
+                .ApplyEnterRoom("Glass Tunnel", 3)
                 .ApplyVisitNode(5, "Base");
 
             // When
@@ -325,6 +324,24 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             new ExecutionResultValidator(model, inGameState)
                 .ExpectRunwayUsed("Base Runway - Boyon Gate Hall Left Door (to Glass Tube)", "Base")
                 .AssertRespectedBy(result);
+        }
+
+        [Fact]
+        public void Execute_NodeNotConnected_Fails()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            AdjacentRunway adjacentRunway = model.Rooms["Bubble Mountain"].Links[9].To[7].Strats["Bubble Mountain Save Room Jump"].Requires
+                .LogicalElement<AdjacentRunway>(0, adjacentRunway => adjacentRunway.FromNode.Id == 2);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyEnterRoom("Lower Mushrooms", 2)
+                .ApplyEnterRoom("Bubble Mountain", 2);
+
+            // When
+            ExecutionResult result = adjacentRunway.Execute(model, inGameState);
+
+            // Expect
+            Assert.Null(result);
         }
 
         #endregion
@@ -348,7 +365,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             Assert.False(adjacentRunway.LogicallyAlways);
             Assert.False(adjacentRunway.LogicallyFree);
         }
-
 
         #endregion
     }
