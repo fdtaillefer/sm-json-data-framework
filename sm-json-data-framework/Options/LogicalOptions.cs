@@ -23,8 +23,8 @@ namespace sm_json_data_framework.Options
     {
         public static readonly int DefaultNumberOfTries = 1;
         public static readonly decimal DefaultTilesSavedWithStutter = 0;
-        // Obscenely short distance so that all shine charges are possible
-        public static readonly decimal DefaultTilesToShineCharge = 10;
+        // Obscenely short distance so that all shine charges are possible. 12 is an in-room Red Tower shine charge.
+        public static readonly decimal DefaultTilesToShineCharge = 12;
         public static readonly decimal DefaultFrameLeniencyMultiplier = 1;
 
         public static readonly ReadOnlySpawnerFarmingOptions DefaultSpawnerFarmingOptions = new SpawnerFarmingOptions().AsReadOnly();

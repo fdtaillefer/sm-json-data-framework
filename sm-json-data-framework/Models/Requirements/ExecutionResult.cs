@@ -139,7 +139,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to open the lock</param>
         public void ApplyOpenedLock(NodeLock nodeLock, Strat strat)
         {
-            OpenedLocks = OpenedLocks.Values.Append((openedLock: nodeLock, stratUsed: strat)).ToDictionary(pair => pair.openedLock.Name);
+            OpenedLocks = OpenedLocks.Values
+                .Append((openedLock: nodeLock, stratUsed: strat))
+                .ToDictionary(pair => pair.openedLock.Name);
             ResultingState.ApplyOpenLock(nodeLock);
         }
 
@@ -150,7 +152,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="strat">The strat used to bypass the lock</param>
         public void ApplyBypassedLock(NodeLock nodeLock, Strat strat)
         {
-            BypassedLocks = BypassedLocks.Values.Append((bypassedLock: nodeLock, stratUsed: strat)).ToDictionary(pair => pair.bypassedLock.Name);
+            BypassedLocks = BypassedLocks.Values
+                .Append((bypassedLock: nodeLock, stratUsed: strat))
+                .ToDictionary(pair => pair.bypassedLock.Name);
             ResultingState.ApplyBypassLock(nodeLock);
         }
 
@@ -162,7 +166,10 @@ namespace sm_json_data_framework.Models.Requirements
         {
             if (!ResultingState.ActiveGameFlags.ContainsFlag(gameFlag))
             {
-                ActivatedGameFlags = ActivatedGameFlags.Values.Append(gameFlag).ToDictionary(gameFlag => gameFlag.Name);
+                ActivatedGameFlags = ActivatedGameFlags.Values
+                    .Append(gameFlag)
+                    .Distinct(ObjectReferenceEqualityComparer<GameFlag>.Default)
+                    .ToDictionary(gameFlag => gameFlag.Name);
                 ResultingState.ApplyAddGameFlag(gameFlag);
             }
         }
@@ -217,7 +224,10 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="items">The items</param>
         public void AddItemInvolved(Item item)
         {
-            ItemsInvolved = ItemsInvolved.Values.Append(item).ToDictionary(item => item.Name);
+            ItemsInvolved = ItemsInvolved.Values
+                .Append(item)
+                .Distinct(ObjectReferenceEqualityComparer<Item>.Default)
+                .ToDictionary(item => item.Name);
         }
 
         /// <summary>
@@ -227,7 +237,10 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="items">The items</param>
         public void AddItemsInvolved(IEnumerable<Item> items)
         {
-            ItemsInvolved = ItemsInvolved.Values.Concat(items).ToDictionary(item => item.Name);
+            ItemsInvolved = ItemsInvolved.Values
+                .Concat(items)
+                .Distinct(ObjectReferenceEqualityComparer<Item>.Default)
+                .ToDictionary(item => item.Name);
         }
 
         /// <summary>
@@ -236,7 +249,10 @@ namespace sm_json_data_framework.Models.Requirements
         /// <param name="items">The items</param>
         public void AddDamageReducingItemsInvolved(IEnumerable<Item> items)
         {
-            DamageReducingItemsInvolved = DamageReducingItemsInvolved.Values.Concat(items).ToDictionary(item => item.Name);
+            DamageReducingItemsInvolved = DamageReducingItemsInvolved.Values
+                .Concat(items)
+                .Distinct(ObjectReferenceEqualityComparer<Item>.Default)
+                .ToDictionary(item => item.Name);
         }
 
         /// <summary>

@@ -283,6 +283,50 @@ namespace sm_json_data_framework.Models.Requirements
         public IList<IUnfinalizedLogicalElement> LogicalElements { get; private set; } = new List<IUnfinalizedLogicalElement>();
 
         /// <summary>
+        /// Returns the nth (based on index) logical element of type T found within this UnfinalizedLogicalRequirements 
+        /// (and which also optionally respects the provided predicate), if found. Return null otherwise.
+        /// </summary>
+        /// <typeparam name="T">The type of logical element to find</typeparam>
+        /// <param name="index">The 0-based index of the element to return, among those of type T which respect the predicate (if provided)</param>
+        /// <param name="predicate">An optional preidcate which, if provided, will filter the T instances that are found.</param>
+        /// <returns></returns>
+        public T LogicalElement<T>(int index, Func<T, bool> predicate = null) where T : IUnfinalizedLogicalElement
+        {
+            IEnumerable<T> elements = LogicalElementsTyped<T>();
+            if (predicate != null)
+            {
+                elements = elements.Where(predicate);
+            }
+
+            return elements
+                .Skip(index)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Returns all logical elements of type T within this UnfinalizedLogicalRequirements which respect the provided predicate.
+        /// </summary>
+        /// <typeparam name="T">The type of logical elements to find</typeparam>
+        /// <param name="predicate">The predicate to filter by</param>
+        /// <returns></returns>
+        public IEnumerable<T> LogicalElementsWhere<T>(Func<T, bool> predicate) where T : IUnfinalizedLogicalElement
+        {
+            return LogicalElementsTyped<T>()
+                .Where(predicate);
+        }
+
+        /// <summary>
+        /// Returns all logical elements of type T within this UnfinalizedLogicalRequirements.
+        /// </summary>
+        /// <typeparam name="T">The type of logical elements to find</typeparam>
+        /// <returns></returns>
+        public IEnumerable<T> LogicalElementsTyped<T>() where T : IUnfinalizedLogicalElement
+        {
+            return LogicalElements
+                .OfType<T>();
+        }
+
+        /// <summary>
         /// Goes through all logical elements within this LogicalRequirements (and all LogicalRequirements within any of them),
         /// attempting to initialize any property that is an object referenced by another property(which is its identifier).
         /// </summary>
