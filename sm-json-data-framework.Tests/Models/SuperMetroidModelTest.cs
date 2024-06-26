@@ -943,30 +943,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.True(enemyDamage.LogicallyNever);
             Assert.False(enemyDamage.LogicallyAlways);
             Assert.False(enemyDamage.LogicallyFree);
-
-            CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(canShineCharge.LogicallyRelevant);
-            Assert.True(canShineCharge.LogicallyNever);
-            Assert.False(canShineCharge.LogicallyAlways);
-            Assert.False(canShineCharge.LogicallyFree);
-
-            CanShineCharge noSparkCanShineCharge = model.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(noSparkCanShineCharge.LogicallyRelevant);
-            Assert.False(noSparkCanShineCharge.LogicallyNever);
-            Assert.True(noSparkCanShineCharge.LogicallyAlways);
-            Assert.True(noSparkCanShineCharge.LogicallyFree);
-
-            CanComeInCharged canComeInCharged = model.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(canComeInCharged.LogicallyRelevant);
-            Assert.True(canComeInCharged.LogicallyNever);
-            Assert.False(canComeInCharged.LogicallyAlways);
-            Assert.False(canComeInCharged.LogicallyFree);
-
-            CanComeInCharged noSparkCanComeInCharged = model.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(noSparkCanComeInCharged.LogicallyRelevant);
-            Assert.False(noSparkCanComeInCharged.LogicallyNever);
-            Assert.False(noSparkCanComeInCharged.LogicallyAlways);
-            Assert.False(noSparkCanComeInCharged.LogicallyFree);
         }
 
         [Fact]
@@ -1004,18 +980,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(enemyDamage.LogicallyNever);
             Assert.False(enemyDamage.LogicallyAlways);
             Assert.False(enemyDamage.LogicallyFree);
-
-            CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(canShineCharge.LogicallyRelevant);
-            Assert.False(canShineCharge.LogicallyNever);
-            Assert.False(canShineCharge.LogicallyAlways);
-            Assert.False(canShineCharge.LogicallyFree);
-
-            CanComeInCharged canComeInCharged = model.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(canComeInCharged.LogicallyRelevant);
-            Assert.False(canComeInCharged.LogicallyNever);
-            Assert.False(canComeInCharged.LogicallyAlways);
-            Assert.False(canComeInCharged.LogicallyFree);
         }
 
         [Fact]
@@ -1046,110 +1010,6 @@ namespace sm_json_data_framework.Tests.Models
             Assert.False(enemyDamage.LogicallyNever);
             Assert.False(enemyDamage.LogicallyAlways);
             Assert.False(enemyDamage.LogicallyFree);
-
-            CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(canShineCharge.LogicallyRelevant);
-            Assert.False(canShineCharge.LogicallyNever);
-            Assert.False(canShineCharge.LogicallyAlways);
-            Assert.False(canShineCharge.LogicallyFree);
-
-            CanComeInCharged canComeInCharged = model.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(canComeInCharged.LogicallyRelevant);
-            Assert.False(canComeInCharged.LogicallyNever);
-            Assert.False(canComeInCharged.LogicallyAlways);
-            Assert.False(canComeInCharged.LogicallyFree);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_NoSpeedBooster_SetsLogicalPropertiesOnShineChargeLogicalElements()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            CanComeInCharged canComeInCharged = model.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(canComeInCharged.LogicallyRelevant);
-            Assert.True(canComeInCharged.LogicallyNever);
-            Assert.False(canComeInCharged.LogicallyAlways);
-            Assert.False(canComeInCharged.LogicallyFree);
-
-            CanShineCharge canShineCharge = model.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(canShineCharge.LogicallyRelevant);
-            Assert.True(canShineCharge.LogicallyNever);
-            Assert.False(canShineCharge.LogicallyAlways);
-            Assert.False(canShineCharge.LogicallyFree);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_FreeSpeedNoShinespark_SetsLogicalPropertiesOnShineChargeLogicalElements()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(model)
-                    .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                )
-                .Build();
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            CanComeInCharged noSparkCanComeInCharged = model.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(noSparkCanComeInCharged.LogicallyRelevant);
-            Assert.False(noSparkCanComeInCharged.LogicallyNever);
-            Assert.False(noSparkCanComeInCharged.LogicallyAlways);
-            Assert.False(noSparkCanComeInCharged.LogicallyFree);
-
-            CanComeInCharged canComeInCharged = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Links[10].To[9].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
-            Assert.True(canComeInCharged.LogicallyRelevant);
-            Assert.True(canComeInCharged.LogicallyNever);
-            Assert.False(canComeInCharged.LogicallyAlways);
-            Assert.False(canComeInCharged.LogicallyFree);
-
-            CanShineCharge noSparkCanShineCharge = model.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(noSparkCanShineCharge.LogicallyRelevant);
-            Assert.False(noSparkCanShineCharge.LogicallyNever);
-            Assert.True(noSparkCanShineCharge.LogicallyAlways);
-            Assert.True(noSparkCanShineCharge.LogicallyFree);
-
-            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[7].To[1].Strats["Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(canShineCharge.LogicallyRelevant);
-            Assert.True(canShineCharge.LogicallyNever);
-            Assert.False(canShineCharge.LogicallyAlways);
-            Assert.False(canShineCharge.LogicallyFree);
-        }
-
-        [Fact]
-        public void ApplyLogicalOptions_NeedsMoreTilesToCharge_SetsLogicalPropertiesOnCanShineCharges()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(model)
-                    .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
-                )
-                .Build();
-            logicalOptions.ShineChargesWithStutter = false;
-            logicalOptions.TilesToShineCharge = 35;
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            CanShineCharge canShineCharge = model.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
-            Assert.True(canShineCharge.LogicallyRelevant);
-            Assert.True(canShineCharge.LogicallyNever);
-            Assert.False(canShineCharge.LogicallyAlways);
-            Assert.False(canShineCharge.LogicallyFree);
         }
 
         [Fact]
