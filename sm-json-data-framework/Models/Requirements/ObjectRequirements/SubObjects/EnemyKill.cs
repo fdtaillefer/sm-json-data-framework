@@ -18,15 +18,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public EnemyKill(UnfinalizedEnemyKill sourceElement, Action<EnemyKill> mappingsInsertionCallback, ModelFinalizationMappings mappings)
             : base(sourceElement, mappingsInsertionCallback)
         {
-            GroupedEnemyNames = sourceElement.GroupedEnemyNames.Select(group => group.AsReadOnly()).ToList().AsReadOnly();
             GroupedEnemies = sourceElement.GroupedEnemies.Select(group => group.Select(enemy => enemy.Finalize(mappings)).ToList().AsReadOnly()).ToList().AsReadOnly();
             ExplicitWeapons = sourceElement.ExplicitWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
             ExcludedWeapons = sourceElement.ExcludedWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
             ValidWeapons = sourceElement.ValidWeapons.Select(weapon => weapon.Finalize(mappings)).ToDictionary(weapon => weapon.Name).AsReadOnly();
             FarmableAmmo = sourceElement.FarmableAmmo.ToHashSet().AsReadOnly();
         }
-
-        public IReadOnlyList<IReadOnlyList<string>> GroupedEnemyNames { get; }
 
         /// <summary>
         /// The enemies that this element's GroupedEnemyNames reference. These enemies are the enemies that must be killed,
@@ -421,7 +418,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// <summary>
         /// <para>Only available after a call to <see cref="InitializeReferencedLogicalElementProperties(UnfinalizedSuperMetroidModel, UnfinalizedRoom)"/>.</para>
         /// <para>The weapons that Samus may attempt to use to resolve this EnemyKill. This is built based on ExplicitWeapons, ExcludedWeapons,
-        /// and the list of all existing weapons.</para>
+        /// and the list of all existing weapons (excluding situational weapons as well as weapons all enemies in this EnemyKill are invulnerable to).</para>
         /// </summary>
         public IList<UnfinalizedWeapon> ValidWeapons { get; set; }
 
@@ -486,7 +483,23 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
             ExcludedWeapons = excludedWeapons.Distinct().ToList();
 
-            List<UnfinalizedWeapon> validWeapons = new List<UnfinalizedWeapon>();
+            // Figure out the list of weapons that all enemies in this EnemyKill are immune to.
+            // We'll be able to remove those from the list of valid weapons since they can't kill anything in the group.
+            List<UnfinalizedWeapon> immuneWeapons = null;
+            List<UnfinalizedEnemy> ungroupedEnemies = GroupedEnemies.SelectMany(group => group).Distinct(ObjectReferenceEqualityComparer<UnfinalizedEnemy>.Default).ToList();
+            foreach(UnfinalizedEnemy enemy in ungroupedEnemies)
+            {
+                if (immuneWeapons == null)
+                {
+                    immuneWeapons = new(enemy.InvulnerableWeapons);
+                }
+                else
+                {
+                    immuneWeapons = immuneWeapons.Intersect(enemy.InvulnerableWeapons, ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default).ToList();
+                }
+            }
+
+            List<UnfinalizedWeapon> validWeapons = new ();
             // If some explicit weapons were provided, only they are allowed. Then take away any excluded weapons.
             if (ExplicitWeapons.Any())
             {
@@ -497,7 +510,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             {
                 validWeapons.AddRange(model.Weapons.Values.Where(w => !w.Situational).Except(ExcludedWeapons, ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default));
             }
-            ValidWeapons = validWeapons;
+            ValidWeapons = validWeapons.Except(immuneWeapons, ObjectReferenceEqualityComparer<UnfinalizedWeapon>.Default).ToList();
 
             return unhandled.Distinct();
         }

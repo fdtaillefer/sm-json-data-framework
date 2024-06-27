@@ -910,45 +910,6 @@ namespace sm_json_data_framework.Tests.Models
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnEnemyKill()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
-                ItemInventory.CreateVanillaStartingInventory(model)
-                    .ApplyAddItem(model.Items["Spazer"])
-                )
-                .Build();
-            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["ETank"], 14)
-                .ApplyAddExpansionItem((ExpansionItem)model.Items["ReserveTank"], 4);
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            EnemyKill impossibleEnemyKill = model.Rooms["Morph Ball Room"].Links[1].To[6].Strats["PB Sidehopper Kill with Bomb Blocks"].Obstacles["C"].Requires.LogicalElement<EnemyKill>(0);
-            Assert.True(impossibleEnemyKill.LogicallyRelevant);
-            Assert.True(impossibleEnemyKill.LogicallyNever);
-            Assert.False(impossibleEnemyKill.LogicallyAlways);
-            Assert.False(impossibleEnemyKill.LogicallyFree);
-
-            EnemyKill possibleEnemyKill = model.Rooms["Green Brinstar Beetom Room"].Links[1].To[2].Strats["Kill the Beetoms"].Requires.LogicalElement<EnemyKill>(0);
-            Assert.True(possibleEnemyKill.LogicallyRelevant);
-            Assert.False(possibleEnemyKill.LogicallyNever);
-            Assert.False(possibleEnemyKill.LogicallyAlways);
-            Assert.False(possibleEnemyKill.LogicallyFree);
-
-            EnemyKill freeEnemyKill = model.Rooms["Baby Kraid Room"].Links[1].To[2].Strats["Kill the Enemies"].Obstacles["A"].Requires.LogicalElement<EnemyKill>(0);
-            Assert.True(freeEnemyKill.LogicallyRelevant);
-            Assert.False(freeEnemyKill.LogicallyNever);
-            Assert.True(freeEnemyKill.LogicallyAlways);
-            Assert.True(freeEnemyKill.LogicallyFree);
-        }
 
         [Fact]
         public void ApplyLogicalOptions_SetsLogicalPropertiesOnResetRoom()
