@@ -22,7 +22,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
     {
         private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
         private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
-
         private static UnfinalizedSuperMetroidModel UnfinalizedModelForModification() => new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
         #region Tests for construction from unfinalized model

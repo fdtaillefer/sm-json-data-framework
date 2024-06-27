@@ -1,7 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Models;
+﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
@@ -13,11 +11,10 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
-using NuGet.Frameworks;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Utils;
-using System.Reflection;
 using sm_json_data_framework.Models.Requirements;
+using sm_json_data_framework.Models.Enemies;
 
 namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.SubObjects
 {
@@ -25,6 +22,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
     {
         private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
         private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
+        private static UnfinalizedSuperMetroidModel UnfinalizedModelForModification() => new UnfinalizedSuperMetroidModel(StaticTestObjects.RawModel);
 
         #region Tests for construction from unfinalized model
 
@@ -265,9 +263,60 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             Assert.Null(result);
         }
 
-        // TESTME Mixed group of enemies, some of which require ammo, uses mixed weapons. But no case for it in vanilla model
+        [Fact]
+        public void Execute_MixGroupWithPartialAmmoRequirement_KillsWithMultipleWeapons()
+        {
+            // Given
+            UnfinalizedSuperMetroidModel unfinalizedModel = UnfinalizedModelForModification();
+            UnfinalizedEnemyKill newEnemyKill = new UnfinalizedEnemyKill();
+            newEnemyKill.ExplicitWeapons = new List<UnfinalizedWeapon>();
+            newEnemyKill.ExcludedWeapons = new List<UnfinalizedWeapon>();
+            newEnemyKill.GroupedEnemyNames.Add(new List<string> { "Reo", "Beetom" });
+            newEnemyKill.GroupedEnemies = new List<IList<UnfinalizedEnemy>> { new List<UnfinalizedEnemy> { unfinalizedModel.Enemies["Reo"], unfinalizedModel.Enemies["Beetom"] } };
+            unfinalizedModel.Rooms["Landing Site"].Links[5].To[2].Strats["Base"].Requires.LogicalElements.Add(newEnemyKill);
 
-        // TESTME Mixed group of enemies, some of which we don't have weapons for, fails. But no case for it in vanilla model
+            SuperMetroidModel model = unfinalizedModel.Finalize();
+            EnemyKill enemyKill = model.Rooms["Landing Site"].Links[5].To[2].Strats["Base"]
+                .Requires.LogicalElement<EnemyKill>(0);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem("Missile")
+                .ApplyRefillResources();
+
+            // When
+            ExecutionResult result = enemyKill.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectKilledEnemy("Beetom", ("Missile", 1))
+                .ExpectKilledEnemy("Reo", (SuperMetroidModel.POWER_BEAM_NAME, 3))
+                .ExpectResourceVariation(RechargeableResourceEnum.Missile, -1)
+                .AssertRespectedBy(result);
+        }
+
+        [Fact]
+        public void Execute_MixGroupWithPartialUnkillable_Fails()
+        {
+            // Given
+            UnfinalizedSuperMetroidModel unfinalizedModel = UnfinalizedModelForModification();
+            UnfinalizedEnemyKill newEnemyKill = new UnfinalizedEnemyKill();
+            newEnemyKill.ExplicitWeapons = new List<UnfinalizedWeapon>();
+            newEnemyKill.ExcludedWeapons = new List<UnfinalizedWeapon>();
+            newEnemyKill.GroupedEnemyNames.Add(new List<string> { "Reo", "Beetom" });
+            newEnemyKill.GroupedEnemies = new List<IList<UnfinalizedEnemy>> { new List<UnfinalizedEnemy> { unfinalizedModel.Enemies["Reo"], unfinalizedModel.Enemies["Beetom"] } };
+            unfinalizedModel.Rooms["Landing Site"].Links[5].To[2].Strats["Base"].Requires.LogicalElements.Add(newEnemyKill);
+
+            SuperMetroidModel model = unfinalizedModel.Finalize();
+            EnemyKill enemyKill = model.Rooms["Landing Site"].Links[5].To[2].Strats["Base"]
+                .Requires.LogicalElement<EnemyKill>(0);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyRefillResources();
+
+            // When
+            ExecutionResult result = enemyKill.Execute(model, inGameState);
+
+            // Expect
+            Assert.Null(result);
+        }
 
         #endregion
 
