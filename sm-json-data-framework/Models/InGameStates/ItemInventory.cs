@@ -77,6 +77,9 @@ namespace sm_json_data_framework.Models.InGameStates
             return new ItemInventory(this);
         }
 
+        public int InGameItemCount => InternalNonConsumableItems.Values.Where(i => i is InGameItem).Count()
+                + InternalExpansionItems.Values.Where(i => i.item is InGameItem).Sum(pair => pair.count);
+
         /// <summary>
         /// Creates and returns a clone of this inventory, but with the provided base resource maximums
         /// </summary>
@@ -274,6 +277,11 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <returns>The new copy, as a full-fledged ItemInventory</returns>
         public new ItemInventory Clone();
+
+        /// <summary>
+        /// The number of in-game pickups found in this inventory.
+        /// </summary>
+        public int InGameItemCount { get; }
 
         /// <summary>
         /// Returns a clone of this inventory, but with the provided base resource Maximums

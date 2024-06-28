@@ -26,7 +26,7 @@ namespace sm_json_data_framework.Models.Navigation
             Description = description;
         }
 
-        public StratFilter(ISet<String> keys, string description)
+        public StratFilter(ISet<string> keys, string description)
         {
             Description = description;
             Keys = new HashSet<string>(keys);

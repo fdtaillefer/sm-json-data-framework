@@ -325,6 +325,102 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
+        #region Tests for InGameItemCount property
+
+        [Fact]
+        public void InGameItemCount_Empty_Returns0()
+        {
+            // Given
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums());
+
+            // When
+            int result = inventory.InGameItemCount;
+
+            // Expect
+            Assert.Equal(0, result);
+        }
+
+        [Fact]
+        public void InGameItemCount_OnlyNonInGameItems_Returns0()
+        {
+            // Given
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BEAM_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_SUIT_NAME]);
+
+            // When
+            int result = inventory.InGameItemCount;
+
+            // Expect
+            Assert.Equal(0, result);
+        }
+
+        [Fact]
+        public void InGameItemCount_OnlyConsumableItems_ReturnsCorrectAmount()
+        {
+            // Given
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddItem(Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                .ApplyAddItem(Model.Items["Morph"])
+                .ApplyAddItem(Model.Items["Grapple"]);
+
+            // When
+            int result = inventory.InGameItemCount;
+
+            // Expect
+            Assert.Equal(3, result);
+        }
+
+        [Fact]
+        public void InGameItemCount_VaryingExpansionItemCounts_ReturnsCorrectAmount()
+        {
+            // Given
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME]);
+
+            // When
+            int result = inventory.InGameItemCount;
+
+            // Expect
+            Assert.Equal(9, result);
+        }
+
+        [Fact]
+        public void InGameItemCount_MixOfEverything_ReturnsCorrectAmount()
+        {
+            // Given
+            ItemInventory inventory = new ItemInventory(ResourceCount.CreateVanillaBaseResourceMaximums())
+                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_BEAM_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.POWER_SUIT_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
+                .ApplyAddItem(Model.Items["Wave"])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.MISSILE_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.SUPER_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME])
+                .ApplyAddItem(Model.Items[SuperMetroidModel.ENERGY_TANK_NAME]);
+
+            // When
+            int result = inventory.InGameItemCount;
+
+            // Expect
+            Assert.Equal(11, result);
+        }
+
+        #endregion
+
         #region Tests for ResourceMaximums property
         [Theory]
         [MemberData(nameof(RechargeableResourceValues))]
@@ -520,7 +616,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         }
         #endregion
 
-        #region Tests for cLone()
+        #region Tests for clone()
         [Fact]
         public void Clone_CopiesCorrectly()
         {
