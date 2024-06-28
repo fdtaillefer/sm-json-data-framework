@@ -819,7 +819,7 @@ namespace sm_json_data_framework.Models.InGameStates
         }
 
         /// <summary>
-        /// Positions the in-game state at the node with the provided in-room ID.
+        /// Positions the in-game state at the node with the provided in-room ID. Note that this method is not responsible for actually executing the strat.
         /// </summary>
         /// <param name="nodeToVisitId">In-room ID of the node to go to</param>
         /// <param name="stratName">The name of the strat through which the node is being reached. Can be null. If not null, only makes sense if 

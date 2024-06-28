@@ -906,29 +906,5 @@ namespace sm_json_data_framework.Tests.Models
         }
 
         #endregion
-
-        #region Tests for ApplyLogicalOptions() that check applied logical properties
-
-        // Tests in this section belong more in individual classes' test, we can move them when those classes get some focus on their tests
-
-        [Fact]
-        public void ApplyLogicalOptions_SetsLogicalPropertiesOnResetRoom()
-        {
-            // Given
-            SuperMetroidModel model = NewModelForOptions();
-            LogicalOptions logicalOptions = new LogicalOptions();
-
-            // When
-            model.ApplyLogicalOptions(logicalOptions);
-
-            // Expect
-            ResetRoom resetRoom = model.Runways["Base Runway - Green Shaft Mid-Low Left Door (to Firefleas)"].Strats["Base"].Requires.LogicalElement<ResetRoom>(0);
-            Assert.True(resetRoom.LogicallyRelevant);
-            Assert.False(resetRoom.LogicallyNever);
-            Assert.False(resetRoom.LogicallyAlways);
-            Assert.False(resetRoom.LogicallyFree);
-        }
-
-        #endregion
     }
 }

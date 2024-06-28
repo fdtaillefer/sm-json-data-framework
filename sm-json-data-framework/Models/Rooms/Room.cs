@@ -82,7 +82,7 @@ namespace sm_json_data_framework.Models.Rooms
         public IReadOnlyDictionary<int, Link> Links { get; }
 
         /// <summary>
-        /// The obstacles that are in this room, mapped by Id.
+        /// The obstacles that are in this room, mapped by in-room Id.
         /// </summary>
         public IReadOnlyDictionary<string, RoomObstacle> Obstacles { get; }
 
