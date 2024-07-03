@@ -200,7 +200,7 @@ namespace sm_json_data_framework.Models.Rooms
             // Build a dictionary of resources that are spent while doing the execution of a cycle
             ResourceCount resourceVariation = requirementsResult.ResultingState.GetResourceVariationWith(inGameState);
             // Start with all consumable resources
-            IDictionary<ConsumableResourceEnum, int> costingResources = Enum.GetValues(typeof(ConsumableResourceEnum))
+            IDictionary<ConsumableResourceEnum, int> costingResources = Enum.GetValues< ConsumableResourceEnum>()
                 .Cast<ConsumableResourceEnum>()
                 // Invert the resource variation to convert it to a resource cost
                 .Select(resource => (resource: resource, cost: resourceVariation.GetAmount(resource) * -1))
@@ -218,7 +218,7 @@ namespace sm_json_data_framework.Models.Rooms
             EnemyDrops initialEffectiveDropRates = FarmCycle.RoomEnemy.Enemy.GetEffectiveDropRates(model, fullResources);
 
             // Build a dictionary containing the variation per cycle for each consmable resource
-            IDictionary<ConsumableResourceEnum, decimal> resourceVariationPerCycle = Enum.GetValues(typeof(ConsumableResourceEnum))
+            IDictionary<ConsumableResourceEnum, decimal> resourceVariationPerCycle = Enum.GetValues<ConsumableResourceEnum>()
                 .Cast<ConsumableResourceEnum>()
                 .ToDictionary(resource => resource, resource => CalculateResourceVariationPerCycle(model, resource, initialEffectiveDropRates, costingResources));
 
@@ -259,7 +259,7 @@ namespace sm_json_data_framework.Models.Rooms
             // Execute some farming to see if we can stabilize those resources before we run out.
 
             IEnumerable<ConsumableResourceEnum> notFullFarmableResources = farmableResources.Except(fullResources).ToArray();
-            IDictionary<ConsumableResourceEnum, decimal> resourceCounts = Enum.GetValues(typeof(ConsumableResourceEnum))
+            IDictionary<ConsumableResourceEnum, decimal> resourceCounts = Enum.GetValues<ConsumableResourceEnum>()
                 .Cast<ConsumableResourceEnum>()
                 .ToDictionary(resource => resource, resource => (decimal)inGameState.Resources.GetAmount(resource));
             EnemyDrops effectiveDropRates = initialEffectiveDropRates;
@@ -356,7 +356,7 @@ namespace sm_json_data_framework.Models.Rooms
                 EnemyDrops effectiveDropRates = FarmCycle.RoomEnemy.Enemy.GetEffectiveDropRates(model, farmableResources);
 
                 // Look for resources that meet the logical farming threshold, but didn't in the previous loops
-                newFarmableResources = Enum.GetValues(typeof(ConsumableResourceEnum))
+                newFarmableResources = Enum.GetValues<ConsumableResourceEnum>()
                     .Cast<ConsumableResourceEnum>()
                     .Except(farmableResources)
                     .Where(resource =>

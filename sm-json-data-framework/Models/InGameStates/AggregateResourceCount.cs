@@ -40,7 +40,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public ResourceCount GetVariationWith(ReadOnlyResourceCount other)
         {
             ResourceCount returnValue = new ResourceCount();
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 returnValue.ApplyAmount(currentResource, GetAmount(currentResource) - other.GetAmount(currentResource));
             }
@@ -68,7 +68,7 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             if (obj is ReadOnlyResourceCount count)
             {
-                foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
                 {
                     if (GetAmount(resource) != count.GetAmount(resource))
                     {
@@ -87,7 +87,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public override int GetHashCode()
         {
             HashCode hash = new();
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 hash.Add(GetAmount(resource));
             }

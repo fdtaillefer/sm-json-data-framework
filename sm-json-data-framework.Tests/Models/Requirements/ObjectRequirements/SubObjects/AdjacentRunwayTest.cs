@@ -35,7 +35,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .LogicalElement<AdjacentRunway>(0);
             Assert.Same(model.Rooms["Blue Brinstar Boulder Room"].Nodes[2], adjacentRunway.FromNode);
             Assert.Empty(adjacentRunway.InRoomPath);
-            foreach (PhysicsEnum physics in Enum.GetValues(typeof(PhysicsEnum)))
+            foreach (PhysicsEnum physics in Enum.GetValues<PhysicsEnum>())
             {
                 Assert.Contains(physics, adjacentRunway.Physics);
             }

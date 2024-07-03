@@ -33,7 +33,7 @@ namespace sm_json_data_framework.Options.ResourceValues
             // We are assuming that dead states (0 energy) won't show up. If we wanted to support that, we'd have to check specifically for it and give it a negative value too.
             // (but greater than the value for null)
             int value = 0;
-            foreach (ConsumableResourceEnum currentResource in Enum.GetValues(typeof(ConsumableResourceEnum)))
+            foreach (ConsumableResourceEnum currentResource in Enum.GetValues<ConsumableResourceEnum>())
             {
                 value += resources.GetAmount(currentResource) * FixedResourceValues[currentResource];
             }

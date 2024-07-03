@@ -380,7 +380,7 @@ namespace sm_json_data_framework.Models.Navigation
                 }
 
                 // Resource variation
-                foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                foreach (RechargeableResourceEnum currentResource in Enum.GetValues<RechargeableResourceEnum>())
                 {
                     int countAfter = ResourcesAfter.GetAmount(currentResource);
 

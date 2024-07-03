@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public static IEnumerable<object[]> RechargeableResourceValues()
         {
 
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 yield return new object[] { resource };
             }
@@ -43,7 +43,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public static IEnumerable<object[]> ConsumableResourceValues()
         {
 
-            foreach (ConsumableResourceEnum resource in Enum.GetValues(typeof(ConsumableResourceEnum)))
+            foreach (ConsumableResourceEnum resource in Enum.GetValues< ConsumableResourceEnum>())
             {
                 yield return new object[] { resource };
             }
@@ -283,7 +283,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
@@ -299,7 +299,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             Assert.Equal(expectedamount, inGameState.Resources.GetAmount(resource));
-            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 if (otherResource != resource)
                 {
@@ -320,7 +320,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
@@ -336,7 +336,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             Assert.Equal(expectedamount, inGameState.Resources.GetAmount(resource));
-            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 if (otherResource != resource)
                 {
@@ -361,7 +361,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
@@ -377,7 +377,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(resource));
-            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 if (otherResource != resource)
                 {
@@ -397,7 +397,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 // Don't put any reserve energy in, we're checking regular energy
                 if (loopResource != RechargeableResourceEnum.ReserveEnergy)
@@ -417,7 +417,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy));
-            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 if (otherResource != RechargeableResourceEnum.RegularEnergy && otherResource != RechargeableResourceEnum.ReserveEnergy)
                 {
@@ -437,7 +437,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 // Don't put any regular energy in, we're checking reserve energy
                 if (loopResource != RechargeableResourceEnum.RegularEnergy)
@@ -457,7 +457,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             Assert.Equal(expectedAmount, inGameState.Resources.GetAmount(RechargeableResourceEnum.ReserveEnergy));
-            foreach (RechargeableResourceEnum otherResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 if (otherResource != RechargeableResourceEnum.RegularEnergy && otherResource != RechargeableResourceEnum.ReserveEnergy)
                 {
@@ -654,7 +654,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach(RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach(RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 startResources.ApplyAmount(resource, initialAmount);
                 maxResources.ApplyAmount(resource, maxAmount);
@@ -670,7 +670,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             inGameState.ApplyRefillResources();
 
             // Expect
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             { 
                 Assert.Equal(maxAmount, inGameState.Resources.GetAmount(resource));
             }
@@ -685,7 +685,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Given
             SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceMaximums.ApplyAmount(resource, 100);
             }
@@ -741,7 +741,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Given
             SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceMaximums.ApplyAmount(resource, 100);
             }
@@ -772,7 +772,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Given
             SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceMaximums.ApplyAmount(resource, 100);
             }
@@ -801,7 +801,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Given
             SuperMetroidModel model = ReusableModel();
             ResourceCount resourceMaximums = new ResourceCount();
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceMaximums.ApplyAmount(resource, 100);
             }
@@ -832,10 +832,10 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             InGameState inGameState = new InGameState(StartConditions.CreateVanillaStartConditions(model));
 
             // When
-            IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops();
+            ISet<EnemyDropEnum> result = inGameState.GetUnneededDrops();
 
             // Expect
-            IEnumerable<EnemyDropEnum> expected = Enum.GetValues<EnemyDropEnum>().Except(new EnemyDropEnum[] { EnemyDropEnum.NoDrop });
+            ISet<EnemyDropEnum> expected = Enum.GetValues<EnemyDropEnum>().Except(new EnemyDropEnum[] { EnemyDropEnum.NoDrop }).ToHashSet();
             Assert.Equal(expected.Count(), result.Count());
             foreach (EnemyDropEnum drop in expected)
             {
@@ -852,7 +852,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 startResources.ApplyAmount(loopResource, initialAmount);
                 maxResources.ApplyAmount(loopResource, maxAmount);
@@ -864,7 +864,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops();
+            ISet<EnemyDropEnum> result = inGameState.GetUnneededDrops();
 
             // Expect
             Assert.Empty(result);
@@ -881,7 +881,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach (RechargeableResourceEnum loopResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 if (loopResource == energyResource)
                 {
@@ -900,7 +900,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             InGameState inGameState = new InGameState(startConditions);
 
             // When
-            IEnumerable<EnemyDropEnum> result = inGameState.GetUnneededDrops();
+            ISet<EnemyDropEnum> result = inGameState.GetUnneededDrops();
 
             // Expect
             // Although one type of energy is full, the other isn't, so energy drops are needed and should NOT be returned

@@ -18,7 +18,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface.InformationC
             ValidCommand = str => str.ToLower() == "sr";
             Execution = (navigator, command) =>
             {
-                foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                foreach (RechargeableResourceEnum currentResource in Enum.GetValues<RechargeableResourceEnum>())
                 {
                     Console.WriteLine($"{currentResource}: {navigator.CurrentInGameState.Resources.GetAmount(currentResource)} " +
                         $"out of {navigator.CurrentInGameState.ResourceMaximums.GetAmount(currentResource)}");

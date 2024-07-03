@@ -78,7 +78,7 @@ namespace sm_json_data_framework.Models.Navigation.ConsoleInterface
 
         private void OutputResources()
         {
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 Console.WriteLine($"{currentResource}: {Navigator.CurrentInGameState.Resources.GetAmount(currentResource)} " +
                     $"out of {Navigator.CurrentInGameState.ResourceMaximums.GetAmount(currentResource)}");

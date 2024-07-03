@@ -37,7 +37,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public static IEnumerable<object[]> RechargeableResourceValues()
         {
 
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 yield return new object[] { resource };
             }
@@ -51,7 +51,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public static IEnumerable<object[]> RechargeableResourceValuesWithExpansionItem()
         {
 
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 yield return new object[] { resource,
                     resource switch
@@ -627,7 +627,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             ResourceCount resourceCount = new ResourceCount();
             int value = 1;
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceCount.ApplyAmount(resource, value++);
             }
@@ -647,7 +647,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Single(clone.ExpansionItems);
             Assert.Contains(missilePack.Name, clone.ExpansionItems.Keys);
             Assert.Equal(2, clone.ExpansionItems[missilePack.Name].count);
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 Assert.Equal(resourceCount.GetAmount(resource), clone.BaseResourceMaximums.GetAmount(resource));
             }
@@ -692,7 +692,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
                 .ApplyAddItem(missilePack).ApplyAddItem(missilePack);
             ResourceCount resourceCount = new ResourceCount();
             int value = 1;
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceCount.ApplyAmount(resource, value++);
             }
@@ -708,7 +708,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             Assert.Single(clone.ExpansionItems);
             Assert.Contains(missilePack.Name, clone.ExpansionItems.Keys);
             Assert.Equal(2, clone.ExpansionItems[missilePack.Name].count);
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 Assert.Equal(resourceCount.GetAmount(resource), clone.BaseResourceMaximums.GetAmount(resource));
             }
@@ -720,7 +720,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             // Given
             ResourceCount resourceCount = new ResourceCount();
             int value = 1;
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 resourceCount.ApplyAmount(resource, value++);
             }

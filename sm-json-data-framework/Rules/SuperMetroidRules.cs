@@ -146,17 +146,17 @@ namespace sm_json_data_framework.Rules
         /// </summary>
         /// <param name="fullResources">Enumeration of full resources</param>
         /// <returns></returns>
-        public virtual IEnumerable<EnemyDropEnum> GetUnneededDrops(IEnumerable<RechargeableResourceEnum> fullResources)
+        public virtual ISet<EnemyDropEnum> GetUnneededDrops(IEnumerable<RechargeableResourceEnum> fullResources)
         {
-            return Enum.GetValues(typeof(EnemyDropEnum))
-                .Cast<EnemyDropEnum>()
+            return Enum.GetValues<EnemyDropEnum>()
                 .Where(drop => {
                     IEnumerable<RechargeableResourceEnum> dropResources = drop.GetRechargeableResources();
                     // Return all drops that actually refill anything (so never return "no drop")
                     // and for which all refilled resources are already full
                     return dropResources.Any()
                         && dropResources.Intersect(fullResources).Count() == dropResources.Count();
-                });
+                })
+                .ToHashSet();
         }
 
         /// <summary>
@@ -164,16 +164,17 @@ namespace sm_json_data_framework.Rules
         /// </summary>
         /// <param name="fullResources">Enumeration of full resources</param>
         /// <returns></returns>
-        public virtual IEnumerable<EnemyDropEnum> GetUnneededDrops(IEnumerable<ConsumableResourceEnum> fullResources)
+        public virtual ISet<EnemyDropEnum> GetUnneededDrops(IEnumerable<ConsumableResourceEnum> fullResources)
         {
-            return Enum.GetValues(typeof(EnemyDropEnum))
+            return Enum.GetValues<EnemyDropEnum>()
                 .Cast<EnemyDropEnum>()
                 .Where(drop => {
                     ConsumableResourceEnum? dropResource = drop.GetConsumableResource();
                     // Return all drops whose consumable resource is already full
                     return dropResource != null
                         && fullResources.Contains((ConsumableResourceEnum)dropResource);
-                });
+                })
+                .ToHashSet();
         }
 
         /// <summary>

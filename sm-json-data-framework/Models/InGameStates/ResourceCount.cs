@@ -24,7 +24,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public ResourceCount()
         {
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 Amounts.Add(currentResource, 0);
             }
@@ -62,7 +62,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public ResourceCount GetVariationWith(ReadOnlyResourceCount other)
         {
             ResourceCount returnValue = new ResourceCount();
-            foreach (RechargeableResourceEnum currentResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum currentResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 returnValue.ApplyAmount(currentResource, GetAmount(currentResource) - other.GetAmount(currentResource));
             }
@@ -159,7 +159,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public ResourceCount ApplyAmounts(ReadOnlyResourceCount other)
         {
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 Amounts[resource] = other.GetAmount(resource);
             }
@@ -221,7 +221,7 @@ namespace sm_json_data_framework.Models.InGameStates
         {
             if(obj is ReadOnlyResourceCount count)
             {
-                foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+                foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
                 {
                     if (GetAmount(resource) != count.GetAmount(resource))
                     {
@@ -240,7 +240,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public override int GetHashCode()
         {
             HashCode hash = new();
-            foreach (RechargeableResourceEnum resource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 hash.Add(Amounts[resource]);
             }

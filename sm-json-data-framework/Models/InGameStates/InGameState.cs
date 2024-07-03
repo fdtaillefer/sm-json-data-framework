@@ -188,7 +188,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// <returns>This, for chaining</returns>
         public InGameState ApplyRefillResources()
         {
-            foreach (RechargeableResourceEnum rechargeableResource in Enum.GetValues(typeof(RechargeableResourceEnum)))
+            foreach (RechargeableResourceEnum rechargeableResource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 ApplyRefillResource(rechargeableResource);
             }
@@ -202,19 +202,19 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public IEnumerable<RechargeableResourceEnum> GetFullRechargeableResources()
         {
-            return Enum.GetValues(typeof(RechargeableResourceEnum))
+            return Enum.GetValues< RechargeableResourceEnum>()
                 .Cast<RechargeableResourceEnum>()
                 .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
         public IEnumerable<ConsumableResourceEnum> GetFullConsumableResources()
         {
-            return Enum.GetValues(typeof(ConsumableResourceEnum))
+            return Enum.GetValues< ConsumableResourceEnum>()
                 .Cast<ConsumableResourceEnum>()
                 .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
-        public IEnumerable<EnemyDropEnum> GetUnneededDrops()
+        public ISet<EnemyDropEnum> GetUnneededDrops()
         {
             return Model.Rules.GetUnneededDrops(GetFullRechargeableResources());
         }
@@ -1066,7 +1066,7 @@ namespace sm_json_data_framework.Models.InGameStates
         /// Returns the enumeration of enemy drops that aren't needed by this in-game state because the associated resources are full.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<EnemyDropEnum> GetUnneededDrops();
+        public ISet<EnemyDropEnum> GetUnneededDrops();
 
         /// <summary>
         /// The read-only dictionary of game flags that are active in this InGameState, mapped by their name.

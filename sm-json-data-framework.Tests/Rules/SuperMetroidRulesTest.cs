@@ -1,4 +1,6 @@
 using sm_json_data_framework.Models.Enemies;
+using sm_json_data_framework.Models.Items;
+using sm_json_data_framework.Models.Requirements;
 
 namespace sm_json_data_framework.Rules
 {
@@ -209,6 +211,208 @@ namespace sm_json_data_framework.Rules
             Assert.Equal(expected, result);
 
         }
+        #endregion
+
+        #region Tests for GetUnneededDrops(RechargeableResourceEnum)
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_NoFullResources_ReturnsNone()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new();
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_AllResourcesFull_ReturnsAllButNoDrop()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = Enum.GetValues<RechargeableResourceEnum>().ToHashSet();
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(Enum.GetValues<EnemyDropEnum>().Length - 1, result.Count);
+            Assert.DoesNotContain(EnemyDropEnum.NoDrop, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_OnlyRegularEnergyFull_ReturnsNone()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new() { RechargeableResourceEnum.RegularEnergy };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_OnlyReserveEnergyFull_ReturnsNone()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new() { RechargeableResourceEnum.RegularEnergy };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_BothEnergiesFull_ReturnsBothEnergyDrops()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new() { RechargeableResourceEnum.RegularEnergy, RechargeableResourceEnum.ReserveEnergy };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(2, result.Count);
+            Assert.Contains(EnemyDropEnum.SmallEnergy, result);
+            Assert.Contains(EnemyDropEnum.BigEnergy, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_MissilesFull_ReturnsMissiles()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new() { RechargeableResourceEnum.Missile };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(1, result.Count);
+            Assert.Contains(EnemyDropEnum.Missile, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_SupersFull_ReturnsSupers()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new() { RechargeableResourceEnum.Super };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(1, result.Count);
+            Assert.Contains(EnemyDropEnum.Super, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsRechargeableResources_PowerBombsFull_ReturnsPowerBonbs()
+        {
+            // Given
+            HashSet<RechargeableResourceEnum> fullResources = new() { RechargeableResourceEnum.PowerBomb };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(1, result.Count);
+            Assert.Contains(EnemyDropEnum.PowerBomb, result);
+        }
+
+        #endregion
+
+        #region Tests for GetUnneededDrops(RechargeableResourceEnum)
+
+        [Fact]
+        public void GetUnneededDropsConsumableResources_NoFullResources_ReturnsNone()
+        {
+            // Given
+            HashSet<ConsumableResourceEnum> fullResources = new();
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsConsumableResources_AllResourcesFull_ReturnsAllButNoDrop()
+        {
+            // Given
+            HashSet<ConsumableResourceEnum> fullResources = Enum.GetValues<ConsumableResourceEnum>().ToHashSet();
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(Enum.GetValues<EnemyDropEnum>().Length - 1, result.Count);
+            Assert.DoesNotContain(EnemyDropEnum.NoDrop, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsConsumableResources_EnergyFull_ReturnsBothEnergyDrops()
+        {
+            // Given
+            HashSet<ConsumableResourceEnum> fullResources = new() { ConsumableResourceEnum.Energy };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(2, result.Count);
+            Assert.Contains(EnemyDropEnum.SmallEnergy, result);
+            Assert.Contains(EnemyDropEnum.BigEnergy, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsConsumableResources_MissilesFull_ReturnsMissiles()
+        {
+            // Given
+            HashSet<ConsumableResourceEnum> fullResources = new() { ConsumableResourceEnum.Missile };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(1, result.Count);
+            Assert.Contains(EnemyDropEnum.Missile, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsConsumableResources_SupersFull_ReturnsSupers()
+        {
+            // Given
+            HashSet<ConsumableResourceEnum> fullResources = new() { ConsumableResourceEnum.Super };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(1, result.Count);
+            Assert.Contains(EnemyDropEnum.Super, result);
+        }
+
+        [Fact]
+        public void GetUnneededDropsConsumableResources_PowerBombsFull_ReturnsPowerBonbs()
+        {
+            // Given
+            HashSet<ConsumableResourceEnum> fullResources = new() { ConsumableResourceEnum.PowerBomb };
+
+            // When
+            ISet<EnemyDropEnum> result = Rules.GetUnneededDrops(fullResources);
+
+            // Expect
+            Assert.Equal(1, result.Count);
+            Assert.Contains(EnemyDropEnum.PowerBomb, result);
+        }
+
         #endregion
     }
 }
