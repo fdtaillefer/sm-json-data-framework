@@ -10,6 +10,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
     public enum ObjectLogicalElementTypeEnum
     {
         And,
+        Not,
         Or,
 
         AcidFrames,
@@ -51,6 +52,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
             switch (type)
             {
                 case ObjectLogicalElementTypeEnum.And:
+                case ObjectLogicalElementTypeEnum.Not:
                 case ObjectLogicalElementTypeEnum.Or:
                     return ObjectLogicalElementSubTypeEnum.SubRequirement;
                 case ObjectLogicalElementTypeEnum.AcidFrames:

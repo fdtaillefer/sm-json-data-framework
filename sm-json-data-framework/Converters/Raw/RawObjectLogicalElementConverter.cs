@@ -78,10 +78,6 @@ namespace sm_json_data_framework.Converters.Raw
         private RawObjectLogicalElementWithSubRequirements CreateLogicalElementWithRequirements(ref Utf8JsonReader reader, JsonSerializerOptions options, 
             string propertyName, ObjectLogicalElementTypeEnum elementTypeEnum)
         {
-            if (reader.TokenType != JsonTokenType.StartArray)
-            {
-                throw new JsonException($"Logical element object '{elementTypeEnum}' should be an array");
-            }
             RawLogicalRequirements logicalRequirements = JsonSerializer.Deserialize<RawLogicalRequirements>(ref reader, options);
             RawObjectLogicalElementWithSubRequirements logicalElement = new RawObjectLogicalElementWithSubRequirements(propertyName, logicalRequirements);
 

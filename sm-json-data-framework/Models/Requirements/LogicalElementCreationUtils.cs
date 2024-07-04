@@ -25,6 +25,7 @@ namespace sm_json_data_framework.Models.Requirements
         public static ReadOnlyDictionary<ObjectLogicalElementTypeEnum, Type> DefaultObjectLogicalElementTypes = new Dictionary<ObjectLogicalElementTypeEnum, Type>
         {
             { ObjectLogicalElementTypeEnum.And, typeof(UnfinalizedAnd) },
+            { ObjectLogicalElementTypeEnum.Not, typeof(UnfinalizedNot) },
             { ObjectLogicalElementTypeEnum.Or, typeof(UnfinalizedOr) },
 
             { ObjectLogicalElementTypeEnum.AcidFrames, typeof(UnfinalizedAcidFrames) },

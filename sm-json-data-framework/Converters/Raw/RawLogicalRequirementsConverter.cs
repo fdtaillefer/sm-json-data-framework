@@ -17,36 +17,42 @@ namespace sm_json_data_framework.Converters.Raw
     {
         public override RawLogicalRequirements Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            // Logical requirements take the form of a json array
-            if (reader.TokenType != JsonTokenType.StartArray)
-            {
-                throw new JsonException("Logical requirements should be an array");
-            }
-
-            // Each element of the array will be a logical element.
-            // Read each element one at a time until we've gone through the array
             List<AbstractRawLogicalElement> logicalElements = new List<AbstractRawLogicalElement>();
-            JsonTokenType tokenType = reader.TokenType;
-            while (tokenType != JsonTokenType.EndArray)
+            // Logical requirements take the form of a json array or a single logical element
+            if (reader.TokenType == JsonTokenType.StartArray)
             {
-                reader.Read();
-
-                // Decide how to create current logical element depending on token type
-                tokenType = reader.TokenType;
-                if (tokenType != JsonTokenType.EndArray)
+                // Each element of the array will be a logical element.
+                // Read each element one at a time until we've gone through the array
+                JsonTokenType tokenType = reader.TokenType;
+                while (tokenType != JsonTokenType.EndArray)
                 {
-                    AbstractRawLogicalElement logicalElement = tokenType switch
-                    {
-                        JsonTokenType.String => JsonSerializer.Deserialize<RawStringLogicalElement>(ref reader, options),
-                        JsonTokenType.StartObject => JsonSerializer.Deserialize<AbstractRawObjectLogicalElement>(ref reader, options),
-                        // Other token types are not supported and will fail fast
-                    };
+                    reader.Read();
 
-                    logicalElements.Add(logicalElement);
+                    // Decide how to create current logical element depending on token type
+                    tokenType = reader.TokenType;
+                    if (tokenType != JsonTokenType.EndArray)
+                    {
+                        logicalElements.Add(InterpretLogicalElementToken(ref reader, options));
+                    }
                 }
+            }
+            else
+            {
+                logicalElements.Add(InterpretLogicalElementToken(ref reader, options));
             }
 
             return new RawLogicalRequirements(logicalElements);
+        }
+
+        private AbstractRawLogicalElement InterpretLogicalElementToken(ref Utf8JsonReader reader, JsonSerializerOptions options)
+        {
+            JsonTokenType tokenType = reader.TokenType;
+            return tokenType switch
+            {
+                JsonTokenType.String => JsonSerializer.Deserialize<RawStringLogicalElement>(ref reader, options),
+                JsonTokenType.StartObject => JsonSerializer.Deserialize<AbstractRawObjectLogicalElement>(ref reader, options),
+                _ => throw new NotImplementedException($"Token type {tokenType} is not supported in logical requirements."),
+            };
         }
 
         public override void Write(Utf8JsonWriter writer, RawLogicalRequirements value, JsonSerializerOptions options)
