@@ -650,6 +650,71 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in a Samus Eater, given the provided in-game state.
+        /// </summary>
+        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="samusEaterFrames">The duration (in frames) of the Samus eater exposure whose damage to calculate.</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateSamusEaterDamage(ReadOnlyInGameState inGameState, int samusEaterFrames)
+        {
+            return CalculateSamusEaterDamage(samusEaterFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in a Samus eater, in the best case scenario
+        /// (presumably both suits).
+        /// </summary>
+        /// <param name="samusEaterFrames">The duration (in frames) of the Samus eater exposure whose damage to calculate.</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCaseSamusEaterDamage(int samusEaterFrames, IReadOnlySet<string> removedItems)
+        {
+            return CalculateSamusEaterDamage(samusEaterFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
+        }
+
+        /// <summary>
+        /// Calculates and returns the damage Samus would take for spending the provided duration in a Samus eater, in the worst case scenario
+        /// (presumably suitless).
+        /// </summary>
+        /// <param name="samusEaterFrames">The duration (in frames) of the Samus eater exposure whose damage to calculate.</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCaseSamusEaterDamage(int samusEaterFrames, ReadOnlyItemInventory startingInventory)
+        {
+            return CalculateSamusEaterDamage(samusEaterFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+        }
+
+        private int CalculateSamusEaterDamage(int samusEaterFrames, bool hasVaria, bool hasGravity)
+        {
+            if (hasGravity)
+            {
+                return samusEaterFrames / 40;
+            }
+            else if (hasVaria)
+            {
+                return samusEaterFrames / 20;
+            }
+            else
+            {
+                return samusEaterFrames / 10;
+            }
+        }
+
+        /// <summary>
+        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
+        /// for a reduction in the damage returned by <see cref="CalculateSamusEaterDamage(ReadOnlyInGameState, int)"/>.<para>
+        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
+        /// </summary>
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <returns></returns>
+        public virtual IEnumerable<Item> GetSamusEaterDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        {
+            // Gravity supercedes Varia
+            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
+        }
+
+        /// <summary>
         /// Calculates and returns the damage Samus would take for executing a shinespark of the provided duration n times, given the provided in-game state.
         /// </summary>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>

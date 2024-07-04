@@ -27,10 +27,10 @@ namespace sm_json_data_framework.Tests.Models.Techs
             TechCategory techCategory = model.TechCategories["General"];
             Assert.Equal("General", techCategory.Name);
             Assert.Equal("General configuration techs", techCategory.Description);
-            Assert.Equal(4, techCategory.FirstLevelTechs.Count);
+            Assert.Equal(5, techCategory.FirstLevelTechs.Count);
             Assert.True(techCategory.FirstLevelTechs.ContainsKey("canHeatRun"));
             Assert.False(techCategory.FirstLevelTechs.ContainsKey("canWaterBreakFree"));
-            Assert.Equal(7, techCategory.Techs.Count);
+            Assert.Equal(8, techCategory.Techs.Count);
             Assert.True(techCategory.Techs.ContainsKey("canHeatRun"));
             Assert.True(techCategory.Techs.ContainsKey("canWaterBreakFree"));
         }

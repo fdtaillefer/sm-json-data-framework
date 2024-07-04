@@ -1,8 +1,8 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Models.Requirements;
-using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Tests.TestTools;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Integers
 {
-    public class DraygonElectricityFramesTest
+    public class SamusEaterFramesTest
     {
         private static SuperMetroidModel ReusableModel() => StaticTestObjects.UnmodifiableModel;
         private static SuperMetroidModel NewModelForOptions() => StaticTestObjects.UnfinalizedModel.Finalize();
@@ -28,8 +28,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             SuperMetroidModel model = ReusableModel();
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires.LogicalElement<DraygonElectricityFrames>(0);
-            Assert.Equal(60, electricityFrames.Frames);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires.LogicalElement<SamusEaterFrames>(0);
+            Assert.Equal(160, samusEaterFrames.Frames);
         }
 
         #endregion
@@ -41,15 +41,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            int result = electricityFrames.CalculateDamage(model, inGameState);
+            int result = samusEaterFrames.CalculateDamage(model, inGameState);
 
             // Expect
-            Assert.Equal(60, result);
+            Assert.Equal(16, result);
         }
 
         [Fact]
@@ -57,16 +57,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            int result = electricityFrames.CalculateDamage(model, inGameState);
+            int result = samusEaterFrames.CalculateDamage(model, inGameState);
 
             // Expect
-            Assert.Equal(30, result);
+            Assert.Equal(8, result);
         }
 
         [Fact]
@@ -74,16 +74,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
-            int result = electricityFrames.CalculateDamage(model, inGameState);
+            int result = samusEaterFrames.CalculateDamage(model, inGameState);
 
             // Expect
-            Assert.Equal(15, result);
+            Assert.Equal(4, result);
         }
 
         #endregion
@@ -95,13 +95,13 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 39);
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 83);
 
             // When
-            ExecutionResult result = electricityFrames.Execute(model, inGameState);
+            ExecutionResult result = samusEaterFrames.Execute(model, inGameState);
 
             // Expect
             Assert.Null(result);
@@ -112,17 +112,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState()
-                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 38);
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 24);
 
             // When
-            ExecutionResult result = electricityFrames.Execute(model, inGameState);
+            ExecutionResult result = samusEaterFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -60)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -16)
                 .AssertRespectedBy(result);
         }
 
@@ -131,17 +131,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.VARIA_SUIT_NAME);
 
             // When
-            ExecutionResult result = electricityFrames.Execute(model, inGameState);
+            ExecutionResult result = samusEaterFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -30)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -8)
                 .ExpectDamageReducingItemInvolved(SuperMetroidModel.VARIA_SUIT_NAME)
                 .AssertRespectedBy(result);
         }
@@ -151,17 +151,17 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
 
             // When
-            ExecutionResult result = electricityFrames.Execute(model, inGameState);
+            ExecutionResult result = samusEaterFrames.Execute(model, inGameState);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -15)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -4)
                 .ExpectDamageReducingItemInvolved(SuperMetroidModel.GRAVITY_SUIT_NAME)
                 .AssertRespectedBy(result);
         }
@@ -171,18 +171,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
-            InGameState inGameState = model.CreateInitialGameState()
-                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
-                .ApplyRefillResources();
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
+            InGameState inGameState = model.CreateInitialGameState();
 
             // When
-            ExecutionResult result = electricityFrames.Execute(model, inGameState, times: 2);
+            ExecutionResult result = samusEaterFrames.Execute(model, inGameState, times: 2);
 
             // Expect
             new ExecutionResultValidator(model, inGameState)
-                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -120)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -32)
                 .AssertRespectedBy(result);
         }
 
@@ -191,15 +189,15 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
         #region Tests for ApplyLogicalOptions() that check applied logical properties
 
         [Fact]
-        public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalPropertiesOnDamageLogicalElements()
+        public void ApplyLogicalOptions_LessPossibleEnergyThanBestCaseDamage_SetsLogicalProperties()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
-            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
-            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 60);
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums()
+                .ApplyAmount(RechargeableResourceEnum.RegularEnergy, 16);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
@@ -213,16 +211,16 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
-            Assert.True(electricityFrames.LogicallyRelevant);
-            Assert.True(electricityFrames.LogicallyNever);
-            Assert.False(electricityFrames.LogicallyAlways);
-            Assert.False(electricityFrames.LogicallyFree);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
+            Assert.True(samusEaterFrames.LogicallyRelevant);
+            Assert.True(samusEaterFrames.LogicallyNever);
+            Assert.False(samusEaterFrames.LogicallyAlways);
+            Assert.False(samusEaterFrames.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_NormalPossibleEnergy_SetsLogicalPropertiesOnDamageLogicalElements()
+        public void ApplyLogicalOptions_NormalPossibleEnergy_SetsLogicalProperties()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
@@ -230,6 +228,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
                 .RegisterRemovedItem(SuperMetroidModel.VARIA_SUIT_NAME)
                 .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME);
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 16);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
@@ -246,22 +245,22 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
-            Assert.True(electricityFrames.LogicallyRelevant);
-            Assert.False(electricityFrames.LogicallyNever);
-            Assert.False(electricityFrames.LogicallyAlways);
-            Assert.False(electricityFrames.LogicallyFree);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
+            Assert.True(samusEaterFrames.LogicallyRelevant);
+            Assert.False(samusEaterFrames.LogicallyNever);
+            Assert.False(samusEaterFrames.LogicallyAlways);
+            Assert.False(samusEaterFrames.LogicallyFree);
         }
 
         [Fact]
-        public void ApplyLogicalOptions_BothSuitsFree_SetsLogicalPropertiesOnDamageLogicalElements()
+        public void ApplyLogicalOptions_BothSuitsFree_SetsLogicalProperties()
         {
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
             ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
-            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 29);
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 16);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
                 .StartingInventory(
                     ItemInventory.CreateVanillaStartingInventory(model)
@@ -280,12 +279,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            DraygonElectricityFrames electricityFrames = model.Techs["canDraygonTurretGrappleJump"].Requires
-                .LogicalElement<DraygonElectricityFrames>(0, element => element.Frames == 60);
-            Assert.True(electricityFrames.LogicallyRelevant);
-            Assert.False(electricityFrames.LogicallyNever);
-            Assert.False(electricityFrames.LogicallyAlways);
-            Assert.False(electricityFrames.LogicallyFree);
+            SamusEaterFrames samusEaterFrames = model.Rooms["Alpha Power Bomb Room"].Nodes[1].CanLeaveCharged.First().Strats["Samus Eater"].Requires
+                .LogicalElement<SamusEaterFrames>(0, samusEaterFrames => samusEaterFrames.Frames == 160);
+            Assert.True(samusEaterFrames.LogicallyRelevant);
+            Assert.False(samusEaterFrames.LogicallyNever);
+            Assert.False(samusEaterFrames.LogicallyAlways);
+            Assert.False(samusEaterFrames.LogicallyFree);
         }
 
         #endregion

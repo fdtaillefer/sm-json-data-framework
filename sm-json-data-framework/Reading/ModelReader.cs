@@ -80,6 +80,7 @@ namespace sm_json_data_framework.Reading
         private static JsonSerializerOptions CreateJsonSerializerOptionsForRawModel()
         {
             JsonSerializerOptions options = CreateBaseJsonSerializerOptions();
+            options.AllowTrailingCommas = true;
 
             // Add custom converters for logical requirements and logical elements
             options.Converters.Add(new RawLogicalRequirementsConverter());

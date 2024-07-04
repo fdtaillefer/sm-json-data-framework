@@ -312,6 +312,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.In
                 .BaseResourceMaximums(baseResouces)
                 .StartingResources(baseResouces)
                 .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
 
             // When
             model.ApplyLogicalOptions(logicalOptions);

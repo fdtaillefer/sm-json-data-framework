@@ -20,6 +20,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
         LavaFrames,
         LavaPhysicsFrames,
         PreviousNode,
+        SamusEaterFrames,
         SpikeHits,
         ThornHits,
 
@@ -60,6 +61,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
                 case ObjectLogicalElementTypeEnum.LavaFrames:
                 case ObjectLogicalElementTypeEnum.LavaPhysicsFrames:
                 case ObjectLogicalElementTypeEnum.PreviousNode:
+                case ObjectLogicalElementTypeEnum.SamusEaterFrames:
                 case ObjectLogicalElementTypeEnum.SpikeHits:
                 case ObjectLogicalElementTypeEnum.ThornHits:
                     return ObjectLogicalElementSubTypeEnum.Integer;

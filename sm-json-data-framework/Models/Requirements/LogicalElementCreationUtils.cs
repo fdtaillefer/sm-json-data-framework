@@ -35,6 +35,7 @@ namespace sm_json_data_framework.Models.Requirements
             { ObjectLogicalElementTypeEnum.LavaFrames, typeof(UnfinalizedLavaFrames) },
             { ObjectLogicalElementTypeEnum.LavaPhysicsFrames, typeof(UnfinalizedLavaPhysicsFrames) },
             { ObjectLogicalElementTypeEnum.PreviousNode, typeof(UnfinalizedPreviousNode) },
+            { ObjectLogicalElementTypeEnum.SamusEaterFrames, typeof(UnfinalizedSamusEaterFrames) },
             { ObjectLogicalElementTypeEnum.SpikeHits, typeof(UnfinalizedSpikeHits) },
             { ObjectLogicalElementTypeEnum.ThornHits, typeof(UnfinalizedThornHits) },
 
@@ -51,7 +52,7 @@ namespace sm_json_data_framework.Models.Requirements
         }.AsReadOnly();
 
         /// <summary>
-        /// A dictionary that maps an ObjectLogicalElementTypeEnum to a a subtype of <see cref="AbstractUnfinalizedObjectLogicalElement"/>
+        /// A dictionary that maps a StringLogicalElementTypeEnum to a a subtype of <see cref="AbstractUnfinalizedStringLogicalElement"/>
         /// that is the default Class to use to represent a logical element of that type.
         /// </summary>
         public static ReadOnlyDictionary<StringLogicalElementTypeEnum, Type> DefaultStringLogicalElementTypes = new Dictionary<StringLogicalElementTypeEnum, Type>
