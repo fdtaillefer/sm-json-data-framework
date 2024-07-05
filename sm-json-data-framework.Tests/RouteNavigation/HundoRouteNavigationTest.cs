@@ -472,7 +472,6 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Caterpillar Room
-            navigator.MoveToNode(7).AssertSucceeded();
             navigator.MoveToNode(3).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
@@ -486,7 +485,8 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Caterpillar Room
-            navigator.MoveToNode(7).AssertSucceeded();
+            navigator.MoveToNode(2).AssertSucceeded();
+            navigator.MoveToNode(4).AssertSucceeded();
             navigator.MoveToNode(1).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
@@ -499,7 +499,6 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Caterpillar Room
-            navigator.MoveToNode(7).AssertSucceeded();
             navigator.MoveToNode(6).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
@@ -645,10 +644,9 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Pink Brin Hopper Room
-            navigator.MoveToNode(3).AssertSucceeded();
-            navigator.MoveToNode(1).AssertSucceeded();
+            navigator.MoveToNode(1, StratFilter.BreaksObstacle("A")).AssertSucceeded();
+            navigator.MoveToNode(1, StratFilter.BreaksObstacle("B")).AssertSucceeded();
             navigator.UnlockNode().AssertSucceeded();
-            navigator.MoveToNode(3).AssertSucceeded();
             navigator.MoveToNode(2).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
@@ -2129,6 +2127,7 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Metal Pirates Room
+            navigator.MoveToNode(2, StratFilter.BreaksObstacle("A")).AssertSucceeded();
             navigator.MoveToNode(1).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
@@ -2304,7 +2303,7 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Caterpillar Room
-            navigator.MoveToNode(7).AssertSucceeded();
+            navigator.MoveToNode(1).AssertSucceeded();
             navigator.MoveToNode(6).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 

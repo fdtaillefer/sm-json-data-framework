@@ -149,7 +149,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .LogicalElement<ResetRoom>(0, resetRoom => !resetRoom.MustStayPut && resetRoom.NodesToAvoid.ContainsKey(3) && resetRoom.Nodes.ContainsKey(4));
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(model.Rooms["Caterpillar Room"].Nodes[4])
-                .ApplyVisitNode(7, "Base")
                 .ApplyVisitNode(2, "Base");
 
             // When
@@ -169,9 +168,8 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .LogicalElement<ResetRoom>(0, resetRoom => !resetRoom.MustStayPut && resetRoom.NodesToAvoid.ContainsKey(3) && resetRoom.Nodes.ContainsKey(4));
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom(model.Rooms["Caterpillar Room"].Nodes[4])
-                .ApplyVisitNode(7, "Base")
+                .ApplyVisitNode(2, "Base")
                 .ApplyVisitNode(3, "Base")
-                .ApplyVisitNode(7, "Base")
                 .ApplyVisitNode(2, "Base");
 
             // When

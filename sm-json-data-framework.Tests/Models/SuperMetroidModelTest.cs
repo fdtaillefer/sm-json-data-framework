@@ -78,14 +78,14 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(9, model.TechCategories.Count);
             Assert.Equal(8, model.TechCategories["General"].Techs.Count);
             Assert.Equal(14, model.TechCategories["Movement"].Techs.Count);
-            Assert.Equal(24, model.TechCategories["Jumps"].Techs.Count);
+            Assert.Equal(25, model.TechCategories["Jumps"].Techs.Count);
             Assert.Equal(13, model.TechCategories["Bomb Jumps"].Techs.Count);
-            Assert.Equal(24, model.TechCategories["Enemy-Dependent"].Techs.Count);
+            Assert.Equal(25, model.TechCategories["Enemy-Dependent"].Techs.Count);
             Assert.Equal(5, model.TechCategories["Shots"].Techs.Count);
             Assert.Equal(4, model.TechCategories["Speed Booster"].Techs.Count);
             Assert.Equal(10, model.TechCategories["Miscellaneous"].Techs.Count);
             Assert.Equal(1, model.TechCategories["Meta"].Techs.Count);
-            Assert.Equal(103, model.Techs.Count);
+            Assert.Equal(105, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
             Assert.True(model.Nodes.Count > 20);

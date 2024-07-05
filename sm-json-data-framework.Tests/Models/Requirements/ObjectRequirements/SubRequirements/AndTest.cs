@@ -103,12 +103,12 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Spazer")
+                .RegisterRemovedItem("Ice")
                 .RegisterRemovedItem("HiJump")
                 .RegisterDisabledTech("canSuitlessMaridia");
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
                 ItemInventory.CreateVanillaStartingInventory(model)
-                    .ApplyAddItem(model.Items["Charge"])
+                    .ApplyAddItem(model.Items["Wave"])
                     .ApplyAddItem(model.Items["SpeedBooster"])
                 )
                 .Build();
@@ -117,9 +117,10 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             model.ApplyLogicalOptions(logicalOptions);
 
             // Expect
-            And oneFreeOneNeverSomePossible = model.Rooms["Metal Pirates Room"].Obstacles["A"].Requires.LogicalElement<Or>(1)
-                .LogicalRequirements.LogicalElement<And>(1);
-            Assert.Equal(5, oneFreeOneNeverSomePossible.LogicalRequirements.LogicalElements.Count()); // Sanity check to make sure we have the right And
+            
+            And oneFreeOneNeverSomePossible = model.Rooms["Metal Pirates Room"].Links[2].To[2].Strats["Charge Spazer Kill"].Obstacles["A"].Requires.LogicalElement<Or>(0)
+                .LogicalRequirements.LogicalElement<And>(2);
+            Assert.Equal(3, oneFreeOneNeverSomePossible.LogicalRequirements.LogicalElements.Count()); // Sanity check to make sure we have the right And
             Assert.True(oneFreeOneNeverSomePossible.LogicallyRelevant);
             Assert.True(oneFreeOneNeverSomePossible.LogicallyNever);
             Assert.False(oneFreeOneNeverSomePossible.LogicallyAlways);

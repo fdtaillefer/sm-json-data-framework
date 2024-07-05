@@ -318,7 +318,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             Assert.False(nonFreeStrat.LogicallyFree);
             Assert.False(nonFreeStrat.LogicallyNever);
 
-            Strat freeStrat = model.Rooms["Landing Site"].Links[5].To[4].Strats["Base"];
+            Strat freeStrat = model.Rooms["Landing Site"].Links[5].To[4].Strats["Over the Top"];
             Assert.True(freeStrat.LogicallyRelevant);
             Assert.True(freeStrat.LogicallyAlways);
             Assert.True(freeStrat.LogicallyFree);

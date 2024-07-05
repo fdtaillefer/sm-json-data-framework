@@ -56,7 +56,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             Assert.Empty(enemyKillWithExplicitWeapons.ExcludedWeapons);
             Assert.Empty(enemyKillWithExplicitWeapons.FarmableAmmo);
 
-            EnemyKill enemyKillWithDifferentEnemies = model.Rooms["Pink Brinstar Hopper Room"].Links[1].To[3].Strats["Fast Weapon Kill"].Obstacles["A"]
+            EnemyKill enemyKillWithDifferentEnemies = model.Rooms["Pink Brinstar Hopper Room"].Links[1].To[1].Strats["Fast Weapon Kill"].Obstacles["A"]
                 .Requires.LogicalElement<EnemyKill>(0);
             Assert.Equal(1, enemyKillWithDifferentEnemies.GroupedEnemies.Count);
             Assert.Equal(3, enemyKillWithDifferentEnemies.GroupedEnemies[0].Count);
