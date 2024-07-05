@@ -607,7 +607,7 @@ namespace sm_json_data_framework.Options
 
         /// <summary>
         /// An optional ResourceItemInventory which, if provided, expresses the max available number of each expansion item.
-        /// It also 
+        /// It also should have the correct base resource maximums, allowing it to express the max available capacity for all resources.
         /// </summary>
         public ReadOnlyResourceItemInventory AvailableResourceInventory { get; }
 

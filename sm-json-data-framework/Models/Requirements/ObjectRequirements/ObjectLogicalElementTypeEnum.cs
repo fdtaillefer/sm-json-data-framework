@@ -13,6 +13,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
         Not,
         Or,
 
+        ResourceCapacity,
+
         AcidFrames,
         DraygonElectricityFrames,
         EnergyAtMost,
@@ -39,6 +41,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
 
     public enum ObjectLogicalElementSubTypeEnum
     {
+        Array,
         Integer,
         String,
         SubObject,
@@ -55,6 +58,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
                 case ObjectLogicalElementTypeEnum.Not:
                 case ObjectLogicalElementTypeEnum.Or:
                     return ObjectLogicalElementSubTypeEnum.SubRequirement;
+                case ObjectLogicalElementTypeEnum.ResourceCapacity:
+                    return ObjectLogicalElementSubTypeEnum.Array;
                 case ObjectLogicalElementTypeEnum.AcidFrames:
                 case ObjectLogicalElementTypeEnum.DraygonElectricityFrames:
                 case ObjectLogicalElementTypeEnum.EnergyAtMost:

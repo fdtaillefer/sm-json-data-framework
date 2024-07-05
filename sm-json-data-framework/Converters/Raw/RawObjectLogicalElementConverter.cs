@@ -1,8 +1,10 @@
 ﻿using sm_json_data_framework.Models.Raw.Requirements;
 using sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.Arrays;
 using sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Strings;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
@@ -47,6 +49,9 @@ namespace sm_json_data_framework.Converters.Raw
                 case ObjectLogicalElementSubTypeEnum.SubRequirement:
                     logicalElement = CreateLogicalElementWithRequirements(ref reader, options, propertyName, elementTypeEnum);
                     break;
+                case ObjectLogicalElementSubTypeEnum.Array:
+                    logicalElement = CreateLogicalElementWithArray(ref reader, options, propertyName, elementTypeEnum);
+                    break;
                 case ObjectLogicalElementSubTypeEnum.Integer:
                     logicalElement = CreateLogicalElementWithInteger(ref reader, options, propertyName, elementTypeEnum);
                     break;
@@ -80,6 +85,22 @@ namespace sm_json_data_framework.Converters.Raw
         {
             RawLogicalRequirements logicalRequirements = JsonSerializer.Deserialize<RawLogicalRequirements>(ref reader, options);
             RawObjectLogicalElementWithSubRequirements logicalElement = new RawObjectLogicalElementWithSubRequirements(propertyName, logicalRequirements);
+
+            return logicalElement;
+        }
+
+        private AbstractRawObjectLogicalElement CreateLogicalElementWithArray(ref Utf8JsonReader reader, JsonSerializerOptions options,
+            string propertyName, ObjectLogicalElementTypeEnum elementTypeEnum)
+        {
+            if (reader.TokenType != JsonTokenType.StartArray)
+            {
+                throw new JsonException($"Logical element object '{elementTypeEnum}' should be an array");
+            }
+            Type typeToInstanciate = GetArrayLogicalElementType(elementTypeEnum);
+            Type listTypeToInstanciate = GetArrayLogicalElementListType(elementTypeEnum);
+            object itemList = JsonSerializer.Deserialize(ref reader, listTypeToInstanciate, options);
+
+            AbstractRawObjectLogicalElement logicalElement = (AbstractRawObjectLogicalElement)Activator.CreateInstance(typeToInstanciate, itemList);
 
             return logicalElement;
         }
@@ -135,6 +156,24 @@ namespace sm_json_data_framework.Converters.Raw
                 ObjectLogicalElementTypeEnum.EnemyDamage => typeof(RawEnemyDamage),
                 ObjectLogicalElementTypeEnum.EnemyKill => typeof(RawEnemyKill),
                 ObjectLogicalElementTypeEnum.ResetRoom => typeof(RawResetRoom),
+                _ => throw new NotSupportedException($"Element type {elementTypeEnum} is not supported here")
+            };
+        }
+
+        private Type GetArrayLogicalElementType(ObjectLogicalElementTypeEnum elementTypeEnum)
+        {
+            return elementTypeEnum switch
+            {
+                ObjectLogicalElementTypeEnum.ResourceCapacity => typeof(RawResourceCapacityLogicalElement),
+                _ => throw new NotSupportedException($"Element type {elementTypeEnum} is not supported here")
+            };
+        }
+
+        private Type GetArrayLogicalElementListType(ObjectLogicalElementTypeEnum elementTypeEnum)
+        {
+            return elementTypeEnum switch
+            {
+                ObjectLogicalElementTypeEnum.ResourceCapacity => typeof(List<RawResourceCapacityLogicalElementItem>),
                 _ => throw new NotSupportedException($"Element type {elementTypeEnum} is not supported here")
             };
         }
