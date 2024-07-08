@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
 
             // Expect
             
-            And oneFreeOneNeverSomePossible = model.Rooms["Metal Pirates Room"].Links[2].To[2].Strats["Charge Spazer Kill"].Obstacles["A"].Requires.LogicalElement<Or>(0)
+            And oneFreeOneNeverSomePossible = model.Rooms["Metal Pirates Room"].Links[3].To[3].Strats["Charge Spazer Kill"].Obstacles["A"].Requires.LogicalElement<Or>(0)
                 .LogicalRequirements.LogicalElement<And>(2);
             Assert.Equal(3, oneFreeOneNeverSomePossible.LogicalRequirements.LogicalElements.Count()); // Sanity check to make sure we have the right And
             Assert.True(oneFreeOneNeverSomePossible.LogicallyRelevant);

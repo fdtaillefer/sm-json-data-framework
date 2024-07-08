@@ -2128,7 +2128,8 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.InteractWithNode().AssertSucceeded();
 
             // Metal Pirates Room
-            navigator.MoveToNode(2, StratFilter.BreaksObstacle("A")).AssertSucceeded();
+            navigator.MoveToNode(3).AssertSucceeded();
+            navigator.MoveToNode(3, StratFilter.BreaksObstacle("A")).AssertSucceeded();
             navigator.MoveToNode(1).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
