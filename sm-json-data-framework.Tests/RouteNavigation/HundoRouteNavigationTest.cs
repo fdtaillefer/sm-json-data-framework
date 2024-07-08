@@ -1497,6 +1497,7 @@ namespace sm_json_data_framework.Tests.RouteNavigation
         {
             // East Ocean
             navigator.MoveToNode(3).AssertSucceeded();
+            navigator.MoveToNode(4).AssertSucceeded();
             navigator.MoveToNode(2).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
