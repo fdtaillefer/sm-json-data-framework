@@ -153,7 +153,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive (Morph)"].Requires.LogicalElement<AdjacentRunway>(0);
+            AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive BounceBall"].Requires.LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 80)
                 .ApplyEnterRoom("Kronic Boost Room", 3)
@@ -171,7 +171,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive (Morph)"].Requires.LogicalElement<AdjacentRunway>(0);
+            AdjacentRunway adjacentRunway = model.Rooms["Lava Dive Room"].Links[2].To[1].Strats["Lava Dive BounceBall"].Requires.LogicalElement<AdjacentRunway>(0);
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyEnterRoom("Kronic Boost Room", 3)
                 .ApplyEnterRoom("Lava Dive Room", 2);

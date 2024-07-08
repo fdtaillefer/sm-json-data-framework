@@ -598,6 +598,7 @@ namespace sm_json_data_framework.Tests.RouteNavigation
             navigator.MoveToNode(5).AssertSucceeded();
             navigator.MoveToNode(2).AssertSucceeded();
             navigator.MoveToNode(3).AssertSucceeded();
+            navigator.MoveToNode(6).AssertSucceeded();
             navigator.MoveToNode(4).AssertSucceeded();
             navigator.InteractWithNode().AssertSucceeded();
 
