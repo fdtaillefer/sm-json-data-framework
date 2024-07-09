@@ -73,19 +73,19 @@ namespace sm_json_data_framework.Tests.Models
             // 81 normal enemies and 14 bosses
             Assert.Equal(95, model.Enemies.Count);
 
-            Assert.Equal(25, model.Helpers.Count);
+            Assert.Equal(26, model.Helpers.Count);
 
             Assert.Equal(9, model.TechCategories.Count);
             Assert.Equal(8, model.TechCategories["General"].Techs.Count);
             Assert.Equal(17, model.TechCategories["Movement"].Techs.Count);
-            Assert.Equal(25, model.TechCategories["Jumps"].Techs.Count);
+            Assert.Equal(26, model.TechCategories["Jumps"].Techs.Count);
             Assert.Equal(13, model.TechCategories["Bomb Jumps"].Techs.Count);
             Assert.Equal(24, model.TechCategories["Enemy-Dependent"].Techs.Count);
             Assert.Equal(6, model.TechCategories["Shots"].Techs.Count);
             Assert.Equal(4, model.TechCategories["Speed Booster"].Techs.Count);
             Assert.Equal(12, model.TechCategories["Miscellaneous"].Techs.Count);
             Assert.Equal(1, model.TechCategories["Meta"].Techs.Count);
-            Assert.Equal(110, model.Techs.Count);
+            Assert.Equal(111, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
             Assert.True(model.Nodes.Count > 20);

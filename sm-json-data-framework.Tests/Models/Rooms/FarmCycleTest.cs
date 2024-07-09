@@ -127,7 +127,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            FarmCycle farmCycle = model.RoomEnemies["Plowerhouse Room Left Zebbo"].FarmCycles["Crouch over spawn point"];
+            FarmCycle farmCycle = model.RoomEnemies["Upper Norfair Farming Room Gamets"].FarmCycles["Gamet down shots"];
             InGameState inGameState = model.CreateInitialGameState();
 
             // When

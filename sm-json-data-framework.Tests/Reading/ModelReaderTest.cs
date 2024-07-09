@@ -60,10 +60,10 @@ namespace sm_json_data_framework.Reading
             // 81 normal enemies and 14 bosses
             Assert.Equal(95, model.Enemies.Count);
 
-            Assert.Equal(25, model.Helpers.Count);
+            Assert.Equal(26, model.Helpers.Count);
 
             Assert.Equal(9, model.TechCategories.Count);
-            Assert.Equal(110, model.Techs.Count);
+            Assert.Equal(111, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
             Assert.True(model.Nodes.Count > 20);
@@ -158,10 +158,10 @@ namespace sm_json_data_framework.Reading
             Assert.Equal(14, model.BossContainer.Enemies.Count());
 
             // Helpers
-            Assert.Equal(25, model.HelperContainer.Helpers.Count());
+            Assert.Equal(26, model.HelperContainer.Helpers.Count());
 
             // Techs
-            Assert.Equal(110, model.TechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList().Count());
+            Assert.Equal(111, model.TechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList().Count());
 
             // Starting items
             Assert.Equal(2, model.ItemContainer.StartingItems.Count());
