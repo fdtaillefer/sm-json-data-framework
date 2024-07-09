@@ -175,7 +175,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms
                 .ApplyConsumeResource(ConsumableResourceEnum.Super, 4)
                 .ApplyConsumeResource(ConsumableResourceEnum.PowerBomb, 4)
                 .ApplyConsumeResource(ConsumableResourceEnum.Energy, 80)
-                .ApplyEnterRoom(farmCycle.RoomEnemy.BetweenNodes[4]);
+                .ApplyEnterRoom(farmCycle.RoomEnemy.HomeNodes[7])
+                .ApplyDestroyObstacle("A");
 
             // When
             ExecutionResult result = farmCycle.FarmExecution.Execute(model, inGameState);

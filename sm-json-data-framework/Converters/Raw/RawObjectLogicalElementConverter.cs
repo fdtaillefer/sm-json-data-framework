@@ -164,6 +164,7 @@ namespace sm_json_data_framework.Converters.Raw
         {
             return elementTypeEnum switch
             {
+                ObjectLogicalElementTypeEnum.ObstaclesCleared => typeof(RawObstaclesCleared),
                 ObjectLogicalElementTypeEnum.ResourceCapacity => typeof(RawResourceCapacityLogicalElement),
                 _ => throw new NotSupportedException($"Element type {elementTypeEnum} is not supported here")
             };
@@ -173,6 +174,7 @@ namespace sm_json_data_framework.Converters.Raw
         {
             return elementTypeEnum switch
             {
+                ObjectLogicalElementTypeEnum.ObstaclesCleared => typeof(List<string>),
                 ObjectLogicalElementTypeEnum.ResourceCapacity => typeof(List<RawResourceCapacityLogicalElementItem>),
                 _ => throw new NotSupportedException($"Element type {elementTypeEnum} is not supported here")
             };

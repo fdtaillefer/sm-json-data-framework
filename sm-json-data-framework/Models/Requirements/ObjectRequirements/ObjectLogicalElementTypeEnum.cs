@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,6 +14,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
         Not,
         Or,
 
+        ObstaclesCleared,
         ResourceCapacity,
 
         AcidFrames,
@@ -58,6 +60,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements
                 case ObjectLogicalElementTypeEnum.Not:
                 case ObjectLogicalElementTypeEnum.Or:
                     return ObjectLogicalElementSubTypeEnum.SubRequirement;
+                case ObjectLogicalElementTypeEnum.ObstaclesCleared:
                 case ObjectLogicalElementTypeEnum.ResourceCapacity:
                     return ObjectLogicalElementSubTypeEnum.Array;
                 case ObjectLogicalElementTypeEnum.AcidFrames:

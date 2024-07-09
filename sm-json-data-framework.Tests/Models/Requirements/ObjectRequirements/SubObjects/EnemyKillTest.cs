@@ -229,7 +229,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            EnemyKill enemyKill = model.Rooms["Etecoon Energy Tank Room"].Links[4].To[6].Strats["Bomb the Beetoms"]
+            EnemyKill enemyKill = model.Rooms["Etecoon Energy Tank Room"].Links[4].To[7].Strats["Bomb the Beetoms"].Obstacles["A"]
                 .Requires.LogicalElement<EnemyKill>(0, enemyKill => enemyKill.ExplicitWeapons.ContainsKey("Bombs"));
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Bombs")
@@ -250,7 +250,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
         {
             // Given
             SuperMetroidModel model = ReusableModel();
-            EnemyKill enemyKill = model.Rooms["Etecoon Energy Tank Room"].Links[6].To[4].Strats["Kill the Beetoms"]
+            EnemyKill enemyKill = model.Rooms["Etecoon Energy Tank Room"].Links[6].To[7].Strats["Kill the Beetoms"].Obstacles["A"]
                 .Requires.LogicalElement<EnemyKill>(0, enemyKill => enemyKill.ExcludedWeapons.ContainsKey("Bombs"));
             InGameState inGameState = model.CreateInitialGameState()
                 .ApplyAddItem("Bombs")
