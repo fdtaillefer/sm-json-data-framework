@@ -22,6 +22,8 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public int ShinesparkFrames { get; set; }
 
+        public int ExcessShinesparkFrames { get; set; }
+
         public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.CanComeInCharged, out Type type))
@@ -30,6 +32,7 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
                 canComeInCharged.FromNodeId = FromNode;
                 canComeInCharged.FramesRemaining = FramesRemaining;
                 canComeInCharged.ShinesparkFrames = ShinesparkFrames;
+                canComeInCharged.ExcessShinesparkFrames = ExcessShinesparkFrames;
                 if (InRoomPath != null)
                 {
                     canComeInCharged.InRoomPath = new List<int>(InRoomPath);

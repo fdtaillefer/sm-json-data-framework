@@ -294,10 +294,6 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             Assert.Null(result);
         }
 
-
-
-
-
         [Fact]
         public void Execute_RequiresShinespark_NotEnoughEnergy_Fails()
         {
@@ -318,6 +314,101 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
 
             // Expect
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_NotEnoughEnergy_Fails()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanComeInCharged canComeInCharged = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.ShinesparkFrames == 125 && canComeInCharged.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 79)
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyEnterRoom("Landing Site", 3);
+
+            // When
+            ExecutionResult result = canComeInCharged.Execute(model, inGameState);
+
+            // Expect
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_BarelyEnoughEnergy_Succeeds()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanComeInCharged canComeInCharged = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.ShinesparkFrames == 125 && canComeInCharged.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 78)
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyEnterRoom("Landing Site", 3);
+
+            // When
+            ExecutionResult result = canComeInCharged.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ExpectRunwayUsed("Base Runway - Landing Site Top Right Door (to Power Bombs)", "Base")
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -92)
+                .AssertRespectedBy(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_EnoughEnergyForSomeExcessFrames_Succeeds()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanComeInCharged canComeInCharged = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.ShinesparkFrames == 125 && canComeInCharged.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 68)
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyEnterRoom("Landing Site", 3);
+
+            // When
+            ExecutionResult result = canComeInCharged.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ExpectRunwayUsed("Base Runway - Landing Site Top Right Door (to Power Bombs)", "Base")
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -102)
+                .AssertRespectedBy(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_EnoughEnergyForMoreThanExcessFrames_Succeeds()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanComeInCharged canComeInCharged = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.ShinesparkFrames == 125 && canComeInCharged.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ApplyEnterRoom("Landing Site", 3);
+
+            // When
+            ExecutionResult result = canComeInCharged.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ExpectRunwayUsed("Base Runway - Landing Site Top Right Door (to Power Bombs)", "Base")
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -125)
+                .AssertRespectedBy(result);
         }
 
         [Fact]
@@ -553,6 +644,64 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
 
             // Expect
             CanComeInCharged canComeInCharged = model.Rooms["Golden Torizo's Room"].Links[1].To[3].Strats["Shinespark"].Requires.LogicalElement<CanComeInCharged>(0);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.False(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_WithExcessShinesparkFrames_LessPossibleEnergyThanBestCaseDamage_SetsLogicalProperties()
+        {
+            // Given
+            SuperMetroidModel model = NewModelForOptions();
+            LogicalOptions logicalOptions = new LogicalOptions();
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 120);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
+
+            // When
+            model.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanComeInCharged canComeInCharged = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.ShinesparkFrames == 125 && canComeInCharged.ExcessShinesparkFrames == 33);
+            Assert.True(canComeInCharged.LogicallyRelevant);
+            Assert.True(canComeInCharged.LogicallyNever);
+            Assert.False(canComeInCharged.LogicallyAlways);
+            Assert.False(canComeInCharged.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_WithExcessShinesparkFrames_JustEnoughPossibleEnergyForBestCaseDamage_SetsLogicalProperties()
+        {
+            // Given
+            SuperMetroidModel model = NewModelForOptions();
+            LogicalOptions logicalOptions = new LogicalOptions();
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 121);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
+
+            // When
+            model.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanComeInCharged canComeInCharged = model.Rooms["Landing Site"].Links[3].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.ShinesparkFrames == 125 && canComeInCharged.ExcessShinesparkFrames == 33);
             Assert.True(canComeInCharged.LogicallyRelevant);
             Assert.False(canComeInCharged.LogicallyNever);
             Assert.False(canComeInCharged.LogicallyAlways);

@@ -68,7 +68,7 @@ namespace sm_json_data_framework.Tests.Models
 
             Assert.Equal(26, model.Helpers.Count);
 
-            Assert.Equal(111, model.Techs.Count);
+            Assert.Equal(114, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
             Assert.True(model.Nodes.Count > 20);

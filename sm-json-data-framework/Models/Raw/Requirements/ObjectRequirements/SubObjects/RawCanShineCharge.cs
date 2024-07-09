@@ -30,6 +30,8 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
 
         public int ShinesparkFrames { get; set; }
 
+        public int ExcessShinesparkFrames { get; set; }
+
         public override IUnfinalizedLogicalElement ToLogicalElement(LogicalElementCreationKnowledgeBase knowledgeBase)
         {
             if (knowledgeBase.ObjectLogicalElementTypes.TryGetValue(ObjectLogicalElementTypeEnum.CanShineCharge, out Type type))
@@ -43,6 +45,7 @@ namespace sm_json_data_framework.Models.Raw.Requirements.ObjectRequirements.SubO
                 canShineCharge.StartingDownTiles = StartingDownTiles;
                 canShineCharge.OpenEnds = OpenEnd;
                 canShineCharge.ShinesparkFrames = ShinesparkFrames;
+                canShineCharge.ExcessShinesparkFrames = ExcessShinesparkFrames;
                 return canShineCharge;
             }
             else

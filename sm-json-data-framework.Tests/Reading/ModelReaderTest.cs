@@ -63,7 +63,7 @@ namespace sm_json_data_framework.Reading
             Assert.Equal(26, model.Helpers.Count);
 
             Assert.Equal(9, model.TechCategories.Count);
-            Assert.Equal(111, model.Techs.Count);
+            Assert.Equal(114, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
             Assert.True(model.Nodes.Count > 20);
@@ -161,7 +161,7 @@ namespace sm_json_data_framework.Reading
             Assert.Equal(26, model.HelperContainer.Helpers.Count());
 
             // Techs
-            Assert.Equal(111, model.TechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList().Count());
+            Assert.Equal(114, model.TechContainer.TechCategories.SelectMany(category => category.Techs).SelectMany(tech => tech.SelectWithExtensions()).ToList().Count());
 
             // Starting items
             Assert.Equal(2, model.ItemContainer.StartingItems.Count());

@@ -188,6 +188,94 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             Assert.Null(result);
         }
 
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_NotEnoughEnergy_Fails()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[4].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanShineCharge>(0, canShineCharge => canShineCharge.ShinesparkFrames == 125 && canShineCharge.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 79)
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
+
+            // When
+            ExecutionResult result = canShineCharge.Execute(model, inGameState);
+
+            // Expect
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_BarelyEnoughEnergy_Succeeds()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[4].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanShineCharge>(0, canShineCharge => canShineCharge.ShinesparkFrames == 125 && canShineCharge.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 78)
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
+
+            // When
+            ExecutionResult result = canShineCharge.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -92)
+                .AssertRespectedBy(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_EnoughEnergyForSomeExcessFrames_Succeeds()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[4].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanShineCharge>(0, canShineCharge => canShineCharge.ShinesparkFrames == 125 && canShineCharge.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyConsumeResource(ConsumableResourceEnum.Energy, 68)
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
+
+            // When
+            ExecutionResult result = canShineCharge.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -102)
+                .AssertRespectedBy(result);
+        }
+
+        [Fact]
+        public void Execute_RequiresShinespark_HasExcessFrames_EnoughEnergyForMoreThanExcessFrames_Succeeds()
+        {
+            // Given
+            SuperMetroidModel model = ReusableModel();
+            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[4].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanShineCharge>(0, canShineCharge => canShineCharge.ShinesparkFrames == 125 && canShineCharge.ExcessShinesparkFrames == 33);
+            InGameState inGameState = model.CreateInitialGameState()
+                .ApplyAddItem(SuperMetroidModel.ENERGY_TANK_NAME)
+                .ApplyRefillResources()
+                .ApplyAddItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
+
+            // When
+            ExecutionResult result = canShineCharge.Execute(model, inGameState);
+
+            // Expect
+            new ExecutionResultValidator(model, inGameState)
+                .ExpectItemInvolved(SuperMetroidModel.SPEED_BOOSTER_NAME)
+                .ExpectResourceVariation(RechargeableResourceEnum.RegularEnergy, -125)
+                .AssertRespectedBy(result);
+        }
+
         #endregion
 
         #region Tests for ApplyLogicalOptions() that check applied logical properties
@@ -263,6 +351,64 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
 
             // Expect
             CanShineCharge canShineCharge = model.Rooms["West Ocean"].Links[13].To[5].Strats["Gravity Suit and Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.False(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_WithExcessShinesparkFrames_LessPossibleEnergyThanBestCaseDamage_SetsLogicalProperties()
+        {
+            // Given
+            SuperMetroidModel model = NewModelForOptions();
+            LogicalOptions logicalOptions = new LogicalOptions();
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 120);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
+
+            // When
+            model.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[4].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanShineCharge>(0, canShineCharge => canShineCharge.ShinesparkFrames == 125 && canShineCharge.ExcessShinesparkFrames == 33);
+            Assert.True(canShineCharge.LogicallyRelevant);
+            Assert.True(canShineCharge.LogicallyNever);
+            Assert.False(canShineCharge.LogicallyAlways);
+            Assert.False(canShineCharge.LogicallyFree);
+        }
+
+        [Fact]
+        public void ApplyLogicalOptions_WithExcessShinesparkFrames_JustEnoughPossibleEnergyForBestCaseDamage_SetsLogicalProperties()
+        {
+            // Given
+            SuperMetroidModel model = NewModelForOptions();
+            LogicalOptions logicalOptions = new LogicalOptions();
+            ResourceCount baseResouces = ResourceCount.CreateVanillaBaseResourceMaximums();
+            baseResouces.ApplyAmount(RechargeableResourceEnum.RegularEnergy, 121);
+            logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model)
+                .BaseResourceMaximums(baseResouces)
+                .StartingResources(baseResouces)
+                .Build();
+            logicalOptions.InternalAvailableResourceInventory = new ResourceItemInventory(baseResouces)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Missile"], 46)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["Super"], 10)
+                .ApplyAddExpansionItem((ExpansionItem)model.Items["PowerBomb"], 10);
+
+            // When
+            model.ApplyLogicalOptions(logicalOptions);
+
+            // Expect
+            CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[4].To[1].Strats["Shinespark"].Requires
+                .LogicalElement<CanShineCharge>(0, canShineCharge => canShineCharge.ShinesparkFrames == 125 && canShineCharge.ExcessShinesparkFrames == 33);
             Assert.True(canShineCharge.LogicallyRelevant);
             Assert.False(canShineCharge.LogicallyNever);
             Assert.False(canShineCharge.LogicallyAlways);

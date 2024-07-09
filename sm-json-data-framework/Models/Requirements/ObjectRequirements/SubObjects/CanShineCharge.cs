@@ -45,6 +45,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             StartingDownTiles = sourceElement.StartingDownTiles;
             OpenEnds = sourceElement.OpenEnds;
             ShinesparkFrames = sourceElement.ShinesparkFrames;
+            ExcessShinesparkFrames = sourceElement.ExcessShinesparkFrames;
         }
 
         public int Length { get; }
@@ -69,6 +70,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public int ShinesparkFrames { get; }
 
         /// <summary>
+        /// The amount of shinespark frames that happen after the primary objective of a shinespark has been met.
+        /// Those excess frames will consume energy if the energy is there, but the shinespark should be considered possible (neregy-wise) as long as
+        /// there is enough energy for the non-excess frames.
+        /// Can be 0 if no shinespark is involved.
+        /// </summary>
+        public int ExcessShinesparkFrames { get; }
+
+        /// <summary>
         /// Indicates whether this CanShineCharge involves executing a shinespark.
         /// </summary>
         public bool MustShinespark => ShinesparkFrames > 0;
@@ -88,7 +97,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
 
             // If we have enough energy for the shinespark to go through, consume the energy cost and return the result
-            int energyNeeded = model.Rules.CalculateEnergyNeededForShinespark(inGameState, ShinesparkFrames, times: times);
+            int energyNeeded = model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames, times: times);
 
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
             if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
@@ -142,7 +151,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 {
                     // If the shinespark requires having more than the possible max energy, this is impossible
                     int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
-                    if(maxEnergy != null && rules.CalculateBestCaseEnergyNeededForShinespark(ShinesparkFrames, AppliedLogicalOptions.RemovedItems) >= maxEnergy.Value)
+                    if(maxEnergy != null && rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames) > maxEnergy.Value)
                     {
                         impossible = true;
                     }
@@ -213,6 +222,8 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         public int OpenEnds { get; set; } = 0;
 
         public int ShinesparkFrames { get; set; }
+
+        public int ExcessShinesparkFrames { get; set; }
 
         protected override CanShineCharge CreateFinalizedElement(UnfinalizedCanShineCharge sourceElement, Action<CanShineCharge> mappingsInsertionCallback, ModelFinalizationMappings mappings)
         {

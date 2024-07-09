@@ -152,7 +152,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // That's why such logic is in InGameState.GetRetroactiveCanLeaveChargeds()
 
             // Figure out how much energy we will need to have for the shinespark
-            int energyNeededForShinespark = model.Rules.CalculateEnergyNeededForShinespark(inGameState, ShinesparkFrames, times: times);
+            int energyNeededForShinespark = model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, excessShinesparkFrames: 0, times: times);
             int shinesparkEnergyToSpend = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
 
             // Try to execute all strats, 
@@ -231,7 +231,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return !AppliedLogicalOptions.IsSpeedBoosterInGame()
                 || (InitiateRemotely?.LogicallyNever is true) 
                 || !Strats.Values.WhereLogicallyRelevant().Any() 
-                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value <= rules.CalculateBestCaseEnergyNeededForShinespark(ShinesparkFrames, AppliedLogicalOptions.RemovedItems))))
+                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value < rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, excessShinesparkFrames: 0))))
                 || LogicalEffectiveRunwayLength < TilesToShineCharge;
         }
 
