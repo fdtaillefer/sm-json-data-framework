@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// A Comparer that can compare two in-game states by their consumable resource count, based on an internal in-game resource evaluator.

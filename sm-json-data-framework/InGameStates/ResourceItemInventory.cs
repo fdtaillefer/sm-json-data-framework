@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Items;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Rules.InitialState;
 using System;
 using System.Collections.Generic;
@@ -7,12 +8,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// A partial inventory which contains only what relates to resources - so base resource maximums and expansion items.
     /// </summary>
-    public class ResourceItemInventory: ReadOnlyResourceItemInventory
+    public class ResourceItemInventory : ReadOnlyResourceItemInventory
     {
         /// <summary>
         /// A constructor that receives an enumeration of ResourceCapacity to express the base resource maximums.

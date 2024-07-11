@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Rooms;
+﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;
@@ -25,7 +26,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
             return sourceItem;
         }
 
-        protected override ExecutionResult ExecutePossible(SuperMetroidModel model, InGameStates.ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             bool fulfilled = true;
             // Iterate over all obstacles to ensure they are destroyed

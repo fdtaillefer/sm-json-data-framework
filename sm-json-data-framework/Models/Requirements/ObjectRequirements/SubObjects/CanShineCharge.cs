@@ -1,15 +1,12 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
-using sm_json_data_framework.Models.Techs;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.Json.Serialization;
 
 namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
 {

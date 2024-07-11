@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Items;
+﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;
@@ -32,7 +33,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
             return sourceItem.Finalize(mappings);
         }
 
-        protected override ExecutionResult ExecutePossible(SuperMetroidModel model, InGameStates.ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
+        protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             bool fulfilled = ResourceCapacities.Values.All(capacity => capacity.IsFulfilled(inGameState));
             if (fulfilled)

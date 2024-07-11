@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// Represents the logically-relevant parts of the state during a given visit of Samus at a given node.

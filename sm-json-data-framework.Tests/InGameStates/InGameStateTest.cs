@@ -1,13 +1,11 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
+﻿using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
-using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Reading;
 using sm_json_data_framework.Rules;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Tests.TestTools;
@@ -17,9 +15,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Tests.Models.InGameStates
+namespace sm_json_data_framework.Tests.InGameStates
 {
     public class InGameStateTest
     {
@@ -43,7 +40,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
         public static IEnumerable<object[]> ConsumableResourceValues()
         {
 
-            foreach (ConsumableResourceEnum resource in Enum.GetValues< ConsumableResourceEnum>())
+            foreach (ConsumableResourceEnum resource in Enum.GetValues<ConsumableResourceEnum>())
             {
                 yield return new object[] { resource };
             }
@@ -654,7 +651,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
             int maxAmount = 100;
             ResourceCount startResources = new ResourceCount();
             ResourceCount maxResources = startResources.Clone();
-            foreach(RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
+            foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
             {
                 startResources.ApplyAmount(resource, initialAmount);
                 maxResources.ApplyAmount(resource, maxAmount);
@@ -671,7 +668,7 @@ namespace sm_json_data_framework.Tests.Models.InGameStates
 
             // Expect
             foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
-            { 
+            {
                 Assert.Equal(maxAmount, inGameState.Resources.GetAmount(resource));
             }
         }

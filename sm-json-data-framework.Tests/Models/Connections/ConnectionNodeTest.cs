@@ -1,6 +1,6 @@
-﻿using sm_json_data_framework.Models;
+﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Tests.TestTools;

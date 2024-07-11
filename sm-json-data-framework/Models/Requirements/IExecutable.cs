@@ -1,4 +1,4 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
 using System;
 using System.Collections.Generic;
 using System.Text;

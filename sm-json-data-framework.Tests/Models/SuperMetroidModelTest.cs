@@ -3,7 +3,6 @@ using sm_json_data_framework.Models.Connections;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Helpers;
-using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;

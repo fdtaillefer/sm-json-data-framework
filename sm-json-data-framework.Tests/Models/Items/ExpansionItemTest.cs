@@ -1,5 +1,4 @@
-﻿using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models.Items;
+﻿using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules.InitialState;
@@ -9,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using sm_json_data_framework.InGameStates;
 
 namespace sm_json_data_framework.Tests.Models.Items
 {

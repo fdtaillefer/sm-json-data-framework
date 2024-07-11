@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// Represents an object with a resource and an amount in the json model.

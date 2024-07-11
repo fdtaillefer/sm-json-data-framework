@@ -1,7 +1,6 @@
-﻿using sm_json_data_framework.Models;
-using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Reading;
 using sm_json_data_framework.Tests.TestTools;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Tests.Models.InGameStates
+namespace sm_json_data_framework.Tests.InGameStates
 {
     public class InNodeStateTest
     {

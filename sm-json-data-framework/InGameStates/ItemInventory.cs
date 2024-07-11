@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Items;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Utils;
@@ -11,7 +12,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// <para>A container for in-game items. It expands upon <see cref="ResourceItemInventory"/>.</para>
@@ -37,9 +38,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// A constructor that receives an enumeration of ResourceCapacity to express the base resource maximums.
         /// </summary>
         /// <param name="baseResourceMaximums">The base maximum for all resources</param>
-        public ItemInventory(IEnumerable<ResourceCapacity> baseResourceMaximums): base(baseResourceMaximums)
+        public ItemInventory(IEnumerable<ResourceCapacity> baseResourceMaximums) : base(baseResourceMaximums)
         {
-            
+
         }
 
         /// <summary>
@@ -47,9 +48,9 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="baseResourceMaximums">A ResourceCount containing the base maximums.
         /// This instance will be cloned and will never be modified as a result of being passed here.</param>
-        public ItemInventory(ResourceCount baseResourceMaximums): base(baseResourceMaximums)
+        public ItemInventory(ResourceCount baseResourceMaximums) : base(baseResourceMaximums)
         {
-            
+
         }
 
         /// <summary>
@@ -58,15 +59,15 @@ namespace sm_json_data_framework.Models.InGameStates
         /// </summary>
         /// <param name="otherInventory">The other inventory, on which most data will be based</param>
         /// <param name="baseResourceMaximums">The base resource maximums to use instead of the one from otherInventory</param>
-        public ItemInventory(ItemInventory otherInventory, ReadOnlyResourceCount baseResourceMaximums = null): base(otherInventory, baseResourceMaximums)
+        public ItemInventory(ItemInventory otherInventory, ReadOnlyResourceCount baseResourceMaximums = null) : base(otherInventory, baseResourceMaximums)
         {
             InternalNonConsumableItems = new Dictionary<string, Item>(otherInventory.InternalNonConsumableItems);
             InternalDisabledItemNames = new HashSet<string>(otherInventory.InternalDisabledItemNames);
         }
 
-        public ItemInventory(UnfinalizedStartConditions unfinalizedStartConditions, ModelFinalizationMappings mappings): base(unfinalizedStartConditions, mappings)
+        public ItemInventory(UnfinalizedStartConditions unfinalizedStartConditions, ModelFinalizationMappings mappings) : base(unfinalizedStartConditions, mappings)
         {
-            foreach(UnfinalizedItem item in unfinalizedStartConditions.StartingInventory.NonConsumableItems.Values)
+            foreach (UnfinalizedItem item in unfinalizedStartConditions.StartingInventory.NonConsumableItems.Values)
             {
                 ApplyAddItem(item.Finalize(mappings));
             }
@@ -115,7 +116,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public override bool HasItem(string itemName)
         {
-            return (InternalNonConsumableItems.ContainsKey(itemName) && !InternalDisabledItemNames.Contains(itemName)) || base.HasItem(itemName);
+            return InternalNonConsumableItems.ContainsKey(itemName) && !InternalDisabledItemNames.Contains(itemName) || base.HasItem(itemName);
         }
 
         public bool HasVariaSuit()
@@ -270,7 +271,7 @@ namespace sm_json_data_framework.Models.InGameStates
     /// <summary>
     /// A read-only interface for an <see cref="ItemInventory"/>, allowing consultation without modification.
     /// </summary>
-    public interface ReadOnlyItemInventory: ReadOnlyResourceItemInventory
+    public interface ReadOnlyItemInventory : ReadOnlyResourceItemInventory
     {
         /// <summary>
         /// Creates and returns a copy of this ItemInventory.

@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules;
@@ -10,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// Represents the logically-relevant parts of the state of the current room.
@@ -170,7 +171,7 @@ namespace sm_json_data_framework.Models.InGameStates
         public InRoomState ApplyVisitNode(RoomNode node, Strat strat)
         {
             // Spawning in the room is ongoing if no nodes have been visited, or only one node has been visited and that node spawns Samus elsewhere
-            bool spawnOngoing = !VisitedRoomPath.Any() || (VisitedRoomPath.Count == 1 && CurrentNode.SpawnsAtDifferentNode);
+            bool spawnOngoing = !VisitedRoomPath.Any() || VisitedRoomPath.Count == 1 && CurrentNode.SpawnsAtDifferentNode;
 
             // Only allow Strat to be null if spawn is ongoing
             if (strat == null && !spawnOngoing)

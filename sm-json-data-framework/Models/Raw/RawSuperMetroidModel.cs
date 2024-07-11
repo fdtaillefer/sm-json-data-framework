@@ -1,16 +1,4 @@
-﻿using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.Enemies;
-using sm_json_data_framework.Models.GameFlags;
-using sm_json_data_framework.Models.Helpers;
-using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models.Items;
-using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Models.Rooms;
-using sm_json_data_framework.Models.Techs;
-using sm_json_data_framework.Models.Weapons;
-using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

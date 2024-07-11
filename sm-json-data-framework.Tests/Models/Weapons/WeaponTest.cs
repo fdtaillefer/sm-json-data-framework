@@ -1,5 +1,4 @@
-﻿using sm_json_data_framework.Models.InGameStates;
-using sm_json_data_framework.Models;
+﻿using sm_json_data_framework.Models;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Tests.TestTools;
@@ -12,6 +11,7 @@ using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Weapons;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects;
+using sm_json_data_framework.InGameStates;
 
 namespace sm_json_data_framework.Tests.Models.Weapons
 {

@@ -1,18 +1,8 @@
 ﻿using sm_json_data_framework.Models;
-using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.Enemies;
-using sm_json_data_framework.Models.Helpers;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw;
-using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements;
-using sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
-using sm_json_data_framework.Models.Rooms;
-using sm_json_data_framework.Models.Rooms.Nodes;
-using sm_json_data_framework.Models.Techs;
-using sm_json_data_framework.Models.Weapons;
-using sm_json_data_framework.Options;
 using sm_json_data_framework.Reading;
 using sm_json_data_framework.Tests.TestTools;
 using sm_json_data_framework.Utils;
@@ -27,6 +17,7 @@ namespace sm_json_data_framework.Tests.Models
     public class UnfinalizedSuperMetroidModelTest
     {
         #region Tests for Ctor(RawSuperMetroidModel, [...])
+
         [Fact]
         public void ConstructorFromRawModel_ReadsAllData()
         {

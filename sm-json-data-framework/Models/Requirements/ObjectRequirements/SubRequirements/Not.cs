@@ -1,4 +1,4 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;

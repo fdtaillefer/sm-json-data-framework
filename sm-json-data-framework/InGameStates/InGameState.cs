@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.Models.Enemies;
+﻿using sm_json_data_framework.Models;
+using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
@@ -14,7 +15,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// Contains the logically-relevant attributes of a given in-game state.
@@ -202,14 +203,14 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public IEnumerable<RechargeableResourceEnum> GetFullRechargeableResources()
         {
-            return Enum.GetValues< RechargeableResourceEnum>()
+            return Enum.GetValues<RechargeableResourceEnum>()
                 .Cast<RechargeableResourceEnum>()
                 .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
 
         public IEnumerable<ConsumableResourceEnum> GetFullConsumableResources()
         {
-            return Enum.GetValues< ConsumableResourceEnum>()
+            return Enum.GetValues<ConsumableResourceEnum>()
                 .Cast<ConsumableResourceEnum>()
                 .Where(resource => InternalResources.GetAmount(resource) >= ResourceMaximums.GetAmount(resource));
         }
@@ -789,7 +790,7 @@ namespace sm_json_data_framework.Models.InGameStates
             if (activeLocks.Any())
             {
                 throw new InvalidOperationException($"Cannot exit '{CurrentRoom.Name}' via node {CurrentNode.Id} " +
-                    $"because the following locks are active on that node: {String.Join(", ", activeLocks.Select(nodeLock => nodeLock.Name))}.");
+                    $"because the following locks are active on that node: {string.Join(", ", activeLocks.Select(nodeLock => nodeLock.Name))}.");
             }
 
             // Exiting is legal, so enter the next room
@@ -942,7 +943,8 @@ namespace sm_json_data_framework.Models.InGameStates
             }
 
             // Return all CanLeaveCharged that are valid to retroactively execute
-            return previousRoomExitNode.CanLeaveCharged.WhereLogicallyRelevant().Where(clc => {
+            return previousRoomExitNode.CanLeaveCharged.WhereLogicallyRelevant().Where(clc =>
+            {
                 // If the CanLeaveCharged is initiated remotely, we must take a closer look at what happened in that room
                 if (clc.IsInitiatedRemotely)
                 {
@@ -969,7 +971,8 @@ namespace sm_json_data_framework.Models.InGameStates
                     }
 
                     if (!clc.InitiateRemotely.PathToDoor.Zip
-                        (lastRoomFinalPath.Skip(1), (expectedPath, actualPath) => {
+                        (lastRoomFinalPath.Skip(1), (expectedPath, actualPath) =>
+                        {
                             // These two path nodes match up if they go to the same room node, and if the actual path uses one of the valid strats
                             return expectedPath.linkTo.TargetNode == actualPath.nodeState.Node
                                 && expectedPath.strats.ContainsKey(actualPath.strat.Name);

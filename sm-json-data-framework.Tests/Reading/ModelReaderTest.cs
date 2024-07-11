@@ -1,11 +1,7 @@
 ﻿using sm_json_data_framework.Models;
-using sm_json_data_framework.Models.Connections;
-using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Raw;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements;
-using sm_json_data_framework.Options;
-using sm_json_data_framework.Rules;
 using sm_json_data_framework.Tests.TestTools;
 using sm_json_data_framework.Utils;
 using System;
@@ -13,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 
 namespace sm_json_data_framework.Reading
@@ -21,6 +16,7 @@ namespace sm_json_data_framework.Reading
     public class ModelReaderTest
     {
         #region Tests for ReadUnfinalizedModel()
+
         [Fact]
         public void ReadUnfinalizedModel_ReadsAllData()
         {
@@ -118,6 +114,7 @@ namespace sm_json_data_framework.Reading
             Assert.True(model.Rules is RandoSuperMetroidRules);
             Assert.NotEmpty(model.Rooms["Crocomire's Room"].Nodes[3].LinksTo[6].Strats["Gravity Acid"].Requires.LogicalElements.Where(element => element.GetType() == typeof(ExtendedAcidFrames)));
         }
+
         #endregion
 
         #region Tests for ReadRawModel()

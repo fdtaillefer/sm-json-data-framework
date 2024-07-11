@@ -12,7 +12,7 @@ using sm_json_data_framework.Models.Rooms.Nodes;
 using sm_json_data_framework.Rules.InitialState;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
-using sm_json_data_framework.Models.InGameStates;
+using sm_json_data_framework.InGameStates;
 
 namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
 {

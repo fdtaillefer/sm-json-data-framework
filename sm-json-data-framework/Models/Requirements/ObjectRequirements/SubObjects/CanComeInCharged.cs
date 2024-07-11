@@ -1,4 +1,4 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Models.Rooms.Nodes;
@@ -9,9 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text.Json.Serialization;
 
-namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects 
+namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjects
 {
     /// <summary>
     /// A logical element which requires Samus to have been able to come into the room either with

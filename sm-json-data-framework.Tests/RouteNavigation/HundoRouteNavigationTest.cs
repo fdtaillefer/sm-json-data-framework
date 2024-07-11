@@ -1,9 +1,6 @@
 ﻿using sm_json_data_framework.Models;
-using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Navigation;
-using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Tests.TestTools;
-using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

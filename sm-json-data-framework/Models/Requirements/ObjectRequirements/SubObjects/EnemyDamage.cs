@@ -1,5 +1,5 @@
-﻿using sm_json_data_framework.Models.Enemies;
-using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers;
 using sm_json_data_framework.Models.Rooms;
 using sm_json_data_framework.Options;

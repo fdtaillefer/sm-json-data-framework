@@ -6,12 +6,12 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
-namespace sm_json_data_framework.Models.InGameStates
+namespace sm_json_data_framework.InGameStates
 {
     /// <summary>
     /// Contains values for all rechargeable resource types. The context of those values is not known by this container.
     /// </summary>
-    public class ResourceCount: ReadOnlyResourceCount
+    public class ResourceCount : ReadOnlyResourceCount
     {
         /// <summary>
         /// Creates and returns an instance of ResourceCount containing the vanilla base maximums.
@@ -30,7 +30,7 @@ namespace sm_json_data_framework.Models.InGameStates
             }
         }
 
-        public ResourceCount(IEnumerable<ResourceCapacity> resourceAmounts): this()
+        public ResourceCount(IEnumerable<ResourceCapacity> resourceAmounts) : this()
         {
             // Apply each resource amount
             foreach (ResourceCapacity capacity in resourceAmounts)
@@ -219,7 +219,7 @@ namespace sm_json_data_framework.Models.InGameStates
 
         public override bool Equals(object obj)
         {
-            if(obj is ReadOnlyResourceCount count)
+            if (obj is ReadOnlyResourceCount count)
             {
                 foreach (RechargeableResourceEnum resource in Enum.GetValues<RechargeableResourceEnum>())
                 {

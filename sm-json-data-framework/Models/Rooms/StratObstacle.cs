@@ -1,4 +1,4 @@
-﻿using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw.Rooms;
 using sm_json_data_framework.Models.Requirements;

@@ -1,7 +1,7 @@
-﻿using sm_json_data_framework.Models;
+﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.GameFlags;
-using sm_json_data_framework.Models.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using sm_json_data_framework.Models.Rooms;
@@ -10,10 +10,7 @@ using sm_json_data_framework.Models.Weapons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace sm_json_data_framework.Tests.TestTools
 {

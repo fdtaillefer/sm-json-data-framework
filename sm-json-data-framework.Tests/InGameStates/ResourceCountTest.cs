@@ -1,17 +1,14 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
-using sm_json_data_framework.Models.InGameStates;
+﻿using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
-using sm_json_data_framework.Models.Rooms.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace sm_json_data_framework.Tests.Models.InGameStates
+namespace sm_json_data_framework.Tests.InGameStates
 {
     public class ResourceCountTest
     {
