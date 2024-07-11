@@ -118,7 +118,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterDisabledTech("canShinespark");
+            logicalOptions.RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             model.ApplyLogicalOptions(logicalOptions);
             CanShineCharge canShineCharge = model.Rooms["Parlor and Alcatraz"].Links[8].To[1].Strats["Parlor Quick Charge"].Requires.LogicalElement<CanShineCharge>(0);
             InGameState inGameState = model.CreateInitialGameState()
@@ -158,7 +158,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions();
-            logicalOptions.RegisterDisabledTech("canShinespark");
+            logicalOptions.RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             model.ApplyLogicalOptions(logicalOptions);
             CanShineCharge canShineCharge = model.Rooms["Landing Site"].Links[7].To[1].Strats["Shinespark"].Requires.LogicalElement<CanShineCharge>(0);
             InGameState inGameState = model.CreateInitialGameState()
@@ -470,7 +470,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
                 ItemInventory.CreateVanillaStartingInventory(model)
                     .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])

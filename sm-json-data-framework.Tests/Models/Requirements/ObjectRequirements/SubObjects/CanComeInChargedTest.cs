@@ -252,7 +252,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
                 .Requires.LogicalElement<UnfinalizedCanComeInCharged>(0).ShinesparkFrames = 0;
 
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             SuperMetroidModel model = unfinalizedModel.Finalize(logicalOptions);
             CanComeInCharged canComeInCharged = model.Rooms["Wrecked Ship Energy Tank Room"].Links[1].To[2].Strats["Shinespark"]
                 .Requires.LogicalElement<CanComeInCharged>(0);
@@ -276,7 +276,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             model.ApplyLogicalOptions(logicalOptions);
             CanComeInCharged canComeInCharged = model.Rooms["Post Crocomire Farming Room"].Links[5].To[1].Strats["Shinespark"]
                 .Requires.LogicalElement<Or>(0)
@@ -439,7 +439,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             model.ApplyLogicalOptions(logicalOptions);
             CanComeInCharged canComeInCharged = model.Rooms["Parlor and Alcatraz"].Links[1].To[8].Strats["SpeedBooster"]
                 .Requires.LogicalElement<CanComeInCharged>(0, canComeInCharged => canComeInCharged.FromNode.Id == 1);
@@ -769,7 +769,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
                 ItemInventory.CreateVanillaStartingInventory(model)
                     .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])

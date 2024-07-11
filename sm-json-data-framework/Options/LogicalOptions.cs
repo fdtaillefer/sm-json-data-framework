@@ -307,7 +307,15 @@ namespace sm_json_data_framework.Options
             }
         }
 
-        public bool CanShinespark => IsTechEnabled("canShinespark");
+        /// <summary>
+        /// Whether the ability to shinespark is logically enabled.
+        /// </summary>
+        public bool CanShinespark => IsTechEnabled(SuperMetroidModel.SHINESPARK_TECH_NAME);
+
+        /// <summary>
+        /// Whether the ability to use reserves during a shinespark is enabled.
+        /// </summary>
+        public bool CanUseReservesToShinespark => IsTechEnabled(SuperMetroidModel.USE_RESERVES_FOR_SHINESPARK_TECH_NAME);
 
         /// <summary>
         /// Registers the provided strat name as a disabled strat.

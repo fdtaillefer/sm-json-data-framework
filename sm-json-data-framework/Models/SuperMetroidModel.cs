@@ -55,6 +55,9 @@ namespace sm_json_data_framework.Models
         public const string ENERGY_TANK_NAME = "ETank";
         public const string RESERVE_TANK_NAME = "ReserveTank";
 
+        public const string SHINESPARK_TECH_NAME = "canShinespark";
+        public const string USE_RESERVES_FOR_SHINESPARK_TECH_NAME = "canShinesparkWithReserve";
+
         public SuperMetroidModel(UnfinalizedSuperMetroidModel sourceModel, LogicalOptions logicalOptions = null)
         {
             ModelFinalizationMappings mappings = new ModelFinalizationMappings(this);

@@ -109,7 +109,7 @@ namespace sm_json_data_framework.Tests.Models.Requirements.ObjectRequirements.Su
             logicalOptions.InternalStartConditions = StartConditions.CreateVanillaStartConditionsBuilder(model).StartingInventory(
                 ItemInventory.CreateVanillaStartingInventory(model)
                     .ApplyAddItem(model.Items["Wave"])
-                    .ApplyAddItem(model.Items["SpeedBooster"])
+                    .ApplyAddItem(model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME])
                 )
                 .Build();
 

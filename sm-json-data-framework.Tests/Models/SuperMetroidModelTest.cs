@@ -82,10 +82,10 @@ namespace sm_json_data_framework.Tests.Models
             Assert.Equal(13, model.TechCategories["Bomb Jumps"].Techs.Count);
             Assert.Equal(24, model.TechCategories["Enemy-Dependent"].Techs.Count);
             Assert.Equal(6, model.TechCategories["Shots"].Techs.Count);
-            Assert.Equal(7, model.TechCategories["Speed Booster"].Techs.Count);
+            Assert.Equal(8, model.TechCategories["Speed Booster"].Techs.Count);
             Assert.Equal(12, model.TechCategories["Miscellaneous"].Techs.Count);
             Assert.Equal(1, model.TechCategories["Meta"].Techs.Count);
-            Assert.Equal(114, model.Techs.Count);
+            Assert.Equal(115, model.Techs.Count);
 
             // Not getting an exact nodes count, but make sure there are many in the top-level dictionary
             Assert.True(model.Nodes.Count > 20);
@@ -476,7 +476,7 @@ namespace sm_json_data_framework.Tests.Models
 
             Assert.Same(appliedOptions, model.Weapons["Wave"].AppliedLogicalOptions);
             Assert.Same(appliedOptions, model.Enemies["Geemer (blue)"].AppliedLogicalOptions);
-            Assert.Same(appliedOptions, model.Items["SpeedBooster"].AppliedLogicalOptions);
+            Assert.Same(appliedOptions, model.Items[SuperMetroidModel.SPEED_BOOSTER_NAME].AppliedLogicalOptions);
             Assert.Same(appliedOptions, model.GameFlags["f_ZebesSetAblaze"].AppliedLogicalOptions);
             Assert.Same(appliedOptions, model.Techs["canWalljump"].AppliedLogicalOptions);
             Assert.Same(appliedOptions, model.Helpers["h_canOpenZebetites"].AppliedLogicalOptions);

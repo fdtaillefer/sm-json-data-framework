@@ -88,7 +88,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             model.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = model.Rooms["Spore Spawn Farming Room"].Nodes[1].CanLeaveCharged.First();
             InGameState inGameState = model.CreateInitialGameState()
@@ -108,7 +108,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterDisabledTech("canShinespark");
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             model.ApplyLogicalOptions(logicalOptions);
             CanLeaveCharged canLeaveCharged = model.Rooms["Green Brinstar Main Shaft / Etecoon Room"].Nodes[9].CanLeaveCharged.First();
             InGameState inGameState = model.CreateInitialGameState()
@@ -209,8 +209,8 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
                 .RegisterRemovedItem("Morph")
-                .RegisterRemovedItem("Gravity")
-                .RegisterDisabledTech("canShinespark");
+                .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME)
+                .RegisterDisabledTech(SuperMetroidModel.SHINESPARK_TECH_NAME);
             logicalOptions.TilesSavedWithStutter = 0;
             logicalOptions.TilesToShineCharge = 19;
 
@@ -275,7 +275,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("SpeedBooster");
+                .RegisterRemovedItem(SuperMetroidModel.SPEED_BOOSTER_NAME);
 
             // When
             model.ApplyLogicalOptions(logicalOptions);
@@ -288,6 +288,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms.Nodes
             Assert.True(neverByNoSpeedBooster.LogicallyNever);
             Assert.Equal(30, neverByNoSpeedBooster.LogicalEffectiveRunwayLength);
         }
+
         [Fact]
         public void ApplyLogicalOptions_SpeedBoosterFree_SetsLogicalProperties()
         {

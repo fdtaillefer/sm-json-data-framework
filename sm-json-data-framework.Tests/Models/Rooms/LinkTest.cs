@@ -44,7 +44,7 @@ namespace sm_json_data_framework.Tests.Models.Rooms
             // Given
             SuperMetroidModel model = NewModelForOptions();
             LogicalOptions logicalOptions = new LogicalOptions()
-                .RegisterRemovedItem("Gravity")
+                .RegisterRemovedItem(SuperMetroidModel.GRAVITY_SUIT_NAME)
                 .RegisterDisabledTech("canSuitlessMaridia");
 
             // When
