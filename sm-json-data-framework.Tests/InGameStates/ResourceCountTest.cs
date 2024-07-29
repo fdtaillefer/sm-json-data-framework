@@ -1,4 +1,5 @@
-﻿using sm_json_data_framework.InGameStates;
+﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
+using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Requirements;
 using System;
@@ -210,7 +211,37 @@ namespace sm_json_data_framework.Tests.InGameStates
         }
         #endregion
 
-        #region Tests for ApplyAmountReduction()
+        #region Tests for ApplyAmountReduction(RechargeableResource)
+        [Theory]
+        [MemberData(nameof(RechargeableResourceValues))]
+        public void ApplyAmountReduction_SetsAmount(RechargeableResourceEnum resource)
+        {
+            // Given
+            int initialAmount = 5;
+            int removedAmount = 2;
+            ResourceCount resourceCount = new ResourceCount();
+
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
+            {
+                resourceCount.ApplyAmount(loopResource, initialAmount);
+            }
+
+            // When
+            resourceCount.ApplyAmountReduction(resource, removedAmount);
+
+            // Expect
+            Assert.Equal(initialAmount - removedAmount, resourceCount.GetAmount(resource));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
+            {
+                if (otherResource != resource)
+                {
+                    Assert.Equal(initialAmount, resourceCount.GetAmount(otherResource));
+                }
+            }
+        }
+        #endregion
+
+        #region Tests for ApplyAmountReduction(ConsumableResource)
         [Theory]
         [InlineData(RechargeableResourceEnum.Missile)]
         [InlineData(RechargeableResourceEnum.Super)]
@@ -347,6 +378,38 @@ namespace sm_json_data_framework.Tests.InGameStates
             Assert.Equal(-2, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
             Assert.Equal(0, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
         }
+        #endregion
+
+        #region Tests for ApplyConvertReservesToRegularEnergy()
+
+        [Theory]
+        [InlineData(5, 2, 7, 3)]
+        [InlineData(5, 11, 16, -6)] // It should allow reserves to go into negatives without validation
+        public void ApplyConvertReservesToRegularEnergy_SetsCorrectAmounts(int initialAmount, int convertedAmount, int expectedRegularEnergy, int expectedReserveEnergy)
+        {
+            // Given
+            ResourceCount resourceCount = new ResourceCount();
+
+            foreach (RechargeableResourceEnum loopResource in Enum.GetValues<RechargeableResourceEnum>())
+            {
+                resourceCount.ApplyAmount(loopResource, initialAmount);
+            }
+
+            // When
+            resourceCount.ApplyConvertReservesToRegularEnergy(convertedAmount);
+
+            // Expect
+            Assert.Equal(expectedRegularEnergy, resourceCount.GetAmount(RechargeableResourceEnum.RegularEnergy));
+            Assert.Equal(expectedReserveEnergy, resourceCount.GetAmount(RechargeableResourceEnum.ReserveEnergy));
+            foreach (RechargeableResourceEnum otherResource in Enum.GetValues<RechargeableResourceEnum>())
+            {
+                if (otherResource != RechargeableResourceEnum.RegularEnergy && otherResource != RechargeableResourceEnum.ReserveEnergy)
+                {
+                    Assert.Equal(initialAmount, resourceCount.GetAmount(otherResource));
+                }
+            }
+        }
+
         #endregion
 
         #region Tests for IsResourceAvailable()

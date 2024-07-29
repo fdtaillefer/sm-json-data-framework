@@ -141,6 +141,18 @@ namespace sm_json_data_framework.InGameStates
         }
 
         /// <summary>
+        /// Reduces the provided quantity of the provided rechargeable resource.
+        /// </summary>
+        /// <param name="resource">The resource to reduce</param>
+        /// <param name="quantity">The amount to reduce</param>
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyAmountReduction(RechargeableResourceEnum resource, int quantity)
+        {
+            Amounts[resource] -= quantity;
+            return this;
+        }
+
+        /// <summary>
         /// Increases the provided quantity of the provided rechargeable resource.
         /// </summary>
         /// <param name="resource">The resource to reduce</param>
@@ -150,6 +162,18 @@ namespace sm_json_data_framework.InGameStates
         {
             Amounts[resource] += increase;
             return this;
+        }
+
+        /// <summary>
+        /// Subtracts the provided amount from reserve energy and adds it to regular energy.
+        /// This method will naively put reserves into negatives if that's the result of the requested operation.
+        /// </summary>
+        /// <param name="amount">The amount of reserves to convert to regular energy</param>
+        /// <returns>This, for chaining</returns>
+        public ResourceCount ApplyConvertReservesToRegularEnergy(int amount)
+        {
+            return ApplyAmountReduction(RechargeableResourceEnum.ReserveEnergy, amount)
+                .ApplyAmountIncrease(RechargeableResourceEnum.RegularEnergy, amount);
         }
 
         /// <summary>
