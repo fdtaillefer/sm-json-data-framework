@@ -99,7 +99,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
             if (inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeeded)
             {
-                int energyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
+                int energyCost = model.Rules.CalculateInterruptibleShinesparkDamage(inGameState, ShinesparkFrames, times: times);
                 InGameState resultingState = inGameState.Clone();
                 resultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, energyCost);
                 ExecutionResult result = new ExecutionResult(resultingState);

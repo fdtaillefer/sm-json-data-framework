@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.InGameStates.EnergyManagement;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Items;
@@ -19,51 +20,51 @@ namespace sm_json_data_framework.Rules
     {
         private const int DROP_RATE_DIVIDER = 102;
 
-        public virtual int ThornDamage { get => 16; }
+        public virtual int ThornDamage => 16;
 
-        public virtual int SpikeDamage { get => 60; }
+        public virtual int SpikeDamage => 60;
 
-        public virtual int HibashiDamage { get => 30; }
+        public virtual int HibashiDamage => 30;
 
         /// <summary>
-        /// The energy at which a shinespark is interrupted
+        /// Multiplier to apply to shinespark frames to obtain shinespark damage.
         /// </summary>
-        public virtual int ShinesparkEnergyLimit { get => 29; }
+        public virtual decimal ShinesparkFramesToDamageMultiplier => 1;
 
         /// <summary>
         /// The number of tiles that are lost when combining two runways via a room transition
         /// </summary>
-        public virtual decimal RoomTransitionTilesLost { get => 1M; }
+        public virtual decimal RoomTransitionTilesLost => 1.25M;
 
         // Apparently the gain varies between 8.5 and 9 pixels, which is just over half a tile.
         /// <summary>
         /// The number of tiles gained from having one open end in a runway.
         /// </summary>
-        public virtual decimal TilesGainedPerOpenEnd { get => 0.5M; }
+        public virtual decimal TilesGainedPerOpenEnd => 0.5M;
 
         // According to zqxk, charging on gentle up tiles multiplies required distance by 27/32. So each tile is worth 32/27 of a tile
         /// <summary>
         /// A multiplier that can be applied to a number of gentle up tiles to obtain the equivalent run length in flat tiles.
         /// </summary>
-        public virtual decimal GentleUpTileMultiplier { get => 32M / 27M; }
+        public virtual decimal GentleUpTileMultiplier => 32M / 27M;
 
         // According to zqxk, charging on steep up tiles multiplies required distance by 3/4. So each tile is worth 4/3 of a tile
         /// <summary>
         /// A multiplier that can be applied to a number of steep up tiles to obtain the equivalent run length in flat tiles.
         /// </summary>
-        public virtual decimal SteepUpTileMultiplier { get => 4M / 3M; }
+        public virtual decimal SteepUpTileMultiplier => 4M / 3M;
 
         // STITCHME Don't know about downward slopes yet
         /// <summary>
         /// A multiplier that can be applied to a number of gentle down tiles to obtain the equivalent run length in flat tiles.
         /// </summary>
-        public virtual decimal GentleDownTileMultiplier { get => 1M; }
+        public virtual decimal GentleDownTileMultiplier => 1M;
 
         // STITCHME Don't know about downward slopes yet
         /// <summary>
         /// A multiplier that can be applied to a number of steep down tiles to obtain the equivalent run length in flat tiles.
         /// </summary>
-        public virtual decimal SteepDownTileMultiplier { get => 1; }
+        public virtual decimal SteepDownTileMultiplier => 1;
 
         /// <summary>
         /// Calculates the real in-game drop rate (out of DROP_RATE_DIVIDER) for the provided initial drop rates, after adjusting for the elimination of some drops.
@@ -190,7 +191,7 @@ namespace sm_json_data_framework.Rules
                 EnemyDropEnum.Missile => 2,
                 EnemyDropEnum.Super => 1,
                 EnemyDropEnum.PowerBomb => 1,
-                _ => throw new Exception($"Unrecognized enemy drop {enemyDrop}")
+                _ => throw new NotImplementedException($"Unrecognized enemy drop {enemyDrop}")
             };
         }
 
@@ -330,438 +331,216 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a heated room, given the provided in-game state.
+        /// Returns the minimum energy that Samus can go to during the provided DoT effect.
+        /// Going below that energy amount should be seen as a failure even if it doesn't kill Samus.
         /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateHeatDamage(ReadOnlyInGameState inGameState, int heatFrames)
-        {
-            return CalculateHeatDamage(heatFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a heated room, in the best case scenario
-        /// (presumably both suits).
-        /// </summary>
-        /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
-        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseHeatDamage(int heatFrames, IReadOnlySet<string> removedItems)
-        {
-            return CalculateHeatDamage(heatFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a heated room, in the worst case scenario
-        /// (presumably suitless).
-        /// </summary>
-        /// <param name="heatFrames">The duration (in frames) of the heat exposure whose damage to calculate.</param>
-        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseHeatDamage(int heatFrames, ReadOnlyItemInventory startingInventory)
-        {
-            return CalculateHeatDamage(heatFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
-        }
-
-        private int CalculateHeatDamage(int heatFrames, bool hasVaria, bool hasGravity)
-        {
-            if (hasGravity || hasVaria)
-            {
-                return 0;
-            }
-            else
-            {
-                return heatFrames / 4;
-            }
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateHeatDamage(ReadOnlyInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="dotEnum">The DoT effect to get the minimum energy threshold for</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetHeatDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual int GetDamageOverTimeMinimumEnergyThreshold(DamageOverTimeEnum dotEnum)
         {
-            // Gravity and Varia are equivalent. Varia's more iconic for heat reduction, so let's prioritize it.
-            return GetDamageReducingItemsWhenVariaSupersedesGravity(model, inGameState);
+            return dotEnum switch
+            {
+                DamageOverTimeEnum.Acid => 1,
+                DamageOverTimeEnum.GrappleElectricity => 1,
+                DamageOverTimeEnum.Heat => 1,
+                DamageOverTimeEnum.Lava => 1,
+                DamageOverTimeEnum.LavaPhysics => 1,
+                DamageOverTimeEnum.Shinespark => 29,
+                DamageOverTimeEnum.SamusEater => 1,
+                _ => throw new NotImplementedException($"DamageOverTime enum {dotEnum} not supported here")
+            };
         }
 
         /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava, given the provided in-game state.
+        /// Returns the damage per frame for the provided DoT effect.
         /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateLavaDamage(ReadOnlyInGameState inGameState, int lavaFrames)
+        /// <param name="dotEnum">The DoT effect to get the base damage for</param>
+        /// <returns></returns>
+        public virtual decimal GetBaseDamagePerFrame(DamageOverTimeEnum dotEnum)
         {
-            return CalculateLavaDamage(lavaFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
+            return dotEnum switch
+            {
+                DamageOverTimeEnum.Acid => 1.5M,
+                DamageOverTimeEnum.GrappleElectricity => 1,
+                DamageOverTimeEnum.Heat => 0.25M,
+                DamageOverTimeEnum.Lava => 0.5M,
+                DamageOverTimeEnum.LavaPhysics => 0.5M,
+                DamageOverTimeEnum.Shinespark => 1,
+                DamageOverTimeEnum.SamusEater => 0.1M,
+                _ => throw new NotImplementedException($"DamageOverTime enum {dotEnum} not supported here")
+            };
         }
 
         /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava, in the best case scenario
-        /// (presumably both suits).
+        /// Returns a multiplier to apply on top of the base damage of a DoT effect based on the provided in-game state.
         /// </summary>
-        /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseLavaDamage(int lavaFrames, IReadOnlySet<string> removedItems)
+        /// <param name="inGameState">The in-game state on which to base the damage reduction</param>
+        /// <param name="dotEnum">The DoT effect to get damage reduction for</param>
+        /// <returns></returns>
+        public virtual decimal GetDamageOverTimeReductionMultiplier(ReadOnlyInGameState inGameState, DamageOverTimeEnum dotEnum)
         {
-            return CalculateLavaDamage(lavaFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
+            return GetDamageOverTimeReductionMultiplier(dotEnum, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava, in the worst case scenario
-        /// (presumably suitless).
-        /// </summary>
-        /// <param name="lavaFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseLavaDamage(int lavaFrames, ReadOnlyItemInventory startingInventory)
-        {
-            return CalculateLavaDamage(lavaFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
-        }
-
-        private int CalculateLavaDamage(int lavaFrames, bool hasVaria, bool hasGravity)
+        private decimal GetDamageOverTimeReductionMultiplier(DamageOverTimeEnum dotEnum, bool hasVaria, bool hasGravity)
         {
             if (hasGravity)
             {
-                return 0;
+                // Shinespark and lavaPhysics damage is unaffected by having Gravity
+                switch (dotEnum)
+                {
+                    case DamageOverTimeEnum.Acid:
+                    case DamageOverTimeEnum.GrappleElectricity:
+                    case DamageOverTimeEnum.SamusEater:
+                        return 0.25M;
+                    case DamageOverTimeEnum.Lava:
+                    case DamageOverTimeEnum.Heat:
+                        return 0;
+                }
             }
-            else if (hasVaria)
-            {
-                return lavaFrames / 4;
-            }
-            else
-            {
-                return lavaFrames / 2;
-            }
-        }
 
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava while undergoing lava physics 
-        /// (i.e. with Gravity Suit turned off if available), given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateLavaPhysicsDamage(ReadOnlyInGameState inGameState, int lavaPhysicsFrames)
-        {
-            return CalculateLavaPhysicsDamage(lavaPhysicsFrames, inGameState.Inventory.HasVariaSuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava while undergoing lava physics 
-        /// (i.e. with Gravity Suit turned off if available), in the best case scenario (presumably with Varia).
-        /// </summary>
-        /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseLavaPhysicsDamage(int lavaPhysicsFrames, IReadOnlySet<string> removedItems)
-        {
-            return CalculateLavaPhysicsDamage(lavaPhysicsFrames, !removedItems.ContainsVariaSuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in lava while undergoing lava physics 
-        /// (i.e. with Gravity Suit turned off if available), in the worst case scenario (presumably suitless).
-        /// </summary>
-        /// <param name="lavaPhysicsFrames">The duration (in frames) of the lava exposure whose damage to calculate.</param>
-        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseLavaPhysicsDamage(int lavaPhysicsFrames, ReadOnlyItemInventory startingInventory)
-        {
-            return CalculateLavaPhysicsDamage(lavaPhysicsFrames, startingInventory.HasVariaSuit());
-        }
-
-        private int CalculateLavaPhysicsDamage(int lavaPhysicsFrames, bool hasVaria)
-        {
             if (hasVaria)
             {
-                return lavaPhysicsFrames / 4;
+                // Shinespark damage is unaffected by having Varia
+                switch (dotEnum)
+                {
+                    case DamageOverTimeEnum.Acid:
+                    case DamageOverTimeEnum.GrappleElectricity:
+                    case DamageOverTimeEnum.SamusEater:
+                    case DamageOverTimeEnum.Lava:
+                    case DamageOverTimeEnum.LavaPhysics:
+                        return 0.5M;
+                    case DamageOverTimeEnum.Heat:
+                        return 0;
+                }
             }
-            else
+
+            switch (dotEnum)
             {
-                return lavaPhysicsFrames / 2;
+                case DamageOverTimeEnum.Acid:
+                case DamageOverTimeEnum.GrappleElectricity:
+                case DamageOverTimeEnum.SamusEater:
+                case DamageOverTimeEnum.Lava:
+                case DamageOverTimeEnum.LavaPhysics:
+                case DamageOverTimeEnum.Heat:
+                case DamageOverTimeEnum.Shinespark:
+                    return 1;
+                default:
+                    throw new NotImplementedException($"DamageOverTime enum {dotEnum} not supported here");
             }
         }
 
         /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateLavaDamage(ReadOnlyInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
+        /// Returns the damage done by the provided DoT over the provided number of frames, given the inGameState but assuming an ability to take the damage indefinitely.
         /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="frames">The number of frames the DoT effect will be active for</param>
+        /// <param name="dotEnum">The DoT effect to get damage for</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetLavaDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual int CalculateDamageOverTime(ReadOnlyInGameState inGameState, int frames, DamageOverTimeEnum dotEnum)
         {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
+            return CalculateDamageOverTime(frames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit(), dotEnum);
         }
 
         /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateLavaPhysicsDamage(ReadOnlyInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<Item> GetLavaPhysicsDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Gravity turned off
-            return GetDamageReducingItemsWhenGravityTurnedOff(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in acid, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateAcidDamage(ReadOnlyInGameState inGameState, int acidFrames)
-        {
-            return CalculateAcidDamage(acidFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in acid, in the best case scenario
+        /// Calculates and returns the damage Samus would take for being subjected to a given DoT effect for the provided duration, in the best case scenario
         /// (presumably both suits).
         /// </summary>
-        /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
+        /// <param name="frames">The duration (in frames) of the DoT exposure whose damage to calculate</param>
+        /// <param name="dotEnum">The DoT effect</param>
         /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseAcidDamage(int acidFrames, IReadOnlySet<string> removedItems)
+        public virtual int CalculateBestCaseDamageOverTime(int frames, DamageOverTimeEnum dotEnum, IReadOnlySet<string> removedItems)
         {
-            return CalculateAcidDamage(acidFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
+            return CalculateDamageOverTime(frames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit(), dotEnum);
         }
 
         /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in acid, in the worst case scenario
+        /// Calculates and returns the damage Samus would take for being subjected to a given DoT effect for the provided duration, in the worst case scenario
         /// (presumably suitless).
         /// </summary>
-        /// <param name="acidFrames">The duration (in frames) of the acid exposure whose damage to calculate.</param>
+        /// <param name="frames">The duration (in frames) of the DoT exposure whose damage to calculate</param>
+        /// <param name="dotEnum">The DoT effect</param>
         /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseAcidDamage(int acidFrames, ReadOnlyItemInventory startingInventory)
+        public virtual int CalculateWorstCaseDamageOverTime(int frames, DamageOverTimeEnum dotEnum, ReadOnlyItemInventory startingInventory)
         {
-            return CalculateAcidDamage(acidFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
+            return CalculateDamageOverTime(frames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit(), dotEnum);
         }
 
-        private int CalculateAcidDamage(int acidFrames, bool hasVaria, bool hasGravity)
+        private int CalculateDamageOverTime(int frames, bool hasVaria, bool hasGravity, DamageOverTimeEnum dotEnum)
         {
-            if (hasGravity)
-            {
-                return acidFrames * 3 / 8;
-            }
-            else if (hasVaria)
-            {
-                return acidFrames * 3 / 4;
-            }
-            else
-            {
-                return acidFrames * 6 / 4;
-            }
+            return (int)(frames * GetBaseDamagePerFrame(dotEnum) * GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria, hasGravity));
         }
 
         /// <summary>
         /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateAcidDamage(ReadOnlyInGameState, int)"/>.<para>
+        /// for a reduction in the damage returned by <see cref="CalculateDamageOverTime(ReadOnlyInGameState, int, DamageOverTimeEnum)"/>.<para>
         /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
         /// </summary>
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetAcidDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<Item> GetDamageOverTimeReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState, DamageOverTimeEnum dotEnum)
         {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
+            decimal gravityOnlyMultiplier = GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria: false, hasGravity: true);
+            decimal variaOnlyMultiplier = GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria: true, hasGravity: false);
+            decimal bothMultiplier = GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria: true, hasGravity: true);
 
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration grappled to a broken Draygon turret, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateElectricityGrappleDamage(ReadOnlyInGameState inGameState, int electricityFrames)
-        {
-            return CalculateElectricityGrappleDamage(electricityFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
-        }
+            bool gravityReduces = gravityOnlyMultiplier < 1;
+            bool variaReduces = variaOnlyMultiplier < 1;
+            bool variaMattersWithGravity = bothMultiplier < gravityOnlyMultiplier;
 
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration grappled to a broken Draygon turret, in the best case scenario
-        /// (presumably both suits).
-        /// </summary>
-        /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
-        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseElectricityGrappleDamage(int electricityFrames, IReadOnlySet<string> removedItems)
-        {
-            return CalculateElectricityGrappleDamage(electricityFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration grappled to a broken Draygon turret, in the worst case scenario
-        /// (presumably suitless).
-        /// </summary>
-        /// <param name="electricityFrames">The duration (in frames) of the electricity exposure whose damage to calculate.</param>
-        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseElectricityGrappleDamage(int electricityFrames, ReadOnlyItemInventory startingInventory)
-        {
-            return CalculateElectricityGrappleDamage(electricityFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
-        }
-
-        private int CalculateElectricityGrappleDamage(int electricityFrames, bool hasVaria, bool hasGravity)
-        {
-            if (hasGravity)
+            HashSet<Item> items = new();
+            if (inGameState.Inventory.HasGravitySuit() && gravityReduces)
             {
-                return electricityFrames / 4;
+                items.Add(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME]);
             }
-            else if (hasVaria)
+
+            if (inGameState.Inventory.HasVariaSuit() && variaReduces && (variaMattersWithGravity || !inGameState.Inventory.HasGravitySuit()))
             {
-                return electricityFrames / 2;
+                items.Add(model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
             }
-            else
-            {
-                return electricityFrames;
-            }
-        }
 
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateElectricityGrappleDamage(ReadOnlyInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<Item> GetElectricityGrappleDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a Samus Eater, given the provided in-game state.
-        /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="samusEaterFrames">The duration (in frames) of the Samus eater exposure whose damage to calculate.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateSamusEaterDamage(ReadOnlyInGameState inGameState, int samusEaterFrames)
-        {
-            return CalculateSamusEaterDamage(samusEaterFrames, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a Samus eater, in the best case scenario
-        /// (presumably both suits).
-        /// </summary>
-        /// <param name="samusEaterFrames">The duration (in frames) of the Samus eater exposure whose damage to calculate.</param>
-        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseSamusEaterDamage(int samusEaterFrames, IReadOnlySet<string> removedItems)
-        {
-            return CalculateSamusEaterDamage(samusEaterFrames, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
-        }
-
-        /// <summary>
-        /// Calculates and returns the damage Samus would take for spending the provided duration in a Samus eater, in the worst case scenario
-        /// (presumably suitless).
-        /// </summary>
-        /// <param name="samusEaterFrames">The duration (in frames) of the Samus eater exposure whose damage to calculate.</param>
-        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseSamusEaterDamage(int samusEaterFrames, ReadOnlyItemInventory startingInventory)
-        {
-            return CalculateSamusEaterDamage(samusEaterFrames, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
-        }
-
-        private int CalculateSamusEaterDamage(int samusEaterFrames, bool hasVaria, bool hasGravity)
-        {
-            if (hasGravity)
-            {
-                return samusEaterFrames / 40;
-            }
-            else if (hasVaria)
-            {
-                return samusEaterFrames / 20;
-            }
-            else
-            {
-                return samusEaterFrames / 10;
-            }
-        }
-
-        /// <summary>
-        /// <para>Returns the enumeration of items found in the provided inGameState which would be responsible
-        /// for a reduction in the damage returned by <see cref="CalculateSamusEaterDamage(ReadOnlyInGameState, int)"/>.<para>
-        /// <para>Does not return items that would reduce the damage, but are made irrelevant by another item's reduction</para>
-        /// </summary>
-        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<Item> GetSamusEaterDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
+            return items;
         }
 
         /// <summary>
         /// <para>
-        /// Calculates and returns the damage Samus would take for attempting to execute a shinespark of the provided duration n times, given the provided in-game state.
-        /// If Samus has not enough energy to complete the shinesparks, this will return how much she will lose before shinesprks stop moving her.
+        /// Calculates and returns the damage Samus would take for attempting to execute a shinespark of the provided duration n times, given the provided regular energy value.
+        /// If Samus has not enough energy to complete the shinesparks, this will return how much she will lose before shinesparks stop moving her.
         /// </para>
         /// <para>
         /// This method makes no comment on whether Samus has enough energy to accomplish anything with the shinespark.
         /// This can instead be checked by calling <see cref="CalculateMinimumEnergyNeededForShinespark(int, int, int)"/>.
         /// </para>
         /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="currentRegularEnergy">The amount of regular energy available.</param>
         /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate (including any excess frames).</param>
         /// <param name="times">The number of times the shinespark will be performed.</param>
         /// <returns>The calculated damage</returns>
-        public virtual int CalculateShinesparkDamage(ReadOnlyInGameState inGameState, int shinesparkFrames, int times = 1)
+        public int CalculateInterruptibleShinesparkDamage(ReadOnlyInGameState inGameState, int shinesparkFrames, int times = 1)
         {
-            int maxDamage = CalculateMaximumShinesparkDamage(shinesparkFrames, 1);
-            int energyAvailableForSpark = inGameState.Resources.GetAmount(ConsumableResourceEnum.Energy) - ShinesparkEnergyLimit;
+            int currentRegularEnergy = inGameState.Resources.GetAmount(RechargeableResourceEnum.RegularEnergy);
+            int maxDamage = CalculateDamageOverTime(inGameState, shinesparkFrames, DamageOverTimeEnum.Shinespark) * times;
+            int energyAvailableForSpark = currentRegularEnergy - GetDamageOverTimeMinimumEnergyThreshold(DamageOverTimeEnum.Shinespark);
             return Math.Min(maxDamage, energyAvailableForSpark);
         }
 
         /// <summary>
-        /// <para>Returns the minimum energy that can be consumed to execute a shinespark n times, and to complete at least the non-excess frames n consecutive times.
+        /// <para>Returns the minimum energy that must be consumed to execute a shinespark n times.
+        /// This is interpreted as meaning all shinesparks but the last one must execute fully, since otherwise there would be no energy to start the next one.
         /// By default, that is the energy cost of the full shinespark * (times -1) + the energy cost of just the non-excess frames once.</para>
         /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
         /// </summary>
-        public virtual int CalculateMinimumShinesparkDamage(int shinesparkFrames, int excessShinesparkFrames, int times = 1)
+        public int CalculateMinimumShinesparkDamage(int shinesparkFrames, int excessShinesparkFrames, int times = 1)
         {
             if (shinesparkFrames <= 0 || times <= 0)
             {
                 return 0;
             }
-            return shinesparkFrames * (times - 1) + shinesparkFrames - excessShinesparkFrames;
-        }
-
-        /// <summary>
-        /// <para>Returns the maximum energy that can be consumed to execute a shinespark n times, and to complete at least the non-excess frames n consecutive times.
-        /// By default, that means all excess frames are consumed, so it's simply shinesparkFrames * times.</para>
-        /// <para>This does return 0 if shinesparkFrames is 0, interpreting that as meaning there is no shinespark.</para>
-        /// </summary>
-        /// <param name="shinesparkFrames">The duration (in frames) of the shinespark whose damage to calculate (including any excess frames).</param>
-        /// <param name="times">The number of times the shinespark will be performed.</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateMaximumShinesparkDamage(int shinesparkFrames, int times = 1)
-        {
-            if (shinesparkFrames <= 0 || times <= 0)
-            {
-                return 0;
-            }
-            return shinesparkFrames * times ;
+            return ((int)(shinesparkFrames * ShinesparkFramesToDamageMultiplier)) * (times - 1) + ((int)((shinesparkFrames - excessShinesparkFrames) * ShinesparkFramesToDamageMultiplier));
         }
 
         /// <summary>
@@ -780,7 +559,7 @@ namespace sm_json_data_framework.Rules
             {
                 return 0;
             }
-            return CalculateMinimumShinesparkDamage(shinesparkFrames, excessShinesparkFrames, times) + ShinesparkEnergyLimit;
+            return CalculateMinimumShinesparkDamage(shinesparkFrames, excessShinesparkFrames, times) + GetDamageOverTimeMinimumEnergyThreshold(DamageOverTimeEnum.Shinespark);
         }
 
         /// <summary>
@@ -948,7 +727,7 @@ namespace sm_json_data_framework.Rules
                 RechargeableResourceEnum.PowerBomb => ExpansionPickupRestoreBehaviorEnum.ADD_PICKED_UP,
                 RechargeableResourceEnum.RegularEnergy => ExpansionPickupRestoreBehaviorEnum.REFILL,
                 RechargeableResourceEnum.ReserveEnergy => ExpansionPickupRestoreBehaviorEnum.NOTHING,
-                _ => throw new Exception($"Unrecognized rechargeable resource {resource}")
+                _ => throw new NotImplementedException($"Unrecognized rechargeable resource {resource}")
             };
         }
     }

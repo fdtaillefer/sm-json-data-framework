@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.InGameStates.EnergyManagement;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Rules;
@@ -16,6 +17,54 @@ namespace sm_json_data_framework.Tests.TestTools
     /// </summary>
     public class RandoSuperMetroidRules : SuperMetroidRules
     {
+        public override decimal GetDamageOverTimeReductionMultiplier(ReadOnlyInGameState inGameState, DamageOverTimeEnum dotEnum)
+        {
+            return GetDamageOverTimeReductionMultiplier(dotEnum, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
+        }
+
+        private decimal GetDamageOverTimeReductionMultiplier(DamageOverTimeEnum dotEnum, bool hasVaria, bool hasGravity)
+        {
+            // We're making Varia the only suit that reduces heat, acid, lava, and electricity
+            if (hasGravity)
+            {
+                switch (dotEnum)
+                {
+                    case DamageOverTimeEnum.SamusEater:
+                        return 0.25M;
+                }
+            }
+
+            if (hasVaria)
+            {
+                // Shinespark damage is unaffected by having Varia
+                switch (dotEnum)
+                {
+                    case DamageOverTimeEnum.Acid:
+                    case DamageOverTimeEnum.GrappleElectricity:
+                    case DamageOverTimeEnum.SamusEater:
+                    case DamageOverTimeEnum.Lava:
+                    case DamageOverTimeEnum.LavaPhysics:
+                        return 0.5M;
+                    case DamageOverTimeEnum.Heat:
+                        return 0;
+                }
+            }
+
+            switch (dotEnum)
+            {
+                case DamageOverTimeEnum.Acid:
+                case DamageOverTimeEnum.GrappleElectricity:
+                case DamageOverTimeEnum.SamusEater:
+                case DamageOverTimeEnum.Lava:
+                case DamageOverTimeEnum.LavaPhysics:
+                case DamageOverTimeEnum.Heat:
+                case DamageOverTimeEnum.Shinespark:
+                    return 1;
+                default:
+                    throw new NotImplementedException($"DamageOverTime enum {dotEnum} not supported here");
+            }
+        }
+
         public override int CalculateEnvironmentalDamage(ReadOnlyInGameState inGameState, int baseDamage)
         {
             // Make Varia the only suit that reduces environmental damage
@@ -46,89 +95,5 @@ namespace sm_json_data_framework.Tests.TestTools
             // Report Varia as being the only suit that reduces environmental damage
             return ReturnVariaIfPresent(model, inGameState);
         }
-
-        public override int CalculateHeatDamage(ReadOnlyInGameState inGameState, int heatFrames)
-        {
-            // Make Varia the only suit that reduces heat damage
-            if (inGameState.Inventory.HasVariaSuit())
-            {
-                return 0;
-            }
-            else
-            {
-                return heatFrames / 4;
-            }
-        }
-
-        public override IEnumerable<Item> GetHeatDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Report Varia as being the only suit that reduces heat damage
-            return ReturnVariaIfPresent(model, inGameState);
-        }
-
-        public override int CalculateLavaDamage(ReadOnlyInGameState inGameState, int lavaFrames)
-        {
-            // Make Varia the only suit that reduces lava damage
-            bool hasVaria = inGameState.Inventory.HasVariaSuit();
-            if (hasVaria)
-            {
-                return 0;
-            }
-            else
-            {
-                return lavaFrames / 2;
-            }
-        }
-
-        public override int CalculateLavaPhysicsDamage(ReadOnlyInGameState inGameState, int lavaPhysicsFrames)
-        {
-            // Turning off Gravity does nothing, use standard calculation
-            return CalculateLavaDamage(inGameState, lavaPhysicsFrames);
-        }
-
-        public override IEnumerable<Item> GetLavaDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Report Varia as being the only suit that reduces lava damage
-            return ReturnVariaIfPresent(model, inGameState);
-        }
-
-        public override int CalculateAcidDamage(ReadOnlyInGameState inGameState, int acidFrames)
-        {
-            // Make Varia the only suit that reduces acid damage
-            if (inGameState.Inventory.HasVariaSuit())
-            {
-                return acidFrames * 3 / 8;
-            }
-            else
-            {
-                return acidFrames * 6 / 4;
-            }
-        }
-
-        public override IEnumerable<Item> GetAcidDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Report Varia as being the only suit that reduces acid damage
-            return ReturnVariaIfPresent(model, inGameState);
-        }
-
-        public override int CalculateElectricityGrappleDamage(ReadOnlyInGameState inGameState, int electricityFrames)
-        {
-            // Make Varia the only suit that reduces electricity grapple damage
-            if (inGameState.Inventory.HasVariaSuit())
-            {
-                return electricityFrames / 4;
-            }
-            else
-            {
-                return electricityFrames;
-            }
-        }
-
-        public override IEnumerable<Item> GetElectricityGrappleDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Report Varia as being the only suit that reduces electricity grapple damage
-            return ReturnVariaIfPresent(model, inGameState);
-        }
-
     }
 }

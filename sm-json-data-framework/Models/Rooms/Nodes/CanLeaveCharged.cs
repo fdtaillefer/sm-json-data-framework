@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Models.Navigation;
 using sm_json_data_framework.Models.Raw.Rooms.Nodes;
 using sm_json_data_framework.Models.Requirements;
@@ -150,7 +151,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
 
             // Figure out how much energy we will need to have for the shinespark
             int energyNeededForShinespark = model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, excessShinesparkFrames: 0, times: times);
-            int shinesparkEnergyToSpend = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
+            int shinesparkEnergyToSpend = model.Rules.CalculateInterruptibleShinesparkDamage(inGameState, ShinesparkFrames, times: times);
 
             // Try to execute all strats, 
             // obtaining the result of whichever spends the lowest amount of resources while retaining enough for the shinespark

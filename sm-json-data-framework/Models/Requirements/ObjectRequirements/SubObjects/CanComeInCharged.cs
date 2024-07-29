@@ -80,7 +80,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         protected override ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0)
         {
             int energyNeededForShinespark = model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames, times: times);
-            int shinesparkEnergyCost = model.Rules.CalculateShinesparkDamage(inGameState, ShinesparkFrames, times: times);
+            int shinesparkEnergyCost = model.Rules.CalculateInterruptibleShinesparkDamage(inGameState, ShinesparkFrames, times: times);
             // Not calling IsResourceAvailable() because Samus only needs to have that much energy, not necessarily spend all of it
             Predicate<ReadOnlyInGameState> hasEnergyForShinespark = state => state.Resources.GetAmount(ConsumableResourceEnum.Energy) >= energyNeededForShinespark;
             Action<ExecutionResult> consumeShinesparkEnergy = result => result.ResultingState.ApplyConsumeResource(ConsumableResourceEnum.Energy, shinesparkEnergyCost);
