@@ -1,5 +1,5 @@
-﻿using sm_json_data_framework.InGameStates;
-using sm_json_data_framework.InGameStates.EnergyManagement;
+﻿using sm_json_data_framework.EnergyManagement;
+using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;

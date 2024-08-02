@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.InGameStates.EnergyManagement
+namespace sm_json_data_framework.EnergyManagement
 {
     /// <summary>
     /// An enum for different damage over time effects

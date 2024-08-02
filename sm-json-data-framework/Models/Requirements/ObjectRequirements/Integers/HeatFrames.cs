@@ -1,4 +1,4 @@
-﻿using sm_json_data_framework.InGameStates.EnergyManagement;
+﻿using sm_json_data_framework.EnergyManagement;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
 using System;
