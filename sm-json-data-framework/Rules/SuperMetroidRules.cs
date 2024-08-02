@@ -1,5 +1,5 @@
-﻿using sm_json_data_framework.InGameStates;
-using sm_json_data_framework.InGameStates.EnergyManagement;
+﻿using sm_json_data_framework.EnergyManagement;
+using sm_json_data_framework.InGameStates;
 using sm_json_data_framework.Models;
 using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Items;
@@ -19,12 +19,6 @@ namespace sm_json_data_framework.Rules
     public class SuperMetroidRules
     {
         private const int DROP_RATE_DIVIDER = 102;
-
-        public virtual int ThornDamage => 16;
-
-        public virtual int SpikeDamage => 60;
-
-        public virtual int HibashiDamage => 30;
 
         /// <summary>
         /// Multiplier to apply to shinespark frames to obtain shinespark damage.
@@ -263,57 +257,88 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
-        /// Calculates and returns the environmental damage Samus would take for the provided in-game state and base environmental damage. This method is intended
-        /// for environment-based punctual hits, not damage over time.
+        /// Returns the base damage for one hit of the provided environment damage source.
         /// </summary>
-        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
-        /// <param name="baseDamage">The base damage</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateEnvironmentalDamage(ReadOnlyInGameState inGameState, int baseDamage)
+        /// <param name="environmentDamageEnum">The type of environment damage</param>
+        /// <returns></returns>
+        public virtual int GetPunctualEnvironmentBaseDamage(PunctualEnvironmentDamageEnum environmentDamageEnum)
         {
-            return CalculateEnvironmentalDamage(baseDamage, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
+            return environmentDamageEnum switch
+            {
+                PunctualEnvironmentDamageEnum.ThornHit => 16,
+                PunctualEnvironmentDamageEnum.SpikeHit => 60,
+                PunctualEnvironmentDamageEnum.HibashiHit => 30,
+                _ => throw new NotImplementedException($"PunctualEnvironmentDamageEnum enum {environmentDamageEnum} not supported here")
+            };
         }
 
         /// <summary>
-        /// Calculates and returns the environmental damage Samus would take for the provided base environmental damage, in the best case scenario
-        /// (presumably, both suits).
-        /// This method is intended for environment-based punctual hits, not damage over time.
+        /// Returns a multiplier to apply on top of the base damage of a punctual hit of environment damage based on the provided in-game state.
         /// </summary>
-        /// <param name="baseDamage">The base damage</param>
-        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateBestCaseEnvironmentalDamage(int baseDamage, IReadOnlySet<string> removedItems)
+        /// <param name="inGameState">The in-game state on which to base the damage reduction</param>
+        /// <param name="environmentDamageEnum">The environment damage to get damage reduction for</param>
+        /// <returns></returns>
+        public virtual decimal GetPunctualEnvironmentDamageReductionMultiplier(ReadOnlyInGameState inGameState, PunctualEnvironmentDamageEnum environmentDamageEnum)
         {
-            return CalculateEnvironmentalDamage(baseDamage, !removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit());
+            return GetPunctualEnvironmentDamageReductionMultiplier(environmentDamageEnum, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
         }
 
-        /// <summary>
-        /// Calculates and returns the environmental damage Samus would take for the provided base environmental damage, in the worst case scenario
-        /// (presumably, suitless).
-        /// This method is intended for environment-based punctual hits, not damage over time.
-        /// </summary>
-        /// <param name="baseDamage">The base damage</param>
-        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
-        /// <returns>The calculated damage</returns>
-        public virtual int CalculateWorstCaseEnvironmentalDamage(int baseDamage, ReadOnlyItemInventory startingInventory)
-        {
-            return CalculateEnvironmentalDamage(baseDamage, startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit());
-        }
-
-        private int CalculateEnvironmentalDamage(int baseDamage, bool hasVaria, bool hasGravity)
+        private decimal GetPunctualEnvironmentDamageReductionMultiplier(PunctualEnvironmentDamageEnum environmentDamageEnum, bool hasVaria, bool hasGravity)
         {
             if (hasGravity)
             {
-                return baseDamage / 4;
+                return 0.25M;
             }
             else if (hasVaria)
             {
-                return baseDamage / 2;
+                return 0.5M;
             }
             else
             {
-                return baseDamage;
+                return 1;
             }
+        }
+
+        /// <summary>
+        /// Calculates and returns the environment damage Samus would take for the provided in-game state and environment damage type.
+        /// </summary>
+        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="environmentDamageEnum">The environment damage source</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculatePunctualEnvironmentDamage(ReadOnlyInGameState inGameState, PunctualEnvironmentDamageEnum environmentDamageEnum)
+        {
+            return CalculatePunctualEnvironmentDamage(inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit(), environmentDamageEnum);
+        }
+
+        private int CalculatePunctualEnvironmentDamage(bool hasVaria, bool hasGravity, PunctualEnvironmentDamageEnum environmentDamageEnum)
+        {
+            int baseDamage = GetPunctualEnvironmentBaseDamage(environmentDamageEnum);
+            decimal multiplier = GetPunctualEnvironmentDamageReductionMultiplier(environmentDamageEnum, hasVaria, hasGravity);
+            return (int)(baseDamage * multiplier);
+        }
+
+        /// <summary>
+        /// Calculates and returns the environmental damage Samus would take for the provided environmental damage source, in the best case scenario
+        /// (presumably, both suits).
+        /// </summary>
+        /// <param name="environmentDamageEnum">The environment damage source</param>
+        /// <param name="removedItems">A set of item names that cannot logically be found in game</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateBestCasePunctualEnvironmentDamage(PunctualEnvironmentDamageEnum environmentDamageEnum, IReadOnlySet<string> removedItems)
+        {
+            return CalculatePunctualEnvironmentDamage(!removedItems.ContainsVariaSuit(), !removedItems.ContainsGravitySuit(), environmentDamageEnum);
+        }
+
+        /// <summary>
+        /// Calculates and returns the environmental damage Samus would take for the provided environmental damage source, in the worst case scenario
+        /// (presumably, suitless).
+        /// </summary>
+        /// <param name="environmentDamageEnum">The environment damage source</param>
+        /// <param name="startingInventory">The inventory of items that Samus is logically guaranteed to have</param>
+        /// <returns>The calculated damage</returns>
+        public virtual int CalculateWorstCasePunctualEnvironmentDamage(PunctualEnvironmentDamageEnum environmentDamageEnum, ReadOnlyItemInventory startingInventory)
+        {
+            return CalculatePunctualEnvironmentDamage(startingInventory.HasVariaSuit(), startingInventory.HasGravitySuit(), environmentDamageEnum);
         }
 
         /// <summary>
@@ -324,10 +349,35 @@ namespace sm_json_data_framework.Rules
         /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
         /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
         /// <returns></returns>
-        public virtual IEnumerable<Item> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
+        public virtual IEnumerable<Item> GetPunctualEnvironmentDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState, 
+            PunctualEnvironmentDamageEnum environmentDamageEnum)
         {
-            // Gravity supercedes Varia
-            return GetDamageReducingItemsWhenGravitySupersedesVaria(model, inGameState);
+            decimal gravityOnlyMultiplier = GetPunctualEnvironmentDamageReductionMultiplier(environmentDamageEnum, hasVaria: false, hasGravity: true);
+            decimal variaOnlyMultiplier = GetPunctualEnvironmentDamageReductionMultiplier(environmentDamageEnum, hasVaria: true, hasGravity: false);
+            decimal bothMultiplier = GetPunctualEnvironmentDamageReductionMultiplier(environmentDamageEnum, hasVaria: true, hasGravity: true);
+
+            return GetDamageReducingItems(model, inGameState, gravityOnlyMultiplier, variaOnlyMultiplier, bothMultiplier);
+        }
+
+        private IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState, 
+            decimal gravityOnlyMultiplier, decimal variaOnlyMultiplier, decimal bothMultiplier)
+        {
+            bool gravityReduces = gravityOnlyMultiplier < 1;
+            bool variaReduces = variaOnlyMultiplier < 1;
+            bool variaMattersWithGravity = bothMultiplier < gravityOnlyMultiplier;
+
+            HashSet<Item> items = new();
+            if (inGameState.Inventory.HasGravitySuit() && gravityReduces)
+            {
+                items.Add(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME]);
+            }
+
+            if (inGameState.Inventory.HasVariaSuit() && variaReduces && (variaMattersWithGravity || !inGameState.Inventory.HasGravitySuit()))
+            {
+                items.Add(model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
+            }
+
+            return items;
         }
 
         /// <summary>
@@ -353,7 +403,7 @@ namespace sm_json_data_framework.Rules
         }
 
         /// <summary>
-        /// Returns the damage per frame for the provided DoT effect.
+        /// Returns the base damage per frame for the provided DoT effect.
         /// </summary>
         /// <param name="dotEnum">The DoT effect to get the base damage for</param>
         /// <returns></returns>
@@ -471,7 +521,23 @@ namespace sm_json_data_framework.Rules
 
         private int CalculateDamageOverTime(int frames, bool hasVaria, bool hasGravity, DamageOverTimeEnum dotEnum)
         {
-            return (int)(frames * GetBaseDamagePerFrame(dotEnum) * GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria, hasGravity));
+            return (int)(frames * GetDamagePerFrame(hasVaria, hasGravity, dotEnum));
+        }
+
+        /// <summary>
+        /// Returns the damage Samus will takes per frame of the provided DoT effect, given the provided in-game state.
+        /// </summary>
+        /// <param name="inGameState">An in-game state describing the current player situation, notably knowing what items the player has.</param>
+        /// <param name="dotEnum">The DoT effect to get damage for</param>
+        /// <returns></returns>
+        public virtual decimal GetDamagePerFrame(ReadOnlyInGameState inGameState, DamageOverTimeEnum dotEnum)
+        {
+            return GetDamagePerFrame(inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit(), dotEnum);
+        }
+
+        private decimal GetDamagePerFrame(bool hasVaria, bool hasGravity, DamageOverTimeEnum dotEnum)
+        {
+            return GetBaseDamagePerFrame(dotEnum) * GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria, hasGravity);
         }
 
         /// <summary>
@@ -488,22 +554,7 @@ namespace sm_json_data_framework.Rules
             decimal variaOnlyMultiplier = GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria: true, hasGravity: false);
             decimal bothMultiplier = GetDamageOverTimeReductionMultiplier(dotEnum, hasVaria: true, hasGravity: true);
 
-            bool gravityReduces = gravityOnlyMultiplier < 1;
-            bool variaReduces = variaOnlyMultiplier < 1;
-            bool variaMattersWithGravity = bothMultiplier < gravityOnlyMultiplier;
-
-            HashSet<Item> items = new();
-            if (inGameState.Inventory.HasGravitySuit() && gravityReduces)
-            {
-                items.Add(model.Items[SuperMetroidModel.GRAVITY_SUIT_NAME]);
-            }
-
-            if (inGameState.Inventory.HasVariaSuit() && variaReduces && (variaMattersWithGravity || !inGameState.Inventory.HasGravitySuit()))
-            {
-                items.Add(model.Items[SuperMetroidModel.VARIA_SUIT_NAME]);
-            }
-
-            return items;
+            return GetDamageReducingItems(model, inGameState, gravityOnlyMultiplier, variaOnlyMultiplier, bothMultiplier);
         }
 
         /// <summary>

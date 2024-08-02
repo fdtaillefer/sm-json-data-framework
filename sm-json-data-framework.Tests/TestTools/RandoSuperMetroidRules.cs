@@ -65,16 +65,16 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        public override int CalculateEnvironmentalDamage(ReadOnlyInGameState inGameState, int baseDamage)
+        public override decimal GetPunctualEnvironmentDamageReductionMultiplier(ReadOnlyInGameState inGameState, PunctualEnvironmentDamageEnum environmentDamageEnum)
         {
-            // Make Varia the only suit that reduces environmental damage
+            // Make Varia the only suit that reduces environment damage
             if (inGameState.Inventory.HasVariaSuit())
             {
-                return baseDamage / 4;
+                return 0.25M;
             }
             else
             {
-                return baseDamage;
+                return 1;
             }
         }
 
@@ -88,12 +88,6 @@ namespace sm_json_data_framework.Tests.TestTools
             {
                 return new Item[] { };
             }
-        }
-
-        public override IEnumerable<Item> GetEnvironmentalDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            // Report Varia as being the only suit that reduces environmental damage
-            return ReturnVariaIfPresent(model, inGameState);
         }
     }
 }
