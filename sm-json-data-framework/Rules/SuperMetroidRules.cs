@@ -21,11 +21,6 @@ namespace sm_json_data_framework.Rules
         private const int DROP_RATE_DIVIDER = 102;
 
         /// <summary>
-        /// Multiplier to apply to shinespark frames to obtain shinespark damage.
-        /// </summary>
-        public virtual decimal ShinesparkFramesToDamageMultiplier => 1;
-
-        /// <summary>
         /// The number of tiles that are lost when combining two runways via a room transition
         /// </summary>
         public virtual decimal RoomTransitionTilesLost => 1.25M;
@@ -591,7 +586,8 @@ namespace sm_json_data_framework.Rules
             {
                 return 0;
             }
-            return ((int)(shinesparkFrames * ShinesparkFramesToDamageMultiplier)) * (times - 1) + ((int)((shinesparkFrames - excessShinesparkFrames) * ShinesparkFramesToDamageMultiplier));
+            decimal framesToDamageMultiplier = GetBaseDamagePerFrame(DamageOverTimeEnum.Shinespark);
+            return ((int)(shinesparkFrames * framesToDamageMultiplier)) * (times - 1) + ((int)((shinesparkFrames - excessShinesparkFrames) * framesToDamageMultiplier));
         }
 
         /// <summary>
