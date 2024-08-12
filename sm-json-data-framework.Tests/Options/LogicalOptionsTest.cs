@@ -448,7 +448,7 @@ namespace sm_json_data_framework.Tests.Options
         #region Tests for Clone()
 
         [Fact]
-        public void Clone_CopiesCorectly()
+        public void Clone_CopiesCorrectly()
         {
             // Given
             Strat strat = Model.GetNodeInRoom("Blue Brinstar Energy Tank Room", 1).LinksTo[3].Strats["Ceiling E-Tank Dboost"];
@@ -488,6 +488,18 @@ namespace sm_json_data_framework.Tests.Options
             logicalOptions.TilesSavedWithStutter = expectedTilesSavedWithStutter;
             logicalOptions.TilesToShineCharge = expectedTilesToShineCharge;
 
+            int expectedPauseSpamLeewayFrames = 8;
+            int expectedReserveRefillLeeway = 9;
+            int expectedReserveUsageTimingLeeway = 11;
+            logicalOptions.PauseSpamLeewayFrames = expectedPauseSpamLeewayFrames;
+            logicalOptions.ReserveRefillLeewayEnergy = expectedReserveRefillLeeway;
+            logicalOptions.ReserveUsageTimingLeewayFrames = expectedReserveUsageTimingLeeway;
+
+            bool expectedCanUsePartialReserves = !logicalOptions.CanUsePartialReserves;
+            logicalOptions.CanUsePartialReserves = expectedCanUsePartialReserves;
+            int expectedIframesToAvoidDoubleHit = 12;
+            logicalOptions.IframesToAvoidDoubleHit = expectedIframesToAvoidDoubleHit;
+
             decimal expectedMinimumEnergyRatePerSecond = 2.5M;
             decimal expectedSafetyMarginPercent = 3.5M;
             Dictionary<ConsumableResourceEnum, decimal> minimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal> {
@@ -518,6 +530,13 @@ namespace sm_json_data_framework.Tests.Options
             Assert.Equal(expectedTechsEnabledByDefault, clone.TechsEnabledByDefault);
             Assert.Equal(expectedTilesSavedWithStutter, clone.TilesSavedWithStutter);
             Assert.Equal(expectedTilesToShineCharge, clone.TilesToShineCharge);
+
+            Assert.Equal(expectedPauseSpamLeewayFrames, clone.PauseSpamLeewayFrames);
+            Assert.Equal(expectedReserveRefillLeeway, clone.ReserveRefillLeewayEnergy);
+            Assert.Equal(expectedReserveUsageTimingLeeway, clone.ReserveUsageTimingLeewayFrames);
+
+            Assert.Equal(expectedCanUsePartialReserves, clone.CanUsePartialReserves);
+            Assert.Equal(expectedIframesToAvoidDoubleHit, clone.IframesToAvoidDoubleHit);
 
             Assert.Equal(expectedMinimumEnergyRatePerSecond, clone.SpawnerFarmingOptions.MinimumRatesPerSecond[ConsumableResourceEnum.Energy]);
             Assert.Equal(expectedSafetyMarginPercent, clone.SpawnerFarmingOptions.SafetyMarginPercent);
@@ -559,6 +578,14 @@ namespace sm_json_data_framework.Tests.Options
             clone.TilesSavedWithStutter = 1;
             clone.TilesToShineCharge = 20;
 
+            clone.PauseSpamLeewayFrames = 8;
+            clone.ReserveRefillLeewayEnergy = 9;
+            clone.ReserveUsageTimingLeewayFrames = 11;
+
+            bool originalCanUsePartialReserves = logicalOptions.CanUsePartialReserves;
+            clone.CanUsePartialReserves = !originalCanUsePartialReserves;
+            clone.IframesToAvoidDoubleHit = 12;
+
             Dictionary<ConsumableResourceEnum, decimal> minimumRatesPerSecond = new Dictionary<ConsumableResourceEnum, decimal> {
                 { ConsumableResourceEnum.Energy, 2.5M }
             };
@@ -585,6 +612,13 @@ namespace sm_json_data_framework.Tests.Options
             Assert.True(logicalOptions.TechsEnabledByDefault);
             Assert.Equal(LogicalOptions.DefaultTilesSavedWithStutter, logicalOptions.TilesSavedWithStutter);
             Assert.Equal(LogicalOptions.DefaultTilesToShineCharge, logicalOptions.TilesToShineCharge);
+
+            Assert.Equal(LogicalOptions.DefaultPauseSpamLeewayFrames, logicalOptions.PauseSpamLeewayFrames);
+            Assert.Equal(LogicalOptions.DefaultReserveRefillLeeway, logicalOptions.ReserveRefillLeewayEnergy);
+            Assert.Equal(LogicalOptions.DefaultReserveUsageTimingLeeway, logicalOptions.ReserveUsageTimingLeewayFrames);
+
+            Assert.Equal(originalCanUsePartialReserves, logicalOptions.CanUsePartialReserves);
+            Assert.Equal(LogicalOptions.DefaultIframesToAvoidDoubleHit, logicalOptions.IframesToAvoidDoubleHit);
 
             Assert.Equal(SpawnerFarmingOptions.DefaultEnergyMinimumRatePerSecond, logicalOptions.SpawnerFarmingOptions.MinimumRatesPerSecond[ConsumableResourceEnum.Energy]);
             Assert.Equal(SpawnerFarmingOptions.DefaultSafetyMarginPercent, logicalOptions.SpawnerFarmingOptions.SafetyMarginPercent);

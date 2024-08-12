@@ -21,6 +21,31 @@ namespace sm_json_data_framework.Rules
         private const int DROP_RATE_DIVIDER = 102;
 
         /// <summary>
+        /// The amount of frames it takes for the pause fade out to complete.
+        /// </summary>
+        public virtual int PauseFadeOutFrames => 30;
+
+        /// <summary>
+        /// The amount of frames it takes for the pause unpause fade in to complete.
+        /// </summary>
+        public virtual int UnpauseFadeInFrames => 30;
+
+        /// <summary>
+        /// The amount of frames it takes for the pause fade out + the unpause fade in to complete.
+        /// </summary>
+        public virtual int FramesToPauseAndUnpause => PauseFadeOutFrames + UnpauseFadeInFrames;
+
+        /// <summary>
+        /// The number of iframes that Samus gets after taking a hit.
+        /// </summary>
+        public virtual int NumberOfIframes => 100;
+
+        /// <summary>
+        /// The number of energy per frame that is refilled when reserves automatically activate.
+        /// </summary>
+        public virtual decimal AutoReserveRefillPerFrame => 1;
+
+        /// <summary>
         /// The number of tiles that are lost when combining two runways via a room transition
         /// </summary>
         public virtual decimal RoomTransitionTilesLost => 1.25M;
@@ -393,6 +418,29 @@ namespace sm_json_data_framework.Rules
                 DamageOverTimeEnum.LavaPhysics => 1,
                 DamageOverTimeEnum.Shinespark => 29,
                 DamageOverTimeEnum.SamusEater => 1,
+                _ => throw new NotImplementedException($"DamageOverTime enum {dotEnum} not supported here")
+            };
+        }
+
+        /// <summary>
+        /// Indicates the behavior of a DoT effect when the energy tries to dip below the minimum energy threshold.
+        /// If true, reserves are not used and the DoT effect gets interrupted (think of an interrupted shinespark), leaving Samus at the minimum energy threshold.
+        /// If false, damage continues to happen, triggering auto reserves or killing Samus.
+        /// </summary>
+        /// <param name="dotEnum"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual bool IsInterruptibleDot(DamageOverTimeEnum dotEnum)
+        {
+            return dotEnum switch
+            {
+                DamageOverTimeEnum.Acid => false,
+                DamageOverTimeEnum.GrappleElectricity => false,
+                DamageOverTimeEnum.Heat => false,
+                DamageOverTimeEnum.Lava => false,
+                DamageOverTimeEnum.LavaPhysics => false,
+                DamageOverTimeEnum.Shinespark => true,
+                DamageOverTimeEnum.SamusEater => false,
                 _ => throw new NotImplementedException($"DamageOverTime enum {dotEnum} not supported here")
             };
         }

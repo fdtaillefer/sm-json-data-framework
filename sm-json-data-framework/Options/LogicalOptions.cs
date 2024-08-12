@@ -26,6 +26,11 @@ namespace sm_json_data_framework.Options
         // Obscenely short distance so that all shine charges are possible. 12 is an in-room Red Tower shine charge.
         public static readonly decimal DefaultTilesToShineCharge = 12;
         public static readonly decimal DefaultFrameLeniencyMultiplier = 1;
+        public static readonly int DefaultPauseSpamLeewayFrames = 10;
+        public static readonly int DefaultReserveRefillLeeway = 20;
+        public static readonly int DefaultReserveUsageTimingLeeway = 20;
+        public static readonly bool DefaultCanUsePartialReserves = true;
+        public static readonly int DefaultIframesToAvoidDoubleHit = 60;
 
         public static readonly ReadOnlySpawnerFarmingOptions DefaultSpawnerFarmingOptions = new SpawnerFarmingOptions().AsReadOnly();
 
@@ -64,6 +69,11 @@ namespace sm_json_data_framework.Options
             InternalRemovedGameFlags = new HashSet<string>(other.InternalRemovedGameFlags);
             TilesToShineCharge = other.TilesToShineCharge;
             TilesSavedWithStutter = other.TilesSavedWithStutter;
+            PauseSpamLeewayFrames = other.PauseSpamLeewayFrames;
+            ReserveRefillLeewayEnergy = other.ReserveRefillLeewayEnergy;
+            ReserveUsageTimingLeewayFrames = other.ReserveUsageTimingLeewayFrames;
+            CanUsePartialReserves = other.CanUsePartialReserves;
+            IframesToAvoidDoubleHit = other.IframesToAvoidDoubleHit;
             InGameResourceEvaluator = other.InGameResourceEvaluator; // This also assigns InGameStateComparer
             TriesByTech = new Dictionary<string, int>(other.TriesByTech);
             TriesByHelper = new Dictionary<string, int>(other.TriesByHelper);
@@ -238,6 +248,12 @@ namespace sm_json_data_framework.Options
             }
         }
 
+        public int PauseSpamLeewayFrames { get; set; } = DefaultPauseSpamLeewayFrames;
+
+        public int ReserveRefillLeewayEnergy { get; set; } = DefaultReserveRefillLeeway;
+
+        public int ReserveUsageTimingLeewayFrames { get; set; } = DefaultReserveUsageTimingLeeway;
+
         public InGameStateComparer InGameStateComparer { get; private set; }
 
         public bool ShineChargesWithStutter { get; set; } = false;
@@ -307,15 +323,13 @@ namespace sm_json_data_framework.Options
             }
         }
 
-        /// <summary>
-        /// Whether the ability to shinespark is logically enabled.
-        /// </summary>
         public bool CanShinespark => IsTechEnabled(SuperMetroidModel.SHINESPARK_TECH_NAME);
 
-        /// <summary>
-        /// Whether the ability to use reserves during a shinespark is enabled.
-        /// </summary>
         public bool CanUseReservesToShinespark => IsTechEnabled(SuperMetroidModel.USE_RESERVES_FOR_SHINESPARK_TECH_NAME);
+
+        public bool CanUsePartialReserves { get; set; } = DefaultCanUsePartialReserves;
+
+        public int IframesToAvoidDoubleHit { get; set; } = DefaultIframesToAvoidDoubleHit;
 
         /// <summary>
         /// Registers the provided strat name as a disabled strat.
@@ -532,6 +546,22 @@ namespace sm_json_data_framework.Options
         public int NumberOfTries(Strat strat);
 
         /// <summary>
+        /// The number of frames it's expected for the player to take to press pause after the unpause animation ends when pause spamming.
+        /// </summary>
+        public int PauseSpamLeewayFrames { get; }
+
+        /// <summary>
+        /// When using reserves to manually refill energy, this defines the amount of energy below max energy to which the player is espected to refill.
+        /// This is necessary because over-refilling will empty the reserves
+        /// </summary>
+        public int ReserveRefillLeewayEnergy { get; }
+
+        /// <summary>
+        /// Determines how far away from optimal timing (in frames) the player is expected to be able to position a pause with the intent to use reserves.
+        /// </summary>
+        public int ReserveUsageTimingLeewayFrames { get; }
+
+        /// <summary>
         /// An instance of <see cref="InGameStateComparer"/>, initialized with the current relative resource values.
         /// </summary>
         public InGameStateComparer InGameStateComparer { get; }
@@ -571,10 +601,25 @@ namespace sm_json_data_framework.Options
         public bool IsTechEnabled(Tech tech);
 
         /// <summary>
-        /// Indicates thse logical options expect the player to shinespark.
+        /// Indicates whether logical options expect the player to shinespark.
         /// </summary>
         /// <returns></returns>
         public bool CanShinespark { get; }
+
+        /// <summary>
+        /// Whether the ability to use reserves during a shinespark is enabled.
+        /// </summary>
+        public bool CanUseReservesToShinespark { get; }
+
+        /// <summary>
+        /// Whether the ability to manually use a portion of remaining reserves (within the <see cref="ReserveRefillLeewayEnergy"/>) is logically expected.
+        /// </summary>
+        public bool CanUsePartialReserves { get; }
+
+        /// <summary>
+        /// The number of iframes that must remain (after auto reserves have triggered) for the player to be expected to avoid a double hit.
+        /// </summary>
+        public int IframesToAvoidDoubleHit { get; }
 
         /// <summary>
         /// Indicates whether the player is expected to be able to execute the provided Strat according to this LogicalOptions.
