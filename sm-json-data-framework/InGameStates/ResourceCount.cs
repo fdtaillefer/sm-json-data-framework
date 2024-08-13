@@ -261,6 +261,20 @@ namespace sm_json_data_framework.InGameStates
             return true;
         }
 
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (KeyValuePair<RechargeableResourceEnum, int> resourceAmount in Amounts)
+            {
+                if(builder.Length > 0)
+                {
+                    builder.Append("; ");
+                }
+                builder.Append(resourceAmount.Key.ToString()).Append(": ").Append(resourceAmount.Value);
+            }
+            return builder.ToString();
+        }
+
         public override int GetHashCode()
         {
             HashCode hash = new();

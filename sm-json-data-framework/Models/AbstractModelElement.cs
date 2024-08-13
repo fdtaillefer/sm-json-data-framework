@@ -52,16 +52,16 @@ namespace sm_json_data_framework.Models
         /// </para>
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
-        protected abstract void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules);
+        /// <param name="model">The model this element belongs to</param>
+        protected abstract void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model);
 
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             if (logicalOptions != AppliedLogicalOptions)
             {
                 AppliedLogicalOptions = logicalOptions;
-                PropagateLogicalOptions(logicalOptions, rules);
-                UpdateLogicalProperties(rules);
+                PropagateLogicalOptions(logicalOptions, model);
+                UpdateLogicalProperties(model);
             }
         }
 
@@ -69,10 +69,10 @@ namespace sm_json_data_framework.Models
         /// Updates any logical property of this model, as a result of logical options being applied.
         /// Any override of this method should call the base implementation first.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
-        protected virtual void UpdateLogicalProperties(SuperMetroidRules rules)
+        /// <param name="model">The model this element belongs to</param>
+        protected virtual void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            LogicallyRelevant = CalculateLogicallyRelevant(rules);
+            LogicallyRelevant = CalculateLogicallyRelevant(model);
         }
 
         public bool LogicallyRelevant { get; private set; }
@@ -80,8 +80,9 @@ namespace sm_json_data_framework.Models
         /// <summary>
         /// Calculates and returns what the value of <see cref="LogicallyRelevant"/> should be.
         /// </summary>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        public abstract bool CalculateLogicallyRelevant(SuperMetroidRules rules);
+        public abstract bool CalculateLogicallyRelevant(SuperMetroidModel model);
     }
 
     /// <summary>
@@ -98,8 +99,8 @@ namespace sm_json_data_framework.Models
         /// as that could leave the model in an inconsistent state.
         /// </summary>
         /// <param name="logicalOptions">LogicalOptions being applied</param>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
-        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules);
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        public void ApplyLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model);
 
         /// <summary>
         /// <para>

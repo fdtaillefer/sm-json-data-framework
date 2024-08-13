@@ -5,6 +5,7 @@ using sm_json_data_framework.Models.Requirements.ObjectRequirements;
 using sm_json_data_framework.Models.Requirements.StringRequirements;
 using sm_json_data_framework.Reading;
 using sm_json_data_framework.Tests.TestTools;
+using sm_json_data_framework.Tests.TestTools.AlteredRules;
 using sm_json_data_framework.Utils;
 using System;
 using System.Collections.Generic;

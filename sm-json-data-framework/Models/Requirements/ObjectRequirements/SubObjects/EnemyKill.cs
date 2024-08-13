@@ -193,18 +193,18 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return nonFreeGroups.ToList();
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Propagate to all valid weapons, so we can tell if any of them is still usable
             foreach (Weapon weapon in ValidWeapons.Values)
             {
-                weapon.ApplyLogicalOptions(logicalOptions, rules);
+                weapon.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
 
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // Can't fulfill this if none of the valid weapons are possible to use
             if (!ValidWeapons.Values.Any(weapon => !weapon.LogicallyNever))
@@ -218,7 +218,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // If all enemies can be killed by always available weapons that cost no non-farmable ammo, then this is always possible
             return !KillEnemiesWithFreeWeapons(ValidWeapons.Values.WhereLogicallyAlways().ToList(), out var _).Any();
@@ -227,7 +227,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             // It won't identify it as always
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // If all enemies can be killed by always available and free weapons, then this is always possible
             return !KillEnemiesWithFreeWeapons(ValidWeapons.Values.WhereLogicallyFree().ToList(), out var _).Any();

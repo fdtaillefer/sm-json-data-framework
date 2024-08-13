@@ -40,12 +40,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public Room Room { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // There's nothing that can make a room environment irrelevant
             return true;

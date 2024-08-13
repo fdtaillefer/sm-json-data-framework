@@ -56,27 +56,27 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (RoomObstacle obstacle in Obstacles.Values)
             {
-                obstacle.ApplyLogicalOptions(logicalOptions, rules);
+                obstacle.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // If any of the obstacles is impossible to clear, this is impossible to fulfill
             return Obstacles.Values.Any(roomObstacle => roomObstacle.LogicallyIndestructible);
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // We can't really know where/how the obstacle can be destroyed, besides the base common requirements
             return false;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // We can't really know where/how the obstacle can be destroyed, besides the base common requirements
             return false;

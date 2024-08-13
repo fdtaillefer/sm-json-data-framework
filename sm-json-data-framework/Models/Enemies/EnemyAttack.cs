@@ -41,12 +41,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         public bool AffectedByGravity { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // An enemy attack always has some relevance
             return true;

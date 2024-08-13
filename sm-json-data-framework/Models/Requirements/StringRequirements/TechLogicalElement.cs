@@ -35,24 +35,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return Tech.Requires.Execute(model, inGameState, times: times * Tries, previousRoomCount: previousRoomCount);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Tech.ApplyLogicalOptions(logicalOptions, rules);
+            Tech.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This is impossible if the tech itself is impossible
             return Tech.LogicallyNever;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This is always possible if the tech itself also is
             return Tech.LogicallyAlways;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // This is always possible if the tech itself also is
             return Tech.LogicallyFree;

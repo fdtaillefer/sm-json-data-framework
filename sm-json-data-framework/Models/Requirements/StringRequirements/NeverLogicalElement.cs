@@ -29,24 +29,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             return null;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // Never is always never
             return true;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // Never is never always
             return false;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // Never is never possible, let alone free
             return false;

@@ -30,12 +30,12 @@ namespace sm_json_data_framework.Models.Enemies
         /// </summary>
         public int Width { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // Enemy dimensions are just data with no logical implications.
             // They have in-game implications but that's too complex to be calculated here.

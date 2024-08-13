@@ -37,13 +37,13 @@ namespace sm_json_data_framework.Models.Connections
         /// </summary>
         public ConnectionNode ToNode { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            FromNode.ApplyLogicalOptions(logicalOptions, rules);
-            ToNode.ApplyLogicalOptions(logicalOptions, rules);
+            FromNode.ApplyLogicalOptions(logicalOptions, model);
+            ToNode.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // Arguably a connection might not be relevant if on a node that's impossible to interact with,
             // but that's a matter of layout and not logic, and is out of scope here.

@@ -31,15 +31,15 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public IReadOnlyDictionary<int, LinkTo> To { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (LinkTo linkTo in To.Values)
             {
-                linkTo.ApplyLogicalOptions(logicalOptions, rules);
+                linkTo.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A link has no logical relevance if it has no destination that can logically be reached
             return To.Values.WhereLogicallyRelevant().Any();

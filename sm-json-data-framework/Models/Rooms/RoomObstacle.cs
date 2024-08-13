@@ -52,20 +52,20 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public Room Room { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Requires.ApplyLogicalOptions(logicalOptions, rules);
+            Requires.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyIndestructible = CalculateLogicallyIndestructible(rules);
-            LogicallyAlwaysDestructible = CalculateLogicallyAlwaysDestructible(rules);
-            LogicallyDestructibleForFree = CalculateLogicallyDestructibleForFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyIndestructible = CalculateLogicallyIndestructible(model);
+            LogicallyAlwaysDestructible = CalculateLogicallyAlwaysDestructible(model);
+            LogicallyDestructibleForFree = CalculateLogicallyDestructibleForFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // An obstacle is always relevant.
             // Even if indestructible, and even if it has base requirements that are always free (because specific strats likely define additional requirements).
@@ -81,9 +81,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyIndestructible"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyIndestructible(SuperMetroidRules rules)
+        protected bool CalculateLogicallyIndestructible(SuperMetroidModel model)
         {
             // If the base destruction requirements are impossible to fulfill, this can never be destroyed
             // If they are possible to fulfill, the obstacle might still be indestructible but we can't tell based on the data we have here.
@@ -99,9 +99,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlwaysDestructible"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlwaysDestructible(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlwaysDestructible(SuperMetroidModel model)
         {
             return Requires.LogicallyAlways;
         }
@@ -115,9 +115,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyDestructibleForFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyDestructibleForFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyDestructibleForFree(SuperMetroidModel model)
         {
             return Requires.LogicallyFree;
         }

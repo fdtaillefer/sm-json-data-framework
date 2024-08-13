@@ -48,14 +48,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.CalculateDamageOverTime(inGameState, (int)(Frames * LeniencyMultiplier), DotEnum) * times;
         }
 
-        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        public override int CalculateBestCastDamage(SuperMetroidModel model)
         {
-            return (int)(rules.CalculateBestCaseDamageOverTime(Frames, DotEnum, AppliedLogicalOptions.RemovedItems) * LeniencyMultiplier);
+            return (int)(model.Rules.CalculateDamageOverTime(Frames, model.BestCaseInventory, DotEnum) * LeniencyMultiplier);
         }
 
-        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        public override int CalculateWorstCastDamage(SuperMetroidModel model)
         {
-            return (int)(rules.CalculateWorstCaseDamageOverTime(Frames, DotEnum, AppliedLogicalOptions.StartConditions.StartingInventory) * LeniencyMultiplier);
+            return (int)(model.Rules.CalculateDamageOverTime(Frames, model.WorstCaseInventory, DotEnum) * LeniencyMultiplier);
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

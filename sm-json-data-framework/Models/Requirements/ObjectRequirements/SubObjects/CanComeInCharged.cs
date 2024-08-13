@@ -282,12 +282,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return (usableRunways, bestResult);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             if(!AppliedLogicalOptions.IsSpeedBoosterInGame())
             {
@@ -304,7 +304,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 {
                     // If the shinespark requires having more energy than the possible max energy, this is impossible
                     int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
-                    if (maxEnergy != null && rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames) > maxEnergy.Value)
+                    if (maxEnergy != null && model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames) > maxEnergy.Value)
                     {
                         return true;
                     }
@@ -316,14 +316,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return false;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This could be always possible based on layout and not logic, but that part is beyond the scope of this method.
             // It would also require SpeedBooster to always be available (and not removed) and to not require a shinespark.
             return false;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // This could be always free based on layout and not logic, but that part is beyond the scope of this method.
             // It would also need SpeedBooster to always be available (and not removed) and it would need to not require a shinespark.

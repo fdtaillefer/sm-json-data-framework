@@ -109,35 +109,35 @@ namespace sm_json_data_framework.Models.Rooms
             return null;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (RoomEnvironment roomEnvironment in RoomEnvironments)
             {
-                roomEnvironment.ApplyLogicalOptions(logicalOptions, rules);
+                roomEnvironment.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (RoomNode node in Nodes.Values)
             {
-                node.ApplyLogicalOptions(logicalOptions, rules);
+                node.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (RoomObstacle obstacle in Obstacles.Values)
             {
-                obstacle.ApplyLogicalOptions(logicalOptions, rules);
+                obstacle.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (Link link in Links.Values)
             {
-                link.ApplyLogicalOptions(logicalOptions, rules);
+                link.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (RoomEnemy enemy in Enemies.Values)
             {
-                enemy.ApplyLogicalOptions(logicalOptions, rules);
+                enemy.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A room always has relevance.
             // A room could technically be unreachable, but that's a matter of layout on top of logic, so out of scope here.

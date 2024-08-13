@@ -48,7 +48,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public RoomNode ExitNode { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // If this contains strats, they belong to a LinkTo.
             // However, we need to apply the logical options to them to calculate if they become impossible
@@ -57,21 +57,21 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
                 var (_, strats) = PathToDoor[i];
                 foreach (Strat strat in strats.Values)
                 {
-                    strat.ApplyLogicalOptions(logicalOptions, rules);
+                    strat.ApplyLogicalOptions(logicalOptions, model);
                 }
 
             }
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // An InitiateRemotely is logically relevant even if impossible, because its existence indicates that its CanLeaveCharged is impossible
             return true;
@@ -85,9 +85,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // If there is any node in the path that has no possible strat, then it's impossible to execute this InitiateRemotely
             return PathToDoor.Any(pathNode => !pathNode.strats.Values.Any(strat => !strat.LogicallyNever));
@@ -98,9 +98,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This is always possible if all nodes in the path have an always possible strat and there's no need to open the door first (which we can't tell if that's always or not).
             // Note that this makes no statement on whether it can be used retroactively - that's not a concept this element has.
@@ -112,9 +112,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // This is free if all nodes in the path have a free strat and there's no need to open the door first (which we can't tell if that's free or not).
             // Note that this makes no statement on whether it can be used retroactively - that's not a concept this element has.

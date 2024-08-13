@@ -84,23 +84,23 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Requires.ApplyLogicalOptions(logicalOptions, rules);
-            Bypass?.ApplyLogicalOptions(logicalOptions, rules);
-            Obstacle.ApplyLogicalOptions(logicalOptions, rules);
+            Requires.ApplyLogicalOptions(logicalOptions, model);
+            Bypass?.ApplyLogicalOptions(logicalOptions, model);
+            Obstacle.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyNeverFromHere = CalculateLogicallyNeverFromHere(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyNeverFromHere = CalculateLogicallyNeverFromHere(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A StratObstacle is always relevant - even if impossible because it blocks the path, and even if free because it's a way to destroy the obstacle.
             return true;
@@ -114,9 +114,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This StratObstacle becomes impossible to fulfill ever if the obstacle can never be destroyed, and can't be bypassed from here
             bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
@@ -132,9 +132,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNeverFromHere"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNeverFromHere(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNeverFromHere(SuperMetroidModel model)
         {
             bool indestructibleHere = Obstacle.LogicallyIndestructible || Requires.LogicallyNever;
             bool unbypassableHere = Bypass == null || Bypass.LogicallyNever;
@@ -147,9 +147,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             return (Obstacle.LogicallyAlwaysDestructible && Requires.LogicallyAlways) || Bypass?.LogicallyAlways is true;
         }
@@ -159,9 +159,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             return (Obstacle.LogicallyDestructibleForFree && Requires.LogicallyFree) || Bypass?.LogicallyFree is true;
         }

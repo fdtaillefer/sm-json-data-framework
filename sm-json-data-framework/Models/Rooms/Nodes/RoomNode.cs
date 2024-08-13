@@ -204,50 +204,50 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            InteractionRequires.ApplyLogicalOptions(logicalOptions, rules);
+            InteractionRequires.ApplyLogicalOptions(logicalOptions, model);
 
             foreach (CanLeaveCharged canLeaveCharged in CanLeaveCharged)
             {
-                canLeaveCharged.ApplyLogicalOptions(logicalOptions, rules);
+                canLeaveCharged.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (DoorEnvironment doorEnvironment in DoorEnvironments)
             {
-                doorEnvironment.ApplyLogicalOptions(logicalOptions, rules);
+                doorEnvironment.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (ViewableNode viewableNode in ViewableNodes.Values)
             {
-                viewableNode.ApplyLogicalOptions(logicalOptions, rules);
+                viewableNode.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (NodeLock nodeLock in Locks.Values)
             {
-                nodeLock.ApplyLogicalOptions(logicalOptions, rules);
+                nodeLock.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (Runway runway in Runways.Values)
             {
-                runway.ApplyLogicalOptions(logicalOptions, rules);
+                runway.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (TwinDoorAddress twinDoorAddress in TwinDoorAddresses)
             {
-                twinDoorAddress.ApplyLogicalOptions(logicalOptions, rules);
+                twinDoorAddress.ApplyLogicalOptions(logicalOptions, model);
             }
 
             // Links belong to rooms, not nodes, so we don't have to propagate to them if we don't need the information.
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNeverInteract = CalculateLogicallyNeverInteract(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNeverInteract = CalculateLogicallyNeverInteract(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A node always has relevance
             return true;
@@ -261,9 +261,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNeverInteract"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNeverInteract(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNeverInteract(SuperMetroidModel model)
         {
             // A node is impossible to interact with if it has impossible interaction requirements or a lock that can't be taken care of
             return InteractionRequires.LogicallyNever || Locks.Values.Any(nodeLock => nodeLock.LogicallyNever);

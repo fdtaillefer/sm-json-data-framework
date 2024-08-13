@@ -62,12 +62,12 @@ namespace sm_json_data_framework.Models.Connections
         /// </summary>
         public ConnectionNodePositionEnum Position { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // The two ends of a connection are always relevant given their connection is
             return true;

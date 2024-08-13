@@ -25,24 +25,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             return LogicalRequirements.Execute(model, inGameState, times: times, previousRoomCount: previousRoomCount);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            LogicalRequirements.ApplyLogicalOptions(logicalOptions, rules);
+            LogicalRequirements.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // Delegate to requirements
             return LogicalRequirements.LogicallyNever;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // Delegate to requirements
             return LogicalRequirements.LogicallyAlways;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // Delegate to requirements
             return LogicalRequirements.LogicallyFree;

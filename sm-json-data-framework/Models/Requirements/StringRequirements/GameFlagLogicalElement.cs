@@ -41,24 +41,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            GameFlag.ApplyLogicalOptions(logicalOptions, rules);
+            GameFlag.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This is impossible if the game flag itself is impossible
             return GameFlag.LogicallyNever;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This is always possible if the game flag itself also is
             return GameFlag.LogicallyAlways;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             return GameFlag.LogicallyFree;
         }

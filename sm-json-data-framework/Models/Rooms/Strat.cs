@@ -109,34 +109,34 @@ namespace sm_json_data_framework.Models.Rooms
             return result;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Requires.ApplyLogicalOptions(logicalOptions, rules);
+            Requires.ApplyLogicalOptions(logicalOptions, model);
 
             foreach (StratFailure failure in Failures.Values)
             {
-                failure.ApplyLogicalOptions(logicalOptions, rules);
+                failure.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (StratObstacle stratObstacle in Obstacles.Values)
             {
-                stratObstacle.ApplyLogicalOptions(logicalOptions, rules);
-                stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions, rules);
+                stratObstacle.ApplyLogicalOptions(logicalOptions, model);
+                stratObstacle.Obstacle.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A strat that can never be executed may as well not exist
-            return !CalculateLogicallyNever(rules);
+            return !CalculateLogicallyNever(model);
         }
 
         /// <summary>
@@ -147,9 +147,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // A strat is impossible to execute if it has impossible requirements, but also if it has any impossible obstacle
             // or if it's just logically disabled
@@ -162,9 +162,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // Can always be fulfilled if enabled, and its requirements can always be done, and its obstacles can always be destroyed or bypassed
             return AppliedLogicalOptions.IsStratEnabled(this) && Requires.LogicallyAlways && !Obstacles.Values.Any(obstacle => !obstacle.LogicallyAlways);
@@ -175,9 +175,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // Free if enabled, has free requirements, and its obstacles can always be destroyed or bypassed for free
             return AppliedLogicalOptions.IsStratEnabled(this) && Requires.LogicallyFree && !Obstacles.Values.Any(obstacle => !obstacle.LogicallyFree);

@@ -40,14 +40,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             return model.Rules.CalculatePunctualEnvironmentDamage(inGameState, EnvironmentDamageEnum) * Hits * times;
         }
 
-        public override int CalculateBestCastDamage(SuperMetroidRules rules)
+        public override int CalculateBestCastDamage(SuperMetroidModel model)
         {
-            return rules.CalculateBestCasePunctualEnvironmentDamage(EnvironmentDamageEnum, AppliedLogicalOptions.RemovedItems) * Hits;
+            return model.Rules.CalculatePunctualEnvironmentDamage(model.BestCaseInventory, EnvironmentDamageEnum) * Hits;
         }
 
-        public override int CalculateWorstCastDamage(SuperMetroidRules rules)
+        public override int CalculateWorstCastDamage(SuperMetroidModel model)
         {
-            return rules.CalculateWorstCasePunctualEnvironmentDamage(EnvironmentDamageEnum, AppliedLogicalOptions.StartConditions.StartingInventory) * Hits;
+            return model.Rules.CalculatePunctualEnvironmentDamage(model.WorstCaseInventory, EnvironmentDamageEnum) * Hits;
         }
 
         public override IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState)

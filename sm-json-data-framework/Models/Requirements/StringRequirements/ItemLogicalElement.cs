@@ -39,24 +39,24 @@ namespace sm_json_data_framework.Models.Requirements.StringRequirements
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Item.ApplyLogicalOptions(logicalOptions, rules);
+            Item.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This is impossible if the item can never be used
             return Item.LogicallyNever;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This is always possible if the item can always be used
             return Item.LogicallyAlways;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             return Item.LogicallyFree;
         }

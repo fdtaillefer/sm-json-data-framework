@@ -34,12 +34,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
         /// </summary>
         public int Count { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // Capacity cannot be below 0, so anything that isn't above 0 is always met and completely irrelevant
             return Count > 0;

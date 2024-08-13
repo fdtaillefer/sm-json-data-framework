@@ -122,24 +122,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This could be impossible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This could be always possible, but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // This could be always free (using an adjacent runway never costs resources), but that depends on layout and not logic, and is beyond the scope of this method.
             return false;
@@ -165,7 +165,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             PhysicsEnum? physics = inGameState.GetCurrentDoorPhysics(previousRoomCount);
             if (physics != null)
             {
-                frameExecutables.Add(physics.Value.FramesExecutable(Frames, model.AppliedLogicalOptions, model.Rules));
+                frameExecutables.Add(physics.Value.FramesExecutable(Frames, model.AppliedLogicalOptions, model));
             }
 
             if (inGameState.IsHeatedRoom(previousRoomCount))
@@ -173,7 +173,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 HeatFrames heatFrames = new HeatFrames(Frames);
                 // You normally shouldn't apply logical options out of the blue, but this is a temporary element with no ties to any elements in the model,
                 // and it needs the logical options to have access to leniency
-                heatFrames.ApplyLogicalOptions(model.AppliedLogicalOptions, model.Rules);
+                heatFrames.ApplyLogicalOptions(model.AppliedLogicalOptions, model);
                 frameExecutables.Add(heatFrames);
             }
 

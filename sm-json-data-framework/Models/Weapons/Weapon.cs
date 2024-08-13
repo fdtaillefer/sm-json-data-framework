@@ -76,24 +76,24 @@ namespace sm_json_data_framework.Models.Weapons
         /// </summary>
         public IReadOnlySet<WeaponCategoryEnum> Categories { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            UseRequires.ApplyLogicalOptions(logicalOptions, rules);
-            ShotRequires.ApplyLogicalOptions(logicalOptions, rules);
+            UseRequires.ApplyLogicalOptions(logicalOptions, model);
+            ShotRequires.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A weapon that can never be used may as well not exist
-            return !CalculateLogicallyNever(rules);
+            return !CalculateLogicallyNever(model);
         }
 
         public bool LogicallyNever { get; private set; }
@@ -101,9 +101,9 @@ namespace sm_json_data_framework.Models.Weapons
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // Weapon is impossible to use if either using it altogether, or doing an individual shot, becomes impossible
             return UseRequires.LogicallyNever || ShotRequires.LogicallyNever;
@@ -114,8 +114,9 @@ namespace sm_json_data_framework.Models.Weapons
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // Weapon is always possible to use if using it altogether, and doing an individual shot, are both always possible
             return UseRequires.LogicallyAlways && ShotRequires.LogicallyAlways;
@@ -126,8 +127,9 @@ namespace sm_json_data_framework.Models.Weapons
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // Weapon is always free to use if using it altogether, and doing an individual shot, are both always free
             return UseRequires.LogicallyFree && ShotRequires.LogicallyFree;

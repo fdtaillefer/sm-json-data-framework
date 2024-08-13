@@ -58,12 +58,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This could be impossible if the smallest possible damage is more than the max we can get
             int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
@@ -72,17 +72,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             {
                 return false;
             }
-            return rules.CalculateBestCaseEnemyDamage(Attack, AppliedLogicalOptions.RemovedItems) * Hits >= maxEnergy;
+            return model.Rules.CalculateEnemyDamage(Attack, model.BestCaseInventory) * Hits >= maxEnergy;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
-            return rules.CalculateWorstCaseEnemyDamage(Attack, AppliedLogicalOptions.StartConditions.StartingInventory) * Hits <= 0;
+            return model.Rules.CalculateEnemyDamage(Attack, model.WorstCaseInventory) * Hits <= 0;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
-            return rules.CalculateWorstCaseEnemyDamage(Attack, AppliedLogicalOptions.StartConditions.StartingInventory) * Hits <= 0;
+            return model.Rules.CalculateEnemyDamage(Attack, model.WorstCaseInventory) * Hits <= 0;
         }
     }
 

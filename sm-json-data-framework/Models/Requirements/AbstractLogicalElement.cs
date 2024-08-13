@@ -55,15 +55,15 @@ namespace sm_json_data_framework.Models.Requirements
         /// <returns>An ExecutionResult describing the execution if successful, or null otherwise.</returns>
         protected abstract ExecutionResult ExecutePossible(SuperMetroidModel model, ReadOnlyInGameState inGameState, int times = 1, int previousRoomCount = 0);
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // There's always situations where a logical element (even one that's logically free or logically never) has some relevance,
             // such as adding data to an ExecutionResult or affecting a containing And/Or.
@@ -75,27 +75,27 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected abstract bool CalculateLogicallyNever(SuperMetroidRules rules);
+        protected abstract bool CalculateLogicallyNever(SuperMetroidModel model);
 
         public bool LogicallyAlways { get; private set; }
 
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected abstract bool CalculateLogicallyAlways(SuperMetroidRules rules);
+        protected abstract bool CalculateLogicallyAlways(SuperMetroidModel model);
 
         public bool LogicallyFree { get; private set; }
 
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected abstract bool CalculateLogicallyFree(SuperMetroidRules rules);
+        protected abstract bool CalculateLogicallyFree(SuperMetroidModel model);
     }
 
     /// <summary>

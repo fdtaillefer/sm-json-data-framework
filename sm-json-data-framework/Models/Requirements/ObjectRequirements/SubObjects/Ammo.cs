@@ -47,12 +47,12 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             int? maxPossibleAmmo = AppliedLogicalOptions.MaxPossibleAmount(AmmoType.GetConsumableResourceEnum());
             if(maxPossibleAmmo == null)
@@ -63,13 +63,13 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return Count > maxPossibleAmmo.Value;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // A count of 0 makes no sense, but it *would* be logically always
             return Count == 0;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // A count of 0 makes no sense, but it *would* always be free
             return Count == 0;

@@ -117,26 +117,26 @@ namespace sm_json_data_framework.Models.Requirements
                 .OfType<T>();
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (ILogicalElement logicalElement in LogicalElements)
             {
-                logicalElement.ApplyLogicalOptions(logicalOptions, rules);
+                logicalElement.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel  model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyOrNever = CalculateLogicallyOrNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyOrAlways = CalculateLogicallyOrAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
-            LogicallyOrFree = CalculateLogicallyOrFree(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyOrNever = CalculateLogicallyOrNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyOrAlways = CalculateLogicallyOrAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
+            LogicallyOrFree = CalculateLogicallyOrFree(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // Logical requirements are always relevant, even when free or impossible
             return true;
@@ -147,9 +147,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // Since executing logical requirements means executing all logical elements, this becomes impossible if any child is impossible
             return LogicalElements.Any(element =>  element.LogicallyNever);
@@ -164,9 +164,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyOrNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyOrNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyOrNever(SuperMetroidModel model)
         {
             // An empty Or makes little sense - interpret it as being possible to fulfill
             if(!LogicalElements.Any())
@@ -183,9 +183,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // Since executing logical requirements means executing all logical elements,
             // this only becomes "always" if all child elements also are (but also if empty)
@@ -201,9 +201,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyOrAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyOrAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyOrAlways(SuperMetroidModel model)
         {
             // An empty Or makes little sense - interpret it as always being possible to fulfill
             if (!LogicalElements.Any())
@@ -220,9 +220,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // Since executing logical requirements means executing all logical elements,
             // this only becomes free if all child elements also are (but also if empty)
@@ -238,9 +238,9 @@ namespace sm_json_data_framework.Models.Requirements
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyOrFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyOrFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyOrFree(SuperMetroidModel model)
         {
             // An empty Or makes little sense - interpret it as always being free
             if (!LogicalElements.Any())

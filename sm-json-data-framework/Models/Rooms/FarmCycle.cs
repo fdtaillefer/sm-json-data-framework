@@ -115,21 +115,21 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Requires.ApplyLogicalOptions(logicalOptions, rules);
+            Requires.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // If a farm cycle cannot be executed, it may as well not exist
-            return !CalculateLogicallyNever(rules);
+            return !CalculateLogicallyNever(model);
         }
 
         /// <summary>
@@ -140,9 +140,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // A farm cycle is impossible if its requirements are impossible.
             // It's also impossible if the enemy can't spawn, but we can't get that property on the parent RoomEnemy because it's in the middle

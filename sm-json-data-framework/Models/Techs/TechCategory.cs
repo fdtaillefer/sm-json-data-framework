@@ -43,14 +43,14 @@ namespace sm_json_data_framework.Models.Techs
         /// All techs inside this category, mapped by name. This includes any and all extension techs (to exclude those, see <see cref="FirstLevelTechs"/>.
         /// </summary>
         public IReadOnlyDictionary<string, Tech> Techs { get; } = new Dictionary<string, Tech>();
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (Tech tech in Techs.Values)
             {
-                tech.ApplyLogicalOptions(logicalOptions, rules);
+                tech.ApplyLogicalOptions(logicalOptions, model);
             }
         }
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A cateogry with no relevant techs may as well not exist.
             return Techs.Values.WhereLogicallyRelevant().Any();

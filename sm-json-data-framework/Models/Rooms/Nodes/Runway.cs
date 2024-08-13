@@ -131,23 +131,23 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return new ExecutableRunway(this, comingIn);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (Strat strat in Strats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions, rules);
+                strat.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
-            LogicalEffectiveReversibleRunwayLength = rules.CalculateEffectiveReversibleRunwayLength(this, TilesSavedWithStutter);
-            LogicalEffectiveRunwayLengthNoCharge = rules.CalculateEffectiveRunwayLength(this, tilesSavedWithStutter: 0);
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            LogicalEffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
+            LogicalEffectiveReversibleRunwayLength = model.Rules.CalculateEffectiveReversibleRunwayLength(this, TilesSavedWithStutter);
+            LogicalEffectiveRunwayLengthNoCharge = model.Rules.CalculateEffectiveRunwayLength(this, tilesSavedWithStutter: 0);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
         /// <summary>
@@ -165,10 +165,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public decimal LogicalEffectiveRunwayLengthNoCharge { get; private set; }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // If a runway cannot be used, it may as well not exist
-            return !CalculateLogicallyNever(rules);
+            return !CalculateLogicallyNever(model);
         }
 
         /// <summary>
@@ -179,9 +179,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // A runway is impossible to use if it has no strats that can be executed
             return !Strats.Values.WhereLogicallyRelevant().Any();
@@ -192,9 +192,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // We only need one always possible strat in order to always be possible
             return Strats.Values.WhereLogicallyAlways().Any();
@@ -205,9 +205,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // We only need one free strat in order to be free
             return Strats.Values.WhereLogicallyFree().Any();

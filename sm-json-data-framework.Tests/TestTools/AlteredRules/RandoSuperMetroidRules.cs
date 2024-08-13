@@ -10,16 +10,16 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sm_json_data_framework.Tests.TestTools
+namespace sm_json_data_framework.Tests.TestTools.AlteredRules
 {
     /// <summary>
     /// A subclass of SuperMetroidRules which has typical randomizer adjustments, to be used intests as an alternate when relevant.
     /// </summary>
     public class RandoSuperMetroidRules : SuperMetroidRules
     {
-        public override decimal GetDamageOverTimeReductionMultiplier(ReadOnlyInGameState inGameState, DamageOverTimeEnum dotEnum)
+        public override decimal GetDamageOverTimeReductionMultiplier(DamageOverTimeEnum dotEnum, ReadOnlyItemInventory inventory)
         {
-            return GetDamageOverTimeReductionMultiplier(dotEnum, inGameState.Inventory.HasVariaSuit(), inGameState.Inventory.HasGravitySuit());
+            return GetDamageOverTimeReductionMultiplier(dotEnum, inventory.HasVariaSuit(), inventory.HasGravitySuit());
         }
 
         private decimal GetDamageOverTimeReductionMultiplier(DamageOverTimeEnum dotEnum, bool hasVaria, bool hasGravity)
@@ -65,10 +65,10 @@ namespace sm_json_data_framework.Tests.TestTools
             }
         }
 
-        public override decimal GetPunctualEnvironmentDamageReductionMultiplier(ReadOnlyInGameState inGameState, PunctualEnvironmentDamageEnum environmentDamageEnum)
+        public override decimal GetPunctualEnvironmentDamageReductionMultiplier(PunctualEnvironmentDamageEnum environmentDamageEnum, ReadOnlyItemInventory inventory)
         {
             // Make Varia the only suit that reduces environment damage
-            if (inGameState.Inventory.HasVariaSuit())
+            if (inventory.HasVariaSuit())
             {
                 return 0.25M;
             }

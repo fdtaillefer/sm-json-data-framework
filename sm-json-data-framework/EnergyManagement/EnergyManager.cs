@@ -1,4 +1,5 @@
 ﻿using sm_json_data_framework.InGameStates;
+using sm_json_data_framework.Models.Enemies;
 using sm_json_data_framework.Models.Items;
 using sm_json_data_framework.Options;
 using sm_json_data_framework.Rules;
@@ -17,7 +18,7 @@ namespace sm_json_data_framework.EnergyManagement
     /// </summary>
     public class EnergyManager
     {
-        public EnergyManager(LogicalOptions logicalOptions, SuperMetroidRules rules)
+        public EnergyManager(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
         {
             // The CanUseReservesToShinespark logical option is based on a tech that's a bit more specific than we use it for
             // The techs in the model will be expanded upon eventually and we'll be able to break those up when we catch up to those changes
@@ -39,6 +40,13 @@ namespace sm_json_data_framework.EnergyManagement
         public int ReserveUsageTimingLeewayFrames { get; }
         public int IframesToAvoidDoubleHit { get; }
 
+        public ReadOnlyResourceCount CalculatePunctualEnemyDamageEnergyVariation(ReadOnlyInGameState inGameState, EnemyAttack attack, int hits,
+            bool canActBeforeFirstHit)
+        {
+            int damagePerHit = Rules.CalculateEnemyDamage(inGameState, attack);
+            return CalculatePunctualDamageEnergyVariation(inGameState, damagePerHit, hits, canActBeforeFirstHit);
+        }
+
         /// <summary>
         /// Attempts to calculate a way to successfully execute a task that involves taking a number of environment damage hits, using the internal rules and logical options
         /// (especially to decide how reserves can be managed).
@@ -50,8 +58,21 @@ namespace sm_json_data_framework.EnergyManagement
         public ReadOnlyResourceCount CalculatePunctualEnvironmentDamageEnergyVariation(ReadOnlyInGameState inGameState, PunctualEnvironmentDamageEnum environmentDamageEnum, int hits,
             bool canActBeforeFirstHit)
         {
-
             int damagePerHit = Rules.CalculatePunctualEnvironmentDamage(inGameState, environmentDamageEnum);
+            return CalculatePunctualDamageEnergyVariation(inGameState, damagePerHit, hits, canActBeforeFirstHit);
+        }
+
+        /// <summary>
+        /// Attempts to calculate a way to successfully execute a task that involves taking a number of hits worth a given amount of damage each, 
+        /// using the internal rules and logical options (especially to decide how reserves can be managed).
+        /// </summary>
+        /// <param name="inGameState">An in-game state, used for current and maximum energy counts and to determine the environment damage</param>
+        /// <param name="damagePerHit">The amount of damage taken for each hit</param>
+        /// <param name="hits">The number of hits to take</param>
+        /// <returns>The resulting resource variation if successful, null otherwise</returns>
+        private ReadOnlyResourceCount CalculatePunctualDamageEnergyVariation(ReadOnlyInGameState inGameState, int damagePerHit, int hits,
+            bool canActBeforeFirstHit)
+        {
             int totalDamage = damagePerHit * hits;
 
             EnergyManagerTaskState state = new EnergyManagerTaskState(this, inGameState, totalDamage, excessEnergyCost: 0, minimumEnergyThreshold: 1);
@@ -63,7 +84,7 @@ namespace sm_json_data_framework.EnergyManagement
             }
 
             // If there's just not enough energy in any scenario, quit immediately
-            if(totalDamage >= state.RegularEnergy + state.ReserveEnergy)
+            if (totalDamage >= state.RegularEnergy + state.ReserveEnergy)
             {
                 return null;
             }

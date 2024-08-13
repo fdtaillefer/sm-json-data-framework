@@ -177,23 +177,23 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return result;
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            InitiateRemotely?.ApplyLogicalOptions(logicalOptions, rules);
+            InitiateRemotely?.ApplyLogicalOptions(logicalOptions, model);
 
             foreach (Strat strat in Strats.Values)
             {
-                strat.ApplyLogicalOptions(logicalOptions, rules);
+                strat.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
-            base.UpdateLogicalProperties(rules);
-            LogicallyNever = CalculateLogicallyNever(rules);
-            LogicallyAlways = CalculateLogicallyAlways(rules);
-            LogicallyFree = CalculateLogicallyFree(rules);
+            LogicalEffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
+            base.UpdateLogicalProperties(model);
+            LogicallyNever = CalculateLogicallyNever(model);
+            LogicallyAlways = CalculateLogicallyAlways(model);
+            LogicallyFree = CalculateLogicallyFree(model);
         }
 
         /// <summary>
@@ -201,10 +201,10 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// </summary>
         public decimal LogicalEffectiveRunwayLength { get; private set; }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // If a CanLeaveCharged is impossible to execute, it may as well not exist
-            return !CalculateLogicallyNever(rules);
+            return !CalculateLogicallyNever(model);
         }
 
         /// <summary>
@@ -215,9 +215,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNever"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
             // There's five separate things that can make a CanLeaveCharged impossible to execute:
@@ -229,7 +229,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             return !AppliedLogicalOptions.IsSpeedBoosterInGame()
                 || (InitiateRemotely?.LogicallyNever is true) 
                 || !Strats.Values.WhereLogicallyRelevant().Any() 
-                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value < rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, excessShinesparkFrames: 0))))
+                || (MustShinespark && (!CanShinespark || (maxEnergy != null && maxEnergy.Value < model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, excessShinesparkFrames: 0))))
                 || LogicalEffectiveRunwayLength < TilesToShineCharge;
         }
 
@@ -238,9 +238,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlways"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // Besides not being never, there's five our separate conditions that must be met to always be possible
             // - Speed Booster is in-game and always available
@@ -248,7 +248,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // - At least one strat is always possible
             // - Does not require a shinespark (if it does, there's energy costs that are not always possible)
             // - There is enough room logically to shine charge
-            return !CalculateLogicallyNever(rules)
+            return !CalculateLogicallyNever(model)
                 && AppliedLogicalOptions.IsSpeedBoosterInGame() && AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster()
                 && (InitiateRemotely == null || InitiateRemotely.LogicallyAlways)
                 && Strats.Values.WhereLogicallyAlways().Any()
@@ -261,9 +261,9 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyFree"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // Besides not being never, there's five separate conditions that must be met to always be possible
             // - Speed Booster is in-game and always available
@@ -271,7 +271,7 @@ namespace sm_json_data_framework.Models.Rooms.Nodes
             // - At least one strat is free
             // - Does not require a shinespark (if it does, there's energy costs so it's not free)
             // - There is enough room logically to shine charge
-            return !CalculateLogicallyNever(rules)
+            return !CalculateLogicallyNever(model)
                 && AppliedLogicalOptions.IsSpeedBoosterInGame() && AppliedLogicalOptions.StartConditions.StartingInventory.HasSpeedBooster()
                 && (InitiateRemotely == null || InitiateRemotely.LogicallyFree)
                 && Strats.Values.WhereLogicallyFree().Any()

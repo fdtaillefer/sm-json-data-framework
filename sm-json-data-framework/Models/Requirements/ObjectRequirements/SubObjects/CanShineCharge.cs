@@ -113,15 +113,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // Nothing to do here
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            LogicalEffectiveRunwayLength = rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
-            base.UpdateLogicalProperties(rules);
+            LogicalEffectiveRunwayLength = model.Rules.CalculateEffectiveRunwayLength(this, TilesSavedWithStutter);
+            base.UpdateLogicalProperties(model);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
         /// </summary>
         public decimal LogicalEffectiveRunwayLength { get; private set; }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             bool impossible = false;
 
@@ -148,7 +148,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
                 {
                     // If the shinespark requires having more than the possible max energy, this is impossible
                     int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
-                    if(maxEnergy != null && rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames) > maxEnergy.Value)
+                    if(maxEnergy != null && model.Rules.CalculateMinimumEnergyNeededForShinespark(ShinesparkFrames, ExcessShinesparkFrames) > maxEnergy.Value)
                     {
                         impossible = true;
                     }
@@ -163,14 +163,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubObjec
             return impossible;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
-            return CalculateLogicallyFree(rules);
+            return CalculateLogicallyFree(model);
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
-            if (CalculateLogicallyNever(rules))
+            if (CalculateLogicallyNever(model))
             {
                 return false;
             }

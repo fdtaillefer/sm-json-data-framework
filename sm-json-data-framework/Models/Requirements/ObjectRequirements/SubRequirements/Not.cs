@@ -33,24 +33,24 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.SubRequi
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            LogicalRequirements.ApplyLogicalOptions(logicalOptions, rules);
+            LogicalRequirements.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This is never possible if the inner requirements are always possible
             return LogicalRequirements.LogicallyAlways;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // This is always possible if the inner requirements are impossible
             return LogicalRequirements.LogicallyNever;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // This is always free if the inner requirements are impossible
             return LogicalRequirements.LogicallyNever;

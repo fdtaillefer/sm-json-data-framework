@@ -51,12 +51,12 @@ namespace sm_json_data_framework.Models.Rooms
         /// </summary>
         public bool ClearsPreviousNode { get; }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
-            Cost.ApplyLogicalOptions(logicalOptions, rules);
+            Cost.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A StratFailure remains relevant even if it describes an effective softlock
             return true;

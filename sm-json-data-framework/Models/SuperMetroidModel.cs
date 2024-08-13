@@ -78,6 +78,7 @@ namespace sm_json_data_framework.Models
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value).AsReadOnly();
             Rules = sourceModel.Rules;
             InternalStartConditions = sourceModel.StartConditions.Finalize(mappings);
+
             // Initialize logical state so that all elements of the model always have logical options available
             ApplyLogicalOptions(logicalOptions, mappings);
         }
@@ -87,6 +88,27 @@ namespace sm_json_data_framework.Models
         /// Note that the <see cref="StartConditions"/> within this instance is never null.
         /// </summary>
         public ReadOnlyLogicalOptions AppliedLogicalOptions { get; private set; }
+        // STITCHME Maybe move these to Logical Options?
+        /// <summary>
+        /// An item inventory that contains all items that could be obtained according to currently applied logical options (except for expansion item counts) .
+        /// </summary>
+        public ReadOnlyItemInventory BestCaseInventory { get; private set; }
+        /// <summary>
+        /// An item inventory that contains only items that Samus starts with according to currently applied logical options.
+        /// </summary>
+        public ReadOnlyItemInventory WorstCaseInventory { get; private set; }
+        /// <summary>
+        /// An inventory with just Varia, made available as a miscellaneous tool for some calculations.
+        /// </summary>
+        public ReadOnlyItemInventory VariaOnlyInventory { get; private set; }
+        /// <summary>
+        /// An inventory with just Gravity, made available as a miscellaneous tool for some calculations.
+        /// </summary>
+        public ReadOnlyItemInventory GravityOnlyInventory { get; private set; }
+        /// <summary>
+        /// An inventory with just Varia and Gravity, made available as a miscellaneous tool for some calculations.
+        /// </summary>
+        public ReadOnlyItemInventory VariaGravityOnlyInventory { get; private set; }
 
         /// <summary>
         /// The items in this model, mapped by name.
@@ -212,49 +234,68 @@ namespace sm_json_data_framework.Models
         {
             AppliedLogicalOptions = PrepareLogicalOptionsToApply(logicalOptions, mappings);
 
+            ItemInventory worstCaseInventory = AppliedLogicalOptions.StartConditions.StartingInventory.Clone();
+            IEnumerable<Item> bestCaseItems = Items.Keys
+                            .Except(AppliedLogicalOptions.RemovedItems)
+                            .Select(itemName => Items[itemName]);
+            ItemInventory bestCaseInventory = new ItemInventory(AppliedLogicalOptions.StartConditions.StartingInventory.Clone());
+            foreach(Item item in bestCaseItems)
+            {
+                bestCaseInventory.ApplyAddItem(item);
+            }
+            WorstCaseInventory = worstCaseInventory;
+            BestCaseInventory = bestCaseInventory;
+            VariaOnlyInventory = new ItemInventory(AppliedLogicalOptions.StartConditions.StartingInventory.Clone())
+                .ApplyAddItem(Items[SuperMetroidModel.VARIA_SUIT_NAME]);
+            GravityOnlyInventory = new ItemInventory(AppliedLogicalOptions.StartConditions.StartingInventory.Clone())
+                .ApplyAddItem(Items[SuperMetroidModel.GRAVITY_SUIT_NAME]);
+            VariaGravityOnlyInventory = new ItemInventory(AppliedLogicalOptions.StartConditions.StartingInventory.Clone())
+                .ApplyAddItem(Items[SuperMetroidModel.VARIA_SUIT_NAME])
+                .ApplyAddItem(Items[SuperMetroidModel.GRAVITY_SUIT_NAME]);
+
             foreach (GameFlag gameFlag in GameFlags.Values)
             {
-                gameFlag.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                gameFlag.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Helper helper in Helpers.Values)
             {
-                helper.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                helper.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Item item in Items.Values)
             {
-                item.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                item.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Tech tech in Techs.Values)
             {
-                tech.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                tech.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (TechCategory techCategory in TechCategories.Values)
             {
-                techCategory.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                techCategory.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Weapon weapon in Weapons.Values)
             {
-                weapon.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                weapon.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Enemy enemy in Enemies.Values)
             {
-                enemy.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                enemy.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Connection connection in Connections.Values)
             {
-                connection.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                connection.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
 
             foreach (Room room in Rooms.Values)
             {
-                room.ApplyLogicalOptions(AppliedLogicalOptions, Rules);
+                room.ApplyLogicalOptions(AppliedLogicalOptions, this);
             }
         }
 

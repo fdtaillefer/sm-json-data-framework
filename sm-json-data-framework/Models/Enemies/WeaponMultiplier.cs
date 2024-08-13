@@ -45,13 +45,13 @@ namespace sm_json_data_framework.Models.Enemies
             return WeaponMultiplierCalculations.NumberOfHits(enemyHp, DamagePerShot);
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             // The state of the weapon itself is useful to calculate logical relevance, so propagate to it to be sure it's up-to-date when we calculate.
-            Weapon.ApplyLogicalOptions(logicalOptions, rules);
+            Weapon.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // If our weapon isn't relevant, neither is a multiplier involving it.
             return Weapon.LogicallyRelevant;

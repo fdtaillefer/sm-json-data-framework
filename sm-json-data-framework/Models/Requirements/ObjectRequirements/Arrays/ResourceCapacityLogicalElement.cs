@@ -48,15 +48,15 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (ResourceCapacityLogicalElementItem resourceCapacityItem in ResourceCapacities.Values)
             {
-                resourceCapacityItem.ApplyLogicalOptions(logicalOptions, rules);
+                resourceCapacityItem.ApplyLogicalOptions(logicalOptions, model);
             }
         }
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // If any resource capacity requires more than is possible to obtain, this is impossible to fulfill
             return ResourceCapacities
@@ -74,7 +74,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
                 .Any();
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
             // If there's no requirement that is less than the starting capacity of the corresponding resource, this is always met
             return !ResourceCapacities
@@ -84,11 +84,11 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Arrays
                 .Any();
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
             // If there's no requirement that is less than the starting capacity of the corresponding resource, this is always met
             // (and also free since just having capacity consumes nothing)
-            return CalculateLogicallyAlways(rules);
+            return CalculateLogicallyAlways(model);
         }
     }
 

@@ -57,14 +57,14 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <summary>
         /// Calculates the amount of damage that fulfilling this logical element will inflict on Samus, in the best case scenario.
         /// </summary>
-        /// <param name="rules">Active game rules, to be used as a reference</param>
-        public abstract int CalculateBestCastDamage(SuperMetroidRules rules);
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        public abstract int CalculateBestCastDamage(SuperMetroidModel model);
 
         /// <summary>
         /// Calculates the amount of damage that fulfilling this logical element will inflict on Samus, in the worst case scenario.
         /// </summary>
-        /// <param name="rules">Active game rules, to be used as a reference</param>
-        public abstract int CalculateWorstCastDamage(SuperMetroidRules rules);
+        /// <param name="model">A model that can be used to obtain data about the current game configuration.</param>
+        public abstract int CalculateWorstCastDamage(SuperMetroidModel model);
 
         /// <summary>
         /// Returns the enumeration of items that are responsible for reducing incurred damage, 
@@ -75,7 +75,7 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
         /// <returns></returns>
         public abstract IEnumerable<Item> GetDamageReducingItems(SuperMetroidModel model, ReadOnlyInGameState inGameState);
 
-        protected override bool CalculateLogicallyNever(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyNever(SuperMetroidModel model)
         {
             // This could be impossible if the smallest possible damage is more than the max we can get
             int? maxEnergy = AppliedLogicalOptions.MaxPossibleAmount(ConsumableResourceEnum.Energy);
@@ -84,17 +84,17 @@ namespace sm_json_data_framework.Models.Requirements.ObjectRequirements.Integers
             {
                 return false;
             }
-            return CalculateBestCastDamage(rules) >= maxEnergy;
+            return CalculateBestCastDamage(model) >= maxEnergy;
         }
 
-        protected override bool CalculateLogicallyAlways(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyAlways(SuperMetroidModel model)
         {
-            return CalculateWorstCastDamage(rules) <= 0;
+            return CalculateWorstCastDamage(model) <= 0;
         }
 
-        protected override bool CalculateLogicallyFree(SuperMetroidRules rules)
+        protected override bool CalculateLogicallyFree(SuperMetroidModel model)
         {
-            return CalculateWorstCastDamage(rules) <= 0;
+            return CalculateWorstCastDamage(model) <= 0;
         }
     }
 

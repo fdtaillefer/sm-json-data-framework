@@ -135,29 +135,29 @@ namespace sm_json_data_framework.Models.Rooms
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (FarmCycle farmCycle in FarmCycles.Values)
             {
-                farmCycle.ApplyLogicalOptions(logicalOptions, rules);
+                farmCycle.ApplyLogicalOptions(logicalOptions, model);
             }
 
-            Spawn.ApplyLogicalOptions(logicalOptions, rules);
-            StopSpawn.ApplyLogicalOptions(logicalOptions, rules);
-            DropRequires.ApplyLogicalOptions(logicalOptions, rules);
+            Spawn.ApplyLogicalOptions(logicalOptions, model);
+            StopSpawn.ApplyLogicalOptions(logicalOptions, model);
+            DropRequires.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        protected override void UpdateLogicalProperties(SuperMetroidRules rules)
+        protected override void UpdateLogicalProperties(SuperMetroidModel model)
         {
-            base.UpdateLogicalProperties(rules);
-            LogicallyNeverSpawns = CalculateLogicallyNeverSpawns(rules);
-            LogicallyAlwaysSpawns = CalculateLogicallyAlwaysSpawns(rules);
+            base.UpdateLogicalProperties(model);
+            LogicallyNeverSpawns = CalculateLogicallyNeverSpawns(model);
+            LogicallyAlwaysSpawns = CalculateLogicallyAlwaysSpawns(model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // A room enemy that never ever spawns may as well not exist
-            return !CalculateLogicallyNeverSpawns(rules);
+            return !CalculateLogicallyNeverSpawns(model);
         }
 
         /// <summary>
@@ -168,9 +168,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyNeverSpawns"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyNeverSpawns(SuperMetroidRules rules)
+        protected bool CalculateLogicallyNeverSpawns(SuperMetroidModel model)
         {
             // We never spawn if spawn conditions are never met OR if conditions to stop spawning are always met
             return Spawn.LogicallyNever || StopSpawn?.LogicallyAlways is true;
@@ -184,9 +184,9 @@ namespace sm_json_data_framework.Models.Rooms
         /// <summary>
         /// Calculates what the value of <see cref="LogicallyAlwaysSpawns"/> should currently be.
         /// </summary>
-        /// <param name="rules">The active SuperMetroidRules, provided so they're available for consultation</param>
+        /// <param name="model">The model this element belongs to</param>
         /// <returns></returns>
-        protected bool CalculateLogicallyAlwaysSpawns(SuperMetroidRules rules)
+        protected bool CalculateLogicallyAlwaysSpawns(SuperMetroidModel model)
         {
             // To always spawn, we must always meet the spawn conditions but also never meet stop spawn conditions
             return Spawn.LogicallyFree && (StopSpawn == null || StopSpawn.LogicallyNever);

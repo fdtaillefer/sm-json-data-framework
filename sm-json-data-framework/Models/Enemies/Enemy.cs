@@ -138,27 +138,27 @@ namespace sm_json_data_framework.Models.Enemies
             }
         }
 
-        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidRules rules)
+        protected override void PropagateLogicalOptions(ReadOnlyLogicalOptions logicalOptions, SuperMetroidModel model)
         {
             foreach (EnemyAttack attack in Attacks.Values)
             {
-                attack.ApplyLogicalOptions(logicalOptions, rules);
+                attack.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (WeaponMultiplier weaponMultiplier in WeaponMultipliers.Values)
             {
-                weaponMultiplier.ApplyLogicalOptions(logicalOptions, rules);
+                weaponMultiplier.ApplyLogicalOptions(logicalOptions, model);
             }
 
             foreach (WeaponSusceptibility weaponSusceptibility in WeaponSusceptibilities.Values)
             {
-                weaponSusceptibility.ApplyLogicalOptions(logicalOptions, rules);
+                weaponSusceptibility.ApplyLogicalOptions(logicalOptions, model);
             }
 
-            Dimensions.ApplyLogicalOptions(logicalOptions, rules);
+            Dimensions.ApplyLogicalOptions(logicalOptions, model);
         }
 
-        public override bool CalculateLogicallyRelevant(SuperMetroidRules rules)
+        public override bool CalculateLogicallyRelevant(SuperMetroidModel model)
         {
             // An enemy always has some relevance
             return true;
