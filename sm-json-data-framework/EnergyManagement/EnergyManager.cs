@@ -83,12 +83,6 @@ namespace sm_json_data_framework.EnergyManagement
                 return state.CompleteWithRegularEnergy();
             }
 
-            // If there's just not enough energy in any scenario, quit immediately
-            if (totalDamage >= state.RegularEnergy + state.ReserveEnergy)
-            {
-                return null;
-            }
-
             // At this point we will need to use some reserves, determine exactly how and whether it's doable
             bool canActBefore = canActBeforeFirstHit;
             for (int i = 0; i < hits; i++)
@@ -101,29 +95,22 @@ namespace sm_json_data_framework.EnergyManagement
                 // We need to use reserves to survive this hit
                 else
                 {
-                    // If we don't have time to use reserves before this hit, fail
-                    if (!canActBefore)
+                    // If we have no more reserves, nothing can save us. Fail.
+                    if (state.ReserveEnergy <= 0)
                     {
                         return null;
                     }
 
                     int reservesNeeded = damagePerHit + 1 - state.RegularEnergy;
-                    // If there's not enough reserves left to take the hit, fail
-                    if (state.ReserveEnergy < reservesNeeded)
-                    {
-                        return null;
-                    }
-
-                    if (UseReservesMidTask)
+                    // Pre-use reserves if we can and if it even allows us to survive the next hit
+                    if (canActBefore && state.ReserveEnergy >= reservesNeeded)
                     {
                         // Use reserves manually. To simplify, try to use as much reserves as needed for all the hits, if max energy allows
                         state.UseReservesWithTargetRegularEnergyAmount(state.RemainingMinimumEnergyNeeded);
                     }
-                    else
-                    {
-                        // Take the hit and use reserves automatically
-                        state.TakePunctualHit(damagePerHit);
-                    }
+                    
+                    // Take the hit (this will trigger auto-reserves if needed and kill us if we can't survive)
+                    state.TakePunctualHit(damagePerHit);
 
                     // If this last hit killed us, it's a fail
                     if (state.RegularEnergy <= 0)
@@ -133,7 +120,7 @@ namespace sm_json_data_framework.EnergyManagement
                 }
 
                 // We're assuming i-frames are always enough to use reserves between two hits
-                canActBefore = true;
+                canActBefore = UseReservesMidTask;
             }
 
             return state.ResultingEnergyVariation;

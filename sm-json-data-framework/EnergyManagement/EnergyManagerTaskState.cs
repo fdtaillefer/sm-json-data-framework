@@ -71,7 +71,7 @@ namespace sm_json_data_framework.EnergyManagement
         /// <summary>
         /// The number of iframes that would be left after an auto refill of reserve tanks if it triggered now.
         /// </summary>
-        public int RemainingIframesIfAutoReservesTrigger => Math.Min(0, EnergyManager.Rules.NumberOfIframes - ((int)(EnergyManager.Rules.AutoReserveRefillPerFrame / ReserveEnergy)) );
+        public int RemainingIframesIfAutoReservesTrigger => Math.Max(0, EnergyManager.Rules.NumberOfIframes - ((int)(ReserveEnergy / EnergyManager.Rules.AutoReserveRefillPerFrame)) );
 
         public EnergyManagerTaskState(EnergyManager energyManager, ReadOnlyInGameState initialInGameState, int minimumEnergyCost, int excessEnergyCost, int minimumEnergyThreshold)
         {
@@ -214,8 +214,9 @@ namespace sm_json_data_framework.EnergyManagement
 
                 // At this point we know we won't empty reserves.
                 // We'll end up at either targetEnergy + leeway, or maxEnergy - leeway
+                // If targetEnergy+leeway hits the max, it's too dangerous to go for so we'll aim at max energy instead and end up at maxEnergy-leeway
                 int resultingEnergy = targetRegularEnergyAmount + EnergyManager.ReserveRefillLeewayEnergy;
-                if (resultingEnergy > MaxRegularEnergy - EnergyManager.ReserveRefillLeewayEnergy)
+                if (resultingEnergy >= MaxRegularEnergy)
                 {
                     resultingEnergy = MaxRegularEnergy - EnergyManager.ReserveRefillLeewayEnergy;
                 }

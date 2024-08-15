@@ -77,17 +77,5 @@ namespace sm_json_data_framework.Tests.TestTools.AlteredRules
                 return 1;
             }
         }
-
-        private IEnumerable<Item> ReturnVariaIfPresent(SuperMetroidModel model, ReadOnlyInGameState inGameState)
-        {
-            if (inGameState.Inventory.HasVariaSuit())
-            {
-                return new[] { model.Items[SuperMetroidModel.VARIA_SUIT_NAME] };
-            }
-            else
-            {
-                return new Item[] { };
-            }
-        }
     }
 }
